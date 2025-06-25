@@ -168,12 +168,29 @@ export class DatabaseStorage implements IStorage {
   // Orders
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
     const orderNumber = `CK${Date.now()}${Math.floor(Math.random() * 1000)}`;
-    const [order] = await db.insert(orders).values({
-      ...insertOrder,
+    
+    // Transform the data to match database schema
+    const orderData = {
+      userId: insertOrder.userId || null,
       orderNumber,
+      items: insertOrder.items,
+      subtotal: insertOrder.subtotal,
+      deliveryFee: insertOrder.deliveryFee || "0",
+      discount: insertOrder.discount || "0",
+      total: insertOrder.total,
+      status: insertOrder.status || "pending",
+      paymentStatus: insertOrder.paymentStatus || "pending",
+      paymentMethod: insertOrder.paymentMethod,
+      deliveryAddress: insertOrder.deliveryAddress,
+      deliveryDate: insertOrder.deliveryDate,
+      deliveryTime: insertOrder.deliveryTime,
+      specialInstructions: insertOrder.specialInstructions,
+      promoCode: insertOrder.promoCode,
       createdAt: new Date(),
       updatedAt: new Date()
-    }).returning();
+    };
+
+    const [order] = await db.insert(orders).values(orderData).returning();
     return order;
   }
 

@@ -139,7 +139,9 @@ export const insertUserSchema = createInsertSchema(users).omit({ id: true });
 export const insertCategorySchema = createInsertSchema(categories).omit({ id: true });
 export const insertCakeSchema = createInsertSchema(cakes).omit({ id: true });
 export const insertAddonSchema = createInsertSchema(addons).omit({ id: true });
-export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, orderNumber: true, createdAt: true, updatedAt: true });
+export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, orderNumber: true, createdAt: true, updatedAt: true }).extend({
+  deliveryDate: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val)
+});
 export const insertDeliveryAreaSchema = createInsertSchema(deliveryAreas).omit({ id: true });
 export const insertPromoCodeSchema = createInsertSchema(promoCodes).omit({ id: true, usedCount: true });
 export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, createdAt: true });

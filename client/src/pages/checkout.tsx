@@ -118,7 +118,7 @@ export default function CheckoutPage() {
         city: data.city,
         landmark: data.landmark
       },
-      deliveryDate: calculateDeliveryDate(data.deliveryTime),
+      deliveryDate: calculateDeliveryDate(data.deliveryTime).toISOString(),
       deliveryTime: data.deliveryTime,
       paymentMethod: data.paymentMethod,
       specialInstructions: data.specialInstructions,
