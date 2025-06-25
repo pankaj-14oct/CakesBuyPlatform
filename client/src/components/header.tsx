@@ -4,14 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, Menu, MapPin, Search, User } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ShoppingCart, Menu, MapPin, Search, User, LogOut } from 'lucide-react';
 import { useCart } from './cart-context';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function Header() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [pincode, setPincode] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const { state: cartState } = useCart();
+  const { user, isAuthenticated, logoutMutation } = useAuth();
 
   const navItems = [
     { href: '/', label: 'Home' },
@@ -97,11 +100,40 @@ export default function Header() {
               </Button>
             </Link>
 
-            {/* User Account */}
-            <Button className="bg-caramel text-white hover:bg-brown hidden sm:flex">
-              <User className="h-4 w-4 mr-2" />
-              Sign In
-            </Button>
+            {/* User Menu */}
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2 hidden sm:flex">
+                    <User className="h-4 w-4" />
+                    <span>{user?.username}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem 
+                    onClick={() => setLocation('/profile')}
+                    className="cursor-pointer"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => logoutMutation.mutate()}
+                    className="cursor-pointer text-red-600"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link href="/auth">
+                <Button className="bg-caramel text-white hover:bg-brown hidden sm:flex">
+                  <User className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              </Link>
+            )}
 
             {/* Mobile Menu */}
             <Sheet>

@@ -9,12 +9,17 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   phone: text("phone"),
   addresses: jsonb("addresses").$type<Array<{
-    type: 'home' | 'work' | 'other';
+    id: string;
+    name: string;
+    type: string;
     address: string;
     pincode: string;
     city: string;
-    isDefault?: boolean;
+    landmark?: string;
+    isDefault: boolean;
   }>>().default([]),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const categories = pgTable("categories", {
@@ -135,7 +140,7 @@ export const reviews = pgTable("reviews", {
 });
 
 // Insert schemas
-export const insertUserSchema = createInsertSchema(users).omit({ id: true });
+export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertCategorySchema = createInsertSchema(categories).omit({ id: true });
 export const insertCakeSchema = createInsertSchema(cakes).omit({ id: true });
 export const insertAddonSchema = createInsertSchema(addons).omit({ id: true });
@@ -145,6 +150,32 @@ export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, ord
 export const insertDeliveryAreaSchema = createInsertSchema(deliveryAreas).omit({ id: true });
 export const insertPromoCodeSchema = createInsertSchema(promoCodes).omit({ id: true, usedCount: true });
 export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, createdAt: true });
+
+// Auth schemas
+export const loginSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters')
+});
+
+export const registerSchema = insertUserSchema.extend({
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"]
+});
+
+// Address schemas
+export const addressSchema = z.object({
+  id: z.string(),
+  name: z.string().min(2, 'Address name is required'),
+  type: z.enum(['home', 'office', 'other']),
+  address: z.string().min(10, 'Address must be at least 10 characters'),
+  pincode: z.string().regex(/^[1-9][0-9]{5}$/, 'Enter a valid 6-digit pincode'),
+  city: z.string().min(2, 'City is required'),
+  landmark: z.string().optional(),
+  isDefault: z.boolean().default(false)
+});
 
 // Types
 export type User = typeof users.$inferSelect;

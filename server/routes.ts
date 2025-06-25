@@ -7,8 +7,19 @@ import {
   insertCategorySchema, 
   insertCakeSchema, 
   insertAddonSchema, 
-  insertPromoCodeSchema 
+  insertPromoCodeSchema,
+  loginSchema,
+  registerSchema,
+  addressSchema
 } from "@shared/schema";
+import { 
+  generateToken, 
+  hashPassword, 
+  comparePasswords, 
+  authenticateToken, 
+  optionalAuth, 
+  type AuthRequest 
+} from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -130,10 +141,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Orders
-  app.post("/api/orders", async (req, res) => {
+  // Orders (with optional authentication)
+  app.post("/api/orders", optionalAuth, async (req: AuthRequest, res) => {
     try {
       const orderData = insertOrderSchema.parse(req.body);
+      
+      // If user is authenticated, associate order with user
+      if (req.user) {
+        orderData.userId = req.user.id;
+      }
+      
       const order = await storage.createOrder(orderData);
       res.status(201).json(order);
     } catch (error) {
@@ -144,7 +161,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/orders/:orderNumber", async (req, res) => {
+  app.get("/api/auth/orders", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const orders = await storage.getUserOrders(req.user!.id);
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user orders" });
+    }
+  });
+
+  app.get("/api/orders/:orderNumber", optionalAuth, async (req: AuthRequest, res) => {
     try {
       const order = await storage.getOrderByNumber(req.params.orderNumber);
       if (!order) {

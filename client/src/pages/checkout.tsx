@@ -23,14 +23,6 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
 const checkoutSchema = z.object({
-  // Delivery Address
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit mobile number'),
-  address: z.string().min(10, 'Address must be at least 10 characters'),
-  pincode: z.string().regex(/^[1-9][0-9]{5}$/, 'Enter a valid 6-digit pincode'),
-  city: z.string().min(2, 'City is required'),
-  landmark: z.string().optional(),
-  
   // Delivery Options
   deliveryDate: z.string().min(1, 'Delivery date is required'),
   deliveryTime: z.string().min(1, 'Delivery time is required'),
@@ -38,17 +30,31 @@ const checkoutSchema = z.object({
   // Payment
   paymentMethod: z.string().min(1, 'Payment method is required'),
   
+  // Guest checkout fields (when not authenticated)
+  guestName: z.string().optional(),
+  guestPhone: z.string().optional(),
+  guestAddress: z.string().optional(),
+  guestPincode: z.string().optional(),
+  guestCity: z.string().optional(),
+  guestLandmark: z.string().optional(),
+  
   // Optional
   specialInstructions: z.string().optional(),
+}).refine((data) => {
+  // Validate guest fields when not using saved address
+  return true; // We'll handle this validation separately
 });
 
 type CheckoutForm = z.infer<typeof checkoutSchema>;
 
 export default function CheckoutPage() {
   const { state: cartState, dispatch } = useCart();
+  const { isAuthenticated } = useAuth();
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
+  const [selectedAddress, setSelectedAddress] = useState<any>(null);
+  const [useGuestCheckout, setUseGuestCheckout] = useState(!isAuthenticated);
   const { toast } = useToast();
 
   const form = useForm<CheckoutForm>({
@@ -57,7 +63,7 @@ export default function CheckoutPage() {
       deliveryDate: new Date().toISOString().split('T')[0],
       deliveryTime: 'evening',
       paymentMethod: 'upi',
-      city: 'Gurgaon'
+      guestCity: 'Gurgaon'
     }
   });
 
@@ -91,6 +97,39 @@ export default function CheckoutPage() {
   const onSubmit = async (data: CheckoutForm) => {
     setIsPlacingOrder(true);
     
+    // Determine delivery address
+    let deliveryAddress;
+    if (useGuestCheckout || !selectedAddress) {
+      // Validate guest checkout fields
+      if (!data.guestName || !data.guestPhone || !data.guestAddress || !data.guestPincode || !data.guestCity) {
+        toast({
+          title: "Missing delivery details",
+          description: "Please fill in all delivery address fields",
+          variant: "destructive"
+        });
+        setIsPlacingOrder(false);
+        return;
+      }
+      
+      deliveryAddress = {
+        name: data.guestName,
+        phone: data.guestPhone,
+        address: data.guestAddress,
+        pincode: data.guestPincode,
+        city: data.guestCity,
+        landmark: data.guestLandmark
+      };
+    } else {
+      deliveryAddress = {
+        name: selectedAddress.name,
+        phone: selectedAddress.phone || '',
+        address: selectedAddress.address,
+        pincode: selectedAddress.pincode,
+        city: selectedAddress.city,
+        landmark: selectedAddress.landmark
+      };
+    }
+    
     const orderData = {
       items: cartState.items.map(item => ({
         cakeId: item.cake.id,
@@ -110,14 +149,7 @@ export default function CheckoutPage() {
       subtotal: subtotal.toString(),
       deliveryFee: deliveryFee.toString(),
       total: total.toString(),
-      deliveryAddress: {
-        name: data.name,
-        phone: data.phone,
-        address: data.address,
-        pincode: data.pincode,
-        city: data.city,
-        landmark: data.landmark
-      },
+      deliveryAddress,
       deliveryDate: calculateDeliveryDate(data.deliveryTime).toISOString(),
       deliveryTime: data.deliveryTime,
       paymentMethod: data.paymentMethod,

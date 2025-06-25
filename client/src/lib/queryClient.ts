@@ -11,10 +11,25 @@ export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
+  headers?: Record<string, string>
 ): Promise<Response> {
+  const token = localStorage.getItem('auth_token');
+  
+  const defaultHeaders: Record<string, string> = {};
+  if (data) {
+    defaultHeaders["Content-Type"] = "application/json";
+  }
+  
+  if (token) {
+    defaultHeaders.Authorization = `Bearer ${token}`;
+  }
+
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers: {
+      ...defaultHeaders,
+      ...headers,
+    },
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });

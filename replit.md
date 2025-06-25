@@ -119,7 +119,10 @@ The application uses a comprehensive database schema with the following main ent
 - **Asset Handling**: Vite for frontend, Express static serving for production
 
 ## Changelog
-- June 25, 2025. Initial setup
+- June 25, 2025. Initial setup  
+- June 25, 2025. JWT authentication system implemented with login/signup
+- June 25, 2025. Multiple address management system added for authenticated users
+- June 25, 2025. PostgreSQL database integration completed with persistent data storage
 
 ## User Preferences
 
