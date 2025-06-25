@@ -2,7 +2,13 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertOrderSchema } from "@shared/schema";
+import { 
+  insertOrderSchema, 
+  insertCategorySchema, 
+  insertCakeSchema, 
+  insertAddonSchema, 
+  insertPromoCodeSchema 
+} from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -174,6 +180,170 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(reviews);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  // Admin API Routes
+  
+  // Admin Categories
+  app.post("/api/admin/categories", async (req, res) => {
+    try {
+      const categoryData = insertCategorySchema.parse(req.body);
+      const category = await storage.createCategory(categoryData);
+      res.status(201).json(category);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid category data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create category" });
+    }
+  });
+
+  app.put("/api/admin/categories/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.updateCategory(id, req.body);
+      res.json({ message: "Category updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update category" });
+    }
+  });
+
+  app.delete("/api/admin/categories/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteCategory(id);
+      res.json({ message: "Category deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete category" });
+    }
+  });
+
+  // Admin Cakes
+  app.post("/api/admin/cakes", async (req, res) => {
+    try {
+      const cakeData = insertCakeSchema.parse(req.body);
+      const cake = await storage.createCake(cakeData);
+      res.status(201).json(cake);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid cake data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create cake" });
+    }
+  });
+
+  app.put("/api/admin/cakes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.updateCake(id, req.body);
+      res.json({ message: "Cake updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update cake" });
+    }
+  });
+
+  app.delete("/api/admin/cakes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteCake(id);
+      res.json({ message: "Cake deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete cake" });
+    }
+  });
+
+  // Admin Orders
+  app.get("/api/admin/orders", async (req, res) => {
+    try {
+      const { status } = req.query;
+      
+      if (status) {
+        const orders = await storage.getOrdersByStatus(status as string);
+        return res.json(orders);
+      }
+
+      const orders = await storage.getAllOrders();
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  // Admin Promo Codes
+  app.get("/api/admin/promo-codes", async (req, res) => {
+    try {
+      const promoCodes = await storage.getAllPromoCodes();
+      res.json(promoCodes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch promo codes" });
+    }
+  });
+
+  app.post("/api/admin/promo-codes", async (req, res) => {
+    try {
+      const promoData = insertPromoCodeSchema.parse(req.body);
+      const promoCode = await storage.createPromoCode(promoData);
+      res.status(201).json(promoCode);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid promo code data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create promo code" });
+    }
+  });
+
+  app.put("/api/admin/promo-codes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.updatePromoCode(id, req.body);
+      res.json({ message: "Promo code updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update promo code" });
+    }
+  });
+
+  app.delete("/api/admin/promo-codes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePromoCode(id);
+      res.json({ message: "Promo code deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete promo code" });
+    }
+  });
+
+  // Admin Add-ons
+  app.post("/api/admin/addons", async (req, res) => {
+    try {
+      const addonData = insertAddonSchema.parse(req.body);
+      const addon = await storage.createAddon(addonData);
+      res.status(201).json(addon);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid addon data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create addon" });
+    }
+  });
+
+  app.put("/api/admin/addons/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.updateAddon(id, req.body);
+      res.json({ message: "Addon updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update addon" });
+    }
+  });
+
+  app.delete("/api/admin/addons/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteAddon(id);
+      res.json({ message: "Addon deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete addon" });
     }
   });
 

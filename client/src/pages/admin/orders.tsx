@@ -1,0 +1,413 @@
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  ShoppingCart, Eye, Package, Truck, CheckCircle, 
+  Clock, XCircle, MapPin, Phone, Calendar 
+} from 'lucide-react';
+import { Order } from '@shared/schema';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { formatPrice } from '@/lib/utils';
+
+export default function AdminOrders() {
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const { data: orders = [], isLoading } = useQuery<Order[]>({
+    queryKey: ['/api/admin/orders', statusFilter],
+    queryFn: async () => {
+      const url = statusFilter === 'all' 
+        ? '/api/admin/orders' 
+        : `/api/admin/orders?status=${statusFilter}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch orders');
+      return response.json();
+    },
+  });
+
+  const updateOrderMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      const response = await apiRequest('PATCH', `/api/orders/${id}/status`, { status });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
+      toast({ title: "Order status updated successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update order status", variant: "destructive" });
+    }
+  });
+
+  const handleStatusChange = (orderId: number, newStatus: string) => {
+    updateOrderMutation.mutate({ id: orderId, status: newStatus });
+  };
+
+  const statusColors = {
+    pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    confirmed: 'bg-blue-100 text-blue-800 border-blue-200',
+    preparing: 'bg-purple-100 text-purple-800 border-purple-200',
+    out_for_delivery: 'bg-orange-100 text-orange-800 border-orange-200',
+    delivered: 'bg-green-100 text-green-800 border-green-200',
+    cancelled: 'bg-red-100 text-red-800 border-red-200'
+  };
+
+  const statusIcons = {
+    pending: Clock,
+    confirmed: CheckCircle,
+    preparing: Package,
+    out_for_delivery: Truck,
+    delivered: CheckCircle,
+    cancelled: XCircle
+  };
+
+  const getStatusIcon = (status: string) => {
+    const Icon = statusIcons[status as keyof typeof statusIcons] || Clock;
+    return <Icon className="h-4 w-4" />;
+  };
+
+  const orderStats = {
+    total: orders.length,
+    pending: orders.filter(o => o.status === 'pending').length,
+    confirmed: orders.filter(o => o.status === 'confirmed').length,
+    preparing: orders.filter(o => o.status === 'preparing').length,
+    out_for_delivery: orders.filter(o => o.status === 'out_for_delivery').length,
+    delivered: orders.filter(o => o.status === 'delivered').length,
+    cancelled: orders.filter(o => o.status === 'cancelled').length,
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-charcoal">Orders</h1>
+          <p className="text-charcoal opacity-70">Manage customer orders</p>
+        </div>
+        
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Orders</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="confirmed">Confirmed</SelectItem>
+            <SelectItem value="preparing">Preparing</SelectItem>
+            <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
+            <SelectItem value="delivered">Delivered</SelectItem>
+            <SelectItem value="cancelled">Cancelled</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Order Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-charcoal">{orderStats.total}</div>
+            <div className="text-sm text-charcoal opacity-60">Total</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-yellow-600">{orderStats.pending}</div>
+            <div className="text-sm text-charcoal opacity-60">Pending</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-blue-600">{orderStats.confirmed}</div>
+            <div className="text-sm text-charcoal opacity-60">Confirmed</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-purple-600">{orderStats.preparing}</div>
+            <div className="text-sm text-charcoal opacity-60">Preparing</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-orange-600">{orderStats.out_for_delivery}</div>
+            <div className="text-sm text-charcoal opacity-60">Delivery</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-green-600">{orderStats.delivered}</div>
+            <div className="text-sm text-charcoal opacity-60">Delivered</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-red-600">{orderStats.cancelled}</div>
+            <div className="text-sm text-charcoal opacity-60">Cancelled</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Orders Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <ShoppingCart className="mr-2 h-5 w-5" />
+            Orders ({orders.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="text-center py-8">Loading orders...</div>
+          ) : orders.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-charcoal opacity-60">No orders found</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Order</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Delivery</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {orders.map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{order.orderNumber}</p>
+                        <p className="text-sm text-charcoal opacity-60">
+                          {new Date(order.createdAt || '').toLocaleDateString()}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{order.deliveryAddress.name}</p>
+                        <p className="text-sm text-charcoal opacity-60">{order.deliveryAddress.phone}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium text-brown">{formatPrice(order.total)}</p>
+                        <p className="text-sm text-charcoal opacity-60">{order.paymentMethod}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Badge className={statusColors[order.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'}>
+                          {getStatusIcon(order.status)}
+                          <span className="ml-1">{order.status.replace('_', ' ')}</span>
+                        </Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <p className="text-sm">{new Date(order.deliveryDate).toLocaleDateString()}</p>
+                        <p className="text-xs text-charcoal opacity-60">{order.deliveryTime}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelectedOrder(order)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                              <DialogTitle>Order Details - {order.orderNumber}</DialogTitle>
+                            </DialogHeader>
+                            
+                            {selectedOrder && (
+                              <div className="space-y-6">
+                                {/* Order Status Update */}
+                                <Card>
+                                  <CardHeader>
+                                    <CardTitle className="text-lg">Update Status</CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <Select
+                                      value={selectedOrder.status}
+                                      onValueChange={(value) => handleStatusChange(selectedOrder.id, value)}
+                                    >
+                                      <SelectTrigger className="w-48">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="pending">Pending</SelectItem>
+                                        <SelectItem value="confirmed">Confirmed</SelectItem>
+                                        <SelectItem value="preparing">Preparing</SelectItem>
+                                        <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
+                                        <SelectItem value="delivered">Delivered</SelectItem>
+                                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </CardContent>
+                                </Card>
+
+                                <div className="grid md:grid-cols-2 gap-6">
+                                  {/* Customer Information */}
+                                  <Card>
+                                    <CardHeader>
+                                      <CardTitle className="text-lg flex items-center">
+                                        <MapPin className="mr-2 h-5 w-5" />
+                                        Delivery Information
+                                      </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-3">
+                                      <div>
+                                        <p className="font-medium">{selectedOrder.deliveryAddress.name}</p>
+                                        <p className="text-sm text-charcoal opacity-70 flex items-center">
+                                          <Phone className="mr-1 h-4 w-4" />
+                                          {selectedOrder.deliveryAddress.phone}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-sm">{selectedOrder.deliveryAddress.address}</p>
+                                        <p className="text-sm text-charcoal opacity-70">
+                                          {selectedOrder.deliveryAddress.city} - {selectedOrder.deliveryAddress.pincode}
+                                        </p>
+                                        {selectedOrder.deliveryAddress.landmark && (
+                                          <p className="text-sm text-charcoal opacity-70">
+                                            Landmark: {selectedOrder.deliveryAddress.landmark}
+                                          </p>
+                                        )}
+                                      </div>
+                                      <div className="flex items-center text-sm text-charcoal opacity-70">
+                                        <Calendar className="mr-1 h-4 w-4" />
+                                        {new Date(selectedOrder.deliveryDate).toLocaleDateString()} 
+                                        ({selectedOrder.deliveryTime})
+                                      </div>
+                                    </CardContent>
+                                  </Card>
+
+                                  {/* Order Summary */}
+                                  <Card>
+                                    <CardHeader>
+                                      <CardTitle className="text-lg">Order Summary</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-3">
+                                      <div className="flex justify-between">
+                                        <span>Subtotal</span>
+                                        <span>{formatPrice(selectedOrder.subtotal)}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span>Delivery Fee</span>
+                                        <span>{formatPrice(selectedOrder.deliveryFee)}</span>
+                                      </div>
+                                      {parseFloat(selectedOrder.discount || '0') > 0 && (
+                                        <div className="flex justify-between text-green-600">
+                                          <span>Discount</span>
+                                          <span>-{formatPrice(selectedOrder.discount)}</span>
+                                        </div>
+                                      )}
+                                      <div className="border-t pt-2">
+                                        <div className="flex justify-between font-bold text-lg">
+                                          <span>Total</span>
+                                          <span className="text-brown">{formatPrice(selectedOrder.total)}</span>
+                                        </div>
+                                      </div>
+                                      <div className="text-sm text-charcoal opacity-70">
+                                        Payment: {selectedOrder.paymentMethod} • {selectedOrder.paymentStatus}
+                                      </div>
+                                    </CardContent>
+                                  </Card>
+                                </div>
+
+                                {/* Order Items */}
+                                <Card>
+                                  <CardHeader>
+                                    <CardTitle className="text-lg">Order Items</CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <div className="space-y-4">
+                                      {selectedOrder.items.map((item, index) => (
+                                        <div key={index} className="flex items-center space-x-4 p-4 border rounded-lg">
+                                          <div className="flex-1">
+                                            <h4 className="font-medium">{item.name}</h4>
+                                            <div className="text-sm text-charcoal opacity-70 space-y-1">
+                                              <p>Weight: {item.weight} • Flavor: {item.flavor}</p>
+                                              {item.customMessage && (
+                                                <p>Message: "{item.customMessage}"</p>
+                                              )}
+                                              {item.addons && item.addons.length > 0 && (
+                                                <p>
+                                                  Add-ons: {item.addons.map(addon => 
+                                                    `${addon.name} x${addon.quantity}`
+                                                  ).join(', ')}
+                                                </p>
+                                              )}
+                                            </div>
+                                          </div>
+                                          <div className="text-right">
+                                            <p className="font-medium">Qty: {item.quantity}</p>
+                                            <p className="text-brown font-medium">{formatPrice(item.price)}</p>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+
+                                {/* Special Instructions */}
+                                {selectedOrder.specialInstructions && (
+                                  <Card>
+                                    <CardHeader>
+                                      <CardTitle className="text-lg">Special Instructions</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                      <p className="text-charcoal">{selectedOrder.specialInstructions}</p>
+                                    </CardContent>
+                                  </Card>
+                                )}
+                              </div>
+                            )}
+                          </DialogContent>
+                        </Dialog>
+
+                        <Select
+                          value={order.status}
+                          onValueChange={(value) => handleStatusChange(order.id, value)}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="confirmed">Confirmed</SelectItem>
+                            <SelectItem value="preparing">Preparing</SelectItem>
+                            <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
+                            <SelectItem value="delivered">Delivered</SelectItem>
+                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

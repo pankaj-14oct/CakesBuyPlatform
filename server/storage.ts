@@ -46,6 +46,32 @@ export interface IStorage {
   // Reviews
   getCakeReviews(cakeId: number): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
+
+  // Admin methods
+  // Categories management
+  createCategory(category: InsertCategory): Promise<Category>;
+  updateCategory(id: number, updates: Partial<Category>): Promise<void>;
+  deleteCategory(id: number): Promise<void>;
+
+  // Cakes management
+  createCake(cake: InsertCake): Promise<Cake>;
+  updateCake(id: number, updates: Partial<Cake>): Promise<void>;
+  deleteCake(id: number): Promise<void>;
+
+  // Orders management
+  getAllOrders(): Promise<Order[]>;
+  getOrdersByStatus(status: string): Promise<Order[]>;
+
+  // Promo codes management
+  createPromoCode(promoCode: InsertPromoCode): Promise<PromoCode>;
+  updatePromoCode(id: number, updates: Partial<PromoCode>): Promise<void>;
+  deletePromoCode(id: number): Promise<void>;
+  getAllPromoCodes(): Promise<PromoCode[]>;
+
+  // Add-ons management
+  createAddon(addon: InsertAddon): Promise<Addon>;
+  updateAddon(id: number, updates: Partial<Addon>): Promise<void>;
+  deleteAddon(id: number): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -238,7 +264,12 @@ export class MemStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const user: User = { id: this.currentUserId++, ...insertUser };
+    const user: User = { 
+      id: this.currentUserId++, 
+      ...insertUser,
+      phone: insertUser.phone || null,
+      addresses: insertUser.addresses || []
+    };
     this.users.set(user.id, user);
     return user;
   }
@@ -311,6 +342,8 @@ export class MemStorage implements IStorage {
       orderNumber,
       createdAt: new Date(),
       updatedAt: new Date(),
+      status: 'pending',
+      userId: insertOrder.userId || null,
       ...insertOrder 
     };
     this.orders.set(order.id, order);
@@ -367,11 +400,11 @@ export class MemStorage implements IStorage {
       return { valid: false, message: "Promo code has expired" };
     }
 
-    if (promo.usageLimit && promo.usedCount >= promo.usageLimit) {
+    if (promo.usageLimit && (promo.usedCount || 0) >= promo.usageLimit) {
       return { valid: false, message: "Promo code usage limit exceeded" };
     }
 
-    if (orderValue < parseFloat(promo.minOrderValue)) {
+    if (orderValue < parseFloat(promo.minOrderValue || "0")) {
       return { valid: false, message: `Minimum order value should be ₹${promo.minOrderValue}` };
     }
 
@@ -397,10 +430,116 @@ export class MemStorage implements IStorage {
     const review: Review = { 
       id: this.currentReviewId++, 
       createdAt: new Date(),
+      userId: insertReview.userId || null,
+      cakeId: insertReview.cakeId || null,
+      orderId: insertReview.orderId || null,
+      comment: insertReview.comment || null,
+      isVerified: insertReview.isVerified || null,
       ...insertReview 
     };
     this.reviews.set(review.id, review);
     return review;
+  }
+
+  // Admin methods implementation
+  // Categories management
+  async createCategory(insertCategory: InsertCategory): Promise<Category> {
+    const category: Category = { 
+      id: this.currentCategoryId++, 
+      ...insertCategory 
+    };
+    this.categories.set(category.id, category);
+    return category;
+  }
+
+  async updateCategory(id: number, updates: Partial<Category>): Promise<void> {
+    const category = this.categories.get(id);
+    if (category) {
+      this.categories.set(id, { ...category, ...updates });
+    }
+  }
+
+  async deleteCategory(id: number): Promise<void> {
+    this.categories.delete(id);
+  }
+
+  // Cakes management
+  async createCake(insertCake: InsertCake): Promise<Cake> {
+    const cake: Cake = { 
+      id: this.currentCakeId++, 
+      ...insertCake 
+    };
+    this.cakes.set(cake.id, cake);
+    return cake;
+  }
+
+  async updateCake(id: number, updates: Partial<Cake>): Promise<void> {
+    const cake = this.cakes.get(id);
+    if (cake) {
+      this.cakes.set(id, { ...cake, ...updates });
+    }
+  }
+
+  async deleteCake(id: number): Promise<void> {
+    this.cakes.delete(id);
+  }
+
+  // Orders management
+  async getAllOrders(): Promise<Order[]> {
+    return Array.from(this.orders.values()).sort((a, b) => 
+      new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+    );
+  }
+
+  async getOrdersByStatus(status: string): Promise<Order[]> {
+    return Array.from(this.orders.values()).filter(order => order.status === status);
+  }
+
+  // Promo codes management
+  async createPromoCode(insertPromoCode: InsertPromoCode): Promise<PromoCode> {
+    const promoCode: PromoCode = { 
+      id: this.currentPromoCodeId++, 
+      usedCount: 0,
+      ...insertPromoCode 
+    };
+    this.promoCodes.set(promoCode.id, promoCode);
+    return promoCode;
+  }
+
+  async updatePromoCode(id: number, updates: Partial<PromoCode>): Promise<void> {
+    const promoCode = this.promoCodes.get(id);
+    if (promoCode) {
+      this.promoCodes.set(id, { ...promoCode, ...updates });
+    }
+  }
+
+  async deletePromoCode(id: number): Promise<void> {
+    this.promoCodes.delete(id);
+  }
+
+  async getAllPromoCodes(): Promise<PromoCode[]> {
+    return Array.from(this.promoCodes.values());
+  }
+
+  // Add-ons management
+  async createAddon(insertAddon: InsertAddon): Promise<Addon> {
+    const addon: Addon = { 
+      id: this.currentAddonId++, 
+      ...insertAddon 
+    };
+    this.addons.set(addon.id, addon);
+    return addon;
+  }
+
+  async updateAddon(id: number, updates: Partial<Addon>): Promise<void> {
+    const addon = this.addons.get(id);
+    if (addon) {
+      this.addons.set(id, { ...addon, ...updates });
+    }
+  }
+
+  async deleteAddon(id: number): Promise<void> {
+    this.addons.delete(id);
   }
 }
 
