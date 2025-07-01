@@ -133,8 +133,70 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Quick Category Access */}
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl lg:text-3xl font-bold text-charcoal mb-4">
+              What will you wish for?
+            </h2>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
+            <Link href="/category/all">
+              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl mb-2">🎂</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">CLASSIC</h3>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/category/gourmet">
+              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl mb-2">🍰</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">GOURMET</h3>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/category/designer">
+              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl mb-2">🎨</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">DESIGNER</h3>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/category/desserts">
+              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl mb-2">🧁</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">DESSERTS</h3>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/category/cookies">
+              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl mb-2">🍪</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">COOKIES</h3>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/category/hampers">
+              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl mb-2">🎁</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">HAMPERS</h3>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Categories Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-cream">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-bold text-charcoal mb-4">
@@ -165,13 +227,51 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Gurgaon Loves Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="flex items-center justify-center mb-4">
+              <Star className="text-caramel mr-2 h-6 w-6 fill-current" />
+              <h2 className="text-3xl lg:text-4xl font-bold text-charcoal">
+                Gurgaon Loves
+              </h2>
+            </div>
+            <p className="text-lg text-charcoal opacity-70">
+              Bestsellers from across the city
+            </p>
+          </div>
+
+          {cakesLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <div className="bg-gray-200 h-48"></div>
+                  <CardContent className="p-6">
+                    <div className="bg-gray-200 rounded h-4 mb-2"></div>
+                    <div className="bg-gray-200 rounded h-3 mb-4"></div>
+                    <div className="bg-gray-200 rounded h-8"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredCakes.slice(0, 4).map((cake) => (
+                <CakeCard key={cake.id} cake={cake} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* Featured Cakes */}
       <section className="py-16 bg-cream">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-12">
             <div>
               <h2 className="text-3xl lg:text-4xl font-bold text-charcoal mb-4">
-                Bestselling Cakes
+                All Bestselling Cakes
               </h2>
               <p className="text-lg text-charcoal opacity-70">
                 Most loved by Gurgaon customers
@@ -221,6 +321,121 @@ export default function Home() {
                 View All Cakes
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Special Occasions Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-charcoal mb-4">
+              Special Occasions
+            </h2>
+            <p className="text-lg text-charcoal opacity-70">
+              Perfect cakes for every celebration
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            <Link href="/category/birthday">
+              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                <CardContent className="p-6 text-center">
+                  <div className="text-3xl mb-3">🎂</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel mb-2">Birthday</h3>
+                  <p className="text-xs text-charcoal opacity-60">Celebrate with joy</p>
+                </CardContent>
+              </Card>
+            </Link>
+            
+            <Link href="/category/anniversary">
+              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                <CardContent className="p-6 text-center">
+                  <div className="text-3xl mb-3">💕</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel mb-2">Anniversary</h3>
+                  <p className="text-xs text-charcoal opacity-60">Love & togetherness</p>
+                </CardContent>
+              </Card>
+            </Link>
+            
+            <Link href="/category/wedding">
+              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                <CardContent className="p-6 text-center">
+                  <div className="text-3xl mb-3">💒</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel mb-2">Wedding</h3>
+                  <p className="text-xs text-charcoal opacity-60">Perfect union</p>
+                </CardContent>
+              </Card>
+            </Link>
+            
+            <Link href="/category/graduation">
+              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                <CardContent className="p-6 text-center">
+                  <div className="text-3xl mb-3">🎓</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel mb-2">Graduation</h3>
+                  <p className="text-xs text-charcoal opacity-60">Achievement unlocked</p>
+                </CardContent>
+              </Card>
+            </Link>
+            
+            <Link href="/category/baby-shower">
+              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                <CardContent className="p-6 text-center">
+                  <div className="text-3xl mb-3">👶</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel mb-2">Baby Shower</h3>
+                  <p className="text-xs text-charcoal opacity-60">New beginnings</p>
+                </CardContent>
+              </Card>
+            </Link>
+            
+            <Link href="/category/farewell">
+              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                <CardContent className="p-6 text-center">
+                  <div className="text-3xl mb-3">👋</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel mb-2">Farewell</h3>
+                  <p className="text-xs text-charcoal opacity-60">Best wishes ahead</p>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Delivery Promise Section */}
+      <section className="py-16 bg-gradient-to-r from-caramel to-brown text-white">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+            <div className="flex flex-col items-center">
+              <div className="bg-white/20 p-4 rounded-full mb-4">
+                <Clock className="h-8 w-8" />
+              </div>
+              <h3 className="font-bold text-lg mb-2">Same Day Delivery</h3>
+              <p className="text-sm opacity-90">Order before 2 PM for same day delivery across Gurgaon</p>
+            </div>
+            
+            <div className="flex flex-col items-center">
+              <div className="bg-white/20 p-4 rounded-full mb-4">
+                <Shield className="h-8 w-8" />
+              </div>
+              <h3 className="font-bold text-lg mb-2">100% Fresh</h3>
+              <p className="text-sm opacity-90">Made fresh daily with premium ingredients</p>
+            </div>
+            
+            <div className="flex flex-col items-center">
+              <div className="bg-white/20 p-4 rounded-full mb-4">
+                <CheckCircle className="h-8 w-8" />
+              </div>
+              <h3 className="font-bold text-lg mb-2">Safe Packaging</h3>
+              <p className="text-sm opacity-90">Hygienic packaging ensures cake reaches you safely</p>
+            </div>
+            
+            <div className="flex flex-col items-center">
+              <div className="bg-white/20 p-4 rounded-full mb-4">
+                <Truck className="h-8 w-8" />
+              </div>
+              <h3 className="font-bold text-lg mb-2">All Sectors</h3>
+              <p className="text-sm opacity-90">Delivering to all sectors of Gurgaon</p>
+            </div>
           </div>
         </div>
       </section>
@@ -296,6 +511,58 @@ export default function Home() {
                 className="rounded-xl shadow-lg mt-8"
               />
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose CakesBuy Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-charcoal mb-4">
+              Why Choose CakesBuy?
+            </h2>
+            <p className="text-lg text-charcoal opacity-70">
+              Leading cake delivery service in Gurgaon
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Card className="p-6 text-center">
+              <CardContent className="p-0">
+                <div className="bg-caramel/10 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <CheckCircle className="h-8 w-8 text-caramel" />
+                </div>
+                <h3 className="font-bold text-xl text-charcoal mb-3">Premium Quality</h3>
+                <p className="text-charcoal opacity-70">
+                  Made with finest ingredients by expert bakers. Every cake is crafted with love and precision.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="p-6 text-center">
+              <CardContent className="p-0">
+                <div className="bg-caramel/10 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <Clock className="h-8 w-8 text-caramel" />
+                </div>
+                <h3 className="font-bold text-xl text-charcoal mb-3">On-Time Delivery</h3>
+                <p className="text-charcoal opacity-70">
+                  Same-day and midnight delivery options. We ensure your celebrations are never delayed.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="p-6 text-center">
+              <CardContent className="p-0">
+                <div className="bg-caramel/10 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <Star className="h-8 w-8 text-caramel fill-current" />
+                </div>
+                <h3 className="font-bold text-xl text-charcoal mb-3">5000+ Happy Customers</h3>
+                <p className="text-charcoal opacity-70">
+                  Trusted by thousands of families across Gurgaon for their special moments and celebrations.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
