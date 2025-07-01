@@ -143,51 +143,51 @@ export default function Home() {
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
-            <Link href="/category/all">
+            <Link href="/category/birthday-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-4 text-center">
                   <div className="text-2xl mb-2">🎂</div>
-                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">CLASSIC</h3>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">BIRTHDAY</h3>
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/category/gourmet">
+            <Link href="/category/wedding-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-4 text-center">
-                  <div className="text-2xl mb-2">🍰</div>
-                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">GOURMET</h3>
+                  <div className="text-2xl mb-2">💒</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">WEDDING</h3>
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/category/designer">
+            <Link href="/category/theme-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-4 text-center">
                   <div className="text-2xl mb-2">🎨</div>
-                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">DESIGNER</h3>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">THEME</h3>
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/category/desserts">
+            <Link href="/category/eggless-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-4 text-center">
-                  <div className="text-2xl mb-2">🧁</div>
-                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">DESSERTS</h3>
+                  <div className="text-2xl mb-2">🥚</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">EGGLESS</h3>
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/category/cookies">
+            <Link href="/category/photo-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-4 text-center">
-                  <div className="text-2xl mb-2">🍪</div>
-                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">COOKIES</h3>
+                  <div className="text-2xl mb-2">📸</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">PHOTO</h3>
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/category/hampers">
+            <Link href="/category/anniversary-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-4 text-center">
-                  <div className="text-2xl mb-2">🎁</div>
-                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">HAMPERS</h3>
+                  <div className="text-2xl mb-2">💕</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">ANNIVERSARY</h3>
                 </CardContent>
               </Card>
             </Link>
@@ -338,7 +338,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            <Link href="/category/birthday">
+            <Link href="/category/birthday-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl mb-3">🎂</div>
@@ -348,7 +348,7 @@ export default function Home() {
               </Card>
             </Link>
             
-            <Link href="/category/anniversary">
+            <Link href="/category/anniversary-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl mb-3">💕</div>
@@ -358,7 +358,7 @@ export default function Home() {
               </Card>
             </Link>
             
-            <Link href="/category/wedding">
+            <Link href="/category/wedding-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl mb-3">💒</div>
@@ -368,32 +368,32 @@ export default function Home() {
               </Card>
             </Link>
             
-            <Link href="/category/graduation">
+            <Link href="/category/theme-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-6 text-center">
-                  <div className="text-3xl mb-3">🎓</div>
-                  <h3 className="font-semibold text-charcoal group-hover:text-caramel mb-2">Graduation</h3>
-                  <p className="text-xs text-charcoal opacity-60">Achievement unlocked</p>
+                  <div className="text-3xl mb-3">🎨</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel mb-2">Theme Cakes</h3>
+                  <p className="text-xs text-charcoal opacity-60">Custom designs</p>
                 </CardContent>
               </Card>
             </Link>
             
-            <Link href="/category/baby-shower">
+            <Link href="/category/photo-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-6 text-center">
-                  <div className="text-3xl mb-3">👶</div>
-                  <h3 className="font-semibold text-charcoal group-hover:text-caramel mb-2">Baby Shower</h3>
-                  <p className="text-xs text-charcoal opacity-60">New beginnings</p>
+                  <div className="text-3xl mb-3">📸</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel mb-2">Photo Cakes</h3>
+                  <p className="text-xs text-charcoal opacity-60">Personalized prints</p>
                 </CardContent>
               </Card>
             </Link>
             
-            <Link href="/category/farewell">
+            <Link href="/category/eggless-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-6 text-center">
-                  <div className="text-3xl mb-3">👋</div>
-                  <h3 className="font-semibold text-charcoal group-hover:text-caramel mb-2">Farewell</h3>
-                  <p className="text-xs text-charcoal opacity-60">Best wishes ahead</p>
+                  <div className="text-3xl mb-3">🥚</div>
+                  <h3 className="font-semibold text-charcoal group-hover:text-caramel mb-2">Eggless</h3>
+                  <p className="text-xs text-charcoal opacity-60">For everyone</p>
                 </CardContent>
               </Card>
             </Link>

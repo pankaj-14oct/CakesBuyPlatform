@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -18,6 +18,7 @@ import {
   Smartphone, Wallet, Truck, Shield, CheckCircle 
 } from 'lucide-react';
 import { useCart } from '@/components/cart-context';
+import { useAuth } from '@/hooks/use-auth';
 import { formatPrice, generateOrderNumber, calculateDeliveryDate } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -57,15 +58,73 @@ export default function CheckoutPage() {
   const [useGuestCheckout, setUseGuestCheckout] = useState(!isAuthenticated);
   const { toast } = useToast();
 
+  // Helper function to check if a time slot is available for today
+  const isTimeSlotAvailable = (deliveryDate: string, timeSlot: string) => {
+    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const currentHour = now.getHours();
+    
+    // If delivery date is not today, all time slots are available
+    if (deliveryDate !== today) {
+      return true;
+    }
+    
+    // For same-day delivery, check current time
+    switch (timeSlot) {
+      case 'morning': // 9 AM - 12 PM
+        return currentHour < 9; // Allow morning only if before 9 AM
+      case 'afternoon': // 12 PM - 4 PM  
+        return currentHour < 12; // Allow afternoon only if before 12 PM
+      case 'evening': // 4 PM - 8 PM
+        return currentHour < 16; // Allow evening only if before 4 PM
+      case 'midnight': // 11:30 PM - 12:30 AM
+        return currentHour < 21; // Allow midnight only if before 9 PM (2 hours advance)
+      default:
+        return true;
+    }
+  };
+
+  // Get minimum delivery date (today or tomorrow based on current time)
+  const getMinDeliveryDate = () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    
+    // If it's past 6 PM, next available delivery is tomorrow
+    if (currentHour >= 18) {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      return tomorrow.toISOString().split('T')[0];
+    }
+    
+    return now.toISOString().split('T')[0];
+  };
+
   const form = useForm<CheckoutForm>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
-      deliveryDate: new Date().toISOString().split('T')[0],
+      deliveryDate: getMinDeliveryDate(),
       deliveryTime: 'evening',
       paymentMethod: 'upi',
       guestCity: 'Gurgaon'
     }
   });
+
+  // Watch delivery date changes to update available time slots
+  const selectedDate = form.watch('deliveryDate');
+  
+  // Auto-select first available time slot when date changes
+  useEffect(() => {
+    const timeSlots = ['morning', 'afternoon', 'evening', 'midnight'];
+    const currentTimeSlot = form.getValues('deliveryTime');
+    
+    // If current time slot is not available for selected date, pick first available
+    if (!isTimeSlotAvailable(selectedDate, currentTimeSlot)) {
+      const firstAvailableSlot = timeSlots.find(slot => isTimeSlotAvailable(selectedDate, slot));
+      if (firstAvailableSlot) {
+        form.setValue('deliveryTime', firstAvailableSlot);
+      }
+    }
+  }, [selectedDate, form]);
 
   const subtotal = cartState.total;
   const deliveryFee = subtotal >= 500 ? 0 : 50;
@@ -96,6 +155,17 @@ export default function CheckoutPage() {
 
   const onSubmit = async (data: CheckoutForm) => {
     setIsPlacingOrder(true);
+    
+    // Validate time slot availability
+    if (!isTimeSlotAvailable(data.deliveryDate, data.deliveryTime)) {
+      toast({
+        title: "Invalid delivery time",
+        description: "The selected time slot is not available for the chosen date. Please select a different time.",
+        variant: "destructive"
+      });
+      setIsPlacingOrder(false);
+      return;
+    }
     
     // Determine delivery address
     let deliveryAddress;
@@ -344,7 +414,7 @@ export default function CheckoutPage() {
                         id="deliveryDate"
                         type="date"
                         {...form.register('deliveryDate')}
-                        min={new Date().toISOString().split('T')[0]}
+                        min={getMinDeliveryDate()}
                       />
                       {form.formState.errors.deliveryDate && (
                         <p className="text-sm text-red-500 mt-1">
@@ -354,15 +424,47 @@ export default function CheckoutPage() {
                     </div>
                     <div>
                       <Label>Delivery Time *</Label>
-                      <Select onValueChange={(value) => form.setValue('deliveryTime', value)}>
+                      <Select onValueChange={(value) => form.setValue('deliveryTime', value)} value={form.watch('deliveryTime')}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select time slot" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="morning">Morning (9 AM - 12 PM)</SelectItem>
-                          <SelectItem value="afternoon">Afternoon (12 PM - 4 PM)</SelectItem>
-                          <SelectItem value="evening">Evening (4 PM - 8 PM)</SelectItem>
-                          <SelectItem value="midnight">Midnight (11:30 PM - 12:30 AM)</SelectItem>
+                          <SelectItem 
+                            value="morning" 
+                            disabled={!isTimeSlotAvailable(selectedDate, 'morning')}
+                          >
+                            Morning (9 AM - 12 PM)
+                            {!isTimeSlotAvailable(selectedDate, 'morning') && (
+                              <span className="text-red-500 text-xs ml-2">(Not available)</span>
+                            )}
+                          </SelectItem>
+                          <SelectItem 
+                            value="afternoon" 
+                            disabled={!isTimeSlotAvailable(selectedDate, 'afternoon')}
+                          >
+                            Afternoon (12 PM - 4 PM)
+                            {!isTimeSlotAvailable(selectedDate, 'afternoon') && (
+                              <span className="text-red-500 text-xs ml-2">(Not available)</span>
+                            )}
+                          </SelectItem>
+                          <SelectItem 
+                            value="evening" 
+                            disabled={!isTimeSlotAvailable(selectedDate, 'evening')}
+                          >
+                            Evening (4 PM - 8 PM)
+                            {!isTimeSlotAvailable(selectedDate, 'evening') && (
+                              <span className="text-red-500 text-xs ml-2">(Not available)</span>
+                            )}
+                          </SelectItem>
+                          <SelectItem 
+                            value="midnight" 
+                            disabled={!isTimeSlotAvailable(selectedDate, 'midnight')}
+                          >
+                            Midnight (11:30 PM - 12:30 AM)
+                            {!isTimeSlotAvailable(selectedDate, 'midnight') && (
+                              <span className="text-red-500 text-xs ml-2">(Not available)</span>
+                            )}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       {form.formState.errors.deliveryTime && (
@@ -370,6 +472,15 @@ export default function CheckoutPage() {
                           {form.formState.errors.deliveryTime.message}
                         </p>
                       )}
+                      
+                      {/* Time Slot Information */}
+                      <div className="mt-2 text-xs text-charcoal opacity-70">
+                        {selectedDate === new Date().toISOString().split('T')[0] && (
+                          <p className="text-amber-600">
+                            ⚠️ Same-day delivery: Some time slots may not be available based on current time
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
 
