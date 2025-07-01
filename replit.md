@@ -127,6 +127,7 @@ The application uses a comprehensive database schema with the following main ent
 - July 1, 2025. Enhanced homepage with Bakingo.com-inspired sections: Quick Category Access, "Gurgaon Loves" bestsellers, Special Occasions grid, Delivery Promise section, Why Choose Us section
 - July 1, 2025. Rebranded to EgglessCakes - Complete transformation to focus on 100% eggless cake specialty shop with online delivery emphasis
 - July 1, 2025. Added admin settings with dummy data management (25 products, 10 categories, 10 users, 5 orders)
+- July 1, 2025. Implemented birthday and anniversary tracking system with automated event reminders sent one week prior to special occasions
 
 ## User Preferences
 

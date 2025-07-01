@@ -8,9 +8,11 @@ import {
   insertCakeSchema, 
   insertAddonSchema, 
   insertPromoCodeSchema,
+  insertEventReminderSchema,
   loginSchema,
   registerSchema,
-  addressSchema
+  addressSchema,
+  profileUpdateSchema
 } from "@shared/schema";
 import { 
   generateToken, 
@@ -20,6 +22,32 @@ import {
   optionalAuth, 
   type AuthRequest 
 } from "./auth";
+
+// Helper function to create event reminders
+async function createEventReminder(userId: number, eventType: 'birthday' | 'anniversary', eventDate: string) {
+  const currentYear = new Date().getFullYear();
+  const [month, day] = eventDate.split('-');
+  
+  // Calculate reminder date (7 days before event)
+  const eventDateThisYear = new Date(currentYear, parseInt(month) - 1, parseInt(day));
+  const reminderDate = new Date(eventDateThisYear);
+  reminderDate.setDate(reminderDate.getDate() - 7);
+  
+  // If the reminder date has passed this year, set for next year
+  if (reminderDate < new Date()) {
+    eventDateThisYear.setFullYear(currentYear + 1);
+    reminderDate.setFullYear(currentYear + 1);
+  }
+  
+  await storage.createEventReminder({
+    userId,
+    eventType,
+    eventDate,
+    reminderDate,
+    isProcessed: false,
+    notificationSent: false
+  });
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -206,6 +234,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(reviews);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  // User Profile Management
+  app.get("/api/profile", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const user = await storage.getUser(req.user!.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Don't return password in response
+      const { password, ...userProfile } = user;
+      res.json(userProfile);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch profile" });
+    }
+  });
+
+  app.put("/api/profile", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const updateData = profileUpdateSchema.parse(req.body);
+      await storage.updateUser(req.user!.id, updateData);
+      
+      // Create event reminders for birthday and anniversary if provided
+      if (updateData.birthday) {
+        await createEventReminder(req.user!.id, 'birthday', updateData.birthday);
+      }
+      if (updateData.anniversary) {
+        await createEventReminder(req.user!.id, 'anniversary', updateData.anniversary);
+      }
+      
+      res.json({ message: "Profile updated successfully" });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid profile data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // Event Reminders
+  app.get("/api/reminders", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const reminders = await storage.getUserEventReminders(req.user!.id);
+      res.json(reminders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch reminders" });
+    }
+  });
+
+  app.post("/api/reminders", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const reminderData = insertEventReminderSchema.parse({
+        ...req.body,
+        userId: req.user!.id
+      });
+      const reminder = await storage.createEventReminder(reminderData);
+      res.status(201).json(reminder);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid reminder data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create reminder" });
+    }
+  });
+
+  app.delete("/api/reminders/:id", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteEventReminder(id);
+      res.json({ message: "Reminder deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete reminder" });
     }
   });
 

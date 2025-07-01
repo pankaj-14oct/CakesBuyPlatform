@@ -8,6 +8,8 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
   phone: text("phone"),
+  birthday: text("birthday"), // Format: MM-DD
+  anniversary: text("anniversary"), // Format: MM-DD
   addresses: jsonb("addresses").$type<Array<{
     id: string;
     name: string;
@@ -139,6 +141,17 @@ export const reviews = pgTable("reviews", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const eventReminders = pgTable("event_reminders", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  eventType: text("event_type").notNull(), // 'birthday' or 'anniversary'
+  eventDate: text("event_date").notNull(), // MM-DD format
+  reminderDate: timestamp("reminder_date").notNull(),
+  isProcessed: boolean("is_processed").default(false),
+  notificationSent: boolean("notification_sent").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertCategorySchema = createInsertSchema(categories).omit({ id: true });
@@ -150,6 +163,7 @@ export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, ord
 export const insertDeliveryAreaSchema = createInsertSchema(deliveryAreas).omit({ id: true });
 export const insertPromoCodeSchema = createInsertSchema(promoCodes).omit({ id: true, usedCount: true });
 export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, createdAt: true });
+export const insertEventReminderSchema = createInsertSchema(eventReminders).omit({ id: true, createdAt: true });
 
 // Auth schemas
 export const loginSchema = z.object({
@@ -177,6 +191,15 @@ export const addressSchema = z.object({
   isDefault: z.boolean().default(false)
 });
 
+// Profile update schema
+export const profileUpdateSchema = z.object({
+  username: z.string().min(2, 'Username must be at least 2 characters').optional(),
+  email: z.string().email('Invalid email address').optional(),
+  phone: z.string().optional(),
+  birthday: z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/, 'Birthday must be in MM-DD format').optional(),
+  anniversary: z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/, 'Anniversary must be in MM-DD format').optional(),
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -194,3 +217,5 @@ export type PromoCode = typeof promoCodes.$inferSelect;
 export type InsertPromoCode = z.infer<typeof insertPromoCodeSchema>;
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
+export type EventReminder = typeof eventReminders.$inferSelect;
+export type InsertEventReminder = z.infer<typeof insertEventReminderSchema>;

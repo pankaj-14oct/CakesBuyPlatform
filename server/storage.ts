@@ -1,9 +1,10 @@
 import {
-  users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews,
+  users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews, eventReminders,
   type User, type InsertUser, type Category, type InsertCategory,
   type Cake, type InsertCake, type Addon, type InsertAddon,
   type Order, type InsertOrder, type DeliveryArea, type InsertDeliveryArea,
-  type PromoCode, type InsertPromoCode, type Review, type InsertReview
+  type PromoCode, type InsertPromoCode, type Review, type InsertReview,
+  type EventReminder, type InsertEventReminder
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, and, desc } from "drizzle-orm";
@@ -76,6 +77,13 @@ export interface IStorage {
   createAddon(addon: InsertAddon): Promise<Addon>;
   updateAddon(id: number, updates: Partial<Addon>): Promise<void>;
   deleteAddon(id: number): Promise<void>;
+
+  // Event reminders management
+  createEventReminder(reminder: InsertEventReminder): Promise<EventReminder>;
+  getUserEventReminders(userId: number): Promise<EventReminder[]>;
+  getPendingReminders(): Promise<EventReminder[]>;
+  updateEventReminder(id: number, updates: Partial<EventReminder>): Promise<void>;
+  deleteEventReminder(id: number): Promise<void>;
 }
 
 // DatabaseStorage implementation
@@ -371,6 +379,33 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAddon(id: number): Promise<void> {
     await db.delete(addons).where(eq(addons.id, id));
+  }
+
+  // Event reminders management
+  async createEventReminder(insertEventReminder: InsertEventReminder): Promise<EventReminder> {
+    const [reminder] = await db.insert(eventReminders).values(insertEventReminder).returning();
+    return reminder;
+  }
+
+  async getUserEventReminders(userId: number): Promise<EventReminder[]> {
+    return await db.select().from(eventReminders).where(eq(eventReminders.userId, userId));
+  }
+
+  async getPendingReminders(): Promise<EventReminder[]> {
+    const now = new Date();
+    return await db.select().from(eventReminders)
+      .where(and(
+        eq(eventReminders.isProcessed, false),
+        eq(eventReminders.notificationSent, false)
+      ));
+  }
+
+  async updateEventReminder(id: number, updates: Partial<EventReminder>): Promise<void> {
+    await db.update(eventReminders).set(updates).where(eq(eventReminders.id, id));
+  }
+
+  async deleteEventReminder(id: number): Promise<void> {
+    await db.delete(eventReminders).where(eq(eventReminders.id, id));
   }
 }
 
