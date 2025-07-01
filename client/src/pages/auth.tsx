@@ -220,27 +220,6 @@ export default function AuthPage() {
 
                       <FormField
                         control={registerForm.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Phone (Optional)</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Phone className="absolute left-3 top-3 h-4 w-4 text-charcoal opacity-50" />
-                                <Input
-                                  {...field}
-                                  placeholder="10-digit mobile number"
-                                  className="pl-10"
-                                />
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={registerForm.control}
                         name="password"
                         render={({ field }) => (
                           <FormItem>
