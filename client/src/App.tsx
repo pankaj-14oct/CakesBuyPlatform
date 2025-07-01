@@ -20,10 +20,11 @@ import AdminProducts from "@/pages/admin/products";
 import AdminOrders from "@/pages/admin/orders";
 import AdminCoupons from "@/pages/admin/coupons";
 import AdminSettings from "@/pages/admin/settings";
+import AdminAddons from "@/pages/admin/addons";
 import NotFound from "@/pages/not-found";
 
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, ShoppingCart, Tags, Percent, Settings } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Tags, Percent, Settings, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -34,6 +35,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
     { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { path: "/admin/categories", label: "Categories", icon: Tags },
     { path: "/admin/products", label: "Products", icon: Package },
+    { path: "/admin/addons", label: "Addons", icon: Plus },
     { path: "/admin/orders", label: "Orders", icon: ShoppingCart },
     { path: "/admin/coupons", label: "Coupons", icon: Percent },
     { path: "/admin/settings", label: "Settings", icon: Settings },
@@ -105,6 +107,7 @@ function Router() {
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/categories" component={AdminCategories} />
           <Route path="/admin/products" component={AdminProducts} />
+          <Route path="/admin/addons" component={AdminAddons} />
           <Route path="/admin/orders" component={AdminOrders} />
           <Route path="/admin/coupons" component={AdminCoupons} />
           <Route path="/admin/settings" component={AdminSettings} />
