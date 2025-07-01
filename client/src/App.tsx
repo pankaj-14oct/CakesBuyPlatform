@@ -19,6 +19,7 @@ import AdminCategories from "@/pages/admin/categories";
 import AdminProducts from "@/pages/admin/products";
 import AdminOrders from "@/pages/admin/orders";
 import AdminCoupons from "@/pages/admin/coupons";
+import AdminSettings from "@/pages/admin/settings";
 import NotFound from "@/pages/not-found";
 
 import { Link, useLocation } from "wouter";
@@ -35,6 +36,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
     { path: "/admin/products", label: "Products", icon: Package },
     { path: "/admin/orders", label: "Orders", icon: ShoppingCart },
     { path: "/admin/coupons", label: "Coupons", icon: Percent },
+    { path: "/admin/settings", label: "Settings", icon: Settings },
   ];
 
   return (
@@ -105,6 +107,7 @@ function Router() {
           <Route path="/admin/products" component={AdminProducts} />
           <Route path="/admin/orders" component={AdminOrders} />
           <Route path="/admin/coupons" component={AdminCoupons} />
+          <Route path="/admin/settings" component={AdminSettings} />
           <Route component={NotFound} />
         </Switch>
       </AdminLayout>

@@ -373,6 +373,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Data Management
+  app.post("/api/admin/import-dummy-data", async (req, res) => {
+    try {
+      const { importDummyData } = await import("./dummy-data-fixed");
+      const result = await importDummyData();
+      res.json({ 
+        message: "Dummy data imported successfully", 
+        data: result 
+      });
+    } catch (error) {
+      console.error("Import dummy data error:", error);
+      res.status(500).json({ message: "Failed to import dummy data" });
+    }
+  });
+
+  app.delete("/api/admin/clear-data", async (req, res) => {
+    try {
+      const { clearAllData } = await import("./dummy-data-fixed");
+      const result = await clearAllData();
+      res.json(result);
+    } catch (error) {
+      console.error("Clear data error:", error);
+      res.status(500).json({ message: "Failed to clear data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
