@@ -105,7 +105,12 @@ export default function CheckoutPage() {
       deliveryDate: getMinDeliveryDate(),
       deliveryTime: 'evening',
       paymentMethod: 'upi',
-      guestCity: 'Gurgaon'
+      guestCity: 'Gurgaon',
+      guestName: '',
+      guestPhone: '',
+      guestAddress: '',
+      guestPincode: '',
+      guestLandmark: ''
     }
   });
 
@@ -320,77 +325,77 @@ export default function CheckoutPage() {
                 <CardContent className="space-y-4">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="name">Full Name *</Label>
+                      <Label htmlFor="guestName">Full Name *</Label>
                       <Input
-                        id="name"
-                        {...form.register('name')}
+                        id="guestName"
+                        {...form.register('guestName')}
                         placeholder="Enter your full name"
                       />
-                      {form.formState.errors.name && (
+                      {form.formState.errors.guestName && (
                         <p className="text-sm text-red-500 mt-1">
-                          {form.formState.errors.name.message}
+                          {form.formState.errors.guestName.message}
                         </p>
                       )}
                     </div>
                     <div>
-                      <Label htmlFor="phone">Mobile Number *</Label>
+                      <Label htmlFor="guestPhone">Mobile Number *</Label>
                       <Input
-                        id="phone"
-                        {...form.register('phone')}
+                        id="guestPhone"
+                        {...form.register('guestPhone')}
                         placeholder="Enter 10-digit mobile number"
                       />
-                      {form.formState.errors.phone && (
+                      {form.formState.errors.guestPhone && (
                         <p className="text-sm text-red-500 mt-1">
-                          {form.formState.errors.phone.message}
+                          {form.formState.errors.guestPhone.message}
                         </p>
                       )}
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="address">Complete Address *</Label>
+                    <Label htmlFor="guestAddress">Complete Address *</Label>
                     <Textarea
-                      id="address"
-                      {...form.register('address')}
+                      id="guestAddress"
+                      {...form.register('guestAddress')}
                       placeholder="House/Flat number, Street name, Area"
                       rows={3}
                     />
-                    {form.formState.errors.address && (
+                    {form.formState.errors.guestAddress && (
                       <p className="text-sm text-red-500 mt-1">
-                        {form.formState.errors.address.message}
+                        {form.formState.errors.guestAddress.message}
                       </p>
                     )}
                   </div>
 
                   <div className="grid md:grid-cols-3 gap-4">
                     <div>
-                      <Label htmlFor="pincode">Pincode *</Label>
+                      <Label htmlFor="guestPincode">Pincode *</Label>
                       <Input
-                        id="pincode"
-                        {...form.register('pincode')}
+                        id="guestPincode"
+                        {...form.register('guestPincode')}
                         placeholder="122001"
                       />
-                      {form.formState.errors.pincode && (
+                      {form.formState.errors.guestPincode && (
                         <p className="text-sm text-red-500 mt-1">
-                          {form.formState.errors.pincode.message}
+                          {form.formState.errors.guestPincode.message}
                         </p>
                       )}
                     </div>
                     <div>
-                      <Label htmlFor="city">City *</Label>
+                      <Label htmlFor="guestCity">City *</Label>
                       <Input
-                        id="city"
-                        {...form.register('city')}
+                        id="guestCity"
+                        {...form.register('guestCity')}
                         value="Gurgaon"
                         readOnly
                         className="bg-gray-50"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="landmark">Landmark (Optional)</Label>
+                      <Label htmlFor="guestLandmark">Landmark (Optional)</Label>
                       <Input
-                        id="landmark"
-                        {...form.register('landmark')}
+                        id="guestLandmark"
+                        {...form.register('guestLandmark')}
                         placeholder="Near metro station"
                       />
                     </div>
