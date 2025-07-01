@@ -13,16 +13,15 @@ import { Cake, User, Mail, Lock, Phone } from 'lucide-react';
 import { useEffect } from 'react';
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
   password: z.string().min(6, 'Password must be at least 6 characters')
 });
 
 const registerSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters'),
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string(),
-  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit mobile number').optional().or(z.literal(''))
+  confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"]
@@ -46,7 +45,7 @@ export default function AuthPage() {
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
+      phone: '',
       password: ''
     }
   });
@@ -54,11 +53,10 @@ export default function AuthPage() {
   const registerForm = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      username: '',
+      phone: '',
       email: '',
       password: '',
-      confirmPassword: '',
-      phone: ''
+      confirmPassword: ''
     }
   });
 
@@ -67,11 +65,8 @@ export default function AuthPage() {
   };
 
   const onRegister = (data: RegisterForm) => {
-    const { confirmPassword, phone, ...registerData } = data;
-    registerMutation.mutate({
-      ...registerData,
-      phone: phone || undefined
-    });
+    const { confirmPassword, ...registerData } = data;
+    registerMutation.mutate(registerData);
   };
 
   // Don't render if user is authenticated
@@ -112,17 +107,17 @@ export default function AuthPage() {
                     <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
                       <FormField
                         control={loginForm.control}
-                        name="email"
+                        name="phone"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Email</FormLabel>
+                            <FormLabel>Phone Number</FormLabel>
                             <FormControl>
                               <div className="relative">
-                                <Mail className="absolute left-3 top-3 h-4 w-4 text-charcoal opacity-50" />
+                                <Phone className="absolute left-3 top-3 h-4 w-4 text-charcoal opacity-50" />
                                 <Input
                                   {...field}
-                                  type="email"
-                                  placeholder="Enter your email"
+                                  type="tel"
+                                  placeholder="Enter your phone number"
                                   className="pl-10"
                                 />
                               </div>
@@ -181,16 +176,17 @@ export default function AuthPage() {
                     <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
                       <FormField
                         control={registerForm.control}
-                        name="username"
+                        name="phone"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Username</FormLabel>
+                            <FormLabel>Phone Number</FormLabel>
                             <FormControl>
                               <div className="relative">
-                                <User className="absolute left-3 top-3 h-4 w-4 text-charcoal opacity-50" />
+                                <Phone className="absolute left-3 top-3 h-4 w-4 text-charcoal opacity-50" />
                                 <Input
                                   {...field}
-                                  placeholder="Choose a username"
+                                  type="tel"
+                                  placeholder="Enter your phone number"
                                   className="pl-10"
                                 />
                               </div>

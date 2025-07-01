@@ -14,6 +14,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByPhone(phone: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<void>;
   updateUserAddresses(id: number, addresses: any[]): Promise<void>;
@@ -100,12 +101,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
+    // Username field has been removed - this method is deprecated
+    return undefined;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async getUserByPhone(phone: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.phone, phone));
     return user || undefined;
   }
 

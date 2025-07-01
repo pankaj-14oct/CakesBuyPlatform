@@ -4,10 +4,9 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
-  phone: text("phone"),
+  phone: text("phone").notNull().unique(),
   birthday: text("birthday"), // Format: MM-DD
   anniversary: text("anniversary"), // Format: MM-DD
   addresses: jsonb("addresses").$type<Array<{
@@ -177,11 +176,13 @@ export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).
 
 // Auth schemas
 export const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
   password: z.string().min(6, 'Password must be at least 6 characters')
 });
 
-export const registerSchema = insertUserSchema.extend({
+export const registerSchema = z.object({
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
+  email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
@@ -202,7 +203,6 @@ export const verifyOtpSchema = z.object({
 export const otpRegisterSchema = z.object({
   phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
   otp: z.string().length(6, 'OTP must be 6 digits'),
-  username: z.string().min(2, 'Username must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string()
@@ -225,9 +225,8 @@ export const addressSchema = z.object({
 
 // Profile update schema
 export const profileUpdateSchema = z.object({
-  username: z.string().min(2, 'Username must be at least 2 characters').optional(),
   email: z.string().email('Invalid email address').optional(),
-  phone: z.string().optional(),
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number').optional(),
   birthday: z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/, 'Birthday must be in MM-DD format').optional(),
   anniversary: z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/, 'Anniversary must be in MM-DD format').optional(),
 });

@@ -546,7 +546,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Verify OTP and register user
   app.post("/api/auth/register-with-otp", async (req, res) => {
     try {
-      const { phone, otp, username, email, password } = otpRegisterSchema.parse(req.body);
+      const { phone, otp, email, password } = otpRegisterSchema.parse(req.body);
       
       // Verify OTP
       const verification = await storage.verifyOtp(phone, otp);
@@ -560,15 +560,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email already registered" });
       }
       
-      const existingUserByUsername = await storage.getUserByUsername(username);
-      if (existingUserByUsername) {
-        return res.status(400).json({ message: "Username already taken" });
+      const existingUserByPhone = await storage.getUserByPhone(phone);
+      if (existingUserByPhone) {
+        return res.status(400).json({ message: "Phone number already registered" });
       }
       
       // Hash password and create user
       const hashedPassword = await hashPassword(password);
       const newUser = await storage.createUser({
-        username,
         email,
         password: hashedPassword,
         phone,
@@ -576,13 +575,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Generate JWT token
-      const token = generateToken(newUser.id, newUser.username, newUser.email);
+      const token = generateToken(newUser.id, newUser.phone, newUser.email);
       
       res.status(201).json({
         message: "Registration successful",
         user: {
           id: newUser.id,
-          username: newUser.username,
           email: newUser.email,
           phone: newUser.phone
         },
@@ -596,28 +594,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Traditional login route (email/password)
+  // Traditional login route (phone/password)
   app.post("/api/auth/login", async (req, res) => {
     try {
-      const { email, password } = loginSchema.parse(req.body);
+      const { phone, password } = loginSchema.parse(req.body);
       
-      const user = await storage.getUserByEmail(email);
+      const user = await storage.getUserByPhone(phone);
       if (!user) {
-        return res.status(401).json({ message: "Invalid email or password" });
+        return res.status(401).json({ message: "Invalid phone number or password" });
       }
       
       const isPasswordValid = await comparePasswords(password, user.password);
       if (!isPasswordValid) {
-        return res.status(401).json({ message: "Invalid email or password" });
+        return res.status(401).json({ message: "Invalid phone number or password" });
       }
       
-      const token = generateToken(user.id, user.username, user.email);
+      const token = generateToken(user.id, user.phone, user.email);
       
       res.json({
         message: "Login successful",
         user: {
           id: user.id,
-          username: user.username,
           email: user.email,
           phone: user.phone
         },
@@ -631,10 +628,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Traditional registration route (email/password)
+  // Traditional registration route (phone/email/password)
   app.post("/api/auth/register", async (req, res) => {
     try {
-      const { username, email, password, phone } = registerSchema.parse(req.body);
+      const { phone, email, password } = registerSchema.parse(req.body);
       
       // Check if user already exists
       const existingUserByEmail = await storage.getUserByEmail(email);
@@ -642,29 +639,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email already registered" });
       }
       
-      const existingUserByUsername = await storage.getUserByUsername(username);
-      if (existingUserByUsername) {
-        return res.status(400).json({ message: "Username already taken" });
+      const existingUserByPhone = await storage.getUserByPhone(phone);
+      if (existingUserByPhone) {
+        return res.status(400).json({ message: "Phone number already registered" });
       }
       
       // Hash password and create user
       const hashedPassword = await hashPassword(password);
       const newUser = await storage.createUser({
-        username,
         email,
         password: hashedPassword,
-        phone: phone || null,
+        phone,
         addresses: []
       });
       
       // Generate JWT token
-      const token = generateToken(newUser.id, newUser.username, newUser.email);
+      const token = generateToken(newUser.id, newUser.phone, newUser.email);
       
       res.status(201).json({
         message: "Registration successful",
         user: {
           id: newUser.id,
-          username: newUser.username,
           email: newUser.email,
           phone: newUser.phone
         },
