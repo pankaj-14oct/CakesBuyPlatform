@@ -631,6 +631,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Traditional registration route (email/password)
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const { username, email, password, phone } = registerSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUserByEmail = await storage.getUserByEmail(email);
+      if (existingUserByEmail) {
+        return res.status(400).json({ message: "Email already registered" });
+      }
+      
+      const existingUserByUsername = await storage.getUserByUsername(username);
+      if (existingUserByUsername) {
+        return res.status(400).json({ message: "Username already taken" });
+      }
+      
+      // Hash password and create user
+      const hashedPassword = await hashPassword(password);
+      const newUser = await storage.createUser({
+        username,
+        email,
+        password: hashedPassword,
+        phone: phone || null,
+        addresses: []
+      });
+      
+      // Generate JWT token
+      const token = generateToken(newUser.id, newUser.username, newUser.email);
+      
+      res.status(201).json({
+        message: "Registration successful",
+        user: {
+          id: newUser.id,
+          username: newUser.username,
+          email: newUser.email,
+          phone: newUser.phone
+        },
+        token
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid registration data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to register user" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
