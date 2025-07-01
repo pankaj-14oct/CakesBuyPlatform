@@ -631,7 +631,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Traditional registration route (phone/email/password)
   app.post("/api/auth/register", async (req, res) => {
     try {
-      const { phone, email, password } = registerSchema.parse(req.body);
+      const { phone, email, password, confirmPassword } = registerSchema.parse(req.body);
       
       // Check if user already exists
       const existingUserByEmail = await storage.getUserByEmail(email);

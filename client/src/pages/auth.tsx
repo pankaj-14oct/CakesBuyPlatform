@@ -65,8 +65,7 @@ export default function AuthPage() {
   };
 
   const onRegister = (data: RegisterForm) => {
-    const { confirmPassword, ...registerData } = data;
-    registerMutation.mutate(registerData);
+    registerMutation.mutate(data);
   };
 
   // Don't render if user is authenticated
