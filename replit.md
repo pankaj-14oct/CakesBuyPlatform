@@ -129,6 +129,7 @@ The application uses a comprehensive database schema with the following main ent
 - July 1, 2025. Added admin settings with dummy data management (25 products, 10 categories, 10 users, 5 orders)
 - July 1, 2025. Implemented birthday and anniversary tracking system with automated event reminders sent one week prior to special occasions
 - July 1, 2025. Migrated authentication system to mobile number-based login and registration, removing username field for simplified user experience
+- July 1, 2025. Enhanced delivery address management with three address types: Home, Work, and Other - includes complete address forms with validation and CRUD operations
 
 ## User Preferences
 

@@ -20,7 +20,7 @@ import { Home, Building, MapPin, Plus, Check } from 'lucide-react';
 const addressSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(2, 'Address name is required'),
-  type: z.enum(['home', 'office', 'other']),
+  type: z.enum(['home', 'work', 'other']),
   address: z.string().min(10, 'Address must be at least 10 characters'),
   pincode: z.string().regex(/^[1-9][0-9]{5}$/, 'Enter a valid 6-digit pincode'),
   city: z.string().min(2, 'City is required'),
@@ -198,7 +198,7 @@ export default function AddressSelection({
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="home">Home</SelectItem>
-                            <SelectItem value="office">Office</SelectItem>
+                            <SelectItem value="work">Work</SelectItem>
                             <SelectItem value="other">Other</SelectItem>
                           </SelectContent>
                         </Select>

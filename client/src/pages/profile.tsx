@@ -21,7 +21,7 @@ import { useEffect } from 'react';
 const addressSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(2, 'Address name is required'),
-  type: z.enum(['home', 'office', 'other']),
+  type: z.enum(['home', 'work', 'other']),
   address: z.string().min(10, 'Address must be at least 10 characters'),
   pincode: z.string().regex(/^[1-9][0-9]{5}$/, 'Enter a valid 6-digit pincode'),
   city: z.string().min(2, 'City is required'),
@@ -228,7 +228,7 @@ export default function ProfilePage() {
     switch (type) {
       case 'home':
         return <Home className="h-4 w-4" />;
-      case 'office':
+      case 'work':
         return <Building className="h-4 w-4" />;
       default:
         return <MapPin className="h-4 w-4" />;
@@ -397,8 +397,102 @@ export default function ProfilePage() {
                     </DialogHeader>
                     <Form {...addressForm}>
                       <form onSubmit={addressForm.handleSubmit(onSubmitAddress)} className="space-y-4">
-                        {/* Address form fields will go here - simplified for now */}
-                        <Button type="submit" disabled={saveAddressMutation.isPending}>
+                        <FormField
+                          control={addressForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Address Name</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="e.g., Home, Office" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={addressForm.control}
+                          name="type"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Address Type</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select type" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="home">Home</SelectItem>
+                                  <SelectItem value="work">Work</SelectItem>
+                                  <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={addressForm.control}
+                          name="address"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Full Address</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="House/Flat no, Street, Area" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <FormField
+                            control={addressForm.control}
+                            name="pincode"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Pincode</FormLabel>
+                                <FormControl>
+                                  <Input {...field} placeholder="122001" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={addressForm.control}
+                            name="city"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>City</FormLabel>
+                                <FormControl>
+                                  <Input {...field} placeholder="Gurgaon" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        <FormField
+                          control={addressForm.control}
+                          name="landmark"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Landmark (Optional)</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="Near Metro Station" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <Button type="submit" disabled={saveAddressMutation.isPending} className="w-full bg-caramel hover:bg-brown">
                           {saveAddressMutation.isPending ? 'Saving...' : 'Save Address'}
                         </Button>
                       </form>

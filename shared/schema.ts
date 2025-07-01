@@ -215,7 +215,7 @@ export const otpRegisterSchema = z.object({
 export const addressSchema = z.object({
   id: z.string(),
   name: z.string().min(2, 'Address name is required'),
-  type: z.enum(['home', 'office', 'other']),
+  type: z.enum(['home', 'work', 'other']),
   address: z.string().min(10, 'Address must be at least 10 characters'),
   pincode: z.string().regex(/^[1-9][0-9]{5}$/, 'Enter a valid 6-digit pincode'),
   city: z.string().min(2, 'City is required'),
