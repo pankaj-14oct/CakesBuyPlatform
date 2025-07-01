@@ -9,10 +9,10 @@ export default function Footer() {
           {/* Brand Section */}
           <div>
             <div className="text-2xl font-bold mb-6">
-              🎂 CakesBuy
+              🥚 EgglessCakes
             </div>
             <p className="text-gray-300 mb-6">
-              Premium fresh cakes delivered across Gurgaon. Making your celebrations sweeter since 2018.
+              100% eggless cakes delivered online across Gurgaon. Perfect for vegetarians and health-conscious families since 2018.
             </p>
             
             <div className="flex space-x-4">
@@ -52,28 +52,28 @@ export default function Footer() {
             <h3 className="font-semibold mb-6">Quick Links</h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/category/all" className="text-gray-300 hover:text-caramel transition-colors">
-                  All Cakes
+                <Link href="/category/eggless-cakes" className="text-gray-300 hover:text-caramel transition-colors">
+                  All Eggless Cakes
                 </Link>
               </li>
               <li>
-                <Link href="/category/birthday" className="text-gray-300 hover:text-caramel transition-colors">
-                  Birthday Cakes
+                <Link href="/category/birthday-cakes" className="text-gray-300 hover:text-caramel transition-colors">
+                  Eggless Birthday
                 </Link>
               </li>
               <li>
-                <Link href="/custom" className="text-gray-300 hover:text-caramel transition-colors">
-                  Custom Orders
+                <Link href="/category/wedding-cakes" className="text-gray-300 hover:text-caramel transition-colors">
+                  Eggless Wedding
                 </Link>
               </li>
               <li>
-                <Link href="/category/eggless" className="text-gray-300 hover:text-caramel transition-colors">
-                  Eggless Cakes
+                <Link href="/category/theme-cakes" className="text-gray-300 hover:text-caramel transition-colors">
+                  Custom Eggless
                 </Link>
               </li>
               <li>
                 <Link href="/delivery" className="text-gray-300 hover:text-caramel transition-colors">
-                  Same Day Delivery
+                  Online Delivery
                 </Link>
               </li>
             </ul>

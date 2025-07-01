@@ -18,10 +18,10 @@ export default function Header() {
 
   const navItems = [
     { href: '/', label: 'Home' },
-    { href: '/category/birthday', label: 'Cakes' },
-    { href: '/custom', label: 'Custom Orders' },
-    { href: '/delivery', label: 'Delivery' },
-    { href: '/contact', label: 'Contact' },
+    { href: '/category/eggless-cakes', label: 'Eggless Cakes' },
+    { href: '/category/birthday-cakes', label: 'Birthday' },
+    { href: '/category/wedding-cakes', label: 'Wedding' },
+    { href: '/delivery', label: 'Online Delivery' },
   ];
 
   const checkPincode = async () => {
@@ -37,8 +37,9 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <div className="text-2xl font-bold text-brown">
-              🎂 CakesBuy
+              🥚 EgglessCakes
             </div>
+            <Badge className="bg-green-500 text-white text-xs px-2 py-1">100% EGGLESS</Badge>
           </Link>
 
           {/* Desktop Navigation */}

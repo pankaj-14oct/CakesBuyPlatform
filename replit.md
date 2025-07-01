@@ -2,7 +2,7 @@
 
 ## Overview
 
-CakesBuy is a full-stack e-commerce platform for ordering custom cakes in Gurgaon. The application provides a comprehensive cake ordering system with features including category browsing, product customization, shopping cart functionality, and order management. Built as a modern web application with React frontend and Express backend, it offers both same-day delivery and scheduled delivery options.
+EgglessCakes is a specialized full-stack e-commerce platform for ordering 100% eggless cakes online in Gurgaon. The application provides a comprehensive cake ordering system focused exclusively on egg-free products, featuring category browsing, product customization, shopping cart functionality, and order management. Built as a modern web application with React frontend and Express backend, it offers contactless online delivery with same-day delivery options for vegetarian and health-conscious customers.
 
 ## System Architecture
 
@@ -125,6 +125,8 @@ The application uses a comprehensive database schema with the following main ent
 - June 25, 2025. PostgreSQL database integration completed with persistent data storage
 - July 1, 2025. Successfully migrated from Replit Agent to standard Replit environment
 - July 1, 2025. Enhanced homepage with Bakingo.com-inspired sections: Quick Category Access, "Gurgaon Loves" bestsellers, Special Occasions grid, Delivery Promise section, Why Choose Us section
+- July 1, 2025. Rebranded to EgglessCakes - Complete transformation to focus on 100% eggless cake specialty shop with online delivery emphasis
+- July 1, 2025. Added admin settings with dummy data management (25 products, 10 categories, 10 users, 5 orders)
 
 ## User Preferences
 

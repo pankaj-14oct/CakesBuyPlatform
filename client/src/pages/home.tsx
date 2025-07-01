@@ -30,27 +30,34 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="text-center lg:text-left">
               <h1 className="text-4xl lg:text-6xl font-bold text-charcoal mb-6">
-                Fresh Cakes<br />
-                <span className="text-brown">Delivered Daily</span><br />
-                <span className="text-caramel">in Gurgaon</span>
+                100% Eggless<br />
+                <span className="text-brown">Fresh Cakes</span><br />
+                <span className="text-caramel">Online Delivery</span>
               </h1>
               <p className="text-lg text-charcoal mb-8 opacity-80">
-                Premium handcrafted cakes for every celebration. Same-day delivery available across Gurgaon sectors.
+                Delicious eggless cakes made with love. Perfect for vegetarians and everyone who loves fresh, healthy treats. Same-day online delivery across Gurgaon.
               </p>
+              
+              {/* Eggless Badge */}
+              <div className="flex items-center justify-center lg:justify-start mb-6">
+                <Badge className="bg-green-500 text-white px-4 py-2 text-lg">
+                  🥚 100% EGGLESS GUARANTEED
+                </Badge>
+              </div>
               
               {/* Quick Order Section */}
               <Card className="mb-8 shadow-xl">
                 <CardContent className="p-6">
                   <h3 className="font-semibold text-charcoal mb-4">Quick Order</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <Link href="/category/birthday">
+                    <Link href="/category/birthday-cakes">
                       <Button className="w-full bg-pink text-white hover:bg-opacity-90 transition">
-                        🎂 Birthday Cakes
+                        🎂 Eggless Birthday
                       </Button>
                     </Link>
-                    <Link href="/category/anniversary">
+                    <Link href="/category/wedding-cakes">
                       <Button className="w-full bg-caramel text-white hover:bg-brown transition">
-                        💖 Anniversary
+                        💒 Eggless Wedding
                       </Button>
                     </Link>
                   </div>
@@ -74,12 +81,12 @@ export default function Home() {
               {/* Trust Indicators */}
               <div className="flex items-center justify-center lg:justify-start space-x-8">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-brown">2000+</div>
-                  <div className="text-sm text-charcoal opacity-70">Happy Customers</div>
+                  <div className="text-2xl font-bold text-brown">100%</div>
+                  <div className="text-sm text-charcoal opacity-70">Eggless Recipe</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-brown">24hrs</div>
-                  <div className="text-sm text-charcoal opacity-70">Fresh Guarantee</div>
+                  <div className="text-2xl font-bold text-brown">Same Day</div>
+                  <div className="text-sm text-charcoal opacity-70">Online Delivery</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-brown">₹0</div>
@@ -115,19 +122,19 @@ export default function Home() {
           <div className="flex flex-wrap items-center justify-center gap-8 text-sm">
             <div className="flex items-center">
               <Clock className="mr-2 h-4 w-4" />
-              Same Day & Midnight Delivery
+              Same Day Online Delivery
             </div>
             <div className="flex items-center">
               <Shield className="mr-2 h-4 w-4" />
-              100% Fresh Guarantee
+              100% Eggless & Fresh
             </div>
             <div className="flex items-center">
               <CheckCircle className="mr-2 h-4 w-4" />
-              Secure Payment
+              Vegetarian Friendly
             </div>
             <div className="flex items-center">
               <Truck className="mr-2 h-4 w-4" />
-              All Gurgaon Sectors Covered
+              Contactless Delivery
             </div>
           </div>
         </div>
@@ -138,8 +145,9 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
             <h2 className="text-2xl lg:text-3xl font-bold text-charcoal mb-4">
-              What will you wish for?
+              100% Eggless Cake Categories
             </h2>
+            <p className="text-charcoal opacity-70">All our cakes are completely egg-free and delicious</p>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
@@ -234,11 +242,11 @@ export default function Home() {
             <div className="flex items-center justify-center mb-4">
               <Star className="text-caramel mr-2 h-6 w-6 fill-current" />
               <h2 className="text-3xl lg:text-4xl font-bold text-charcoal">
-                Gurgaon Loves
+                Gurgaon's Favorite Eggless Cakes
               </h2>
             </div>
             <p className="text-lg text-charcoal opacity-70">
-              Bestsellers from across the city
+              Most loved 100% eggless bestsellers delivered online
             </p>
           </div>
 
@@ -271,10 +279,10 @@ export default function Home() {
           <div className="flex items-center justify-between mb-12">
             <div>
               <h2 className="text-3xl lg:text-4xl font-bold text-charcoal mb-4">
-                All Bestselling Cakes
+                All Eggless Bestsellers
               </h2>
               <p className="text-lg text-charcoal opacity-70">
-                Most loved by Gurgaon customers
+                100% egg-free cakes loved by health-conscious customers
               </p>
             </div>
             
@@ -330,10 +338,10 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-bold text-charcoal mb-4">
-              Special Occasions
+              100% Eggless Special Occasions
             </h2>
             <p className="text-lg text-charcoal opacity-70">
-              Perfect cakes for every celebration
+              Perfect egg-free cakes for every celebration - healthy & delicious
             </p>
           </div>
 
@@ -409,16 +417,16 @@ export default function Home() {
               <div className="bg-white/20 p-4 rounded-full mb-4">
                 <Clock className="h-8 w-8" />
               </div>
-              <h3 className="font-bold text-lg mb-2">Same Day Delivery</h3>
-              <p className="text-sm opacity-90">Order before 2 PM for same day delivery across Gurgaon</p>
+              <h3 className="font-bold text-lg mb-2">Same Day Online Delivery</h3>
+              <p className="text-sm opacity-90">Order online before 2 PM for contactless same day delivery</p>
             </div>
             
             <div className="flex flex-col items-center">
               <div className="bg-white/20 p-4 rounded-full mb-4">
                 <Shield className="h-8 w-8" />
               </div>
-              <h3 className="font-bold text-lg mb-2">100% Fresh</h3>
-              <p className="text-sm opacity-90">Made fresh daily with premium ingredients</p>
+              <h3 className="font-bold text-lg mb-2">100% Eggless & Fresh</h3>
+              <p className="text-sm opacity-90">All cakes are completely egg-free with premium ingredients</p>
             </div>
             
             <div className="flex flex-col items-center">
@@ -446,10 +454,10 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl lg:text-4xl font-bold text-charcoal mb-6">
-                Create Your Dream Cake
+                Create Your Dream Eggless Cake
               </h2>
               <p className="text-lg text-charcoal opacity-70 mb-8">
-                Our expert bakers bring your vision to life with completely customizable cakes. Choose your flavors, design, and personal message.
+                Our expert bakers create 100% eggless custom cakes that taste amazing. Choose your flavors, design, and personal message - all completely egg-free.
               </p>
 
               <div className="space-y-6 mb-8">
@@ -468,8 +476,8 @@ export default function Home() {
                     🎂
                   </div>
                   <div>
-                    <h4 className="font-semibold text-charcoal">Flavor Selection</h4>
-                    <p className="text-charcoal opacity-70">Choose from 20+ flavors and fillings</p>
+                    <h4 className="font-semibold text-charcoal">Eggless Flavor Selection</h4>
+                    <p className="text-charcoal opacity-70">Choose from 20+ eggless flavors and fillings</p>
                   </div>
                 </div>
                 
@@ -520,10 +528,10 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-bold text-charcoal mb-4">
-              Why Choose CakesBuy?
+              Why Choose EgglessCakes?
             </h2>
             <p className="text-lg text-charcoal opacity-70">
-              Leading cake delivery service in Gurgaon
+              Gurgaon's leading 100% eggless cake online delivery service
             </p>
           </div>
 
