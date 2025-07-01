@@ -12,7 +12,10 @@ import {
   loginSchema,
   registerSchema,
   addressSchema,
-  profileUpdateSchema
+  profileUpdateSchema,
+  sendOtpSchema,
+  verifyOtpSchema,
+  otpRegisterSchema
 } from "@shared/schema";
 import { 
   generateToken, 
@@ -498,6 +501,133 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Clear data error:", error);
       res.status(500).json({ message: "Failed to clear data" });
+    }
+  });
+
+  // OTP Authentication Routes
+  
+  // Send OTP for registration
+  app.post("/api/auth/send-otp", async (req, res) => {
+    try {
+      const { phone } = sendOtpSchema.parse(req.body);
+      
+      // Generate 6-digit OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // Set expiry time (5 minutes from now)
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 5);
+      
+      // Store OTP in database
+      await storage.createOtpVerification({
+        phone,
+        otp,
+        expiresAt,
+        isUsed: false
+      });
+      
+      // In a real app, you would send the OTP via SMS here
+      // For demo purposes, we'll return it in the response
+      console.log(`OTP for ${phone}: ${otp}`);
+      
+      res.json({ 
+        message: "OTP sent successfully",
+        // Remove this in production - only for demo
+        otp: otp 
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid phone number", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to send OTP" });
+    }
+  });
+
+  // Verify OTP and register user
+  app.post("/api/auth/register-with-otp", async (req, res) => {
+    try {
+      const { phone, otp, username, email, password } = otpRegisterSchema.parse(req.body);
+      
+      // Verify OTP
+      const verification = await storage.verifyOtp(phone, otp);
+      if (!verification) {
+        return res.status(400).json({ message: "Invalid or expired OTP" });
+      }
+      
+      // Check if user already exists
+      const existingUserByEmail = await storage.getUserByEmail(email);
+      if (existingUserByEmail) {
+        return res.status(400).json({ message: "Email already registered" });
+      }
+      
+      const existingUserByUsername = await storage.getUserByUsername(username);
+      if (existingUserByUsername) {
+        return res.status(400).json({ message: "Username already taken" });
+      }
+      
+      // Hash password and create user
+      const hashedPassword = await hashPassword(password);
+      const newUser = await storage.createUser({
+        username,
+        email,
+        password: hashedPassword,
+        phone,
+        addresses: []
+      });
+      
+      // Generate JWT token
+      const token = generateToken(newUser.id, newUser.username, newUser.email);
+      
+      res.status(201).json({
+        message: "Registration successful",
+        user: {
+          id: newUser.id,
+          username: newUser.username,
+          email: newUser.email,
+          phone: newUser.phone
+        },
+        token
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid registration data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to register user" });
+    }
+  });
+
+  // Traditional login route (email/password)
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = loginSchema.parse(req.body);
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+      
+      const isPasswordValid = await comparePasswords(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+      
+      const token = generateToken(user.id, user.username, user.email);
+      
+      res.json({
+        message: "Login successful",
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          phone: user.phone
+        },
+        token
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid login data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to login" });
     }
   });
 

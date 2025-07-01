@@ -1,10 +1,10 @@
 import {
-  users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews, eventReminders,
+  users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews, eventReminders, otpVerifications,
   type User, type InsertUser, type Category, type InsertCategory,
   type Cake, type InsertCake, type Addon, type InsertAddon,
   type Order, type InsertOrder, type DeliveryArea, type InsertDeliveryArea,
   type PromoCode, type InsertPromoCode, type Review, type InsertReview,
-  type EventReminder, type InsertEventReminder
+  type EventReminder, type InsertEventReminder, type OtpVerification, type InsertOtpVerification
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, and, desc } from "drizzle-orm";
@@ -84,6 +84,11 @@ export interface IStorage {
   getPendingReminders(): Promise<EventReminder[]>;
   updateEventReminder(id: number, updates: Partial<EventReminder>): Promise<void>;
   deleteEventReminder(id: number): Promise<void>;
+
+  // OTP verification management
+  createOtpVerification(otp: InsertOtpVerification): Promise<OtpVerification>;
+  verifyOtp(phone: string, otp: string): Promise<OtpVerification | null>;
+  cleanupExpiredOtp(): Promise<void>;
 }
 
 // DatabaseStorage implementation
@@ -406,6 +411,36 @@ export class DatabaseStorage implements IStorage {
 
   async deleteEventReminder(id: number): Promise<void> {
     await db.delete(eventReminders).where(eq(eventReminders.id, id));
+  }
+
+  // OTP verification methods
+  async createOtpVerification(otp: InsertOtpVerification): Promise<OtpVerification> {
+    const [newOtp] = await db.insert(otpVerifications).values(otp).returning();
+    return newOtp;
+  }
+
+  async verifyOtp(phone: string, otp: string): Promise<OtpVerification | null> {
+    const [verification] = await db.select().from(otpVerifications)
+      .where(and(
+        eq(otpVerifications.phone, phone),
+        eq(otpVerifications.otp, otp),
+        eq(otpVerifications.isUsed, false)
+      ));
+    
+    if (verification && verification.expiresAt > new Date()) {
+      // Mark as used
+      await db.update(otpVerifications)
+        .set({ isUsed: true })
+        .where(eq(otpVerifications.id, verification.id));
+      return verification;
+    }
+    
+    return null;
+  }
+
+  async cleanupExpiredOtp(): Promise<void> {
+    const now = new Date();
+    await db.delete(otpVerifications).where(eq(otpVerifications.expiresAt, now));
   }
 }
 

@@ -152,6 +152,15 @@ export const eventReminders = pgTable("event_reminders", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const otpVerifications = pgTable("otp_verifications", {
+  id: serial("id").primaryKey(),
+  phone: text("phone").notNull(),
+  otp: text("otp").notNull(),
+  isUsed: boolean("is_used").default(false),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertCategorySchema = createInsertSchema(categories).omit({ id: true });
@@ -164,6 +173,7 @@ export const insertDeliveryAreaSchema = createInsertSchema(deliveryAreas).omit({
 export const insertPromoCodeSchema = createInsertSchema(promoCodes).omit({ id: true, usedCount: true });
 export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, createdAt: true });
 export const insertEventReminderSchema = createInsertSchema(eventReminders).omit({ id: true, createdAt: true });
+export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).omit({ id: true, createdAt: true });
 
 // Auth schemas
 export const loginSchema = z.object({
@@ -172,6 +182,28 @@ export const loginSchema = z.object({
 });
 
 export const registerSchema = insertUserSchema.extend({
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"]
+});
+
+// OTP schemas
+export const sendOtpSchema = z.object({
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
+});
+
+export const verifyOtpSchema = z.object({
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
+  otp: z.string().length(6, 'OTP must be 6 digits'),
+});
+
+export const otpRegisterSchema = z.object({
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
+  otp: z.string().length(6, 'OTP must be 6 digits'),
+  username: z.string().min(2, 'Username must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
@@ -219,3 +251,5 @@ export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type EventReminder = typeof eventReminders.$inferSelect;
 export type InsertEventReminder = z.infer<typeof insertEventReminderSchema>;
+export type OtpVerification = typeof otpVerifications.$inferSelect;
+export type InsertOtpVerification = z.infer<typeof insertOtpVerificationSchema>;

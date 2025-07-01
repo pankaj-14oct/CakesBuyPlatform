@@ -13,6 +13,7 @@ import Product from "@/pages/product";
 import Cart from "@/pages/cart";
 import Checkout from "@/pages/checkout";
 import AuthPage from "@/pages/auth";
+import OtpAuthPage from "@/pages/otp-auth";
 import ProfilePage from "@/pages/profile";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminCategories from "@/pages/admin/categories";
@@ -126,6 +127,7 @@ function Router() {
       <Route path="/cart" component={Cart} />
       <Route path="/checkout" component={Checkout} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/otp-register" component={OtpAuthPage} />
       <Route path="/profile" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>
