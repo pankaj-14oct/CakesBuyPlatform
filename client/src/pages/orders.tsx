@@ -256,14 +256,9 @@ export default function OrdersPage() {
                       <div className="flex items-center space-x-4">
                         <div className="text-right">
                           <p className="font-semibold text-charcoal">{formatPrice(parseFloat(order.total))}</p>
-                          <div className="flex space-x-2">
-                            <Badge className={statusColors[order.status as keyof typeof statusColors]}>
-                              {formatStatus(order.status)}
-                            </Badge>
-                            <Badge className={paymentStatusColors[order.paymentStatus as keyof typeof paymentStatusColors]}>
-                              {formatStatus(order.paymentStatus)}
-                            </Badge>
-                          </div>
+                          <Badge className={statusColors[order.status as keyof typeof statusColors]}>
+                            {formatStatus(order.status)}
+                          </Badge>
                         </div>
                         <Button variant="ghost" size="sm">
                           <Eye className="h-4 w-4" />
