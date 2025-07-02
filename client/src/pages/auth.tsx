@@ -278,8 +278,10 @@ export default function AuthPage() {
       </div>
 
       {/* Right side - Hero */}
-      <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-caramel to-brown items-center justify-center p-8">
-        <div className="text-center text-white max-w-md">
+      <div className="hidden md:flex md:w-1/2 items-center justify-center p-8" style={{
+        background: 'linear-gradient(to bottom right, hsl(30, 51%, 64%), hsl(21, 75%, 31%))'
+      }}>
+        <div className="text-center max-w-md" style={{ color: 'white' }}>
           <div className="mb-8">
             <Cake className="h-20 w-20 md:h-24 md:w-24 mx-auto mb-6 drop-shadow-lg" />
             <h2 className="text-3xl md:text-4xl font-bold mb-4 drop-shadow-md">Delicious Cakes Delivered</h2>

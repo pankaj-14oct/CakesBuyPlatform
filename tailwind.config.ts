@@ -51,6 +51,13 @@ export default {
           "4": "var(--chart-4)",
           "5": "var(--chart-5)",
         },
+        // Custom colors for CakesBuy
+        caramel: "var(--caramel)",
+        brown: "var(--brown)",
+        pink: "var(--pink)",
+        cream: "var(--cream)",
+        charcoal: "var(--charcoal)",
+        mint: "var(--mint)",
         sidebar: {
           DEFAULT: "var(--sidebar-background)",
           foreground: "var(--sidebar-foreground)",
