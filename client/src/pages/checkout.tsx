@@ -225,7 +225,7 @@ export default function CheckoutPage() {
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
       console.log('Sending order data:', orderData);
-      const response = await apiRequest('POST', '/api/orders', orderData);
+      const response = await apiRequest('/api/orders', 'POST', orderData);
       if (!response.ok) {
         const errorData = await response.text();
         console.error('Order API error:', errorData);

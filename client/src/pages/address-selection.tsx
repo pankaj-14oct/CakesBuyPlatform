@@ -79,7 +79,7 @@ export default function AddressSelection({
         id: `addr_${Date.now()}`,
       };
 
-      const res = await apiRequest('POST', '/api/auth/addresses', addressData);
+      const res = await apiRequest('/api/auth/addresses', 'POST', addressData);
       return res.json();
     },
     onSuccess: (data) => {

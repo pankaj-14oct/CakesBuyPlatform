@@ -150,10 +150,10 @@ export default function ProfilePage() {
       };
 
       if (editingAddress) {
-        const res = await apiRequest('PUT', `/api/auth/addresses/${editingAddress.id}`, addressData);
+        const res = await apiRequest(`/api/auth/addresses/${editingAddress.id}`, 'PUT', addressData);
         return res.json();
       } else {
-        const res = await apiRequest('POST', '/api/auth/addresses', addressData);
+        const res = await apiRequest('/api/auth/addresses', 'POST', addressData);
         return res.json();
       }
     },

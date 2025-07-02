@@ -50,7 +50,7 @@ export default function AdminCategories() {
 
   const createMutation = useMutation({
     mutationFn: async (data: CategoryForm) => {
-      const response = await apiRequest('POST', '/api/admin/categories', data);
+      const response = await apiRequest('/api/admin/categories', 'POST', data);
       return response.json();
     },
     onSuccess: () => {
@@ -66,7 +66,7 @@ export default function AdminCategories() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<Category> }) => {
-      const response = await apiRequest('PUT', `/api/admin/categories/${id}`, data);
+      const response = await apiRequest(`/api/admin/categories/${id}`, 'PUT', data);
       return response.json();
     },
     onSuccess: () => {

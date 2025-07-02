@@ -67,7 +67,7 @@ export default function AdminCoupons() {
         validFrom: data.validFrom.toISOString(),
         validUntil: data.validUntil?.toISOString(),
       };
-      const response = await apiRequest('POST', '/api/admin/promo-codes', formattedData);
+      const response = await apiRequest('/api/admin/promo-codes', 'POST', formattedData);
       return response.json();
     },
     onSuccess: () => {
@@ -83,7 +83,7 @@ export default function AdminCoupons() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<PromoCode> }) => {
-      const response = await apiRequest('PUT', `/api/admin/promo-codes/${id}`, data);
+      const response = await apiRequest(`/api/admin/promo-codes/${id}`, 'PUT', data);
       return response.json();
     },
     onSuccess: () => {

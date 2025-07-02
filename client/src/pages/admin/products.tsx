@@ -93,7 +93,7 @@ export default function AdminProducts() {
 
   const createMutation = useMutation({
     mutationFn: async (data: ProductForm) => {
-      const response = await apiRequest('POST', '/api/admin/cakes', data);
+      const response = await apiRequest('/api/admin/cakes', 'POST', data);
       return response.json();
     },
     onSuccess: () => {
@@ -109,7 +109,7 @@ export default function AdminProducts() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<Cake> }) => {
-      const response = await apiRequest('PUT', `/api/admin/cakes/${id}`, data);
+      const response = await apiRequest(`/api/admin/cakes/${id}`, 'PUT', data);
       return response.json();
     },
     onSuccess: () => {

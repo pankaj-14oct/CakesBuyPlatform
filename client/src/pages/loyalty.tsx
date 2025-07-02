@@ -104,7 +104,7 @@ export default function LoyaltyPage() {
   // Redeem reward mutation
   const redeemRewardMutation = useMutation({
     mutationFn: async (rewardId: number) => {
-      const response = await apiRequest('POST', '/api/loyalty/redeem', { rewardId });
+      const response = await apiRequest('/api/loyalty/redeem', 'POST', { rewardId });
       return response.json();
     },
     onSuccess: (data) => {

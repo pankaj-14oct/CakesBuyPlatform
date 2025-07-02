@@ -65,7 +65,7 @@ export default function OtpAuthPage() {
   // Send OTP mutation
   const sendOtpMutation = useMutation({
     mutationFn: async (data: PhoneForm) => {
-      const response = await apiRequest('POST', '/api/auth/send-otp', data);
+      const response = await apiRequest('/api/auth/send-otp', 'POST', data);
       return response.json();
     },
     onSuccess: (data) => {
@@ -89,7 +89,7 @@ export default function OtpAuthPage() {
   // Register with OTP mutation
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterForm & { phone: string; otp: string }) => {
-      const response = await apiRequest('POST', '/api/auth/register-with-otp', data);
+      const response = await apiRequest('/api/auth/register-with-otp', 'POST', data);
       return response.json();
     },
     onSuccess: (data) => {
