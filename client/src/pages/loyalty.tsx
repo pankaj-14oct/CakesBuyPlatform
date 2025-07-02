@@ -151,11 +151,22 @@ export default function LoyaltyPage() {
     );
   }
 
-  const stats = loyaltyStats!;
-  const currentTier = stats.tier as keyof typeof tierColors;
+  if (!loyaltyStats) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="text-center">
+          <Coins className="h-12 w-12 text-caramel mx-auto mb-4 animate-pulse" />
+          <p className="text-charcoal opacity-70">Loading loyalty data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const stats = loyaltyStats;
+  const currentTier = (stats.tier || 'Bronze') as keyof typeof tierColors;
   const TierIcon = tierIcons[currentTier];
   const currentRequirement = tierRequirements[currentTier];
-  const totalSpent = parseFloat(stats.totalSpent);
+  const totalSpent = parseFloat(stats.totalSpent || "0");
   
   // Calculate progress to next tier
   let nextTier = null;
