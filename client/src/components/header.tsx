@@ -107,7 +107,7 @@ export default function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2 hidden sm:flex">
                     <User className="h-4 w-4" />
-                    <span>{user?.username}</span>
+                    <span>Hi {user?.email?.split('@')[0] || 'User'}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
@@ -182,11 +182,38 @@ export default function Header() {
                     ))}
                   </nav>
 
-                  {/* Mobile Sign In */}
-                  <Button className="bg-caramel text-white hover:bg-brown">
-                    <User className="h-4 w-4 mr-2" />
-                    Sign In
-                  </Button>
+                  {/* Mobile User Menu */}
+                  {isAuthenticated ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                        <User className="h-4 w-4 text-caramel" />
+                        <span className="text-sm font-medium">Hi {user?.email?.split('@')[0] || 'User'}</span>
+                      </div>
+                      <Button 
+                        onClick={() => setLocation('/profile')}
+                        variant="outline" 
+                        className="w-full justify-start"
+                      >
+                        <User className="h-4 w-4 mr-2" />
+                        Profile
+                      </Button>
+                      <Button 
+                        onClick={() => logoutMutation.mutate()}
+                        variant="outline" 
+                        className="w-full justify-start text-red-600 hover:text-red-700"
+                      >
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Logout
+                      </Button>
+                    </div>
+                  ) : (
+                    <Link href="/auth">
+                      <Button className="bg-caramel text-white hover:bg-brown w-full">
+                        <User className="h-4 w-4 mr-2" />
+                        Sign In
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>
