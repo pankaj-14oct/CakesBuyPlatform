@@ -150,4 +150,18 @@
   .hover\:text-caramel:hover {
     color: hsl(30, 51%, 64%);
   }
+
+  /* Embla Carousel Styles */
+  .embla {
+    overflow: hidden;
+  }
+
+  .embla__container {
+    display: flex;
+  }
+
+  .embla__slide {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
 }

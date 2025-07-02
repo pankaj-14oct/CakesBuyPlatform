@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Link } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -8,12 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { 
   Plus, Minus, Trash2, ShoppingBag, ArrowLeft, 
-  Truck, Tag, Gift, Heart, Star
+  Truck, Tag, Gift, Heart, Star, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useCart } from '@/components/cart-context';
 import { formatPrice } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import useEmblaCarousel from 'embla-carousel-react';
 
 export default function CartPage() {
   const { state: cartState, dispatch } = useCart();
@@ -21,6 +22,24 @@ export default function CartPage() {
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
   const { toast } = useToast();
+
+  // Carousel functionality
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    loop: false,
+    align: 'start',
+    slidesToScroll: 1,
+    breakpoints: {
+      '(min-width: 768px)': { slidesToScroll: 2 }
+    }
+  });
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
 
   // Fetch addons for recommendations
   const { data: addons } = useQuery({
@@ -263,45 +282,69 @@ export default function CartPage() {
               </Card>
             ))}
 
-            {/* Addons Section */}
+            {/* Addons Section with Carousel */}
             {addons && addons.length > 0 && (
               <Card className="mt-6">
                 <CardHeader>
-                  <CardTitle className="text-lg text-charcoal">
-                    Treat Yourself <span className="text-caramel">More</span> With
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg text-charcoal">
+                      Treat Yourself <span className="text-caramel">More</span> With
+                    </CardTitle>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={scrollPrev}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={scrollNext}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {addons.slice(0, 4).map((addon: any) => (
-                      <div key={addon.id} className="bg-white rounded-lg border p-3 text-center">
-                        <div className="mb-3">
-                          <img 
-                            src={addon.image || '/api/placeholder/100/100'} 
-                            alt={addon.name}
-                            className="w-16 h-16 mx-auto rounded-lg object-cover"
-                          />
-                        </div>
-                        <h4 className="font-medium text-charcoal text-sm mb-1">{addon.name}</h4>
-                        <div className="text-caramel font-bold text-sm mb-2">
-                          {formatPrice(parseFloat(addon.price))}
-                        </div>
-                        <div className="flex items-center justify-center mb-2">
-                          <div className="flex items-center text-yellow-500 text-xs">
-                            <Star className="h-3 w-3 fill-current" />
-                            <span className="ml-1">4.5</span>
-                            <span className="text-gray-500 ml-1">(120 Reviews)</span>
+                  <div className="embla" ref={emblaRef}>
+                    <div className="embla__container flex">
+                      {addons.map((addon: any) => (
+                        <div key={addon.id} className="embla__slide flex-none w-48 mr-4">
+                          <div className="bg-white rounded-lg border p-3 text-center h-full">
+                            <div className="mb-3">
+                              <img 
+                                src={addon.image || '/api/placeholder/100/100'} 
+                                alt={addon.name}
+                                className="w-16 h-16 mx-auto rounded-lg object-cover"
+                              />
+                            </div>
+                            <h4 className="font-medium text-charcoal text-sm mb-1">{addon.name}</h4>
+                            <div className="text-caramel font-bold text-sm mb-2">
+                              {formatPrice(parseFloat(addon.price))}
+                            </div>
+                            <div className="flex items-center justify-center mb-2">
+                              <div className="flex items-center text-yellow-500 text-xs">
+                                <Star className="h-3 w-3 fill-current" />
+                                <span className="ml-1">4.5</span>
+                                <span className="text-gray-500 ml-1">(120)</span>
+                              </div>
+                            </div>
+                            <Button 
+                              size="sm" 
+                              className="w-full bg-white border border-caramel text-caramel hover:bg-caramel hover:text-white text-xs"
+                              onClick={() => handleAddAddon(addon)}
+                            >
+                              Add to Cart
+                            </Button>
                           </div>
                         </div>
-                        <Button 
-                          size="sm" 
-                          className="w-full bg-white border border-caramel text-caramel hover:bg-caramel hover:text-white text-xs"
-                          onClick={() => handleAddAddon(addon)}
-                        >
-                          Add to Cart
-                        </Button>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
