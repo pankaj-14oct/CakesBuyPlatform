@@ -137,7 +137,13 @@ export default function CheckoutPage() {
 
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
+      console.log('Sending order data:', orderData);
       const response = await apiRequest('POST', '/api/orders', orderData);
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Order API error:', errorData);
+        throw new Error(`Order failed: ${response.status} ${errorData}`);
+      }
       return response.json();
     },
     onSuccess: (data) => {
@@ -150,9 +156,10 @@ export default function CheckoutPage() {
       });
     },
     onError: (error) => {
+      console.error('Order mutation error:', error);
       toast({
         title: "Order failed",
-        description: "Failed to place order. Please try again.",
+        description: error.message || "Failed to place order. Please try again.",
         variant: "destructive"
       });
     }
@@ -225,7 +232,7 @@ export default function CheckoutPage() {
       deliveryFee: deliveryFee.toString(),
       total: total.toString(),
       deliveryAddress,
-      deliveryDate: calculateDeliveryDate(data.deliveryTime).toISOString(),
+      deliveryDate: data.deliveryDate,
       deliveryTime: data.deliveryTime,
       paymentMethod: data.paymentMethod,
       specialInstructions: data.specialInstructions,
@@ -577,7 +584,7 @@ export default function CheckoutPage() {
                   {cartState.items.map((item) => (
                     <div key={item.id} className="flex gap-3">
                       <img 
-                        src={item.cake.images[0] || '/placeholder-cake.jpg'} 
+                        src={(item.cake.images && item.cake.images[0]) || '/placeholder-cake.jpg'} 
                         alt={item.cake.name}
                         className="w-12 h-12 object-cover rounded"
                       />

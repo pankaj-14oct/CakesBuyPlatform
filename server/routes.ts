@@ -176,6 +176,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Orders (with optional authentication)
   app.post("/api/orders", optionalAuth, async (req: AuthRequest, res) => {
     try {
+      console.log('Order request body:', JSON.stringify(req.body, null, 2));
+      console.log('User from token:', req.user);
       const orderData = insertOrderSchema.parse(req.body);
       
       // If user is authenticated, associate order with user
