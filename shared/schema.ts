@@ -260,7 +260,7 @@ export const otpRegisterSchema = z.object({
 
 // Address schemas
 export const addressSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   name: z.string().min(2, 'Address name is required'),
   type: z.enum(['home', 'work', 'other']),
   address: z.string().min(10, 'Address must be at least 10 characters'),
