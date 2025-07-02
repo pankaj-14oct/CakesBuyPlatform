@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ShoppingCart, Menu, MapPin, Search, User, LogOut } from 'lucide-react';
+import { ShoppingCart, Menu, MapPin, Search, User, LogOut, Package, Heart, Calendar, Wallet, MapPinIcon, MessageCircle, Settings } from 'lucide-react';
 import { useCart } from './cart-context';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -120,26 +120,104 @@ export default function Header() {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2 hidden sm:flex">
-                    <User className="h-4 w-4" />
-                    <span>Hi {user?.email?.split('@')[0] || 'User'}</span>
+                  <Button variant="outline" size="sm" className="gap-2 hidden sm:flex hover:bg-gray-50">
+                    <div className="w-8 h-8 bg-pink rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                      {user?.phone?.slice(-1) || 'P'}
+                    </div>
+                    <div className="text-left">
+                      <div className="text-sm font-semibold text-gray-900">
+                        Hey {user?.phone?.slice(-4) || 'User'}!
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {user?.phone || user?.email}
+                      </div>
+                    </div>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem 
-                    onClick={() => setLocation('/profile')}
-                    className="cursor-pointer"
-                  >
-                    <User className="h-4 w-4 mr-2" />
-                    Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => logoutMutation.mutate()}
-                    className="cursor-pointer text-red-600"
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Logout
-                  </DropdownMenuItem>
+                <DropdownMenuContent align="end" className="w-56 p-0">
+                  <div className="p-3 border-b bg-gray-50">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-pink rounded-full flex items-center justify-center text-white font-semibold">
+                        {user?.phone?.slice(-1) || 'P'}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-900">
+                          Hey {user?.phone?.slice(-4) || 'User'}!
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {user?.phone || user?.email}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-1">
+                    <DropdownMenuItem 
+                      onClick={() => setLocation('/orders')}
+                      className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                    >
+                      <Package className="h-5 w-5 text-gray-600" />
+                      <span className="font-medium">My Orders</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem 
+                      onClick={() => setLocation('/wishlist')}
+                      className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                    >
+                      <Heart className="h-5 w-5 text-gray-600" />
+                      <span className="font-medium">My Favourites</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem 
+                      onClick={() => setLocation('/occasions')}
+                      className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                    >
+                      <Calendar className="h-5 w-5 text-gray-600" />
+                      <span className="font-medium">My Occasions</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem 
+                      onClick={() => setLocation('/profile')}
+                      className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                    >
+                      <MapPinIcon className="h-5 w-5 text-gray-600" />
+                      <span className="font-medium">Manage Address</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem 
+                      onClick={() => setLocation('/loyalty')}
+                      className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                    >
+                      <Wallet className="h-5 w-5 text-gray-600" />
+                      <span className="font-medium">My Wallet</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem 
+                      onClick={() => setLocation('/profile')}
+                      className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                    >
+                      <Settings className="h-5 w-5 text-gray-600" />
+                      <span className="font-medium">My Reviews</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem 
+                      onClick={() => window.open('https://wa.me/1234567890', '_blank')}
+                      className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                    >
+                      <MessageCircle className="h-5 w-5 text-green-600" />
+                      <span className="font-medium">WhatsApp</span>
+                    </DropdownMenuItem>
+                  </div>
+                  
+                  <div className="border-t p-1">
+                    <DropdownMenuItem 
+                      onClick={() => logoutMutation.mutate()}
+                      className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 text-red-600"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      <span className="font-medium">Logout</span>
+                    </DropdownMenuItem>
+                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
@@ -199,27 +277,85 @@ export default function Header() {
 
                   {/* Mobile User Menu */}
                   {isAuthenticated ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                        <User className="h-4 w-4 text-caramel" />
-                        <span className="text-sm font-medium">Hi {user?.email?.split('@')[0] || 'User'}</span>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="w-10 h-10 bg-pink rounded-full flex items-center justify-center text-white font-semibold">
+                          {user?.phone?.slice(-1) || 'P'}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-gray-900">
+                            Hey {user?.phone?.slice(-4) || 'User'}!
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {user?.phone || user?.email}
+                          </div>
+                        </div>
                       </div>
-                      <Button 
-                        onClick={() => setLocation('/profile')}
-                        variant="outline" 
-                        className="w-full justify-start"
-                      >
-                        <User className="h-4 w-4 mr-2" />
-                        Profile
-                      </Button>
-                      <Button 
-                        onClick={() => logoutMutation.mutate()}
-                        variant="outline" 
-                        className="w-full justify-start text-red-600 hover:text-red-700"
-                      >
-                        <LogOut className="h-4 w-4 mr-2" />
-                        Logout
-                      </Button>
+                      
+                      <div className="space-y-2">
+                        <Button 
+                          onClick={() => setLocation('/orders')}
+                          variant="outline" 
+                          className="w-full justify-start gap-3"
+                        >
+                          <Package className="h-4 w-4" />
+                          My Orders
+                        </Button>
+                        
+                        <Button 
+                          onClick={() => setLocation('/wishlist')}
+                          variant="outline" 
+                          className="w-full justify-start gap-3"
+                        >
+                          <Heart className="h-4 w-4" />
+                          My Favourites
+                        </Button>
+                        
+                        <Button 
+                          onClick={() => setLocation('/occasions')}
+                          variant="outline" 
+                          className="w-full justify-start gap-3"
+                        >
+                          <Calendar className="h-4 w-4" />
+                          My Occasions
+                        </Button>
+                        
+                        <Button 
+                          onClick={() => setLocation('/profile')}
+                          variant="outline" 
+                          className="w-full justify-start gap-3"
+                        >
+                          <MapPinIcon className="h-4 w-4" />
+                          Manage Address
+                        </Button>
+                        
+                        <Button 
+                          onClick={() => setLocation('/loyalty')}
+                          variant="outline" 
+                          className="w-full justify-start gap-3"
+                        >
+                          <Wallet className="h-4 w-4" />
+                          My Wallet
+                        </Button>
+                        
+                        <Button 
+                          onClick={() => window.open('https://wa.me/1234567890', '_blank')}
+                          variant="outline" 
+                          className="w-full justify-start gap-3"
+                        >
+                          <MessageCircle className="h-4 w-4 text-green-600" />
+                          WhatsApp
+                        </Button>
+                        
+                        <Button 
+                          onClick={() => logoutMutation.mutate()}
+                          variant="outline" 
+                          className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Logout
+                        </Button>
+                      </div>
                     </div>
                   ) : (
                     <Link href="/auth">
