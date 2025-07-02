@@ -11,9 +11,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
   Heart, Star, Truck, Clock, Shield, Plus, Minus, 
-  MapPin, Calendar, MessageCircle, Camera, ArrowLeft 
+  MapPin, Calendar, MessageCircle, Camera, ArrowLeft, X 
 } from 'lucide-react';
 import { Cake, Addon, Review } from '@shared/schema';
 import { formatPrice } from '@/lib/utils';
@@ -28,6 +29,8 @@ export default function ProductPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedAddons, setSelectedAddons] = useState<Record<number, number>>({});
   const [isLiked, setIsLiked] = useState(false);
+  const [showAddonModal, setShowAddonModal] = useState(false);
+  const [pendingCartItem, setPendingCartItem] = useState<any>(null);
   const { dispatch } = useCart();
   const { toast } = useToast();
 
@@ -98,9 +101,9 @@ export default function ProductPage() {
   const totalPrice = (basePrice + addonsTotal) * quantity;
 
   const handleAddToCart = () => {
-    const weight = selectedWeight || cake.weights[0]?.weight;
-    const flavor = selectedFlavor || cake.flavors[0];
-    const price = selectedWeightData?.price || cake.weights[0]?.price || 0;
+    const weight = selectedWeight || cake.weights?.[0]?.weight || '';
+    const flavor = selectedFlavor || cake.flavors?.[0] || '';
+    const price = selectedWeightData?.price || cake.weights?.[0]?.price || 0;
 
     const cartItem = {
       id: Date.now(),
@@ -118,11 +121,46 @@ export default function ProductPage() {
         }))
     };
 
-    dispatch({ type: 'ADD_ITEM', payload: cartItem });
-    toast({
-      title: "Added to cart!",
-      description: `${cake.name} has been added to your cart.`,
-    });
+    // Store the cart item and show addon modal
+    setPendingCartItem(cartItem);
+    setShowAddonModal(true);
+  };
+
+  const handleConfirmAddToCart = () => {
+    if (pendingCartItem) {
+      // Update cart item with selected addons
+      const updatedCartItem = {
+        ...pendingCartItem,
+        addons: Object.entries(selectedAddons)
+          .filter(([_, qty]) => qty > 0)
+          .map(([addonId, qty]) => ({
+            addon: addons.find(a => a.id === parseInt(addonId))!,
+            quantity: qty
+          }))
+      };
+
+      dispatch({ type: 'ADD_ITEM', payload: updatedCartItem });
+      toast({
+        title: "Added to cart!",
+        description: `${cake.name} has been added to your cart.`,
+      });
+      
+      setShowAddonModal(false);
+      setPendingCartItem(null);
+    }
+  };
+
+  const handleSkipAddons = () => {
+    if (pendingCartItem) {
+      dispatch({ type: 'ADD_ITEM', payload: pendingCartItem });
+      toast({
+        title: "Added to cart!",
+        description: `${cake.name} has been added to your cart.`,
+      });
+      
+      setShowAddonModal(false);
+      setPendingCartItem(null);
+    }
   };
 
   const handleAddonChange = (addonId: number, quantity: number) => {
@@ -552,6 +590,221 @@ export default function ProductPage() {
           </Tabs>
         </div>
       </div>
+      
+      {/* Full-Screen Addon Selection Modal */}
+      <Dialog open={showAddonModal} onOpenChange={setShowAddonModal}>
+        <DialogContent className="max-w-none w-screen h-screen max-h-none p-0 m-0 rounded-none">
+          <div className="h-full flex flex-col bg-cream">
+            {/* Header */}
+            <div className="bg-white border-b p-6 flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <img 
+                  src={cake.images?.[0] || '/placeholder-cake.jpg'} 
+                  alt={cake.name}
+                  className="w-16 h-16 rounded-lg object-cover"
+                />
+                <div>
+                  <DialogTitle className="text-xl font-bold text-charcoal">
+                    Add Extras to Your Order
+                  </DialogTitle>
+                  <p className="text-charcoal opacity-70">
+                    {cake.name} • ₹{formatPrice(pendingCartItem?.price || 0)}
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowAddonModal(false)}
+                className="text-charcoal"
+              >
+                <X className="h-6 w-6" />
+              </Button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-auto p-6">
+              <div className="max-w-4xl mx-auto">
+                <h3 className="text-2xl font-bold text-charcoal mb-6">Make it Extra Special</h3>
+                
+                {/* Addon Categories */}
+                <div className="grid gap-8">
+                  {/* Candles */}
+                  <div>
+                    <h4 className="text-lg font-semibold text-charcoal mb-4 flex items-center">
+                      🕯️ Candles & Sparklers
+                    </h4>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {addons.filter(addon => addon.category === 'candles').map((addon) => (
+                        <Card key={addon.id} className="hover:shadow-lg transition-shadow">
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <div>
+                                <h5 className="font-medium text-charcoal">{addon.name}</h5>
+                                <p className="text-sm text-charcoal opacity-70">{addon.description}</p>
+                              </div>
+                              <span className="font-semibold text-caramel">₹{addon.price}</span>
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleAddonChange(addon.id, (selectedAddons[addon.id] || 0) - 1)}
+                                  disabled={!selectedAddons[addon.id]}
+                                >
+                                  <Minus className="h-4 w-4" />
+                                </Button>
+                                <span className="font-medium w-8 text-center">
+                                  {selectedAddons[addon.id] || 0}
+                                </span>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleAddonChange(addon.id, (selectedAddons[addon.id] || 0) + 1)}
+                                >
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Greeting Cards */}
+                  <div>
+                    <h4 className="text-lg font-semibold text-charcoal mb-4 flex items-center">
+                      💌 Greeting Cards
+                    </h4>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {addons.filter(addon => addon.category === 'cards').map((addon) => (
+                        <Card key={addon.id} className="hover:shadow-lg transition-shadow">
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <div>
+                                <h5 className="font-medium text-charcoal">{addon.name}</h5>
+                                <p className="text-sm text-charcoal opacity-70">{addon.description}</p>
+                              </div>
+                              <span className="font-semibold text-caramel">₹{addon.price}</span>
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleAddonChange(addon.id, (selectedAddons[addon.id] || 0) - 1)}
+                                  disabled={!selectedAddons[addon.id]}
+                                >
+                                  <Minus className="h-4 w-4" />
+                                </Button>
+                                <span className="font-medium w-8 text-center">
+                                  {selectedAddons[addon.id] || 0}
+                                </span>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleAddonChange(addon.id, (selectedAddons[addon.id] || 0) + 1)}
+                                >
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Flowers */}
+                  <div>
+                    <h4 className="text-lg font-semibold text-charcoal mb-4 flex items-center">
+                      🌸 Fresh Flowers
+                    </h4>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {addons.filter(addon => addon.category === 'flowers').map((addon) => (
+                        <Card key={addon.id} className="hover:shadow-lg transition-shadow">
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <div>
+                                <h5 className="font-medium text-charcoal">{addon.name}</h5>
+                                <p className="text-sm text-charcoal opacity-70">{addon.description}</p>
+                              </div>
+                              <span className="font-semibold text-caramel">₹{addon.price}</span>
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleAddonChange(addon.id, (selectedAddons[addon.id] || 0) - 1)}
+                                  disabled={!selectedAddons[addon.id]}
+                                >
+                                  <Minus className="h-4 w-4" />
+                                </Button>
+                                <span className="font-medium w-8 text-center">
+                                  {selectedAddons[addon.id] || 0}
+                                </span>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleAddonChange(addon.id, (selectedAddons[addon.id] || 0) + 1)}
+                                >
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="bg-white border-t p-6">
+              <div className="max-w-4xl mx-auto flex items-center justify-between">
+                <div>
+                  <p className="text-charcoal font-medium">
+                    Total: ₹{formatPrice((pendingCartItem?.price || 0) + addonsTotal)}
+                  </p>
+                  <p className="text-sm text-charcoal opacity-70">
+                    {Object.values(selectedAddons).reduce((sum, qty) => sum + qty, 0)} extras selected
+                  </p>
+                </div>
+                
+                <div className="flex space-x-4">
+                  <Button
+                    variant="outline"
+                    onClick={handleSkipAddons}
+                    className="border-caramel text-caramel"
+                  >
+                    Skip Extras
+                  </Button>
+                  <Button
+                    onClick={handleConfirmAddToCart}
+                    className="bg-caramel hover:bg-brown text-white"
+                  >
+                    Add to Cart
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
