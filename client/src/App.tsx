@@ -49,9 +49,9 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="flex">
+      <div className="flex h-screen">
         {/* Admin Sidebar */}
-        <div className="w-64 bg-white shadow-sm border-r">
+        <div className="w-64 bg-white shadow-sm border-r flex flex-col">
           <div className="p-6">
             <Link href="/" className="flex items-center space-x-2 text-caramel hover:text-brown">
               <Package className="h-6 w-6" />
@@ -59,7 +59,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
             </Link>
           </div>
           
-          <nav className="px-4 space-y-2">
+          <nav className="px-4 space-y-2 flex-1">
             {adminNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = location === item.path;
@@ -82,7 +82,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
             })}
           </nav>
           
-          <div className="absolute bottom-4 left-4 right-4">
+          <div className="p-4 border-t">
             <Link href="/">
               <Button variant="outline" className="w-full">
                 Back to Store
@@ -92,8 +92,8 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Admin Content */}
-        <div className="flex-1">
-          <div className="p-8">
+        <div className="flex-1 overflow-auto">
+          <div className="p-8 min-h-full">
             {children}
           </div>
         </div>
