@@ -10,7 +10,7 @@ import {
   type UserReward, type InsertUserReward
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, like, and, desc } from "drizzle-orm";
+import { eq, like, and, desc, isNotNull, or } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -84,10 +84,13 @@ export interface IStorage {
 
   // Event reminders management
   createEventReminder(reminder: InsertEventReminder): Promise<EventReminder>;
+  getEventReminder(id: number): Promise<EventReminder | undefined>;
   getUserEventReminders(userId: number): Promise<EventReminder[]>;
   getPendingReminders(): Promise<EventReminder[]>;
   updateEventReminder(id: number, updates: Partial<EventReminder>): Promise<void>;
   deleteEventReminder(id: number): Promise<void>;
+  getUsersWithUpcomingEvents(): Promise<User[]>;
+  getUsersWithEventDates(): Promise<User[]>;
 
   // OTP verification management
   createOtpVerification(otp: InsertOtpVerification): Promise<OtpVerification>;
@@ -648,6 +651,31 @@ export class DatabaseStorage implements IStorage {
         usedAt: new Date()
       })
       .where(eq(userRewards.code, code));
+  }
+
+  async getEventReminder(id: number): Promise<EventReminder | undefined> {
+    const [reminder] = await db.select().from(eventReminders).where(eq(eventReminders.id, id));
+    return reminder || undefined;
+  }
+
+  async getUsersWithUpcomingEvents(): Promise<User[]> {
+    return db.select().from(users)
+      .where(
+        or(
+          isNotNull(users.birthday),
+          isNotNull(users.anniversary)
+        )
+      );
+  }
+
+  async getUsersWithEventDates(): Promise<User[]> {
+    return db.select().from(users)
+      .where(
+        or(
+          isNotNull(users.birthday),
+          isNotNull(users.anniversary)
+        )
+      );
   }
 }
 

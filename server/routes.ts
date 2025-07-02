@@ -27,6 +27,7 @@ import {
   optionalAuth, 
   type AuthRequest 
 } from "./auth";
+import { sendReminderEmail, type ReminderEmailData } from "./email-service";
 
 // Helper function to create event reminders
 async function createEventReminder(userId: number, eventType: 'birthday' | 'anniversary', eventDate: string) {
@@ -926,6 +927,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid reward data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to create loyalty reward" });
+    }
+  });
+
+  // Admin Email Reminder Routes
+  
+  // Get all pending reminders
+  app.get("/api/admin/reminders/pending", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const pendingReminders = await storage.getPendingReminders();
+      res.json(pendingReminders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch pending reminders" });
+    }
+  });
+
+  // Send reminder emails manually
+  app.post("/api/admin/reminders/send", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { reminderIds, discountCode, discountPercentage } = req.body;
+      
+      if (!Array.isArray(reminderIds) || reminderIds.length === 0) {
+        return res.status(400).json({ message: "Please provide reminder IDs" });
+      }
+
+      const results = [];
+      
+      for (const reminderId of reminderIds) {
+        try {
+          const reminder = await storage.getEventReminder(reminderId);
+          if (!reminder) {
+            results.push({ reminderId, success: false, error: "Reminder not found" });
+            continue;
+          }
+
+          const user = await storage.getUser(reminder.userId);
+          if (!user || !user.email) {
+            results.push({ reminderId, success: false, error: "User or email not found" });
+            continue;
+          }
+
+          const emailData: ReminderEmailData = {
+            userEmail: user.email,
+            userName: user.email.split('@')[0], // Use email prefix as name fallback
+            eventType: reminder.eventType as 'birthday' | 'anniversary',
+            eventDate: reminder.eventDate,
+            discountCode,
+            discountPercentage
+          };
+
+          const emailSent = await sendReminderEmail(emailData);
+          
+          if (emailSent) {
+            await storage.updateEventReminder(reminderId, { 
+              notificationSent: true, 
+              isProcessed: true 
+            });
+            results.push({ reminderId, success: true });
+          } else {
+            results.push({ reminderId, success: false, error: "Email sending failed" });
+          }
+        } catch (error) {
+          results.push({ reminderId, success: false, error: error instanceof Error ? error.message : 'Unknown error' });
+        }
+      }
+
+      res.json({ 
+        message: "Reminder emails processed", 
+        results,
+        totalSent: results.filter(r => r.success).length,
+        totalFailed: results.filter(r => !r.success).length
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to send reminder emails" });
+    }
+  });
+
+  // Get all users with upcoming events
+  app.get("/api/admin/users/upcoming-events", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const users = await storage.getUsersWithUpcomingEvents();
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch users with upcoming events" });
+    }
+  });
+
+  // Create bulk reminders for users with birthday/anniversary data
+  app.post("/api/admin/reminders/create-bulk", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const users = await storage.getUsersWithEventDates();
+      const created = [];
+      
+      for (const user of users) {
+        try {
+          if (user.birthday) {
+            await createEventReminder(user.id, 'birthday', user.birthday);
+            created.push({ userId: user.id, eventType: 'birthday' });
+          }
+          if (user.anniversary) {
+            await createEventReminder(user.id, 'anniversary', user.anniversary);
+            created.push({ userId: user.id, eventType: 'anniversary' });
+          }
+        } catch (error) {
+          // Skip if reminder already exists
+        }
+      }
+      
+      res.json({ 
+        message: "Bulk reminders created successfully", 
+        created: created.length,
+        details: created 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create bulk reminders" });
     }
   });
 
