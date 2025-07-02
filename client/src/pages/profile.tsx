@@ -72,7 +72,9 @@ export default function ProfilePage() {
     queryKey: ['/api/auth/addresses'],
     queryFn: async () => {
       const res = await apiRequest('GET', '/api/auth/addresses');
-      return res.json();
+      const data = await res.json();
+      console.log('Addresses response:', data);
+      return data;
     },
     enabled: isAuthenticated
   });

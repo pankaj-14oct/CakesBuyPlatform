@@ -317,8 +317,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
+      console.log(`Fetching addresses for user ${req.user!.id}:`, user.addresses);
       res.json(user.addresses || []);
     } catch (error) {
+      console.error('Error fetching addresses:', error);
       res.status(500).json({ message: "Failed to fetch addresses" });
     }
   });
@@ -326,12 +328,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/addresses", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const addressData = createAddressSchema.parse(req.body);
+      console.log(`Creating address for user ${req.user!.id}:`, addressData);
+      
       const user = await storage.getUser(req.user!.id);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
       const currentAddresses = user.addresses || [];
+      console.log('Current addresses:', currentAddresses);
+      
       const newAddress = {
         ...addressData,
         id: `addr_${Date.now()}`,
@@ -339,10 +345,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const updatedAddresses = [...currentAddresses, newAddress];
+      console.log('Updated addresses:', updatedAddresses);
+      
       await storage.updateUserAddresses(req.user!.id, updatedAddresses);
+      
+      // Verify the update by fetching the user again
+      const updatedUser = await storage.getUser(req.user!.id);
+      console.log('User after address update:', updatedUser?.addresses);
       
       res.status(201).json(newAddress);
     } catch (error) {
+      console.error('Error creating address:', error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid address data", errors: error.errors });
       }
