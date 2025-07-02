@@ -270,6 +270,8 @@ export const addressSchema = z.object({
   isDefault: z.boolean().default(false)
 });
 
+export const createAddressSchema = addressSchema.omit({ id: true });
+
 // Profile update schema
 export const profileUpdateSchema = z.object({
   email: z.string().email('Invalid email address').optional(),

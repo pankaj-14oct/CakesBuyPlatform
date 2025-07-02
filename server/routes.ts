@@ -13,6 +13,7 @@ import {
   loginSchema,
   registerSchema,
   addressSchema,
+  createAddressSchema,
   profileUpdateSchema,
   sendOtpSchema,
   verifyOtpSchema,
@@ -323,7 +324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/addresses", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const addressData = addressSchema.parse(req.body);
+      const addressData = createAddressSchema.parse(req.body);
       const user = await storage.getUser(req.user!.id);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
