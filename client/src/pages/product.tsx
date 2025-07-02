@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { Cake, Review } from '@shared/schema';
 import { formatPrice } from '@/lib/utils';
+import { useCart } from '@/components/cart-context';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -22,6 +24,8 @@ export default function ProductPage() {
   const [customMessage, setCustomMessage] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
+  const { dispatch } = useCart();
+  const { toast } = useToast();
 
   const { data: cake, isLoading: cakeLoading } = useQuery<Cake>({
     queryKey: ['/api/cakes', slug],
@@ -80,6 +84,29 @@ export default function ProductPage() {
   const selectedWeightData = cake.weights?.find(w => w.weight === selectedWeight);
   const basePrice = selectedWeightData?.price || cake.weights?.[0]?.price || 0;
   const totalPrice = basePrice * quantity;
+
+  const handleAddToCart = () => {
+    const weight = selectedWeight || cake.weights?.[0]?.weight || '';
+    const flavor = selectedFlavor || cake.flavors?.[0] || '';
+    const price = selectedWeightData?.price || cake.weights?.[0]?.price || 0;
+
+    const cartItem = {
+      id: Date.now(),
+      cake,
+      quantity,
+      weight,
+      flavor,
+      customMessage: customMessage.trim() || undefined,
+      price,
+      addons: []
+    };
+
+    dispatch({ type: 'ADD_ITEM', payload: cartItem });
+    toast({
+      title: "Added to cart!",
+      description: `${cake.name} has been added to your cart.`,
+    });
+  };
 
   const getRatingStars = (rating: string | null) => {
     if (!rating) return null;
@@ -267,6 +294,14 @@ export default function ProductPage() {
 
             {/* Action Buttons */}
             <div className="space-y-3">
+              <Button
+                size="lg"
+                className="w-full bg-brown text-white hover:bg-opacity-90"
+                onClick={handleAddToCart}
+                disabled={!selectedWeight || !selectedFlavor}
+              >
+                Add to Cart - {formatPrice(totalPrice)}
+              </Button>
               <Button
                 variant="outline"
                 size="lg"

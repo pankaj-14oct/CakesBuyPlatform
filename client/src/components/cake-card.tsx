@@ -6,8 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Heart, Settings, Star } from 'lucide-react';
 import { Cake } from '@shared/schema';
 import { formatPrice } from '@/lib/utils';
-import { useCart } from './cart-context';
-import { useToast } from '@/hooks/use-toast';
 
 interface CakeCardProps {
   cake: Cake;
@@ -15,39 +13,6 @@ interface CakeCardProps {
 
 export default function CakeCard({ cake }: CakeCardProps) {
   const [isLiked, setIsLiked] = useState(false);
-  const [isAdding, setIsAdding] = useState(false);
-  const { dispatch } = useCart();
-  const { toast } = useToast();
-
-  const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    setIsAdding(true);
-    
-    // Default options for quick add
-    const defaultWeight = cake.weights[0];
-    const defaultFlavor = cake.flavors[0];
-    
-    const cartItem = {
-      id: Date.now(),
-      cake,
-      quantity: 1,
-      weight: defaultWeight.weight,
-      flavor: defaultFlavor,
-      price: defaultWeight.price,
-      addons: []
-    };
-
-    dispatch({ type: 'ADD_ITEM', payload: cartItem });
-    
-    toast({
-      title: "Added to cart!",
-      description: `${cake.name} (${defaultWeight.weight}) has been added to your cart.`,
-    });
-
-    setTimeout(() => setIsAdding(false), 2000);
-  };
 
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -55,7 +20,8 @@ export default function CakeCard({ cake }: CakeCardProps) {
     setIsLiked(!isLiked);
   };
 
-  const getRatingStars = (rating: string) => {
+  const getRatingStars = (rating: string | null) => {
+    if (!rating) return null;
     const ratingNum = parseFloat(rating);
     const fullStars = Math.floor(ratingNum);
     const hasHalfStar = ratingNum % 1 !== 0;
@@ -73,7 +39,7 @@ export default function CakeCard({ cake }: CakeCardProps) {
     );
   };
 
-  const originalPrice = cake.weights[0]?.price || 0;
+  const originalPrice = cake.weights?.[0]?.price || 0;
   const discountedPrice = originalPrice * 0.8; // 20% discount simulation
 
   return (
@@ -81,14 +47,14 @@ export default function CakeCard({ cake }: CakeCardProps) {
       <Card className="bg-white rounded-2xl shadow-lg overflow-hidden cake-card group hover:shadow-xl transition-all duration-300">
         <div className="relative">
           <img 
-            src={cake.images[0] || '/placeholder-cake.jpg'} 
+            src={cake.images?.[0] || '/placeholder-cake.jpg'} 
             alt={cake.name}
             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
           />
           
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1">
-            {cake.deliveryOptions.sameDay && (
+            {cake.deliveryOptions?.sameDay && (
               <Badge className="bg-mint text-white text-xs font-semibold">
                 Same Day
               </Badge>
@@ -145,18 +111,16 @@ export default function CakeCard({ cake }: CakeCardProps) {
               </span>
             </div>
             <div className="text-sm text-charcoal opacity-70">
-              {cake.weights[0]?.weight}
+              {cake.weights?.[0]?.weight}
             </div>
           </div>
           
           {/* Actions */}
           <div className="flex space-x-2">
             <Button
-              onClick={handleAddToCart}
-              disabled={isAdding}
               className="flex-1 bg-caramel text-white hover:bg-brown transition-colors"
             >
-              {isAdding ? '✓ Added!' : 'Add to Cart'}
+              View Details
             </Button>
             <Button
               variant="outline"
