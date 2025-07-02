@@ -132,6 +132,7 @@ The application uses a comprehensive database schema with the following main ent
 - July 1, 2025. Enhanced delivery address management with three address types: Home, Work, and Other - includes complete address forms with validation and CRUD operations
 - July 2, 2025. Implemented comprehensive loyalty program system with points earning (1 point per ₹10 spent), tier system (Bronze/Silver/Gold/Platinum), and reward redemption with 8 default rewards
 - July 2, 2025. Added complete orders history and tracking system with detailed order views, status filtering, search functionality, and comprehensive order information display
+- July 2, 2025. Merged checkout delivery details with profile address management - users can now select from saved addresses or create new ones during checkout, with seamless integration between guest and authenticated user experiences
 
 ## User Preferences
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -13,15 +13,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { 
   ArrowLeft, MapPin, Calendar, Clock, CreditCard, 
-  Smartphone, Wallet, Truck, Shield, CheckCircle 
+  Smartphone, Wallet, Truck, Shield, CheckCircle, Plus, Home, Building, Check
 } from 'lucide-react';
 import { useCart } from '@/components/cart-context';
 import { useAuth } from '@/hooks/use-auth';
 import { formatPrice, generateOrderNumber, calculateDeliveryDate } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { addressSchema } from '@shared/schema';
 
 const checkoutSchema = z.object({
   // Delivery Options
@@ -47,6 +50,7 @@ const checkoutSchema = z.object({
 });
 
 type CheckoutForm = z.infer<typeof checkoutSchema>;
+type AddressForm = z.infer<typeof addressSchema>;
 
 export default function CheckoutPage() {
   const { state: cartState, dispatch } = useCart();
@@ -56,7 +60,35 @@ export default function CheckoutPage() {
   const [orderNumber, setOrderNumber] = useState('');
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
   const [useGuestCheckout, setUseGuestCheckout] = useState(!isAuthenticated);
+  const [showAddAddressDialog, setShowAddAddressDialog] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch user addresses if authenticated
+  const { data: addressesData } = useQuery({
+    queryKey: ['/api/auth/addresses'],
+    queryFn: async () => {
+      const res = await apiRequest('GET', '/api/auth/addresses');
+      return res.json();
+    },
+    enabled: isAuthenticated
+  });
+
+  const addresses = addressesData?.addresses || [];
+
+  // Address form for adding new addresses
+  const addressForm = useForm<AddressForm>({
+    resolver: zodResolver(addressSchema),
+    defaultValues: {
+      name: '',
+      type: 'home',
+      address: '',
+      pincode: '',
+      city: 'Gurgaon',
+      landmark: '',
+      isDefault: false
+    }
+  });
 
   // Helper function to check if a time slot is available for today
   const isTimeSlotAvailable = (deliveryDate: string, timeSlot: string) => {
@@ -131,6 +163,50 @@ export default function CheckoutPage() {
     }
   }, [selectedDate, form]);
 
+  // Add address mutation
+  const addAddressMutation = useMutation({
+    mutationFn: async (data: AddressForm) => {
+      const addressData = {
+        ...data,
+        id: `addr_${Date.now()}`,
+      };
+      const res = await apiRequest('POST', '/api/auth/addresses', addressData);
+      return res.json();
+    },
+    onSuccess: (newAddress) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/addresses'] });
+      setShowAddAddressDialog(false);
+      setSelectedAddress(newAddress);
+      addressForm.reset();
+      toast({
+        title: "Address added",
+        description: "Your new address has been saved and selected."
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save address",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const getAddressIcon = (type: string) => {
+    switch (type) {
+      case 'home':
+        return <Home className="h-4 w-4" />;
+      case 'work':
+        return <Building className="h-4 w-4" />;
+      default:
+        return <MapPin className="h-4 w-4" />;
+    }
+  };
+
+  const onSubmitAddress = (data: AddressForm) => {
+    addAddressMutation.mutate(data);
+  };
+
   const subtotal = cartState.total;
   const deliveryFee = subtotal >= 500 ? 0 : 50;
   const total = subtotal + deliveryFee;
@@ -181,8 +257,27 @@ export default function CheckoutPage() {
     
     // Determine delivery address
     let deliveryAddress;
-    if (useGuestCheckout || !selectedAddress) {
-      // Validate guest checkout fields
+    if (isAuthenticated && !useGuestCheckout && selectedAddress) {
+      // Use selected saved address
+      deliveryAddress = {
+        name: selectedAddress.name,
+        phone: selectedAddress.phone || '',
+        address: selectedAddress.address,
+        pincode: selectedAddress.pincode,
+        city: selectedAddress.city,
+        landmark: selectedAddress.landmark
+      };
+    } else if (isAuthenticated && !useGuestCheckout && !selectedAddress) {
+      // No address selected when using saved addresses
+      toast({
+        title: "No address selected",
+        description: "Please select a delivery address or switch to guest checkout",
+        variant: "destructive"
+      });
+      setIsPlacingOrder(false);
+      return;
+    } else {
+      // Guest checkout - validate all fields
       if (!data.guestName || !data.guestPhone || !data.guestAddress || !data.guestPincode || !data.guestCity) {
         toast({
           title: "Missing delivery details",
@@ -200,15 +295,6 @@ export default function CheckoutPage() {
         pincode: data.guestPincode,
         city: data.guestCity,
         landmark: data.guestLandmark
-      };
-    } else {
-      deliveryAddress = {
-        name: selectedAddress.name,
-        phone: selectedAddress.phone || '',
-        address: selectedAddress.address,
-        pincode: selectedAddress.pincode,
-        city: selectedAddress.city,
-        landmark: selectedAddress.landmark
       };
     }
     
@@ -323,90 +409,283 @@ export default function CheckoutPage() {
             <div className="lg:col-span-2 space-y-6">
               {/* Delivery Address */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <MapPin className="mr-2 h-5 w-5 text-caramel" />
-                    Delivery Address
-                  </CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center">
+                      <MapPin className="mr-2 h-5 w-5 text-caramel" />
+                      Delivery Address
+                    </CardTitle>
+                  </div>
+                  {isAuthenticated && (
+                    <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => setUseGuestCheckout(!useGuestCheckout)}
+                        className="text-sm text-caramel hover:underline"
+                      >
+                        {useGuestCheckout ? 'Use Saved Address' : 'Use Guest Checkout'}
+                      </button>
+                    </div>
+                  )}
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="guestName">Full Name *</Label>
-                      <Input
-                        id="guestName"
-                        {...form.register('guestName')}
-                        placeholder="Enter your full name"
-                      />
-                      {form.formState.errors.guestName && (
-                        <p className="text-sm text-red-500 mt-1">
-                          {form.formState.errors.guestName.message}
-                        </p>
+                  {isAuthenticated && !useGuestCheckout ? (
+                    /* Saved Addresses Selection */
+                    <div className="space-y-4">
+                      {addresses.length > 0 ? (
+                        <RadioGroup
+                          value={selectedAddress?.id || ''}
+                          onValueChange={(addressId) => {
+                            const address = addresses.find((a: any) => a.id === addressId);
+                            if (address) setSelectedAddress(address);
+                          }}
+                          className="space-y-3"
+                        >
+                          {addresses.map((address: any) => (
+                            <div key={address.id} className="relative">
+                              <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <RadioGroupItem value={address.id} id={address.id} />
+                                <Label htmlFor={address.id} className="flex-1 cursor-pointer">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    {getAddressIcon(address.type)}
+                                    <span className="font-medium">{address.name}</span>
+                                    {address.isDefault && (
+                                      <Badge variant="secondary" className="text-xs">Default</Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-charcoal opacity-80 mb-1">
+                                    {address.address}
+                                  </p>
+                                  <p className="text-sm text-charcoal opacity-70">
+                                    {address.city}, {address.pincode}
+                                    {address.landmark && ` • ${address.landmark}`}
+                                  </p>
+                                </Label>
+                                {selectedAddress?.id === address.id && (
+                                  <Check className="h-5 w-5 text-green-600" />
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </RadioGroup>
+                      ) : (
+                        <div className="text-center py-8 text-charcoal opacity-70">
+                          <MapPin className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                          <p className="mb-4">No saved addresses found</p>
+                        </div>
                       )}
-                    </div>
-                    <div>
-                      <Label htmlFor="guestPhone">Mobile Number *</Label>
-                      <Input
-                        id="guestPhone"
-                        {...form.register('guestPhone')}
-                        placeholder="Enter 10-digit mobile number"
-                      />
-                      {form.formState.errors.guestPhone && (
-                        <p className="text-sm text-red-500 mt-1">
-                          {form.formState.errors.guestPhone.message}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                      
+                      {/* Add New Address Button */}
+                      <Dialog open={showAddAddressDialog} onOpenChange={setShowAddAddressDialog}>
+                        <DialogTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full border-dashed border-caramel text-caramel hover:bg-caramel hover:text-white"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add New Address
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-md">
+                          <DialogHeader>
+                            <DialogTitle>Add New Address</DialogTitle>
+                          </DialogHeader>
+                          <Form {...addressForm}>
+                            <form onSubmit={addressForm.handleSubmit(onSubmitAddress)} className="space-y-4">
+                              <FormField
+                                control={addressForm.control}
+                                name="name"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Address Name</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} placeholder="e.g., Home, Office" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
 
-                  <div>
-                    <Label htmlFor="guestAddress">Complete Address *</Label>
-                    <Textarea
-                      id="guestAddress"
-                      {...form.register('guestAddress')}
-                      placeholder="House/Flat number, Street name, Area"
-                      rows={3}
-                    />
-                    {form.formState.errors.guestAddress && (
-                      <p className="text-sm text-red-500 mt-1">
-                        {form.formState.errors.guestAddress.message}
-                      </p>
-                    )}
-                  </div>
+                              <FormField
+                                control={addressForm.control}
+                                name="type"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Address Type</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select type" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="home">Home</SelectItem>
+                                        <SelectItem value="work">Work</SelectItem>
+                                        <SelectItem value="other">Other</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
 
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="guestPincode">Pincode *</Label>
-                      <Input
-                        id="guestPincode"
-                        {...form.register('guestPincode')}
-                        placeholder="122001"
-                      />
-                      {form.formState.errors.guestPincode && (
-                        <p className="text-sm text-red-500 mt-1">
-                          {form.formState.errors.guestPincode.message}
-                        </p>
-                      )}
+                              <FormField
+                                control={addressForm.control}
+                                name="address"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Complete Address</FormLabel>
+                                    <FormControl>
+                                      <Textarea {...field} placeholder="House/Flat number, Street name, Area" rows={3} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <div className="grid grid-cols-2 gap-4">
+                                <FormField
+                                  control={addressForm.control}
+                                  name="pincode"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Pincode</FormLabel>
+                                      <FormControl>
+                                        <Input {...field} placeholder="122004" maxLength={6} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <FormField
+                                  control={addressForm.control}
+                                  name="city"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>City</FormLabel>
+                                      <FormControl>
+                                        <Input {...field} placeholder="Gurgaon" />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+
+                              <FormField
+                                control={addressForm.control}
+                                name="landmark"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Landmark (Optional)</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} placeholder="Near Metro Station" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <Button 
+                                type="submit" 
+                                disabled={addAddressMutation.isPending} 
+                                className="w-full bg-caramel hover:bg-brown"
+                              >
+                                {addAddressMutation.isPending ? 'Saving...' : 'Save Address'}
+                              </Button>
+                            </form>
+                          </Form>
+                        </DialogContent>
+                      </Dialog>
                     </div>
-                    <div>
-                      <Label htmlFor="guestCity">City *</Label>
-                      <Input
-                        id="guestCity"
-                        {...form.register('guestCity')}
-                        value="Gurgaon"
-                        readOnly
-                        className="bg-gray-50"
-                      />
+                  ) : (
+                    /* Guest Checkout Form */
+                    <div className="space-y-4">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="guestName">Full Name *</Label>
+                          <Input
+                            id="guestName"
+                            {...form.register('guestName')}
+                            placeholder="Enter your full name"
+                          />
+                          {form.formState.errors.guestName && (
+                            <p className="text-sm text-red-500 mt-1">
+                              {form.formState.errors.guestName.message}
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <Label htmlFor="guestPhone">Mobile Number *</Label>
+                          <Input
+                            id="guestPhone"
+                            {...form.register('guestPhone')}
+                            placeholder="Enter 10-digit mobile number"
+                          />
+                          {form.formState.errors.guestPhone && (
+                            <p className="text-sm text-red-500 mt-1">
+                              {form.formState.errors.guestPhone.message}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="guestAddress">Complete Address *</Label>
+                        <Textarea
+                          id="guestAddress"
+                          {...form.register('guestAddress')}
+                          placeholder="House/Flat number, Street name, Area"
+                          rows={3}
+                        />
+                        {form.formState.errors.guestAddress && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {form.formState.errors.guestAddress.message}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="grid md:grid-cols-3 gap-4">
+                        <div>
+                          <Label htmlFor="guestPincode">Pincode *</Label>
+                          <Input
+                            id="guestPincode"
+                            {...form.register('guestPincode')}
+                            placeholder="122004"
+                            maxLength={6}
+                          />
+                          {form.formState.errors.guestPincode && (
+                            <p className="text-sm text-red-500 mt-1">
+                              {form.formState.errors.guestPincode.message}
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <Label htmlFor="guestCity">City *</Label>
+                          <Input
+                            id="guestCity"
+                            {...form.register('guestCity')}
+                            placeholder="Gurgaon"
+                          />
+                          {form.formState.errors.guestCity && (
+                            <p className="text-sm text-red-500 mt-1">
+                              {form.formState.errors.guestCity.message}
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <Label htmlFor="guestLandmark">Landmark (Optional)</Label>
+                          <Input
+                            id="guestLandmark"
+                            {...form.register('guestLandmark')}
+                            placeholder="Near metro station"
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <Label htmlFor="guestLandmark">Landmark (Optional)</Label>
-                      <Input
-                        id="guestLandmark"
-                        {...form.register('guestLandmark')}
-                        placeholder="Near metro station"
-                      />
-                    </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
 
