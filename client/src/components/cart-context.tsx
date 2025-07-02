@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, ReactNode } from 'react';
+import { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { Cake, Addon } from '@shared/schema';
 
 export interface CartItem {
@@ -28,7 +28,8 @@ type CartAction =
   | { type: 'UPDATE_QUANTITY'; payload: { id: number; quantity: number } }
   | { type: 'UPDATE_ITEM'; payload: { id: number; updates: Partial<CartItem> } }
   | { type: 'ADD_ADDON'; payload: { itemId: number; addon: Addon; quantity: number } }
-  | { type: 'CLEAR_CART' };
+  | { type: 'CLEAR_CART' }
+  | { type: 'LOAD_CART'; payload: CartState };
 
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
@@ -117,7 +118,11 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     }
 
     case 'CLEAR_CART':
+      localStorage.removeItem(CART_STORAGE_KEY);
       return { items: [], total: 0, itemCount: 0 };
+
+    case 'LOAD_CART':
+      return action.payload;
 
     default:
       return state;
@@ -137,17 +142,61 @@ const calculateTotal = (items: CartItem[]): number => {
 const CartContext = createContext<{
   state: CartState;
   dispatch: React.Dispatch<CartAction>;
+  clearCart: () => void;
 } | null>(null);
 
+// Helper functions for localStorage
+const CART_STORAGE_KEY = 'cakesbuy_cart';
+
+const saveCartToStorage = (state: CartState) => {
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state));
+  } catch (error) {
+    console.error('Failed to save cart to localStorage:', error);
+  }
+};
+
+const loadCartFromStorage = (): CartState => {
+  try {
+    const saved = localStorage.getItem(CART_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Validate the structure to ensure it's still valid
+      if (parsed && Array.isArray(parsed.items)) {
+        return {
+          items: parsed.items,
+          total: parsed.total || calculateTotal(parsed.items),
+          itemCount: parsed.itemCount || parsed.items.reduce((sum: number, item: CartItem) => sum + item.quantity, 0)
+        };
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load cart from localStorage:', error);
+  }
+  return { items: [], total: 0, itemCount: 0 };
+};
+
+// Enhanced reducer that saves to localStorage
+const persistentCartReducer = (state: CartState, action: CartAction): CartState => {
+  const newState = cartReducer(state, action);
+  saveCartToStorage(newState);
+  return newState;
+};
+
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [state, dispatch] = useReducer(cartReducer, {
-    items: [],
-    total: 0,
-    itemCount: 0
-  });
+  const [state, dispatch] = useReducer(persistentCartReducer, { items: [], total: 0, itemCount: 0 }, loadCartFromStorage);
+
+  // Save to localStorage whenever state changes
+  useEffect(() => {
+    saveCartToStorage(state);
+  }, [state]);
+
+  const clearCart = () => {
+    dispatch({ type: 'CLEAR_CART' });
+  };
 
   return (
-    <CartContext.Provider value={{ state, dispatch }}>
+    <CartContext.Provider value={{ state, dispatch, clearCart }}>
       {children}
     </CartContext.Provider>
   );

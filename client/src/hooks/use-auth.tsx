@@ -68,17 +68,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!token) return null;
       
       try {
-        const res = await apiRequest("GET", "/api/auth/me", undefined, {
-          'Authorization': `Bearer ${token}`
-        });
+        const res = await apiRequest("GET", "/api/auth/me");
         const data = await res.json();
         return data.user;
       } catch (error) {
+        console.error('Auth verification failed:', error);
         removeToken();
         return null;
       }
     },
-    retry: false
+    retry: false,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const loginMutation = useMutation({
