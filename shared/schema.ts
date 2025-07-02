@@ -19,6 +19,11 @@ export const users = pgTable("users", {
     landmark?: string;
     isDefault: boolean;
   }>>().default([]),
+  // Loyalty Program fields
+  loyaltyPoints: integer("loyalty_points").default(0),
+  loyaltyTier: text("loyalty_tier").default("Bronze"), // Bronze, Silver, Gold, Platinum
+  totalSpent: decimal("total_spent", { precision: 10, scale: 2 }).default("0"),
+  orderCount: integer("order_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -160,6 +165,43 @@ export const otpVerifications = pgTable("otp_verifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Loyalty Program Tables
+export const loyaltyTransactions = pgTable("loyalty_transactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  orderId: integer("order_id").references(() => orders.id),
+  type: text("type").notNull(), // 'earned', 'redeemed', 'expired', 'bonus'
+  points: integer("points").notNull(),
+  description: text("description").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const loyaltyRewards = pgTable("loyalty_rewards", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  pointsCost: integer("points_cost").notNull(),
+  rewardType: text("reward_type").notNull(), // 'discount_percent', 'discount_amount', 'free_item', 'free_delivery'
+  rewardValue: decimal("reward_value", { precision: 10, scale: 2 }).notNull(),
+  validityDays: integer("validity_days").default(30),
+  maxRedemptions: integer("max_redemptions"), // null for unlimited
+  currentRedemptions: integer("current_redemptions").default(0),
+  minTier: text("min_tier").default("Bronze"), // Minimum tier required
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userRewards = pgTable("user_rewards", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  rewardId: integer("reward_id").references(() => loyaltyRewards.id).notNull(),
+  code: text("code").notNull().unique(), // Unique redemption code
+  isUsed: boolean("is_used").default(false),
+  usedAt: timestamp("used_at"),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertCategorySchema = createInsertSchema(categories).omit({ id: true });
@@ -173,6 +215,11 @@ export const insertPromoCodeSchema = createInsertSchema(promoCodes).omit({ id: t
 export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, createdAt: true });
 export const insertEventReminderSchema = createInsertSchema(eventReminders).omit({ id: true, createdAt: true });
 export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).omit({ id: true, createdAt: true });
+
+// Loyalty Program insert schemas
+export const insertLoyaltyTransactionSchema = createInsertSchema(loyaltyTransactions).omit({ id: true, createdAt: true });
+export const insertLoyaltyRewardSchema = createInsertSchema(loyaltyRewards).omit({ id: true, createdAt: true });
+export const insertUserRewardSchema = createInsertSchema(userRewards).omit({ id: true, createdAt: true });
 
 // Auth schemas
 export const loginSchema = z.object({
@@ -252,3 +299,11 @@ export type EventReminder = typeof eventReminders.$inferSelect;
 export type InsertEventReminder = z.infer<typeof insertEventReminderSchema>;
 export type OtpVerification = typeof otpVerifications.$inferSelect;
 export type InsertOtpVerification = z.infer<typeof insertOtpVerificationSchema>;
+
+// Loyalty Program types
+export type LoyaltyTransaction = typeof loyaltyTransactions.$inferSelect;
+export type InsertLoyaltyTransaction = z.infer<typeof insertLoyaltyTransactionSchema>;
+export type LoyaltyReward = typeof loyaltyRewards.$inferSelect;
+export type InsertLoyaltyReward = z.infer<typeof insertLoyaltyRewardSchema>;
+export type UserReward = typeof userRewards.$inferSelect;
+export type InsertUserReward = z.infer<typeof insertUserRewardSchema>;

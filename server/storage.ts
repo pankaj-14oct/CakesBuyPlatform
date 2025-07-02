@@ -1,10 +1,13 @@
 import {
   users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews, eventReminders, otpVerifications,
+  loyaltyTransactions, loyaltyRewards, userRewards,
   type User, type InsertUser, type Category, type InsertCategory,
   type Cake, type InsertCake, type Addon, type InsertAddon,
   type Order, type InsertOrder, type DeliveryArea, type InsertDeliveryArea,
   type PromoCode, type InsertPromoCode, type Review, type InsertReview,
-  type EventReminder, type InsertEventReminder, type OtpVerification, type InsertOtpVerification
+  type EventReminder, type InsertEventReminder, type OtpVerification, type InsertOtpVerification,
+  type LoyaltyTransaction, type InsertLoyaltyTransaction, type LoyaltyReward, type InsertLoyaltyReward,
+  type UserReward, type InsertUserReward
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, and, desc } from "drizzle-orm";
@@ -90,6 +93,28 @@ export interface IStorage {
   createOtpVerification(otp: InsertOtpVerification): Promise<OtpVerification>;
   verifyOtp(phone: string, otp: string): Promise<OtpVerification | null>;
   cleanupExpiredOtp(): Promise<void>;
+
+  // Loyalty Program management
+  // User loyalty operations
+  updateUserLoyalty(userId: number, pointsToAdd: number, orderAmount: number): Promise<void>;
+  getUserLoyaltyStats(userId: number): Promise<User | undefined>;
+  
+  // Loyalty transactions
+  createLoyaltyTransaction(transaction: InsertLoyaltyTransaction): Promise<LoyaltyTransaction>;
+  getUserLoyaltyTransactions(userId: number, limit?: number): Promise<LoyaltyTransaction[]>;
+  
+  // Loyalty rewards
+  getLoyaltyRewards(userTier?: string): Promise<LoyaltyReward[]>;
+  getLoyaltyReward(id: number): Promise<LoyaltyReward | undefined>;
+  createLoyaltyReward(reward: InsertLoyaltyReward): Promise<LoyaltyReward>;
+  updateLoyaltyReward(id: number, updates: Partial<LoyaltyReward>): Promise<void>;
+  deleteLoyaltyReward(id: number): Promise<void>;
+  
+  // User rewards (redeemed rewards)
+  redeemReward(userId: number, rewardId: number): Promise<UserReward>;
+  getUserRewards(userId: number): Promise<UserReward[]>;
+  getUserReward(code: string): Promise<UserReward | undefined>;
+  useUserReward(code: string): Promise<void>;
 }
 
 // DatabaseStorage implementation
@@ -447,6 +472,182 @@ export class DatabaseStorage implements IStorage {
   async cleanupExpiredOtp(): Promise<void> {
     const now = new Date();
     await db.delete(otpVerifications).where(eq(otpVerifications.expiresAt, now));
+  }
+
+  // Loyalty Program implementations
+  async updateUserLoyalty(userId: number, pointsToAdd: number, orderAmount: number): Promise<void> {
+    const user = await this.getUser(userId);
+    if (!user) return;
+
+    const newPoints = (user.loyaltyPoints || 0) + pointsToAdd;
+    const newTotalSpent = parseFloat(user.totalSpent || "0") + orderAmount;
+    const newOrderCount = (user.orderCount || 0) + 1;
+
+    // Determine tier based on total spent
+    let newTier = "Bronze";
+    if (newTotalSpent >= 50000) newTier = "Platinum";
+    else if (newTotalSpent >= 20000) newTier = "Gold";
+    else if (newTotalSpent >= 5000) newTier = "Silver";
+
+    await db.update(users)
+      .set({
+        loyaltyPoints: newPoints,
+        totalSpent: newTotalSpent.toString(),
+        orderCount: newOrderCount,
+        loyaltyTier: newTier,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async getUserLoyaltyStats(userId: number): Promise<User | undefined> {
+    return this.getUser(userId);
+  }
+
+  async createLoyaltyTransaction(insertTransaction: InsertLoyaltyTransaction): Promise<LoyaltyTransaction> {
+    const transactionData = {
+      ...insertTransaction,
+      createdAt: new Date()
+    };
+    const [transaction] = await db.insert(loyaltyTransactions).values(transactionData).returning();
+    return transaction;
+  }
+
+  async getUserLoyaltyTransactions(userId: number, limit: number = 50): Promise<LoyaltyTransaction[]> {
+    return db.select().from(loyaltyTransactions)
+      .where(eq(loyaltyTransactions.userId, userId))
+      .orderBy(desc(loyaltyTransactions.createdAt))
+      .limit(limit);
+  }
+
+  async getLoyaltyRewards(userTier?: string): Promise<LoyaltyReward[]> {
+    const query = db.select().from(loyaltyRewards).where(eq(loyaltyRewards.isActive, true));
+    
+    if (userTier) {
+      const tierOrder = { "Bronze": 1, "Silver": 2, "Gold": 3, "Platinum": 4 };
+      const userTierLevel = tierOrder[userTier as keyof typeof tierOrder] || 1;
+      
+      return query.then(rewards => 
+        rewards.filter(reward => {
+          const rewardTierLevel = tierOrder[reward.minTier as keyof typeof tierOrder] || 1;
+          return rewardTierLevel <= userTierLevel;
+        })
+      );
+    }
+    
+    return query;
+  }
+
+  async getLoyaltyReward(id: number): Promise<LoyaltyReward | undefined> {
+    const [reward] = await db.select().from(loyaltyRewards).where(eq(loyaltyRewards.id, id));
+    return reward || undefined;
+  }
+
+  async createLoyaltyReward(insertReward: InsertLoyaltyReward): Promise<LoyaltyReward> {
+    const rewardData = {
+      ...insertReward,
+      createdAt: new Date()
+    };
+    const [reward] = await db.insert(loyaltyRewards).values(rewardData).returning();
+    return reward;
+  }
+
+  async updateLoyaltyReward(id: number, updates: Partial<LoyaltyReward>): Promise<void> {
+    await db.update(loyaltyRewards)
+      .set(updates)
+      .where(eq(loyaltyRewards.id, id));
+  }
+
+  async deleteLoyaltyReward(id: number): Promise<void> {
+    await db.delete(loyaltyRewards).where(eq(loyaltyRewards.id, id));
+  }
+
+  async redeemReward(userId: number, rewardId: number): Promise<UserReward> {
+    const reward = await this.getLoyaltyReward(rewardId);
+    const user = await this.getUser(userId);
+    
+    if (!reward || !user) {
+      throw new Error("Reward or user not found");
+    }
+
+    if ((user.loyaltyPoints || 0) < reward.pointsCost) {
+      throw new Error("Insufficient points");
+    }
+
+    // Generate unique code
+    const code = `REWARD${Date.now()}${Math.random().toString(36).substr(2, 9)}`.toUpperCase();
+    
+    // Create user reward
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + (reward.validityDays || 30));
+    
+    const userRewardData = {
+      userId,
+      rewardId,
+      code,
+      expiresAt,
+      createdAt: new Date()
+    };
+    
+    const [userReward] = await db.insert(userRewards).values(userRewardData).returning();
+    
+    // Deduct points from user
+    await db.update(users)
+      .set({
+        loyaltyPoints: (user.loyaltyPoints || 0) - reward.pointsCost,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+    
+    // Create transaction record
+    await this.createLoyaltyTransaction({
+      userId,
+      type: 'redeemed',
+      points: -reward.pointsCost,
+      description: `Redeemed: ${reward.title}`
+    });
+    
+    // Update reward redemption count
+    await db.update(loyaltyRewards)
+      .set({
+        currentRedemptions: (reward.currentRedemptions || 0) + 1
+      })
+      .where(eq(loyaltyRewards.id, rewardId));
+    
+    return userReward;
+  }
+
+  async getUserRewards(userId: number): Promise<UserReward[]> {
+    return db.select().from(userRewards)
+      .where(eq(userRewards.userId, userId))
+      .orderBy(desc(userRewards.createdAt));
+  }
+
+  async getUserReward(code: string): Promise<UserReward | undefined> {
+    const [userReward] = await db.select().from(userRewards).where(eq(userRewards.code, code));
+    return userReward || undefined;
+  }
+
+  async useUserReward(code: string): Promise<void> {
+    const userReward = await this.getUserReward(code);
+    if (!userReward) {
+      throw new Error("Reward not found");
+    }
+    
+    if (userReward.isUsed) {
+      throw new Error("Reward already used");
+    }
+    
+    if (userReward.expiresAt < new Date()) {
+      throw new Error("Reward expired");
+    }
+    
+    await db.update(userRewards)
+      .set({
+        isUsed: true,
+        usedAt: new Date()
+      })
+      .where(eq(userRewards.code, code));
   }
 }
 

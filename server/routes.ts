@@ -9,6 +9,7 @@ import {
   insertAddonSchema, 
   insertPromoCodeSchema,
   insertEventReminderSchema,
+  insertLoyaltyRewardSchema,
   loginSchema,
   registerSchema,
   addressSchema,
@@ -183,6 +184,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const order = await storage.createOrder(orderData);
+      
+      // Award loyalty points if user is authenticated
+      if (req.user && orderData.userId) {
+        try {
+          const orderTotal = parseFloat(order.totalAmount);
+          // Award 1 point per ₹10 spent (10% back in points)
+          const pointsToAward = Math.floor(orderTotal / 10);
+          
+          if (pointsToAward > 0) {
+            // Update user loyalty stats
+            await storage.updateUserLoyalty(req.user.id, pointsToAward, orderTotal);
+            
+            // Create loyalty transaction record
+            await storage.createLoyaltyTransaction({
+              userId: req.user.id,
+              orderId: order.id,
+              type: 'earned',
+              points: pointsToAward,
+              description: `Earned ${pointsToAward} points from order ${order.orderNumber}`
+            });
+          }
+        } catch (loyaltyError) {
+          // Don't fail the order if loyalty update fails
+          console.error('Failed to update loyalty points:', loyaltyError);
+        }
+      }
+      
       res.status(201).json(order);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -670,6 +698,147 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid registration data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to register user" });
+    }
+  });
+
+  // Loyalty Program Routes
+  
+  // Get user loyalty stats
+  app.get("/api/loyalty/stats", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const loyaltyStats = await storage.getUserLoyaltyStats(req.user.id);
+      if (!loyaltyStats) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({
+        points: loyaltyStats.loyaltyPoints || 0,
+        tier: loyaltyStats.loyaltyTier || "Bronze",
+        totalSpent: loyaltyStats.totalSpent || "0",
+        orderCount: loyaltyStats.orderCount || 0
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch loyalty stats" });
+    }
+  });
+
+  // Get user loyalty transactions
+  app.get("/api/loyalty/transactions", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const limit = parseInt(req.query.limit as string) || 50;
+      const transactions = await storage.getUserLoyaltyTransactions(req.user.id, limit);
+      res.json(transactions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch loyalty transactions" });
+    }
+  });
+
+  // Get available loyalty rewards
+  app.get("/api/loyalty/rewards", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const user = await storage.getUser(req.user.id);
+      const userTier = user?.loyaltyTier || "Bronze";
+      const rewards = await storage.getLoyaltyRewards(userTier);
+      res.json(rewards);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch loyalty rewards" });
+    }
+  });
+
+  // Redeem a loyalty reward
+  app.post("/api/loyalty/redeem", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const { rewardId } = req.body;
+      if (!rewardId) {
+        return res.status(400).json({ message: "Reward ID is required" });
+      }
+      
+      const userReward = await storage.redeemReward(req.user.id, rewardId);
+      res.json({
+        message: "Reward redeemed successfully",
+        code: userReward.code,
+        expiresAt: userReward.expiresAt
+      });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Get user's redeemed rewards
+  app.get("/api/loyalty/my-rewards", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const userRewards = await storage.getUserRewards(req.user.id);
+      res.json(userRewards);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user rewards" });
+    }
+  });
+
+  // Apply reward code (validate and use)
+  app.post("/api/loyalty/apply-reward", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { code } = req.body;
+      if (!code) {
+        return res.status(400).json({ message: "Reward code is required" });
+      }
+      
+      const userReward = await storage.getUserReward(code);
+      if (!userReward) {
+        return res.status(404).json({ message: "Invalid reward code" });
+      }
+      
+      if (userReward.isUsed) {
+        return res.status(400).json({ message: "Reward already used" });
+      }
+      
+      if (userReward.expiresAt < new Date()) {
+        return res.status(400).json({ message: "Reward expired" });
+      }
+      
+      // Get reward details
+      const reward = await storage.getLoyaltyReward(userReward.rewardId);
+      
+      res.json({
+        valid: true,
+        reward: reward,
+        userReward: userReward
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to validate reward code" });
+    }
+  });
+
+  // Admin: Create loyalty reward
+  app.post("/api/admin/loyalty/rewards", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const validatedData = insertLoyaltyRewardSchema.parse(req.body);
+      const reward = await storage.createLoyaltyReward(validatedData);
+      res.status(201).json(reward);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid reward data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create loyalty reward" });
     }
   });
 
