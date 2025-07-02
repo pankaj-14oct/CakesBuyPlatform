@@ -76,7 +76,7 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen bg-cream flex">
       {/* Left side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+      <div className="w-full md:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
@@ -278,32 +278,32 @@ export default function AuthPage() {
       </div>
 
       {/* Right side - Hero */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-caramel to-brown items-center justify-center p-8">
+      <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-caramel to-brown items-center justify-center p-8">
         <div className="text-center text-white max-w-md">
           <div className="mb-8">
-            <Cake className="h-24 w-24 mx-auto mb-6" />
-            <h2 className="text-4xl font-bold mb-4">Delicious Cakes Delivered</h2>
-            <p className="text-lg opacity-90 mb-6">
+            <Cake className="h-20 w-20 md:h-24 md:w-24 mx-auto mb-6 drop-shadow-lg" />
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 drop-shadow-md">Delicious Cakes Delivered</h2>
+            <p className="text-base md:text-lg opacity-95 mb-6 drop-shadow-sm">
               Fresh, handcrafted cakes made with love. Same-day delivery available in Gurgaon.
             </p>
           </div>
           
-          <div className="space-y-4 text-sm">
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Custom cake designs</span>
+          <div className="space-y-4 text-sm md:text-base">
+            <div className="flex items-center justify-center space-x-3">
+              <div className="w-2 h-2 bg-white rounded-full flex-shrink-0 shadow-sm"></div>
+              <span className="drop-shadow-sm font-medium">Custom cake designs</span>
             </div>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Premium ingredients</span>
+            <div className="flex items-center justify-center space-x-3">
+              <div className="w-2 h-2 bg-white rounded-full flex-shrink-0 shadow-sm"></div>
+              <span className="drop-shadow-sm font-medium">Premium ingredients</span>
             </div>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Same-day delivery</span>
+            <div className="flex items-center justify-center space-x-3">
+              <div className="w-2 h-2 bg-white rounded-full flex-shrink-0 shadow-sm"></div>
+              <span className="drop-shadow-sm font-medium">Same-day delivery</span>
             </div>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Secure payments</span>
+            <div className="flex items-center justify-center space-x-3">
+              <div className="w-2 h-2 bg-white rounded-full flex-shrink-0 shadow-sm"></div>
+              <span className="drop-shadow-sm font-medium">Secure payments</span>
             </div>
           </div>
         </div>
