@@ -71,7 +71,7 @@ export default function CheckoutPage() {
   const { data: addressesData } = useQuery({
     queryKey: ['/api/auth/addresses'],
     queryFn: async () => {
-      const res = await apiRequest('GET', '/api/auth/addresses');
+      const res = await apiRequest('/api/auth/addresses', 'GET');
       return res.json();
     },
     enabled: isAuthenticated
@@ -170,7 +170,7 @@ export default function CheckoutPage() {
   const addAddressMutation = useMutation({
     mutationFn: async (data: AddressForm) => {
       console.log('Making API request with data:', data);
-      const res = await apiRequest('POST', '/api/auth/addresses', data);
+      const res = await apiRequest('/api/auth/addresses', 'POST', data);
       console.log('API response status:', res.status);
       if (!res.ok) {
         const errorText = await res.text();
