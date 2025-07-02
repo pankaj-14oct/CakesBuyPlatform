@@ -308,6 +308,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Address Management
+  app.get("/api/auth/addresses", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const user = await storage.getUser(req.user!.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user.addresses || []);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch addresses" });
+    }
+  });
+
+  app.post("/api/auth/addresses", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const addressData = addressSchema.parse(req.body);
+      const user = await storage.getUser(req.user!.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const currentAddresses = user.addresses || [];
+      const newAddress = {
+        ...addressData,
+        id: `addr_${Date.now()}`,
+        isDefault: currentAddresses.length === 0 // First address is default
+      };
+
+      const updatedAddresses = [...currentAddresses, newAddress];
+      await storage.updateUserAddresses(req.user!.id, updatedAddresses);
+      
+      res.status(201).json(newAddress);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid address data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create address" });
+    }
+  });
+
+  app.put("/api/auth/addresses/:id", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const addressData = addressSchema.parse(req.body);
+      const user = await storage.getUser(req.user!.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const currentAddresses = user.addresses || [];
+      const addressIndex = currentAddresses.findIndex(addr => addr.id === req.params.id);
+      
+      if (addressIndex === -1) {
+        return res.status(404).json({ message: "Address not found" });
+      }
+
+      currentAddresses[addressIndex] = { ...currentAddresses[addressIndex], ...addressData };
+      await storage.updateUserAddresses(req.user!.id, currentAddresses);
+      
+      res.json(currentAddresses[addressIndex]);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid address data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update address" });
+    }
+  });
+
+  app.delete("/api/auth/addresses/:id", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const user = await storage.getUser(req.user!.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const currentAddresses = user.addresses || [];
+      const updatedAddresses = currentAddresses.filter(addr => addr.id !== req.params.id);
+      
+      await storage.updateUserAddresses(req.user!.id, updatedAddresses);
+      res.json({ message: "Address deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete address" });
+    }
+  });
+
   // Event Reminders
   app.get("/api/reminders", authenticateToken, async (req: AuthRequest, res) => {
     try {

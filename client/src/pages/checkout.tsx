@@ -166,11 +166,7 @@ export default function CheckoutPage() {
   // Add address mutation
   const addAddressMutation = useMutation({
     mutationFn: async (data: AddressForm) => {
-      const addressData = {
-        ...data,
-        id: `addr_${Date.now()}`,
-      };
-      const res = await apiRequest('POST', '/api/auth/addresses', addressData);
+      const res = await apiRequest('POST', '/api/auth/addresses', data);
       return res.json();
     },
     onSuccess: (newAddress) => {
