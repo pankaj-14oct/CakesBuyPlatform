@@ -12,6 +12,7 @@ import Category from "@/pages/category";
 import Product from "@/pages/product";
 import Cart from "@/pages/cart";
 import Checkout from "@/pages/checkout";
+import DeliveryPage from "@/pages/delivery";
 import AuthPage from "@/pages/auth";
 import OtpAuthPage from "@/pages/otp-auth";
 import ProfilePage from "@/pages/profile";
@@ -128,6 +129,7 @@ function Router() {
       <Route path="/product/:slug" component={Product} />
       <Route path="/cart" component={Cart} />
       <Route path="/checkout" component={Checkout} />
+      <Route path="/delivery" component={DeliveryPage} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/otp-register" component={OtpAuthPage} />
       <Route path="/profile" component={ProfilePage} />

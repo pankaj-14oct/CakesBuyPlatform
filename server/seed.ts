@@ -110,11 +110,22 @@ const seedData = {
   ],
 
   deliveryAreas: [
-    { name: "Sector 14", pincode: "122001", deliveryCharge: "50", isActive: true },
-    { name: "Cyber City", pincode: "122002", deliveryCharge: "60", isActive: true },
-    { name: "Golf Course Road", pincode: "122003", deliveryCharge: "70", isActive: true },
-    { name: "MG Road", pincode: "122004", deliveryCharge: "50", isActive: true },
-    { name: "Sohna Road", pincode: "122005", deliveryCharge: "80", isActive: true },
+    { name: "Sector 14", pincode: "122001", deliveryFee: "50", freeDeliveryThreshold: "500", sameDayAvailable: true, midnightAvailable: true, isActive: true },
+    { name: "Cyber City", pincode: "122002", deliveryFee: "60", freeDeliveryThreshold: "500", sameDayAvailable: true, midnightAvailable: true, isActive: true },
+    { name: "Golf Course Road", pincode: "122003", deliveryFee: "70", freeDeliveryThreshold: "500", sameDayAvailable: true, midnightAvailable: false, isActive: true },
+    { name: "MG Road", pincode: "122004", deliveryFee: "50", freeDeliveryThreshold: "500", sameDayAvailable: true, midnightAvailable: true, isActive: true },
+    { name: "Sohna Road", pincode: "122005", deliveryFee: "80", freeDeliveryThreshold: "500", sameDayAvailable: true, midnightAvailable: false, isActive: true },
+    { name: "Udyog Vihar", pincode: "122006", deliveryFee: "60", freeDeliveryThreshold: "500", sameDayAvailable: true, midnightAvailable: true, isActive: true },
+    { name: "Sector 49", pincode: "122007", deliveryFee: "50", freeDeliveryThreshold: "500", sameDayAvailable: true, midnightAvailable: true, isActive: true },
+    { name: "Sector 56", pincode: "122009", deliveryFee: "70", freeDeliveryThreshold: "500", sameDayAvailable: true, midnightAvailable: false, isActive: true },
+    { name: "Sector 40", pincode: "122011", deliveryFee: "60", freeDeliveryThreshold: "500", sameDayAvailable: true, midnightAvailable: true, isActive: true },
+    { name: "Sector 45", pincode: "122012", deliveryFee: "50", freeDeliveryThreshold: "500", sameDayAvailable: true, midnightAvailable: true, isActive: true },
+    { name: "Sector 46", pincode: "122015", deliveryFee: "70", freeDeliveryThreshold: "500", sameDayAvailable: true, midnightAvailable: true, isActive: true },
+    { name: "Sector 47", pincode: "122016", deliveryFee: "60", freeDeliveryThreshold: "500", sameDayAvailable: true, midnightAvailable: false, isActive: true },
+    { name: "Sector 50", pincode: "122017", deliveryFee: "50", freeDeliveryThreshold: "500", sameDayAvailable: true, midnightAvailable: true, isActive: true },
+    { name: "Sector 51", pincode: "122018", deliveryFee: "70", freeDeliveryThreshold: "500", sameDayAvailable: true, midnightAvailable: true, isActive: true },
+    { name: "Nirvana Country", pincode: "122051", deliveryFee: "80", freeDeliveryThreshold: "500", sameDayAvailable: false, midnightAvailable: false, isActive: true },
+    { name: "Emerald Hills", pincode: "122052", deliveryFee: "80", freeDeliveryThreshold: "500", sameDayAvailable: false, midnightAvailable: false, isActive: true },
   ],
 
   promoCodes: [

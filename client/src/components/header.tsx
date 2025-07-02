@@ -25,9 +25,24 @@ export default function Header() {
   ];
 
   const checkPincode = async () => {
-    if (!pincode) return;
-    // API call to check delivery area
-    console.log('Checking pincode:', pincode);
+    if (!pincode) {
+      alert('Please enter a pincode');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/delivery-areas/check/${pincode}`);
+      const data = await response.json();
+      
+      if (data.available) {
+        alert(`✅ ${data.message}\nDelivery Fee: ₹${data.area.deliveryFee}\nFree delivery on orders above ₹${data.area.freeDeliveryThreshold}`);
+      } else {
+        alert(`❌ ${data.message}\nWe currently deliver to: 122001, 122002, 122003, 122004, 122005, 122006, 122007, 122009, 122011, 122012, 122015, 122016, 122017, 122018, 122051, 122052`);
+      }
+    } catch (error) {
+      console.error('Error checking pincode:', error);
+      alert('Error checking delivery area. Please try again.');
+    }
   };
 
   return (
