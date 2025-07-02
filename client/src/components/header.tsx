@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ShoppingCart, Menu, MapPin, Search, User, LogOut, Package, Heart, Calendar, Wallet, MapPinIcon, MessageCircle, Settings } from 'lucide-react';
+import { ShoppingCart, Menu, MapPin, Search, User, LogOut, Package, Heart, Calendar, Wallet, MapPinIcon, MessageCircle, Settings, Truck } from 'lucide-react';
 import { useCart } from './cart-context';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -95,6 +95,14 @@ export default function Header() {
                 Check
               </Button>
             </div>
+
+            {/* Track Order */}
+            <Link href="/track-order">
+              <Button className="bg-red-500 text-white hover:bg-red-600 hidden lg:flex items-center gap-2 px-4 py-2 text-sm font-medium">
+                <Truck className="h-4 w-4" />
+                Track Order
+              </Button>
+            </Link>
 
             {/* Search - Mobile */}
             <Button variant="ghost" size="icon" className="md:hidden">
@@ -257,6 +265,14 @@ export default function Header() {
                       Check
                     </Button>
                   </div>
+
+                  {/* Mobile Track Order */}
+                  <Link href="/track-order">
+                    <Button className="bg-red-500 text-white hover:bg-red-600 w-full flex items-center justify-center gap-2 py-3">
+                      <Truck className="h-5 w-5" />
+                      Track Order
+                    </Button>
+                  </Link>
 
                   {/* Mobile Navigation */}
                   <nav className="flex flex-col space-y-4">
