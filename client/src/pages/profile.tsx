@@ -14,8 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { Home, Building, MapPin, Plus, Edit, Trash2, User, Calendar, Bell } from 'lucide-react';
-import { useLocation } from 'wouter';
+import { Home, Building, MapPin, Plus, Edit, Trash2, User, Calendar, Bell, Package, Coins } from 'lucide-react';
+import { useLocation, Link } from 'wouter';
 import { useEffect } from 'react';
 
 const addressSchema = z.object({
@@ -245,6 +245,41 @@ export default function ProfilePage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-charcoal mb-2">My Profile</h1>
           <p className="text-charcoal opacity-70">Manage your account, special dates, and delivery addresses</p>
+        </div>
+
+        {/* Quick Navigation Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <Link href="/orders">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer border-2 hover:border-caramel">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-4">
+                  <div className="bg-caramel/10 p-3 rounded-lg">
+                    <Package className="h-6 w-6 text-caramel" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-charcoal">My Orders</h3>
+                    <p className="text-sm text-charcoal opacity-70">View order history and track deliveries</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+          
+          <Link href="/loyalty">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer border-2 hover:border-caramel">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-4">
+                  <div className="bg-caramel/10 p-3 rounded-lg">
+                    <Coins className="h-6 w-6 text-caramel" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-charcoal">Loyalty Program</h3>
+                    <p className="text-sm text-charcoal opacity-70">Earn points and redeem rewards</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
 
         <Tabs defaultValue="personal" className="space-y-6">

@@ -188,7 +188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Award loyalty points if user is authenticated
       if (req.user && orderData.userId) {
         try {
-          const orderTotal = parseFloat(order.totalAmount);
+          const orderTotal = parseFloat(order.total);
           // Award 1 point per ₹10 spent (10% back in points)
           const pointsToAward = Math.floor(orderTotal / 10);
           

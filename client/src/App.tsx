@@ -15,6 +15,8 @@ import Checkout from "@/pages/checkout";
 import AuthPage from "@/pages/auth";
 import OtpAuthPage from "@/pages/otp-auth";
 import ProfilePage from "@/pages/profile";
+import OrdersPage from "@/pages/orders";
+import LoyaltyPage from "@/pages/loyalty";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminCategories from "@/pages/admin/categories";
 import AdminProducts from "@/pages/admin/products";
@@ -129,6 +131,8 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <Route path="/otp-register" component={OtpAuthPage} />
       <Route path="/profile" component={ProfilePage} />
+      <Route path="/orders" component={OrdersPage} />
+      <Route path="/loyalty" component={LoyaltyPage} />
       <Route component={NotFound} />
     </Switch>
   );
