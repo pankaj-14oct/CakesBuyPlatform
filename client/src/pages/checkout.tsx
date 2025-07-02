@@ -269,11 +269,19 @@ export default function CheckoutPage() {
       };
     } else if (isAuthenticated && !useGuestCheckout && !selectedAddress) {
       // No address selected when using saved addresses
-      toast({
-        title: "No address selected",
-        description: "Please select a delivery address or switch to guest checkout",
-        variant: "destructive"
-      });
+      if (showAddAddressDialog) {
+        toast({
+          title: "Complete address first",
+          description: "Please finish adding your new address or cancel to select from existing addresses",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "No address selected",
+          description: "Please select a delivery address or switch to guest checkout",
+          variant: "destructive"
+        });
+      }
       setIsPlacingOrder(false);
       return;
     } else {
@@ -920,7 +928,7 @@ export default function CheckoutPage() {
               <Button
                 type="submit"
                 size="lg"
-                disabled={isPlacingOrder || createOrderMutation.isPending}
+                disabled={isPlacingOrder || createOrderMutation.isPending || showAddAddressDialog}
                 className="w-full bg-brown text-white hover:bg-opacity-90"
               >
                 {isPlacingOrder || createOrderMutation.isPending ? (
