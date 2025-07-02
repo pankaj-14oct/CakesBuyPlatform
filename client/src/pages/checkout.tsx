@@ -169,10 +169,20 @@ export default function CheckoutPage() {
   // Add address mutation
   const addAddressMutation = useMutation({
     mutationFn: async (data: AddressForm) => {
+      console.log('Making API request with data:', data);
       const res = await apiRequest('POST', '/api/auth/addresses', data);
-      return res.json();
+      console.log('API response status:', res.status);
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('API error response:', errorText);
+        throw new Error(errorText);
+      }
+      const result = await res.json();
+      console.log('API response data:', result);
+      return result;
     },
     onSuccess: (newAddress) => {
+      console.log('Address saved successfully:', newAddress);
       queryClient.invalidateQueries({ queryKey: ['/api/auth/addresses'] });
       setShowAddAddressDialog(false);
       setSelectedAddress(newAddress);
@@ -183,6 +193,7 @@ export default function CheckoutPage() {
       });
     },
     onError: (error: any) => {
+      console.error('Address save error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to save address",
@@ -203,6 +214,7 @@ export default function CheckoutPage() {
   };
 
   const onSubmitAddress = (data: AddressForm) => {
+    console.log('Submitting address data:', data);
     addAddressMutation.mutate(data);
   };
 
