@@ -12,10 +12,11 @@ import {
   Heart, Star, Truck, Plus, Minus, 
   MessageCircle
 } from 'lucide-react';
-import { Cake, Review } from '@shared/schema';
+import { Cake, Review, Addon } from '@shared/schema';
 import { formatPrice } from '@/lib/utils';
 import { useCart } from '@/components/cart-context';
 import { useToast } from '@/hooks/use-toast';
+import AddonSelectionModal from '@/components/addon-selection-modal';
 
 export default function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -24,6 +25,7 @@ export default function ProductPage() {
   const [customMessage, setCustomMessage] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
+  const [showAddonModal, setShowAddonModal] = useState(false);
   const { dispatch } = useCart();
   const { toast } = useToast();
 
@@ -86,6 +88,30 @@ export default function ProductPage() {
   const totalPrice = basePrice * quantity;
 
   const handleAddToCart = () => {
+    // Validate required selections
+    if (!selectedWeight && cake.weights && cake.weights.length > 1) {
+      toast({
+        title: "Please select a weight",
+        description: "Choose your preferred cake weight before adding to cart.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!selectedFlavor && cake.flavors && cake.flavors.length > 1) {
+      toast({
+        title: "Please select a flavor",
+        description: "Choose your preferred cake flavor before adding to cart.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Show addon selection modal
+    setShowAddonModal(true);
+  };
+
+  const handleAddonSelection = (selectedAddons: { addon: Addon; quantity: number }[]) => {
     const weight = selectedWeight || cake.weights?.[0]?.weight || '';
     const flavor = selectedFlavor || cake.flavors?.[0] || '';
     const price = selectedWeightData?.price || cake.weights?.[0]?.price || 0;
@@ -98,13 +124,13 @@ export default function ProductPage() {
       flavor,
       customMessage: customMessage.trim() || undefined,
       price,
-      addons: []
+      addons: selectedAddons
     };
 
     dispatch({ type: 'ADD_ITEM', payload: cartItem });
     toast({
       title: "Added to cart!",
-      description: `${cake.name} has been added to your cart.`,
+      description: `${cake.name} with ${selectedAddons.length} addons has been added to your cart.`,
     });
   };
 
@@ -458,6 +484,13 @@ export default function ProductPage() {
           </Tabs>
         </div>
       </div>
+
+      {/* Addon Selection Modal */}
+      <AddonSelectionModal
+        isOpen={showAddonModal}
+        onClose={() => setShowAddonModal(false)}
+        onContinue={handleAddonSelection}
+      />
     </div>
   );
 }
