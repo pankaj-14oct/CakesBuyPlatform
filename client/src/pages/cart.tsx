@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,11 +8,12 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { 
   Plus, Minus, Trash2, ShoppingBag, ArrowLeft, 
-  Truck, Tag, Gift, Heart 
+  Truck, Tag, Gift, Heart, Star
 } from 'lucide-react';
 import { useCart } from '@/components/cart-context';
 import { formatPrice } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function CartPage() {
   const { state: cartState, dispatch } = useCart();
@@ -19,6 +21,15 @@ export default function CartPage() {
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
   const { toast } = useToast();
+
+  // Fetch addons for recommendations
+  const { data: addons } = useQuery({
+    queryKey: ['/api/addons'],
+    queryFn: async () => {
+      const res = await apiRequest('GET', '/api/addons');
+      return res.json();
+    }
+  });
 
   const subtotal = cartState.total;
   const deliveryFee = subtotal >= 500 ? 0 : 50;
@@ -43,6 +54,31 @@ export default function CartPage() {
       title: "Item removed",
       description: "Item has been removed from your cart.",
     });
+  };
+
+  const handleAddAddon = (addon: any) => {
+    // Find the first cake item in the cart to add the addon to
+    const firstCakeItem = cartState.items[0];
+    if (firstCakeItem) {
+      dispatch({ 
+        type: 'ADD_ADDON', 
+        payload: { 
+          itemId: firstCakeItem.id, 
+          addon: addon,
+          quantity: 1
+        } 
+      });
+      toast({
+        title: "Addon added!",
+        description: `${addon.name} has been added to your cart.`,
+      });
+    } else {
+      toast({
+        title: "Add a cake first",
+        description: "Please add a cake to your cart before adding addons.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleApplyPromo = async () => {
@@ -135,7 +171,7 @@ export default function CartPage() {
                     {/* Product Image */}
                     <div className="flex-shrink-0">
                       <img 
-                        src={item.cake.images[0] || '/placeholder-cake.jpg'} 
+                        src={(item.cake.images && item.cake.images[0]) || '/api/placeholder/200/200'} 
                         alt={item.cake.name}
                         className="w-24 h-24 object-cover rounded-lg"
                       />
@@ -226,6 +262,50 @@ export default function CartPage() {
                 </CardContent>
               </Card>
             ))}
+
+            {/* Addons Section */}
+            {addons && addons.length > 0 && (
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle className="text-lg text-charcoal">
+                    Treat Yourself <span className="text-caramel">More</span> With
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {addons.slice(0, 4).map((addon: any) => (
+                      <div key={addon.id} className="bg-white rounded-lg border p-3 text-center">
+                        <div className="mb-3">
+                          <img 
+                            src={addon.image || '/api/placeholder/100/100'} 
+                            alt={addon.name}
+                            className="w-16 h-16 mx-auto rounded-lg object-cover"
+                          />
+                        </div>
+                        <h4 className="font-medium text-charcoal text-sm mb-1">{addon.name}</h4>
+                        <div className="text-caramel font-bold text-sm mb-2">
+                          {formatPrice(parseFloat(addon.price))}
+                        </div>
+                        <div className="flex items-center justify-center mb-2">
+                          <div className="flex items-center text-yellow-500 text-xs">
+                            <Star className="h-3 w-3 fill-current" />
+                            <span className="ml-1">4.5</span>
+                            <span className="text-gray-500 ml-1">(120 Reviews)</span>
+                          </div>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          className="w-full bg-white border border-caramel text-caramel hover:bg-caramel hover:text-white text-xs"
+                          onClick={() => handleAddAddon(addon)}
+                        >
+                          Add to Cart
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Suggestions */}
             <Card className="bg-gradient-to-r from-pink/10 to-caramel/10 border-pink/20">

@@ -27,6 +27,7 @@ type CartAction =
   | { type: 'REMOVE_ITEM'; payload: number }
   | { type: 'UPDATE_QUANTITY'; payload: { id: number; quantity: number } }
   | { type: 'UPDATE_ITEM'; payload: { id: number; updates: Partial<CartItem> } }
+  | { type: 'ADD_ADDON'; payload: { itemId: number; addon: Addon; quantity: number } }
   | { type: 'CLEAR_CART' };
 
 const cartReducer = (state: CartState, action: CartAction): CartState => {
@@ -79,6 +80,35 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
           ? { ...item, ...action.payload.updates }
           : item
       );
+
+      const total = calculateTotal(newItems);
+      const itemCount = newItems.reduce((sum, item) => sum + item.quantity, 0);
+
+      return { items: newItems, total, itemCount };
+    }
+
+    case 'ADD_ADDON': {
+      const newItems = state.items.map(item => {
+        if (item.id === action.payload.itemId) {
+          const existingAddonIndex = item.addons.findIndex(
+            a => a.addon.id === action.payload.addon.id
+          );
+
+          if (existingAddonIndex > -1) {
+            // Update existing addon quantity
+            const updatedAddons = [...item.addons];
+            updatedAddons[existingAddonIndex].quantity += action.payload.quantity;
+            return { ...item, addons: updatedAddons };
+          } else {
+            // Add new addon
+            return {
+              ...item,
+              addons: [...item.addons, { addon: action.payload.addon, quantity: action.payload.quantity }]
+            };
+          }
+        }
+        return item;
+      });
 
       const total = calculateTotal(newItems);
       const itemCount = newItems.reduce((sum, item) => sum + item.quantity, 0);
