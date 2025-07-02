@@ -68,7 +68,7 @@ export default function ProfilePage() {
   });
 
   // Fetch user addresses
-  const { data: addressesData, isLoading } = useQuery({
+  const { data: addresses, isLoading: addressesLoading } = useQuery({
     queryKey: ['/api/auth/addresses'],
     queryFn: async () => {
       const res = await apiRequest('GET', '/api/auth/addresses');
@@ -76,8 +76,6 @@ export default function ProfilePage() {
     },
     enabled: isAuthenticated
   });
-
-  const addresses = addressesData?.addresses || [];
 
   const addressForm = useForm<AddressForm>({
     resolver: zodResolver(addressSchema),
@@ -219,9 +217,15 @@ export default function ProfilePage() {
       pincode: '',
       city: 'Gurgaon',
       landmark: '',
-      isDefault: addresses.length === 0
+      isDefault: addresses?.length === 0
     });
     setShowAddDialog(true);
+  };
+
+  const handleDeleteAddress = (addressId: string) => {
+    if (confirm('Are you sure you want to delete this address?')) {
+      deleteAddressMutation.mutate(addressId);
+    }
   };
 
   const getAddressIcon = (type: string) => {
@@ -536,9 +540,58 @@ export default function ProfilePage() {
                 </Dialog>
               </CardHeader>
               <CardContent>
-                <p className="text-center py-8 text-charcoal opacity-70">
-                  Address management will be implemented here
-                </p>
+                {addressesLoading ? (
+                  <p className="text-center py-8 text-charcoal opacity-70">Loading addresses...</p>
+                ) : !addresses || addresses.length === 0 ? (
+                  <div className="text-center py-8">
+                    <MapPin className="h-12 w-12 mx-auto text-charcoal opacity-30 mb-4" />
+                    <p className="text-charcoal opacity-70 mb-4">No addresses saved yet</p>
+                    <p className="text-sm text-charcoal opacity-60">
+                      Add your first delivery address above
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {addresses.map((address: any) => (
+                      <div key={address.id} className="border rounded-lg p-4 bg-white hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-medium text-charcoal capitalize flex items-center gap-2">
+                              {address.type === 'home' && <Home className="h-4 w-4" />}
+                              {address.type === 'work' && <Building className="h-4 w-4" />}
+                              {address.type === 'other' && <MapPin className="h-4 w-4" />}
+                              {address.name}
+                            </h3>
+                            {address.isDefault && (
+                              <Badge variant="secondary" className="text-xs">Default</Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditAddress(address)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteAddress(address.id)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <p className="text-sm text-charcoal opacity-70">
+                          {address.address}, {address.city} - {address.pincode}
+                          {address.landmark && `, ${address.landmark}`}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
