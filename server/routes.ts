@@ -789,6 +789,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get current user info (for authentication persistence)
+  app.get("/api/auth/me", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({
+        user: {
+          id: user.id,
+          email: user.email,
+          phone: user.phone,
+          birthday: user.birthday,
+          anniversary: user.anniversary,
+          addresses: user.addresses,
+          loyaltyPoints: user.loyaltyPoints,
+          loyaltyTier: user.loyaltyTier,
+          totalSpent: user.totalSpent,
+          orderCount: user.orderCount
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user information" });
+    }
+  });
+
   // Loyalty Program Routes
   
   // Get user loyalty stats
