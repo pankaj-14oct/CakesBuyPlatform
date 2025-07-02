@@ -40,6 +40,7 @@ const checkoutSchema = z.object({
   // Guest checkout fields (when not authenticated)
   guestName: z.string().optional(),
   guestPhone: z.string().optional(),
+  guestEmail: z.string().email().optional(),
   guestAddress: z.string().optional(),
   guestPincode: z.string().optional(),
   guestCity: z.string().optional(),
@@ -143,6 +144,7 @@ export default function CheckoutPage() {
       guestCity: 'Gurgaon',
       guestName: '',
       guestPhone: '',
+      guestEmail: '',
       guestAddress: '',
       guestPincode: '',
       guestLandmark: ''
@@ -310,6 +312,7 @@ export default function CheckoutPage() {
       deliveryAddress = {
         name: data.guestName,
         phone: data.guestPhone,
+        email: data.guestEmail,
         address: data.guestAddress,
         pincode: data.guestPincode,
         city: data.guestCity,
@@ -649,6 +652,24 @@ export default function CheckoutPage() {
                             </p>
                           )}
                         </div>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="guestEmail">Email Address (Optional)</Label>
+                        <Input
+                          id="guestEmail"
+                          type="email"
+                          {...form.register('guestEmail')}
+                          placeholder="your.email@example.com"
+                        />
+                        {form.formState.errors.guestEmail && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {form.formState.errors.guestEmail.message}
+                          </p>
+                        )}
+                        <p className="text-sm text-gray-600 mt-1">
+                          We'll send order confirmation and delivery updates to this email
+                        </p>
                       </div>
 
                       <div>

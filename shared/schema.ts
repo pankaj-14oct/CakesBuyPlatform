@@ -95,6 +95,7 @@ export const orders = pgTable("orders", {
   deliveryAddress: jsonb("delivery_address").$type<{
     name: string;
     phone: string;
+    email?: string;
     address: string;
     pincode: string;
     city: string;

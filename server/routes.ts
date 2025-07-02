@@ -27,7 +27,7 @@ import {
   optionalAuth, 
   type AuthRequest 
 } from "./auth";
-import { sendReminderEmail, type ReminderEmailData } from "./email-service";
+import { sendReminderEmail, type ReminderEmailData, sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, type OrderEmailData } from "./email-service";
 
 // Helper function to create event reminders
 async function createEventReminder(userId: number, eventType: 'birthday' | 'anniversary', eventDate: string) {
@@ -214,6 +214,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error('Failed to update loyalty points:', loyaltyError);
         }
       }
+
+      // Send order confirmation email
+      try {
+        let customerEmail = order.deliveryAddress.email;
+        const customerName = order.deliveryAddress.name;
+        
+        // If no email in delivery address and user is authenticated, get from user
+        if (!customerEmail && req.user) {
+          const user = await storage.getUser(req.user.id);
+          customerEmail = user?.email;
+        }
+        
+        if (customerEmail) {
+          const emailData: OrderEmailData = {
+            customerEmail,
+            customerName,
+            order
+          };
+          
+          await sendOrderConfirmationEmail(emailData);
+          console.log(`Order confirmation email sent to ${customerEmail} for order ${order.orderNumber}`);
+        }
+      } catch (emailError) {
+        // Don't fail the order if email fails
+        console.error('Failed to send order confirmation email:', emailError);
+      }
       
       res.status(201).json(order);
     } catch (error) {
@@ -245,7 +271,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/orders/:id/status", async (req, res) => {
+  app.patch("/api/orders/:id/status", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { status } = req.body;
       const orderId = parseInt(req.params.id);
@@ -254,9 +280,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Status is required" });
       }
 
+      const validStatuses = ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      // Update order status
       await storage.updateOrderStatus(orderId, status);
-      res.json({ message: "Order status updated successfully" });
+      
+      // Get updated order for email
+      const order = await storage.getOrder(orderId);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      // Send status update email
+      try {
+        let customerEmail = order.deliveryAddress.email;
+        const customerName = order.deliveryAddress.name;
+        
+        // If no email in delivery address and order has user, get from user
+        if (!customerEmail && order.userId) {
+          const user = await storage.getUser(order.userId);
+          customerEmail = user?.email;
+        }
+        
+        if (customerEmail) {
+          const emailData: OrderEmailData = {
+            customerEmail,
+            customerName,
+            order
+          };
+          
+          await sendOrderStatusUpdateEmail(emailData);
+          console.log(`Order status email sent to ${customerEmail} for order ${order.orderNumber} (${status})`);
+        }
+      } catch (emailError) {
+        // Don't fail the status update if email fails
+        console.error('Failed to send order status email:', emailError);
+      }
+
+      res.json({ message: "Order status updated successfully", order });
     } catch (error) {
+      console.error('Failed to update order status:', error);
       res.status(500).json({ message: "Failed to update order status" });
     }
   });
