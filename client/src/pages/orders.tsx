@@ -103,7 +103,9 @@ export default function OrdersPage() {
           <p className="text-charcoal opacity-70 mb-6">
             Sign in to view your order history and track deliveries
           </p>
-          <Button className="bg-caramel hover:bg-brown">Sign In</Button>
+          <Link href="/auth">
+            <Button className="bg-caramel hover:bg-brown">Sign In</Button>
+          </Link>
         </Card>
       </div>
     );
