@@ -45,15 +45,10 @@ export default function CartPage() {
   const { data: addons, isLoading: addonsLoading, error: addonsError } = useQuery({
     queryKey: ['/api/addons'],
     queryFn: async () => {
-      const res = await apiRequest('GET', '/api/addons');
+      const res = await apiRequest('/api/addons', 'GET');
       return res.json();
     }
   });
-
-  // Debug logging
-  console.log('Addons data:', addons);
-  console.log('Addons loading:', addonsLoading);
-  console.log('Addons error:', addonsError);
 
   const subtotal = cartState.total;
   const deliveryFee = subtotal >= 500 ? 0 : 50;
@@ -287,13 +282,6 @@ export default function CartPage() {
               </Card>
             ))}
 
-            {/* Addons Section with Carousel - Debug */}
-            <div className="mt-6 p-4 border rounded">
-              <p>Debug: Addons loading: {addonsLoading ? 'Yes' : 'No'}</p>
-              <p>Debug: Addons error: {addonsError ? 'Yes' : 'No'}</p>
-              <p>Debug: Addons data: {addons ? `${addons.length} items` : 'None'}</p>
-            </div>
-            
             {/* Addons Section with Carousel */}
             {addons && addons.length > 0 && (
               <Card className="mt-6">
