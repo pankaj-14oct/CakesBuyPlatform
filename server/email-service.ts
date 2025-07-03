@@ -1,15 +1,32 @@
-import { MailService } from '@sendgrid/mail';
+import nodemailer from 'nodemailer';
 import { Order } from '../shared/schema';
 
-if (!process.env.SENDGRID_API_KEY) {
-  console.warn("SENDGRID_API_KEY environment variable not set. Email reminders will be disabled.");
+if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+  console.warn("Gmail credentials not set. Email reminders will be disabled.");
+  console.warn("Please set GMAIL_USER and GMAIL_APP_PASSWORD environment variables.");
 }
 
-let mailService: MailService | null = null;
+let transporter: nodemailer.Transporter | null = null;
 
-if (process.env.SENDGRID_API_KEY) {
-  mailService = new MailService();
-  mailService.setApiKey(process.env.SENDGRID_API_KEY);
+if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+  transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD
+    }
+  });
+  
+  // Verify connection
+  if (transporter) {
+    transporter.verify(function(error, success) {
+      if (error) {
+        console.error('Gmail SMTP connection error:', error);
+      } else {
+        console.log('Gmail SMTP server is ready to send emails');
+      }
+    });
+  }
 }
 
 interface EmailParams {
@@ -21,31 +38,25 @@ interface EmailParams {
 }
 
 export async function sendEmail(params: EmailParams): Promise<boolean> {
-  if (!mailService) {
-    console.warn('SendGrid not configured. Email not sent:', params.subject);
+  if (!transporter) {
+    console.warn('Gmail not configured. Email not sent:', params.subject);
     return false;
   }
 
   try {
-    const mailData: any = {
-      to: params.to,
+    const mailOptions = {
       from: params.from,
+      to: params.to,
       subject: params.subject,
+      text: params.text,
+      html: params.html
     };
-    
-    if (params.text) {
-      mailData.text = params.text;
-    }
-    
-    if (params.html) {
-      mailData.html = params.html;
-    }
 
-    await mailService.send(mailData);
+    await transporter.sendMail(mailOptions);
     console.log(`Email sent successfully to ${params.to}: ${params.subject}`);
     return true;
   } catch (error) {
-    console.error('SendGrid email error:', error);
+    console.error('Gmail email error:', error);
     return false;
   }
 }
@@ -144,7 +155,7 @@ export async function sendReminderEmail(data: ReminderEmailData): Promise<boolea
 
   return await sendEmail({
     to: data.userEmail,
-    from: 'noreply@egglesscakes.com', // You'll need to verify this domain with SendGrid
+    from: process.env.GMAIL_USER || 'noreply@egglesscakes.com',
     subject,
     text,
     html
@@ -282,7 +293,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
 
   return await sendEmail({
     to: customerEmail,
-    from: 'orders@egglesscakes.com',
+    from: process.env.GMAIL_USER || 'orders@egglesscakes.com',
     subject,
     text,
     html
@@ -392,7 +403,7 @@ export async function sendOrderStatusUpdateEmail(data: OrderEmailData): Promise<
 
   return await sendEmail({
     to: customerEmail,
-    from: 'orders@egglesscakes.com',
+    from: process.env.GMAIL_USER || 'orders@egglesscakes.com',
     subject,
     text,
     html
