@@ -226,12 +226,13 @@ export default function CheckoutPage() {
 
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
-      console.log('Sending order data:', orderData);
+      console.log('Sending order data:', JSON.stringify(orderData, null, 2));
       const response = await apiRequest('/api/orders', 'POST', orderData);
       if (!response.ok) {
         const errorData = await response.text();
-        console.error('Order API error:', errorData);
-        throw new Error(`Order failed: ${response.status} ${errorData}`);
+        console.error('Order API error response:', errorData);
+        console.error('Order API error status:', response.status);
+        throw new Error(`Order failed: ${response.status} - ${errorData}`);
       }
       return response.json();
     },
@@ -255,6 +256,13 @@ export default function CheckoutPage() {
   });
 
   const onSubmit = async (data: CheckoutForm) => {
+    console.log('=== CHECKOUT FORM SUBMISSION ===');
+    console.log('Form data:', data);
+    console.log('Cart state:', cartState);
+    console.log('Is authenticated:', isAuthenticated);
+    console.log('Use guest checkout:', useGuestCheckout);
+    console.log('Selected address:', selectedAddress);
+    
     setIsPlacingOrder(true);
     
     // Validate time slot availability

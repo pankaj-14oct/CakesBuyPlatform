@@ -186,7 +186,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         orderData = insertOrderSchema.parse(req.body);
       } catch (validationError: any) {
-        console.error('Order validation error:', validationError);
+        console.error('Order validation error:', JSON.stringify(validationError, null, 2));
+        if (validationError.errors) {
+          console.error('Validation errors:', validationError.errors);
+        }
         return res.status(400).json({ 
           message: "Invalid order data", 
           errors: validationError.errors || validationError.message 
