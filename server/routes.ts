@@ -287,10 +287,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/orders/:id/status", authenticateToken, async (req: AuthRequest, res) => {
     try {
+      console.log('=== ORDER STATUS UPDATE REQUEST ===');
+      console.log('Request body:', req.body);
+      console.log('Order ID:', req.params.id);
+      console.log('User:', req.user);
+      
       const { status } = req.body;
       const orderId = parseInt(req.params.id);
       
       if (!status) {
+        console.error('Status validation failed: Status is required');
         return res.status(400).json({ message: "Status is required" });
       }
 

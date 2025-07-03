@@ -36,7 +36,7 @@ export default function AdminOrders() {
 
   const updateOrderMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
-      const response = await apiRequest('PATCH', `/api/orders/${id}/status`, { status });
+      const response = await apiRequest(`/api/orders/${id}/status`, 'PATCH', { status });
       return response.json();
     },
     onSuccess: () => {
