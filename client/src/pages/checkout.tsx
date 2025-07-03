@@ -271,14 +271,17 @@ export default function CheckoutPage() {
     // Determine delivery address
     let deliveryAddress;
     if (isAuthenticated && !useGuestCheckout && selectedAddress) {
-      // Use selected saved address
+      // Use selected saved address - get phone from user profile if not in address
+      const userResponse = await apiRequest('/api/profile', 'GET');
+      const userData = await userResponse.json();
+      
       deliveryAddress = {
         name: selectedAddress.name,
-        phone: selectedAddress.phone || '',
+        phone: selectedAddress.phone || userData.phone || '',
         address: selectedAddress.address,
         pincode: selectedAddress.pincode,
         city: selectedAddress.city,
-        landmark: selectedAddress.landmark
+        landmark: selectedAddress.landmark || ''
       };
     } else if (isAuthenticated && !useGuestCheckout && !selectedAddress) {
       // No address selected when using saved addresses

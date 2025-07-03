@@ -180,7 +180,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('Order request body:', JSON.stringify(req.body, null, 2));
       console.log('User from token:', req.user);
-      const orderData = insertOrderSchema.parse(req.body);
+      
+      // Validate the order data
+      let orderData;
+      try {
+        orderData = insertOrderSchema.parse(req.body);
+      } catch (validationError: any) {
+        console.error('Order validation error:', validationError);
+        return res.status(400).json({ 
+          message: "Invalid order data", 
+          errors: validationError.errors || validationError.message 
+        });
+      }
       
       // If user is authenticated, associate order with user
       if (req.user) {
