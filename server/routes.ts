@@ -28,6 +28,7 @@ import {
   type AuthRequest 
 } from "./auth";
 import { sendReminderEmail, type ReminderEmailData, sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, type OrderEmailData, sendWelcomeEmail, type WelcomeEmailData } from "./email-service";
+import type { User } from "@shared/schema";
 
 // Helper function to create event reminders
 async function createEventReminder(userId: number, eventType: 'birthday' | 'anniversary', eventDate: string) {
@@ -1156,6 +1157,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all users with upcoming events
+  // Get all users for admin panel
+  app.get("/api/admin/users", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      // Check if user is admin (for now, any authenticated user can access)
+      // In a real app, you'd check for admin role
+      
+      const users = await storage.getAllUsers();
+      
+      // Remove password field for security
+      const safeUsers = users.map((user: User) => ({
+        ...user,
+        password: undefined
+      }));
+      
+      res.json(safeUsers);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
   app.get("/api/admin/users/upcoming-events", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const users = await storage.getUsersWithUpcomingEvents();
