@@ -27,7 +27,7 @@ import {
   optionalAuth, 
   type AuthRequest 
 } from "./auth";
-import { sendReminderEmail, type ReminderEmailData, sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, type OrderEmailData } from "./email-service";
+import { sendReminderEmail, type ReminderEmailData, sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, type OrderEmailData, sendWelcomeEmail, type WelcomeEmailData } from "./email-service";
 
 // Helper function to create event reminders
 async function createEventReminder(userId: number, eventType: 'birthday' | 'anniversary', eventDate: string) {
@@ -790,6 +790,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Generate JWT token
+      // Send welcome email
+      const welcomeEmailData: WelcomeEmailData = {
+        userEmail: newUser.email,
+        userName: newUser.email.split("@")[0], // Use email prefix as name since name is not collected
+        userPhone: newUser.phone
+      };
+      
+      // Send welcome email asynchronously (dont wait for it to complete)
+      sendWelcomeEmail(welcomeEmailData).catch(error => {
+        console.error("Failed to send welcome email:", error);
+      });
       const token = generateToken(newUser.id, newUser.phone, newUser.email);
       
       res.status(201).json({
@@ -866,6 +877,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: hashedPassword,
         phone,
         addresses: []
+      });
+      // Send welcome email
+      const welcomeEmailData: WelcomeEmailData = {
+        userEmail: newUser.email,
+        userName: newUser.email.split("@")[0], // Use email prefix as name since name is not collected
+        userPhone: newUser.phone
+      };
+      
+      // Send welcome email asynchronously (dont wait for it to complete)
+      sendWelcomeEmail(welcomeEmailData).catch(error => {
+        console.error("Failed to send welcome email:", error);
       });
       
       // Generate JWT token
