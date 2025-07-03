@@ -973,6 +973,12 @@ export default function CheckoutPage() {
                 size="lg"
                 disabled={isPlacingOrder || createOrderMutation.isPending || showAddAddressDialog}
                 className="w-full bg-brown text-white hover:bg-opacity-90"
+                onClick={() => {
+                  console.log('=== PLACE ORDER BUTTON CLICKED ===');
+                  console.log('Form errors:', form.formState.errors);
+                  console.log('Is form valid:', form.formState.isValid);
+                  console.log('Button disabled state:', isPlacingOrder || createOrderMutation.isPending || showAddAddressDialog);
+                }}
               >
                 {isPlacingOrder || createOrderMutation.isPending ? (
                   'Placing Order...'
