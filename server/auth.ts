@@ -9,13 +9,13 @@ const JWT_EXPIRES_IN = '7d';
 export interface AuthRequest extends Request {
   user?: {
     id: number;
-    username: string;
+    phone: string;
     email: string;
   };
 }
 
-export const generateToken = (userId: number, username: string, email: string): string => {
-  return jwt.sign({ userId, username, email }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+export const generateToken = (userId: number, phone: string, email: string): string => {
+  return jwt.sign({ userId, phone, email }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
 
 export const hashPassword = async (password: string): Promise<string> => {
@@ -45,7 +45,7 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
 
     req.user = {
       id: user.id,
-      username: user.username,
+      phone: user.phone,
       email: user.email
     };
     
@@ -70,7 +70,7 @@ export const optionalAuth = async (req: AuthRequest, res: Response, next: NextFu
     if (user) {
       req.user = {
         id: user.id,
-        username: user.username,
+        phone: user.phone,
         email: user.email
       };
     }

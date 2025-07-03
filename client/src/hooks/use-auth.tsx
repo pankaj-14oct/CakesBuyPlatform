@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!token) return null;
       
       try {
-        const res = await apiRequest("GET", "/api/auth/me");
+        const res = await apiRequest("/api/auth/me", "GET");
         const data = await res.json();
         return data.user;
       } catch (error) {

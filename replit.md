@@ -138,6 +138,7 @@ The application uses a comprehensive database schema with the following main ent
 - July 2, 2025. Implemented comprehensive email reminder system for customer special dates - customers can enter birthday/anniversary dates in profile, admin panel manages reminder campaigns with discount codes, SendGrid integration for professional email delivery with customizable templates and automatic reminder scheduling
 - July 2, 2025. Enhanced authentication and cart persistence - users stay logged in after page refresh using localStorage token persistence and proper authentication verification, cart data persists across browser sessions using localStorage with automatic restore on page load
 - July 2, 2025. Implemented comprehensive email notification system for orders - SendGrid integration for professional order confirmation emails and status update notifications, guest checkout includes optional email field for non-authenticated users, automatic emails sent for order placement and all status changes (confirmed, preparing, out for delivery, delivered)
+- July 3, 2025. Successfully migrated from Replit Agent to standard Replit environment - Fixed authentication persistence issues by updating JWT token generation and verification to use phone numbers instead of usernames, users now stay logged in across page refreshes and server restarts using localStorage token persistence
 
 ## User Preferences
 
