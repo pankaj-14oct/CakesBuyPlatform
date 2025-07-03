@@ -40,7 +40,9 @@ const checkoutSchema = z.object({
   // Guest checkout fields (when not authenticated)
   guestName: z.string().optional(),
   guestPhone: z.string().optional(),
-  guestEmail: z.string().email().optional(),
+  guestEmail: z.string().optional().refine((val) => !val || z.string().email().safeParse(val).success, {
+    message: 'Invalid email address'
+  }),
   guestAddress: z.string().optional(),
   guestPincode: z.string().optional(),
   guestCity: z.string().optional(),
