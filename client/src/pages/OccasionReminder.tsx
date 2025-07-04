@@ -80,7 +80,13 @@ export default function OccasionReminder() {
         reminderDate: reminderDate,
       };
       
-      const res = await apiRequest("/api/reminders", "POST", apiData);
+      // Convert Date object to string before sending
+      const requestData = {
+        ...apiData,
+        reminderDate: reminderDate.toISOString()
+      };
+      
+      const res = await apiRequest("/api/reminders", "POST", requestData);
       return res.json();
     },
     onSuccess: () => {

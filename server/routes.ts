@@ -509,8 +509,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/reminders", authenticateToken, async (req: AuthRequest, res) => {
     try {
       console.log('Reminder request body:', JSON.stringify(req.body, null, 2));
+      
+      // Convert reminderDate string to Date object if needed
+      const bodyData = { ...req.body };
+      if (bodyData.reminderDate && typeof bodyData.reminderDate === 'string') {
+        bodyData.reminderDate = new Date(bodyData.reminderDate);
+      }
+      
       const reminderData = insertEventReminderSchema.parse({
-        ...req.body,
+        ...bodyData,
         userId: req.user!.id
       });
       const reminder = await storage.createEventReminder(reminderData);
