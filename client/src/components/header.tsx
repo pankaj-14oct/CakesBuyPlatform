@@ -13,6 +13,7 @@ export default function Header() {
   const [location, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const { state: cartState } = useCart();
   const { user, isAuthenticated, logoutMutation } = useAuth();
 
@@ -32,6 +33,7 @@ export default function Header() {
     e.preventDefault();
     if (searchQuery.trim()) {
       setLocation(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setIsMobileSearchOpen(false);
     }
   };
 
@@ -50,18 +52,6 @@ export default function Header() {
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px]">
                 <div className="flex flex-col space-y-4 mt-8">
-                  {/* Mobile Search */}
-                  <form onSubmit={handleSearch} className="relative">
-                    <Input
-                      type="text"
-                      placeholder="Search For Cakes..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2"
-                    />
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  </form>
-
                   {/* Mobile Track Order */}
                   <Link href="/track-order" onClick={() => setIsSheetOpen(false)}>
                     <Button className="bg-red-500 text-white hover:bg-red-600 w-full flex items-center justify-center gap-2 py-3">
@@ -236,7 +226,12 @@ export default function Header() {
               </Link>
 
               {/* Search - Mobile */}
-              <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-red-600 p-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="md:hidden text-white hover:bg-red-600 p-2"
+                onClick={() => setIsMobileSearchOpen(true)}
+              >
                 <Search className="h-5 w-5" />
               </Button>
 
@@ -405,6 +400,73 @@ export default function Header() {
           </div>
         </div>
       </nav>
+
+      {/* Mobile Search Overlay */}
+      {isMobileSearchOpen && (
+        <div className="fixed inset-0 z-50 bg-white md:hidden">
+          <div className="flex flex-col h-full">
+            {/* Search Header */}
+            <div className="bg-red-500 text-white p-4">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsMobileSearchOpen(false)}
+                  className="text-white hover:bg-red-600 p-2"
+                >
+                  <span className="text-xl">×</span>
+                </Button>
+                <form onSubmit={handleSearch} className="flex-1">
+                  <div className="relative">
+                    <Input
+                      type="text"
+                      placeholder="Search For Cakes..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 text-gray-900 bg-white rounded-lg border-0 text-lg"
+                      autoFocus
+                    />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            {/* Track Order Button */}
+            <div className="p-4">
+              <Link href="/track-order" onClick={() => setIsMobileSearchOpen(false)}>
+                <Button className="bg-red-500 text-white hover:bg-red-600 w-full flex items-center justify-center gap-2 py-4 text-lg rounded-lg">
+                  <Truck className="h-5 w-5" />
+                  Track Order
+                </Button>
+              </Link>
+            </div>
+
+            {/* Navigation Categories */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-4 space-y-4">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsMobileSearchOpen(false)}
+                    className="block py-3 text-lg font-medium text-gray-700 hover:text-red-500 border-b border-gray-100"
+                  >
+                    <div className="flex items-center justify-between">
+                      {item.label}
+                      {item.badge && (
+                        <Badge className="bg-red-500 text-white text-xs">
+                          {item.badge}
+                        </Badge>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
