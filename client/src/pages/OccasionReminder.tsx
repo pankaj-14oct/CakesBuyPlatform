@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Calendar, Gift, Heart, Plus, Trash2, Bell, Star } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
+import { apiRequest } from "@/lib/queryClient";
 
 const reminderSchema = z.object({
   title: z.string().min(1, "Reminder title is required"),
@@ -64,17 +65,7 @@ export default function OccasionReminder() {
         personName: data.title, // Using title as person name for now
       };
       
-      const res = await fetch("/api/reminders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(apiData),
-      });
-      
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to create reminder");
-      }
-      
+      const res = await apiRequest("/api/reminders", "POST", apiData);
       return res.json();
     },
     onSuccess: () => {
@@ -98,13 +89,7 @@ export default function OccasionReminder() {
   // Delete reminder mutation
   const deleteReminderMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`/api/reminders/${id}`, {
-        method: "DELETE",
-      });
-      
-      if (!res.ok) {
-        throw new Error("Failed to delete reminder");
-      }
+      await apiRequest(`/api/reminders/${id}`, "DELETE");
     },
     onSuccess: () => {
       toast({
@@ -307,7 +292,7 @@ export default function OccasionReminder() {
                   Add New Reminder
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>Add Reminder</DialogTitle>
                   <DialogDescription>
@@ -328,6 +313,28 @@ export default function OccasionReminder() {
                               {...field}
                             />
                           </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="eventType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Event Type</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select event type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="birthday">Birthday</SelectItem>
+                              <SelectItem value="anniversary">Anniversary</SelectItem>
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
