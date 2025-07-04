@@ -10,10 +10,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Gift, Heart, Plus, Trash2, Bell, Star } from "lucide-react";
+import { Calendar, Gift, Heart, Plus, Trash2, Bell, Star, Clock, Tag, ChevronDown } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const reminderSchema = z.object({
   title: z.string().min(1, "Reminder title is required"),
@@ -275,6 +276,161 @@ export default function OccasionReminder() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Features Overview */}
+        <div className="max-w-4xl mx-auto mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+              Discover ideal desserts & cakes, perfectly suited for your upcoming special occasion!
+            </h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-pink-100 rounded-lg">
+                  <Heart className="h-6 w-6 text-pink-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    Never forget loved one's special days
+                  </h3>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-2xl p-6 shadow-sm border">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-blue-100 rounded-lg">
+                  <Clock className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    Timely reminders before celebrations
+                  </h3>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-2xl p-6 shadow-sm border">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-yellow-100 rounded-lg">
+                  <Bell className="h-6 w-6 text-yellow-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    Save as many reminders as you want
+                  </h3>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-2xl p-6 shadow-sm border">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-red-100 rounded-lg">
+                  <Tag className="h-6 w-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    Use offers for future purchases anytime
+                  </h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="max-w-4xl mx-auto mb-16">
+          <div className="bg-white rounded-2xl p-8 shadow-sm border">
+            <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
+              FAQ's about EgglessCakes App
+            </h2>
+            
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger className="text-left text-lg font-medium">
+                  What are EgglessCakes occasion reminders?
+                </AccordionTrigger>
+                <AccordionContent className="text-gray-600">
+                  Occasion reminders are a feature that helps you save important dates like birthdays and anniversaries. We'll send you notifications before these special occasions with exclusive offers and discounts.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="item-2">
+                <AccordionTrigger className="text-left text-lg font-medium">
+                  How do EgglessCakes occasion reminders work?
+                </AccordionTrigger>
+                <AccordionContent className="text-gray-600">
+                  Simply save the special dates you want to remember. We'll send you email reminders one week before each occasion with exclusive discount codes and cake recommendations perfect for celebrating.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="item-3">
+                <AccordionTrigger className="text-left text-lg font-medium">
+                  What types of occasions can I set reminders for?
+                </AccordionTrigger>
+                <AccordionContent className="text-gray-600">
+                  You can set reminders for birthdays, anniversaries, and other special celebrations. Each reminder can be customized with a personal title to help you remember whose special day it is.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="item-4">
+                <AccordionTrigger className="text-left text-lg font-medium">
+                  How do I save occasion reminders?
+                </AccordionTrigger>
+                <AccordionContent className="text-gray-600">
+                  Click the "Add New Reminder" button, enter a reminder title (like "Mom's Birthday"), select the event type, and choose the date and month. Your reminder will be saved and you'll receive notifications before the special day.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="item-5">
+                <AccordionTrigger className="text-left text-lg font-medium">
+                  How many occasion reminders I can save?
+                </AccordionTrigger>
+                <AccordionContent className="text-gray-600">
+                  You can save as many reminders as you want! There's no limit on the number of special occasions you can track with our reminder system.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="item-6">
+                <AccordionTrigger className="text-left text-lg font-medium">
+                  How many reminders do I need to save to claim an offer?
+                </AccordionTrigger>
+                <AccordionContent className="text-gray-600">
+                  Save 3 reminders to unlock exclusive offers worth ₹750! Once you have 3 or more reminders saved, you'll be eligible for special discounts and promotional codes.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="item-7">
+                <AccordionTrigger className="text-left text-lg font-medium">
+                  How can I redeem the offers?
+                </AccordionTrigger>
+                <AccordionContent className="text-gray-600">
+                  You'll receive discount codes via email when we send reminder notifications. Use these codes during checkout to get special pricing on your cake orders.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="item-8">
+                <AccordionTrigger className="text-left text-lg font-medium">
+                  Can I place orders directly from the saved occasion reminder feature?
+                </AccordionTrigger>
+                <AccordionContent className="text-gray-600">
+                  While you can't place orders directly from reminders, you'll receive email notifications with cake recommendations and links to easily browse and order perfect cakes for each occasion.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="item-9">
+                <AccordionTrigger className="text-left text-lg font-medium">
+                  Is there an expiration date on occasion reminder offers?
+                </AccordionTrigger>
+                <AccordionContent className="text-gray-600">
+                  Yes, promotional codes typically have validity periods. Check the specific terms in your reminder emails for exact expiration dates and usage conditions.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        </div>
 
         {/* Current Reminders */}
         <Card className="mb-8">
