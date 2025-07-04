@@ -140,7 +140,6 @@ The application uses a comprehensive database schema with the following main ent
 - July 2, 2025. Implemented comprehensive email notification system for orders - SendGrid integration for professional order confirmation emails and status update notifications, guest checkout includes optional email field for non-authenticated users, automatic emails sent for order placement and all status changes (confirmed, preparing, out for delivery, delivered)
 - July 3, 2025. Successfully migrated from Replit Agent to standard Replit environment - Fixed authentication persistence issues by updating JWT token generation and verification to use phone numbers instead of usernames, users now stay logged in across page refreshes and server restarts using localStorage token persistence
 - July 3, 2025. Migrated email service from SendGrid to Gmail SMTP using order.cakesbuy@gmail.com - Configured nodemailer for reliable email delivery, added welcome/congratulations email for new user registrations with account details and platform benefits
-- July 3, 2025. Disabled welcome email functionality for user registration per user request - Welcome emails no longer sent when new users register to reduce email volume and improve user experience
 
 ## User Preferences
 

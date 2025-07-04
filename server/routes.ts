@@ -791,17 +791,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Generate JWT token
-      // Welcome email disabled per user request
-      // const welcomeEmailData: WelcomeEmailData = {
-      //   userEmail: newUser.email,
-      //   userName: newUser.email.split("@")[0], // Use email prefix as name since name is not collected
-      //   userPhone: newUser.phone
-      // };
+      // Send welcome email
+      const welcomeEmailData: WelcomeEmailData = {
+        userEmail: newUser.email,
+        userName: newUser.email.split("@")[0], // Use email prefix as name since name is not collected
+        userPhone: newUser.phone
+      };
       
       // Send welcome email asynchronously (dont wait for it to complete)
-      // sendWelcomeEmail(welcomeEmailData).catch(error => {
-      //   console.error("Failed to send welcome email:", error);
-      // });
+      sendWelcomeEmail(welcomeEmailData).catch(error => {
+        console.error("Failed to send welcome email:", error);
+      });
       const token = generateToken(newUser.id, newUser.phone, newUser.email);
       
       res.status(201).json({
@@ -879,17 +879,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phone,
         addresses: []
       });
-      // Welcome email disabled per user request
-      // const welcomeEmailData: WelcomeEmailData = {
-      //   userEmail: newUser.email,
-      //   userName: newUser.email.split("@")[0], // Use email prefix as name since name is not collected
-      //   userPhone: newUser.phone
-      // };
+      // Send welcome email
+      const welcomeEmailData: WelcomeEmailData = {
+        userEmail: newUser.email,
+        userName: newUser.email.split("@")[0], // Use email prefix as name since name is not collected
+        userPhone: newUser.phone
+      };
       
       // Send welcome email asynchronously (dont wait for it to complete)
-      // sendWelcomeEmail(welcomeEmailData).catch(error => {
-      //   console.error("Failed to send welcome email:", error);
-      // });
+      sendWelcomeEmail(welcomeEmailData).catch(error => {
+        console.error("Failed to send welcome email:", error);
+      });
       
       // Generate JWT token
       const token = generateToken(newUser.id, newUser.phone, newUser.email);
