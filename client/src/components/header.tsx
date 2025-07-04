@@ -14,6 +14,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { state: cartState } = useCart();
   const { user, isAuthenticated, logoutMutation } = useAuth();
 
@@ -361,11 +362,14 @@ export default function Header() {
                     </Button>
                   </Link>
                   {/* Mobile User Icon */}
-                  <Link href="/auth">
-                    <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-red-600 p-2">
-                      <User className="h-5 w-5" />
-                    </Button>
-                  </Link>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="md:hidden text-white hover:bg-red-600 p-2"
+                    onClick={() => setIsUserMenuOpen(true)}
+                  >
+                    <User className="h-5 w-5" />
+                  </Button>
                 </>
               )}
             </div>
@@ -467,6 +471,180 @@ export default function Header() {
           </div>
         </div>
       )}
+
+      {/* Mobile User Profile Sheet */}
+      <Sheet open={isUserMenuOpen} onOpenChange={setIsUserMenuOpen}>
+        <SheetContent side="right" className="w-[300px] p-0">
+          <div className="flex flex-col h-full">
+            {/* Profile Header */}
+            <div className="bg-gray-50 p-6 border-b">
+              {isAuthenticated ? (
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    {user?.phone?.slice(-1) || 'U'}
+                  </div>
+                  <div>
+                    <div className="font-bold text-gray-900 text-lg">
+                      Hey! {user?.phone?.slice(-4) || 'User'}...
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {user?.email || user?.phone}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <User className="h-6 w-6 text-gray-600" />
+                  </div>
+                  <Link href="/auth" onClick={() => setIsUserMenuOpen(false)}>
+                    <Button className="bg-red-500 text-white hover:bg-red-600 w-full">
+                      Sign In / Register
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Loyalty Points Banner (if authenticated) */}
+            {isAuthenticated && (
+              <div className="bg-orange-50 p-4 border-b flex items-center gap-3">
+                <div className="text-orange-600">
+                  <Settings className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-900">
+                    Submit Review & Earn 50 Points
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Menu Items */}
+            <div className="flex-1 overflow-y-auto">
+              {isAuthenticated ? (
+                <div className="p-4 space-y-1">
+                  <Button
+                    onClick={() => {
+                      setLocation('/orders');
+                      setIsUserMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12 text-left"
+                  >
+                    <Package className="h-5 w-5 text-gray-600" />
+                    <span className="font-medium">My Orders</span>
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      setLocation('/wishlist');
+                      setIsUserMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12 text-left"
+                  >
+                    <Heart className="h-5 w-5 text-gray-600" />
+                    <span className="font-medium">My Favourites</span>
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      setLocation('/track-order');
+                      setIsUserMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12 text-left"
+                  >
+                    <Truck className="h-5 w-5 text-gray-600" />
+                    <span className="font-medium">Track Order</span>
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      setLocation('/profile');
+                      setIsUserMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12 text-left"
+                  >
+                    <MapPinIcon className="h-5 w-5 text-gray-600" />
+                    <span className="font-medium">Manage Address</span>
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      setLocation('/loyalty');
+                      setIsUserMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12 text-left"
+                  >
+                    <FileText className="h-5 w-5 text-gray-600" />
+                    <span className="font-medium">My Cards</span>
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      setLocation('/profile');
+                      setIsUserMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12 text-left"
+                  >
+                    <Settings className="h-5 w-5 text-gray-600" />
+                    <span className="font-medium">My UPI</span>
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      setLocation('/loyalty');
+                      setIsUserMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12 text-left"
+                  >
+                    <Wallet className="h-5 w-5 text-gray-600" />
+                    <span className="font-medium">My Wallet</span>
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      setLocation('/profile');
+                      setIsUserMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12 text-left"
+                  >
+                    <MessageCircle className="h-5 w-5 text-gray-600" />
+                    <span className="font-medium">My Reviews</span>
+                  </Button>
+
+                  <div className="border-t pt-4 mt-4">
+                    <Button
+                      onClick={() => {
+                        logoutMutation.mutate();
+                        setIsUserMenuOpen(false);
+                      }}
+                      variant="ghost"
+                      className="w-full justify-start gap-3 h-12 text-left text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      <span className="font-medium">Logout</span>
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4">
+                  <div className="text-center text-gray-500">
+                    Please sign in to access your profile and orders.
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }
