@@ -39,11 +39,14 @@ interface EmailParams {
 
 export async function sendEmail(params: EmailParams): Promise<boolean> {
   if (!transporter) {
-    console.warn('Gmail not configured. Email not sent:', params.subject);
+    console.error('Gmail transporter not configured. Email not sent:', params.subject);
+    console.error('Check GMAIL_USER and GMAIL_APP_PASSWORD environment variables');
     return false;
   }
 
   try {
+    console.log(`Attempting to send email to: ${params.to}, subject: ${params.subject}`);
+    
     const mailOptions = {
       from: params.from,
       to: params.to,
@@ -52,11 +55,16 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
       html: params.html
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log(`Email sent successfully to ${params.to}: ${params.subject}`);
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`Email sent successfully to ${params.to}: ${params.subject}`, { messageId: result.messageId });
     return true;
   } catch (error) {
-    console.error('Gmail email error:', error);
+    console.error('Gmail email error details:', {
+      error: error instanceof Error ? error.message : error,
+      stack: error instanceof Error ? error.stack : undefined,
+      to: params.to,
+      subject: params.subject
+    });
     return false;
   }
 }
@@ -71,6 +79,8 @@ export interface ReminderEmailData {
 }
 
 export async function sendReminderEmail(data: ReminderEmailData): Promise<boolean> {
+  console.log('Preparing reminder email with data:', JSON.stringify(data, null, 2));
+  
   const eventTypeText = data.eventType === 'birthday' ? 'Birthday' : 'Anniversary';
   const discountText = data.discountCode && data.discountPercentage 
     ? `Get ${data.discountPercentage}% off with code ${data.discountCode}!` 

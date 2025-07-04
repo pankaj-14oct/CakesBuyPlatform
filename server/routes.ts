@@ -1396,6 +1396,7 @@ CakesBuy
             discountPercentage
           };
 
+          console.log(`Sending reminder email for user ${user.email}, event: ${reminder.eventType}, date: ${reminder.eventDate}`);
           const emailSent = await sendReminderEmail(emailData);
           
           if (emailSent) {
@@ -1404,8 +1405,10 @@ CakesBuy
               isProcessed: true 
             });
             results.push({ reminderId, success: true });
+            console.log(`Reminder email sent successfully for user ${user.email}`);
           } else {
-            results.push({ reminderId, success: false, error: "Email sending failed" });
+            results.push({ reminderId, success: false, error: "Email sending failed - check server logs for details" });
+            console.error(`Failed to send reminder email for user ${user.email}`);
           }
         } catch (error) {
           results.push({ reminderId, success: false, error: error instanceof Error ? error.message : 'Unknown error' });
