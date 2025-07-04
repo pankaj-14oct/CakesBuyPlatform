@@ -200,10 +200,28 @@ export default function OccasionReminder() {
     setIsDialogOpen(true);
   };
 
-  const handleCloseDialog = () => {
-    setIsDialogOpen(false);
+  const handleCloseDialog = (isOpen: boolean) => {
+    setIsDialogOpen(isOpen);
+    if (!isOpen) {
+      setEditingReminder(null);
+      form.reset({
+        eventType: "birthday",
+        relationshipType: "",
+        day: "",
+        month: "",
+      });
+    }
+  };
+
+  const handleAddNewReminder = () => {
     setEditingReminder(null);
-    form.reset();
+    form.reset({
+      eventType: "birthday",
+      relationshipType: "",
+      day: "",
+      month: "",
+    });
+    setIsDialogOpen(true);
   };
 
   const formatDate = (dateStr: string) => {
@@ -533,7 +551,7 @@ export default function OccasionReminder() {
             </div>
             <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
               <DialogTrigger asChild>
-                <Button className="bg-red-600 hover:bg-red-700 text-white">
+                <Button onClick={handleAddNewReminder} className="bg-red-600 hover:bg-red-700 text-white">
                   <Plus className="h-4 w-4 mr-2" />
                   Add New Reminder
                 </Button>
@@ -753,7 +771,7 @@ export default function OccasionReminder() {
           </p>
           {reminders.length === 0 && (
             <Button 
-              onClick={() => setIsDialogOpen(true)}
+              onClick={handleAddNewReminder}
               className="bg-red-600 hover:bg-red-700 text-white text-lg px-8 py-3"
             >
               <Plus className="h-5 w-5 mr-2" />
