@@ -13,32 +13,39 @@ EgglessCakes is a specialized full-stack e-commerce platform for ordering 100% e
 - **UI Framework**: Radix UI components with shadcn/ui design system
 - **Styling**: Tailwind CSS with custom color scheme (caramel, brown, pink themes)
 - **Build Tool**: Vite for development and production builds
+- **Authentication**: JWT token-based with localStorage persistence
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js framework
 - **Language**: TypeScript with ES modules
 - **API Design**: RESTful API with organized route handlers
 - **Development**: Hot reload with tsx for development server
+- **Authentication**: JWT-based with bcrypt password hashing
+- **Email Service**: Gmail SMTP with nodemailer integration
+- **Admin System**: Role-based access control with dedicated admin routes
 
 ### Data Storage Solutions
 - **Database**: PostgreSQL with Drizzle ORM
 - **Schema Management**: Drizzle Kit for migrations and schema updates
-- **Database Provider**: Neon serverless PostgreSQL (configured via @neondatabase/serverless)
-- **Session Management**: PostgreSQL-based sessions using connect-pg-simple
+- **Database Provider**: Replit PostgreSQL (configured via DATABASE_URL)
+- **Session Management**: JWT tokens with localStorage persistence
+- **Password Security**: bcrypt hashing with salt rounds
 
 ## Key Components
 
 ### Database Schema
 The application uses a comprehensive database schema with the following main entities:
 
-1. **Users**: Customer information with address management (JSONB for multiple addresses)
-2. **Categories**: Cake categories with slugs and metadata
-3. **Cakes**: Product catalog with pricing, customization options, and delivery settings
-4. **Orders**: Order management with status tracking
-5. **Addons**: Additional items (candles, cards, flowers)
-6. **Reviews**: Customer feedback system
-7. **Delivery Areas**: Service area management with pincode validation
-8. **Promo Codes**: Discount management system
+1. **Users**: Customer information with role-based access (customer/admin), loyalty program integration, password hashing
+2. **Categories**: Cake categories with slugs and metadata for product organization
+3. **Cakes**: Product catalog with pricing, customization options, delivery settings, and eggless specifications
+4. **Orders**: Complete order management with status tracking, payment integration, and email notifications
+5. **Addons**: Additional items (candles, cards, flowers) with pricing and availability
+6. **Reviews**: Customer feedback system with rating capabilities
+7. **Delivery Areas**: Service area management with pincode validation for Gurgaon delivery zones
+8. **Promo Codes**: Discount management system with usage tracking and expiration dates
+9. **Event Reminders**: Birthday/anniversary tracking with automated email notifications
+10. **Loyalty Rewards**: Points-based reward system with tier management and redemption tracking
 
 ### Frontend Components
 - **Layout Components**: Header with navigation, Footer with contact info
@@ -49,10 +56,16 @@ The application uses a comprehensive database schema with the following main ent
 ### API Endpoints
 - **GET /api/categories**: Category listing and individual category retrieval
 - **GET /api/cakes**: Product catalog with filtering (category, eggless, bestseller, search)
-- **Order Management**: Create orders, track status, user order history
-- **Addon System**: Additional product options
-- **Delivery**: Area validation and delivery options
-- **Reviews**: Product review system
+- **Order Management**: Create orders, track status, user order history, status updates with email notifications
+- **Addon System**: Additional product options with pricing and availability
+- **Delivery**: Area validation and delivery options for Gurgaon pincodes
+- **Reviews**: Product review system with rating capabilities
+- **Authentication**: User registration, login, JWT token management, forgot password with OTP
+- **Admin Routes**: Protected admin panel access with role-based authentication
+- **Loyalty System**: Points earning, tier management, reward redemption
+- **Event Reminders**: Birthday/anniversary tracking with automated notifications
+- **Profile Management**: User profile updates, address management, order history
+- **Email Service**: Test email functionality, order confirmations, welcome emails
 
 ## Data Flow
 
@@ -98,8 +111,11 @@ The application uses a comprehensive database schema with the following main ent
 ### Development Environment
 - **Platform**: Replit with Node.js 20, PostgreSQL 16
 - **Hot Reload**: Vite dev server with backend proxy
-- **Database**: Neon serverless PostgreSQL
+- **Database**: Replit PostgreSQL with automatic connection management
 - **Port Configuration**: Backend on 5000, proxied through Vite
+- **Email Service**: Gmail SMTP with nodemailer integration
+- **Authentication**: JWT tokens with bcrypt password hashing
+- **Admin Access**: Role-based authentication with dedicated admin user
 
 ### Production Build
 - **Frontend**: Vite build to static assets
@@ -144,6 +160,7 @@ The application uses a comprehensive database schema with the following main ent
 - July 3, 2025. Created comprehensive occasion reminder page with exclusive offers system - Users can save special dates (birthdays, anniversaries) to receive ₹750 worth of exclusive offers, includes modern UI with calendar illustrations, how-it-works section, benefits explanation, and reminder management with add/delete functionality
 - July 4, 2025. Added email service testing feature to admin settings panel - Administrators can now test email functionality by sending test emails to verify Gmail SMTP configuration, includes professional test email template with system information and timestamp
 - July 4, 2025. Implemented super admin authentication system - Added role-based access control with dedicated admin user (admin@cakesbuy.com / 1111111111), created secure admin login page at /admin-login, implemented admin middleware protection for all admin routes, users must authenticate as admin to access admin panel functionality
+- July 4, 2025. Successfully completed migration from Replit Agent to standard Replit environment - Set up PostgreSQL database with proper schema migrations, created admin user with secure authentication, configured Gmail SMTP email service, verified all features working properly with robust security practices and client/server separation
 
 ## User Preferences
 
