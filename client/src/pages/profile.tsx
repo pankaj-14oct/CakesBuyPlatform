@@ -282,21 +282,6 @@ export default function ProfilePage() {
       icon: <Home className="h-5 w-5" />
     },
     {
-      id: 'cards',
-      label: 'Manage Saved Cards',
-      icon: <CreditCard className="h-5 w-5" />
-    },
-    {
-      id: 'upi',
-      label: 'Manage Saved UPI',
-      icon: <FileText className="h-5 w-5" />
-    },
-    {
-      id: 'reviews',
-      label: 'My Reviews',
-      icon: <Star className="h-5 w-5" />
-    },
-    {
       id: 'profile',
       label: 'My Profile',
       icon: <User className="h-5 w-5" />
@@ -615,41 +600,7 @@ export default function ProfilePage() {
                   </div>
                 )}
 
-                {activeSection === 'cards' && (
-                  <div>
-                    <div className="border-b pb-4 mb-6">
-                      <h2 className="text-xl font-semibold text-gray-900">Manage Saved Cards</h2>
-                    </div>
-                    <div className="text-center py-12">
-                      <CreditCard className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-500">No saved cards</p>
-                    </div>
-                  </div>
-                )}
 
-                {activeSection === 'upi' && (
-                  <div>
-                    <div className="border-b pb-4 mb-6">
-                      <h2 className="text-xl font-semibold text-gray-900">Manage Saved UPI</h2>
-                    </div>
-                    <div className="text-center py-12">
-                      <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-500">No saved UPI IDs</p>
-                    </div>
-                  </div>
-                )}
-
-                {activeSection === 'reviews' && (
-                  <div>
-                    <div className="border-b pb-4 mb-6">
-                      <h2 className="text-xl font-semibold text-gray-900">My Reviews</h2>
-                    </div>
-                    <div className="text-center py-12">
-                      <Star className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-500">No reviews yet</p>
-                    </div>
-                  </div>
-                )}
 
                 {activeSection === 'profile' && (
                   <div>

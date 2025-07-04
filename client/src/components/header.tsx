@@ -296,14 +296,6 @@ export default function Header() {
                         </DropdownMenuItem>
                         
                         <DropdownMenuItem 
-                          onClick={() => setLocation('/wishlist')}
-                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
-                        >
-                          <Heart className="h-5 w-5 text-gray-600" />
-                          <span className="font-medium">My Favourites</span>
-                        </DropdownMenuItem>
-                        
-                        <DropdownMenuItem 
                           onClick={() => setLocation('/occasions')}
                           className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
                         >
@@ -325,30 +317,6 @@ export default function Header() {
                         >
                           <Wallet className="h-5 w-5 text-gray-600" />
                           <span className="font-medium">My Wallet</span>
-                        </DropdownMenuItem>
-                        
-                        <DropdownMenuItem 
-                          onClick={() => setLocation('/profile?section=cards')}
-                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
-                        >
-                          <CreditCard className="h-5 w-5 text-gray-600" />
-                          <span className="font-medium">Manage Saved Cards</span>
-                        </DropdownMenuItem>
-                        
-                        <DropdownMenuItem 
-                          onClick={() => setLocation('/profile?section=upi')}
-                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
-                        >
-                          <FileText className="h-5 w-5 text-gray-600" />
-                          <span className="font-medium">Manage Saved UPI</span>
-                        </DropdownMenuItem>
-                        
-                        <DropdownMenuItem 
-                          onClick={() => setLocation('/profile?section=reviews')}
-                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
-                        >
-                          <Star className="h-5 w-5 text-gray-600" />
-                          <span className="font-medium">My Reviews</span>
                         </DropdownMenuItem>
                         
                         <DropdownMenuItem 
@@ -583,67 +551,43 @@ export default function Header() {
 
                   <Button
                     onClick={() => {
-                      setLocation('/wishlist');
-                      setIsUserMenuOpen(false);
-                    }}
-                    variant="ghost"
-                    className="w-full justify-start gap-3 h-12 text-left"
-                  >
-                    <Heart className="h-5 w-5 text-gray-600" />
-                    <span className="font-medium">My Favourites</span>
-                  </Button>
-
-                  <Button
-                    onClick={() => {
-                      setLocation('/track-order');
-                      setIsUserMenuOpen(false);
-                    }}
-                    variant="ghost"
-                    className="w-full justify-start gap-3 h-12 text-left"
-                  >
-                    <Truck className="h-5 w-5 text-gray-600" />
-                    <span className="font-medium">Track Order</span>
-                  </Button>
-
-                  <Button
-                    onClick={() => {
-                      setLocation('/profile');
-                      setIsUserMenuOpen(false);
-                    }}
-                    variant="ghost"
-                    className="w-full justify-start gap-3 h-12 text-left"
-                  >
-                    <MapPinIcon className="h-5 w-5 text-gray-600" />
-                    <span className="font-medium">Manage Address</span>
-                  </Button>
-
-                  <Button
-                    onClick={() => {
-                      setLocation('/loyalty');
+                      setLocation('/invoices');
                       setIsUserMenuOpen(false);
                     }}
                     variant="ghost"
                     className="w-full justify-start gap-3 h-12 text-left"
                   >
                     <FileText className="h-5 w-5 text-gray-600" />
-                    <span className="font-medium">My Cards</span>
+                    <span className="font-medium">My Invoices</span>
                   </Button>
 
                   <Button
                     onClick={() => {
-                      setLocation('/profile');
+                      setLocation('/occasions');
                       setIsUserMenuOpen(false);
                     }}
                     variant="ghost"
                     className="w-full justify-start gap-3 h-12 text-left"
                   >
-                    <Settings className="h-5 w-5 text-gray-600" />
-                    <span className="font-medium">My UPI</span>
+                    <Calendar className="h-5 w-5 text-gray-600" />
+                    <span className="font-medium">My Occasions</span>
                   </Button>
 
                   <Button
                     onClick={() => {
-                      setLocation('/loyalty');
+                      setLocation('/profile?section=addresses');
+                      setIsUserMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12 text-left"
+                  >
+                    <MapPinIcon className="h-5 w-5 text-gray-600" />
+                    <span className="font-medium">Address Book</span>
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      setLocation('/profile?section=wallet');
                       setIsUserMenuOpen(false);
                     }}
                     variant="ghost"
@@ -651,6 +595,30 @@ export default function Header() {
                   >
                     <Wallet className="h-5 w-5 text-gray-600" />
                     <span className="font-medium">My Wallet</span>
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      setLocation('/profile?section=profile');
+                      setIsUserMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12 text-left"
+                  >
+                    <User className="h-5 w-5 text-gray-600" />
+                    <span className="font-medium">My Profile</span>
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      setLocation('/profile?section=settings');
+                      setIsUserMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12 text-left"
+                  >
+                    <Settings className="h-5 w-5 text-gray-600" />
+                    <span className="font-medium">Account Settings</span>
                   </Button>
 
                   <Button
