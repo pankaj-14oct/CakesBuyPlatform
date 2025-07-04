@@ -10,7 +10,7 @@ import {
   type UserReward, type InsertUserReward, type Invoice, type InsertInvoice
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, like, and, desc, isNotNull, or } from "drizzle-orm";
+import { eq, like, and, desc, isNotNull, or, gte, lte } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -32,7 +32,7 @@ export interface IStorage {
   getCakes(filters?: { categoryId?: number; isEggless?: boolean; isBestseller?: boolean }): Promise<Cake[]>;
   getCake(id: number): Promise<Cake | undefined>;
   getCakeBySlug(slug: string): Promise<Cake | undefined>;
-  searchCakes(query: string): Promise<Cake[]>;
+  searchCakes(query: string, options?: { sort?: string; category?: string; priceRange?: string }): Promise<Cake[]>;
 
   // Addons
   getAddons(): Promise<Addon[]>;
@@ -219,10 +219,58 @@ export class DatabaseStorage implements IStorage {
     return cake || undefined;
   }
 
-  async searchCakes(query: string): Promise<Cake[]> {
-    return await db.select().from(cakes)
-      .where(like(cakes.name, `%${query}%`))
-      .orderBy(cakes.name);
+  async searchCakes(query: string, options?: { sort?: string; category?: string; priceRange?: string }): Promise<Cake[]> {
+    // Start with basic search
+    let results = await db.select().from(cakes)
+      .where(or(
+        like(cakes.name, `%${query}%`),
+        like(cakes.description, `%${query}%`)
+      ));
+    
+    // Apply category filter if specified
+    if (options?.category && options.category !== 'all') {
+      const category = await db.select().from(categories).where(eq(categories.slug, options.category)).limit(1);
+      if (category.length > 0) {
+        results = results.filter(cake => cake.categoryId === category[0].id);
+      }
+    }
+    
+    // Apply price range filter if specified
+    if (options?.priceRange && options.priceRange !== 'all') {
+      const [min, max] = options.priceRange.split('-');
+      if (max === undefined) {
+        // Handle "2000+" format
+        const minPrice = parseInt(min.replace('+', ''));
+        results = results.filter(cake => cake.basePrice >= minPrice);
+      } else {
+        // Handle "500-1000" format
+        const minPrice = parseInt(min);
+        const maxPrice = parseInt(max);
+        results = results.filter(cake => cake.basePrice >= minPrice && cake.basePrice <= maxPrice);
+      }
+    }
+    
+    // Apply sorting
+    switch (options?.sort) {
+      case 'price-low':
+        results.sort((a, b) => a.basePrice - b.basePrice);
+        break;
+      case 'price-high':
+        results.sort((a, b) => b.basePrice - a.basePrice);
+        break;
+      case 'rating':
+        // For now, order by bestseller as a proxy for rating
+        results.sort((a, b) => (b.isBestseller ? 1 : 0) - (a.isBestseller ? 1 : 0));
+        break;
+      case 'popular':
+        results.sort((a, b) => (b.isBestseller ? 1 : 0) - (a.isBestseller ? 1 : 0));
+        break;
+      default:
+        // Default to name order for relevance
+        results.sort((a, b) => a.name.localeCompare(b.name));
+    }
+    
+    return results;
   }
 
   // Addons

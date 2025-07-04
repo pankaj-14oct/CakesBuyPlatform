@@ -87,10 +87,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Cakes
   app.get("/api/cakes", async (req, res) => {
     try {
-      const { categoryId, isEggless, isBestseller, search } = req.query;
+      const { categoryId, isEggless, isBestseller, search, sort, category, price } = req.query;
       
       if (search) {
-        const cakes = await storage.searchCakes(search as string);
+        const cakes = await storage.searchCakes(search as string, {
+          sort: sort as string,
+          category: category as string,
+          priceRange: price as string
+        });
         return res.json(cakes);
       }
 

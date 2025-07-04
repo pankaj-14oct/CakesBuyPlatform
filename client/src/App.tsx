@@ -22,6 +22,7 @@ import OrdersPage from "@/pages/orders";
 import InvoicesPage from "@/pages/Invoices";
 import LoyaltyPage from "@/pages/loyalty";
 import TrackOrderPage from "@/pages/track-order";
+import SearchPage from "@/pages/search";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminCategories from "@/pages/admin/categories";
 import AdminProducts from "@/pages/admin/products";
@@ -147,6 +148,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/search" component={SearchPage} />
       <Route path="/category/:slug" component={Category} />
       <Route path="/product/:slug" component={Product} />
       <Route path="/cart" component={Cart} />
