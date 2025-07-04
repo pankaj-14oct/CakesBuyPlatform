@@ -508,6 +508,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/reminders", authenticateToken, async (req: AuthRequest, res) => {
     try {
+      console.log('Reminder request body:', JSON.stringify(req.body, null, 2));
       const reminderData = insertEventReminderSchema.parse({
         ...req.body,
         userId: req.user!.id
@@ -516,8 +517,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(reminder);
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.error('Reminder validation error:', JSON.stringify(error.errors, null, 2));
         return res.status(400).json({ message: "Invalid reminder data", errors: error.errors });
       }
+      console.error('Reminder creation error:', error);
       res.status(500).json({ message: "Failed to create reminder" });
     }
   });
