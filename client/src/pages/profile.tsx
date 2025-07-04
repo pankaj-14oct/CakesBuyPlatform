@@ -90,7 +90,7 @@ export default function ProfilePage() {
   const { data: addresses, isLoading: addressesLoading, error: addressesError } = useQuery({
     queryKey: ['/api/auth/addresses'],
     queryFn: async () => {
-      const res = await apiRequest('GET', '/api/auth/addresses');
+      const res = await apiRequest('/api/auth/addresses', 'GET');
       const data = await res.json();
       console.log('Addresses API response:', data);
       return data;
@@ -204,7 +204,7 @@ export default function ProfilePage() {
   // Delete address mutation
   const deleteAddressMutation = useMutation({
     mutationFn: async (addressId: string) => {
-      const res = await apiRequest('DELETE', `/api/auth/addresses/${addressId}`);
+      const res = await apiRequest(`/api/auth/addresses/${addressId}`, 'DELETE');
       return res.json();
     },
     onSuccess: () => {
