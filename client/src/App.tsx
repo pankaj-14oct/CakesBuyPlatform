@@ -19,6 +19,7 @@ import ForgotPassword from "@/pages/ForgotPassword";
 import OccasionReminder from "@/pages/OccasionReminder";
 import ProfilePage from "@/pages/profile";
 import OrdersPage from "@/pages/orders";
+import InvoicesPage from "@/pages/Invoices";
 import LoyaltyPage from "@/pages/loyalty";
 import TrackOrderPage from "@/pages/track-order";
 import AdminDashboard from "@/pages/admin/dashboard";
@@ -155,6 +156,7 @@ function Router() {
       <Route path="/occasions" component={OccasionReminder} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/orders" component={OrdersPage} />
+      <Route path="/invoices" component={InvoicesPage} />
       <Route path="/loyalty" component={LoyaltyPage} />
       <Route path="/track-order" component={TrackOrderPage} />
       <Route component={NotFound} />

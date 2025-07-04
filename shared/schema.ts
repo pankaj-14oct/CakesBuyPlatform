@@ -208,6 +208,62 @@ export const userRewards = pgTable("user_rewards", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Invoice System
+export const invoices = pgTable("invoices", {
+  id: serial("id").primaryKey(),
+  invoiceNumber: text("invoice_number").notNull().unique(),
+  orderId: integer("order_id").references(() => orders.id).notNull(),
+  userId: integer("user_id").references(() => users.id),
+  
+  // Customer Information
+  customerName: text("customer_name").notNull(),
+  customerEmail: text("customer_email"),
+  customerPhone: text("customer_phone").notNull(),
+  
+  // Billing Address
+  billingAddress: jsonb("billing_address").$type<{
+    address: string;
+    pincode: string;
+    city: string;
+    landmark?: string;
+  }>().notNull(),
+  
+  // Invoice Items
+  items: jsonb("items").$type<Array<{
+    name: string;
+    description?: string;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+    taxRate?: number;
+    taxAmount?: number;
+  }>>().notNull(),
+  
+  // Financial Details
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  taxAmount: decimal("tax_amount", { precision: 10, scale: 2 }).default("0"),
+  discountAmount: decimal("discount_amount", { precision: 10, scale: 2 }).default("0"),
+  deliveryFee: decimal("delivery_fee", { precision: 10, scale: 2 }).default("0"),
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  
+  // Invoice Status
+  status: text("status").notNull().default("draft"), // draft, sent, paid, cancelled
+  paymentStatus: text("payment_status").notNull().default("pending"), // pending, paid, partially_paid, overdue
+  paymentMethod: text("payment_method"), // upi, card, cod, bank_transfer
+  
+  // Dates
+  invoiceDate: timestamp("invoice_date").defaultNow(),
+  dueDate: timestamp("due_date"),
+  paidDate: timestamp("paid_date"),
+  
+  // Additional Fields
+  notes: text("notes"),
+  terms: text("terms"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertCategorySchema = createInsertSchema(categories).omit({ id: true });
@@ -226,6 +282,9 @@ export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).
 export const insertLoyaltyTransactionSchema = createInsertSchema(loyaltyTransactions).omit({ id: true, createdAt: true });
 export const insertLoyaltyRewardSchema = createInsertSchema(loyaltyRewards).omit({ id: true, createdAt: true });
 export const insertUserRewardSchema = createInsertSchema(userRewards).omit({ id: true, createdAt: true });
+
+// Invoice insert schema
+export const insertInvoiceSchema = createInsertSchema(invoices).omit({ id: true, invoiceNumber: true, createdAt: true, updatedAt: true });
 
 // Auth schemas
 export const loginSchema = z.object({
@@ -338,3 +397,7 @@ export type LoyaltyReward = typeof loyaltyRewards.$inferSelect;
 export type InsertLoyaltyReward = z.infer<typeof insertLoyaltyRewardSchema>;
 export type UserReward = typeof userRewards.$inferSelect;
 export type InsertUserReward = z.infer<typeof insertUserRewardSchema>;
+
+// Invoice types
+export type Invoice = typeof invoices.$inferSelect;
+export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;

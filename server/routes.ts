@@ -10,6 +10,7 @@ import {
   insertPromoCodeSchema,
   insertEventReminderSchema,
   insertLoyaltyRewardSchema,
+  insertInvoiceSchema,
   loginSchema,
   registerSchema,
   addressSchema,
@@ -30,6 +31,7 @@ import {
   type AuthRequest 
 } from "./auth";
 import { sendReminderEmail, type ReminderEmailData, sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, type OrderEmailData, sendWelcomeEmail, type WelcomeEmailData } from "./email-service";
+import { createInvoiceForOrder, updateInvoiceStatus, getInvoiceByOrderId, getInvoiceByNumber, getUserInvoices, getInvoiceWithOrder, getInvoiceDisplayData } from "./invoice-service";
 import type { User } from "@shared/schema";
 
 // Helper function to create event reminders
@@ -257,8 +259,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't fail the order if email fails
         console.error('Failed to send order confirmation email:', emailError);
       }
+
+      // Create invoice for the order
+      let invoiceCreated = null;
+      try {
+        let customerInfo = undefined;
+        if (req.user) {
+          const user = await storage.getUser(req.user.id);
+          customerInfo = {
+            name: user?.email ? order.deliveryAddress.name : undefined,
+            email: user?.email,
+            phone: user?.phone
+          };
+        }
+        
+        invoiceCreated = await createInvoiceForOrder(order.id, customerInfo);
+        console.log(`Invoice ${invoiceCreated.invoiceNumber} created for order ${order.orderNumber}`);
+      } catch (invoiceError) {
+        // Don't fail the order if invoice creation fails
+        console.error('Failed to create invoice:', invoiceError);
+      }
       
-      res.status(201).json(order);
+      res.status(201).json({ 
+        ...order, 
+        invoiceNumber: invoiceCreated?.invoiceNumber || null 
+      });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid order data", errors: error.errors });
@@ -347,6 +372,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Failed to update order status:', error);
       res.status(500).json({ message: "Failed to update order status" });
+    }
+  });
+
+  // Invoice Management
+  app.post("/api/orders/:id/invoice", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const customerInfo = req.body.customerInfo;
+
+      // Create invoice for the order
+      const invoice = await createInvoiceForOrder(orderId, customerInfo);
+      res.status(201).json(invoice);
+    } catch (error) {
+      console.error('Failed to create invoice:', error);
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to create invoice" });
+    }
+  });
+
+  app.get("/api/invoices/:invoiceNumber", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const invoiceNumber = req.params.invoiceNumber;
+      const invoice = await getInvoiceByNumber(invoiceNumber);
+      
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      // Check if user owns this invoice
+      if (invoice.userId && invoice.userId !== req.user!.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const invoiceWithOrder = await getInvoiceWithOrder(invoice.id);
+      const displayData = getInvoiceDisplayData(invoiceWithOrder!);
+      
+      res.json(displayData);
+    } catch (error) {
+      console.error('Failed to fetch invoice:', error);
+      res.status(500).json({ message: "Failed to fetch invoice" });
+    }
+  });
+
+  app.get("/api/orders/:id/invoice", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const invoice = await getInvoiceByOrderId(orderId);
+      
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found for this order" });
+      }
+
+      // Check if user owns this invoice
+      if (invoice.userId && invoice.userId !== req.user!.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const invoiceWithOrder = await getInvoiceWithOrder(invoice.id);
+      const displayData = getInvoiceDisplayData(invoiceWithOrder!);
+      
+      res.json(displayData);
+    } catch (error) {
+      console.error('Failed to fetch invoice by order:', error);
+      res.status(500).json({ message: "Failed to fetch invoice" });
+    }
+  });
+
+  app.get("/api/auth/invoices", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const invoices = await getUserInvoices(req.user!.id);
+      const displayInvoices = await Promise.all(
+        invoices.map(async (invoice) => {
+          const invoiceWithOrder = await getInvoiceWithOrder(invoice.id);
+          return getInvoiceDisplayData(invoiceWithOrder!);
+        })
+      );
+      
+      res.json(displayInvoices);
+    } catch (error) {
+      console.error('Failed to fetch user invoices:', error);
+      res.status(500).json({ message: "Failed to fetch invoices" });
+    }
+  });
+
+  app.patch("/api/invoices/:id/status", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const invoiceId = parseInt(req.params.id);
+      const { status, paymentStatus } = req.body;
+
+      // First check if invoice exists and user owns it
+      const invoice = await getInvoiceWithOrder(invoiceId);
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      if (invoice.userId && invoice.userId !== req.user!.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      // Update invoice status
+      const updatedInvoice = await updateInvoiceStatus(invoiceId, status, paymentStatus);
+      const displayData = getInvoiceDisplayData({ ...updatedInvoice, order: invoice.order });
+      
+      res.json(displayData);
+    } catch (error) {
+      console.error('Failed to update invoice status:', error);
+      res.status(500).json({ message: "Failed to update invoice status" });
     }
   });
 

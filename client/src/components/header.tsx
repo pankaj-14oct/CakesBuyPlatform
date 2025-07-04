@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ShoppingCart, Menu, MapPin, Search, User, LogOut, Package, Heart, Calendar, Wallet, MapPinIcon, MessageCircle, Settings, Truck } from 'lucide-react';
+import { ShoppingCart, Menu, MapPin, Search, User, LogOut, Package, Heart, Calendar, Wallet, MapPinIcon, MessageCircle, Settings, Truck, FileText } from 'lucide-react';
 import { useCart } from './cart-context';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -167,6 +167,14 @@ export default function Header() {
                     >
                       <Package className="h-5 w-5 text-gray-600" />
                       <span className="font-medium">My Orders</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem 
+                      onClick={() => setLocation('/invoices')}
+                      className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                    >
+                      <FileText className="h-5 w-5 text-gray-600" />
+                      <span className="font-medium">My Invoices</span>
                     </DropdownMenuItem>
                     
                     <DropdownMenuItem 
