@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Gift, Heart, Plus, Trash2, Bell, Star, Clock, Tag, ChevronDown } from "lucide-react";
+import { Calendar, Gift, Heart, Plus, Trash2, Bell, Star, Clock, Tag, ChevronDown, Edit } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
@@ -35,6 +35,7 @@ interface EventReminder {
 
 export default function OccasionReminder() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingReminder, setEditingReminder] = useState<EventReminder | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -96,6 +97,53 @@ export default function OccasionReminder() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/reminders"] });
       setIsDialogOpen(false);
+      setEditingReminder(null);
+      form.reset();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update reminder mutation
+  const updateReminderMutation = useMutation({
+    mutationFn: async (data: ReminderFormData & { id: number }) => {
+      const eventDate = `${data.month.padStart(2, '0')}-${data.day.padStart(2, '0')}`;
+      
+      // Calculate reminder date (7 days before the event)
+      const currentYear = new Date().getFullYear();
+      const [month, day] = [data.month, data.day];
+      const eventDateThisYear = new Date(currentYear, parseInt(month) - 1, parseInt(day));
+      const reminderDate = new Date(eventDateThisYear);
+      reminderDate.setDate(reminderDate.getDate() - 7);
+      
+      // If the reminder date has passed this year, set for next year
+      if (reminderDate < new Date()) {
+        eventDateThisYear.setFullYear(currentYear + 1);
+        reminderDate.setFullYear(currentYear + 1);
+      }
+      
+      const requestData = {
+        eventType: data.eventType,
+        eventDate: eventDate,
+        reminderDate: reminderDate.toISOString()
+      };
+      
+      const res = await apiRequest(`/api/reminders/${data.id}`, "PUT", requestData);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Reminder Updated!",
+        description: "Your occasion reminder has been successfully updated.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/reminders"] });
+      setIsDialogOpen(false);
+      setEditingReminder(null);
       form.reset();
     },
     onError: (error: Error) => {
@@ -129,11 +177,33 @@ export default function OccasionReminder() {
   });
 
   const onSubmit = (values: ReminderFormData) => {
-    createReminderMutation.mutate(values);
+    if (editingReminder) {
+      updateReminderMutation.mutate({ ...values, id: editingReminder.id });
+    } else {
+      createReminderMutation.mutate(values);
+    }
   };
 
   const handleDeleteReminder = (id: number) => {
     deleteReminderMutation.mutate(id);
+  };
+
+  const handleEditReminder = (reminder: EventReminder) => {
+    const [month, day] = reminder.eventDate.split('-');
+    setEditingReminder(reminder);
+    form.reset({
+      eventType: reminder.eventType,
+      relationshipType: reminder.relationshipType,
+      day: day,
+      month: month,
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setEditingReminder(null);
+    form.reset();
   };
 
   const formatDate = (dateStr: string) => {
@@ -461,7 +531,7 @@ export default function OccasionReminder() {
                 Manage your saved special dates and get notified with exclusive offers
               </CardDescription>
             </div>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
               <DialogTrigger asChild>
                 <Button className="bg-red-600 hover:bg-red-700 text-white">
                   <Plus className="h-4 w-4 mr-2" />
@@ -470,9 +540,9 @@ export default function OccasionReminder() {
               </DialogTrigger>
               <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Add Reminder</DialogTitle>
+                  <DialogTitle>{editingReminder ? 'Edit Reminder' : 'Add Reminder'}</DialogTitle>
                   <DialogDescription>
-                    Save 3 reminders for exclusive <span className="font-bold text-red-600">₹750</span> offer
+                    {editingReminder ? 'Update your occasion reminder details' : 'Save 3 reminders for exclusive'} <span className="font-bold text-red-600">₹750</span> offer
                   </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -607,9 +677,12 @@ export default function OccasionReminder() {
                       <Button 
                         type="submit" 
                         className="w-full bg-red-500 hover:bg-red-600 text-white py-4 text-lg font-semibold rounded-lg"
-                        disabled={createReminderMutation.isPending}
+                        disabled={createReminderMutation.isPending || updateReminderMutation.isPending}
                       >
-                        {createReminderMutation.isPending ? "Saving..." : "Save Reminder"}
+                        {(createReminderMutation.isPending || updateReminderMutation.isPending) ? 
+                          (editingReminder ? "Updating..." : "Saving...") : 
+                          (editingReminder ? "Update Reminder" : "Save Reminder")
+                        }
                       </Button>
                     </div>
                   </form>
@@ -646,14 +719,24 @@ export default function OccasionReminder() {
                           <h3 className="font-semibold text-lg capitalize">{reminder.relationshipType}'s {reminder.eventType}</h3>
                           <p className="text-gray-600">{formatDate(reminder.eventDate)}</p>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteReminder(reminder.id)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditReminder(reminder)}
+                            className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteReminder(reminder.id)}
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
