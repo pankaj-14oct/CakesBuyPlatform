@@ -71,7 +71,7 @@ export default function AdminLogin() {
           <div>
             <CardTitle className="text-2xl font-bold text-charcoal">Admin Login</CardTitle>
             <CardDescription>
-              Access the EgglessCakes administration panel
+              Access the CakesBuy administration panel
             </CardDescription>
           </div>
         </CardHeader>

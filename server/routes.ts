@@ -816,20 +816,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const testEmailData = {
         to: email,
         from: "order.cakesbuy@gmail.com",
-        subject: "EgglessCakes - Email Service Test",
+        subject: "CakesBuy - Email Service Test",
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
               <h2 style="color: #8B4513; margin-bottom: 20px;">🧪 Email Service Test</h2>
               
               <p style="color: #333; margin-bottom: 15px;">
-                This is a test email from your EgglessCakes platform to verify that the email service is working correctly.
+                This is a test email from your CakesBuy platform to verify that the email service is working correctly.
               </p>
               
               <div style="background-color: white; padding: 15px; border-radius: 6px; margin: 20px 0;">
                 <h3 style="color: #8B4513; margin-top: 0;">Test Details:</h3>
                 <ul style="color: #666;">
-                  <li><strong>Platform:</strong> EgglessCakes E-commerce</li>
+                  <li><strong>Platform:</strong> CakesBuy E-commerce</li>
                   <li><strong>Service:</strong> Gmail SMTP</li>
                   <li><strong>Test Time:</strong> ${new Date().toLocaleString()}</li>
                   <li><strong>Status:</strong> ✅ Email Service Active</li>
@@ -841,7 +841,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               </p>
               
               <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #8B4513;">
-                <p style="color: #8B4513; font-weight: bold; margin: 0;">EgglessCakes</p>
+                <p style="color: #8B4513; font-weight: bold; margin: 0;">CakesBuy</p>
                 <p style="color: #666; font-size: 12px; margin: 5px 0 0 0;">
                   100% Eggless Cakes • Online Delivery in Gurgaon
                 </p>
@@ -850,19 +850,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           </div>
         `,
         text: `
-Email Service Test - EgglessCakes
+Email Service Test - CakesBuy
 
-This is a test email from your EgglessCakes platform to verify that the email service is working correctly.
+This is a test email from your CakesBuy platform to verify that the email service is working correctly.
 
 Test Details:
-- Platform: EgglessCakes E-commerce  
+- Platform: CakesBuy E-commerce  
 - Service: Gmail SMTP
 - Test Time: ${new Date().toLocaleString()}
 - Status: Email Service Active
 
 If you received this email, your email configuration is working properly and you can send customer notifications.
 
-EgglessCakes
+CakesBuy
 100% Eggless Cakes • Online Delivery in Gurgaon
         `
       };

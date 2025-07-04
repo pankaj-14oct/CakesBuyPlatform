@@ -9,7 +9,7 @@ export default function Footer() {
           {/* Brand Section */}
           <div>
             <div className="text-2xl font-bold mb-6">
-              🥚 EgglessCakes
+              🥚 CakesBuy
             </div>
             <p className="text-gray-300 mb-6">
               100% eggless cakes delivered online across Gurgaon. Perfect for vegetarians and health-conscious families since 2018.

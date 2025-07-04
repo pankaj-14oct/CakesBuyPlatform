@@ -82,7 +82,7 @@ export async function sendReminderEmail(data: ReminderEmailData): Promise<boolea
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
       <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #8B4513; margin: 0; font-size: 28px;">🎂 EgglessCakes</h1>
+          <h1 style="color: #8B4513; margin: 0; font-size: 28px;">🎂 CakesBuy</h1>
           <p style="color: #666; margin: 5px 0 0 0;">100% Eggless Cakes for Special Moments</p>
         </div>
         
@@ -125,8 +125,8 @@ export async function sendReminderEmail(data: ReminderEmailData): Promise<boolea
         </div>
         
         <div style="text-align: center; margin-top: 30px; color: #888; font-size: 12px;">
-          <p>EgglessCakes - Making your celebrations sweeter!</p>
-          <p>Call us: +91-XXXXXXXXXX | Email: info@egglesscakes.com</p>
+          <p>CakesBuy - Making your celebrations sweeter!</p>
+          <p>Call us: +91-XXXXXXXXXX | Email: info@cakesbuy.com</p>
         </div>
       </div>
     </div>
@@ -150,12 +150,12 @@ export async function sendReminderEmail(data: ReminderEmailData): Promise<boolea
     Same day delivery available in Gurgaon
     100% Eggless - Perfect for everyone!
     
-    EgglessCakes - Making your celebrations sweeter!
+    CakesBuy - Making your celebrations sweeter!
   `;
 
   return await sendEmail({
     to: data.userEmail,
-    from: process.env.GMAIL_USER || 'noreply@egglesscakes.com',
+    from: process.env.GMAIL_USER || 'noreply@cakesbuy.com',
     subject,
     text,
     html
@@ -172,7 +172,7 @@ export interface OrderEmailData {
 export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<boolean> {
   const { customerEmail, customerName, order } = data;
   
-  const subject = `🎂 Order Confirmed - ${order.orderNumber} | EgglessCakes`;
+  const subject = `🎂 Order Confirmed - ${order.orderNumber} | CakesBuy`;
   
   const formatPrice = (price: number) => `₹${price.toLocaleString('en-IN')}`;
   
@@ -180,7 +180,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
       <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #8B4513; margin: 0; font-size: 28px;">🎂 EgglessCakes</h1>
+          <h1 style="color: #8B4513; margin: 0; font-size: 28px;">🎂 CakesBuy</h1>
           <p style="color: #666; margin: 5px 0 0 0;">100% Eggless Cakes for Special Moments</p>
         </div>
         
@@ -194,7 +194,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
         </p>
         
         <p style="font-size: 16px; line-height: 1.6; color: #333;">
-          Thank you for choosing EgglessCakes! Your order has been confirmed and we're preparing your delicious 100% eggless cake.
+          Thank you for choosing CakesBuy! Your order has been confirmed and we're preparing your delicious 100% eggless cake.
         </p>
         
         <div style="background-color: #f8f8f8; border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px;">
@@ -260,8 +260,8 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
         </div>
         
         <div style="text-align: center; margin-top: 30px; color: #888; font-size: 12px;">
-          <p>EgglessCakes - Making your celebrations sweeter!</p>
-          <p>Call us: +91-XXXXXXXXXX | Email: info@egglesscakes.com</p>
+          <p>CakesBuy - Making your celebrations sweeter!</p>
+          <p>Call us: +91-XXXXXXXXXX | Email: info@cakesbuy.com</p>
         </div>
       </div>
     </div>
@@ -272,7 +272,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
     
     Dear ${customerName},
     
-    Thank you for choosing EgglessCakes! Your order has been confirmed.
+    Thank you for choosing CakesBuy! Your order has been confirmed.
     
     Order Details:
     - Order Number: ${order.orderNumber}
@@ -288,12 +288,12 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
     
     Track your order at: ${process.env.REPLIT_DEV_DOMAIN || 'https://your-domain.com'}/track-order
     
-    EgglessCakes - Making your celebrations sweeter!
+    CakesBuy - Making your celebrations sweeter!
   `;
 
   return await sendEmail({
     to: customerEmail,
-    from: process.env.GMAIL_USER || 'orders@egglesscakes.com',
+    from: process.env.GMAIL_USER || 'orders@cakesbuy.com',
     subject,
     text,
     html
@@ -307,18 +307,18 @@ export interface WelcomeEmailData {
 }
 
 export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean> {
-  const subject = `🎉 Welcome to EgglessCakes! Your Account is Ready`;
+  const subject = `🎉 Welcome to CakesBuy! Your Account is Ready`;
   
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
       <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #8B4513; margin: 0; font-size: 28px;">🎂 EgglessCakes</h1>
+          <h1 style="color: #8B4513; margin: 0; font-size: 28px;">🎂 CakesBuy</h1>
           <p style="color: #666; margin: 5px 0 0 0;">100% Eggless Cakes for Special Moments</p>
         </div>
         
         <div style="background-color: #e8f5e8; border-left: 4px solid #4CAF50; padding: 20px; margin-bottom: 30px; border-radius: 8px;">
-          <h2 style="color: #4CAF50; margin: 0 0 10px 0;">🎉 Welcome to EgglessCakes!</h2>
+          <h2 style="color: #4CAF50; margin: 0 0 10px 0;">🎉 Welcome to CakesBuy!</h2>
           <p style="margin: 0; font-size: 16px;">Congratulations! Your account has been successfully created.</p>
         </div>
         
@@ -327,7 +327,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean>
         </p>
         
         <p style="font-size: 16px; line-height: 1.6; color: #333;">
-          Welcome to EgglessCakes - Gurgaon's premier destination for 100% eggless cakes! We're thrilled to have you join our sweet family.
+          Welcome to CakesBuy - Gurgaon's premier destination for 100% eggless cakes! We're thrilled to have you join our sweet family.
         </p>
         
         <div style="background-color: #f8f8f8; border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px;">
@@ -366,7 +366,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean>
         </div>
         
         <div style="background-color: #f0f8ff; border: 1px solid #2196F3; padding: 20px; margin: 20px 0; border-radius: 8px;">
-          <h3 style="color: #2196F3; margin: 0 0 15px 0;">🌟 Why Choose EgglessCakes?</h3>
+          <h3 style="color: #2196F3; margin: 0 0 15px 0;">🌟 Why Choose CakesBuy?</h3>
           <div style="color: #333; font-size: 14px;">
             <p style="margin: 5px 0;">🥚 <strong>100% Eggless:</strong> Perfect for vegetarians and health-conscious customers</p>
             <p style="margin: 5px 0;">🚚 <strong>Same Day Delivery:</strong> Fresh cakes delivered in Gurgaon</p>
@@ -383,7 +383,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean>
         </div>
         
         <div style="text-align: center; margin-top: 30px; color: #888; font-size: 12px;">
-          <p>EgglessCakes - Making your celebrations sweeter!</p>
+          <p>CakesBuy - Making your celebrations sweeter!</p>
           <p>Call us: +91-XXXXXXXXXX | Email: order.cakesbuy@gmail.com</p>
         </div>
       </div>
@@ -391,13 +391,13 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean>
   `;
 
   const text = `
-    Welcome to EgglessCakes!
+    Welcome to CakesBuy!
     
     Dear ${data.userName},
     
     Congratulations! Your account has been successfully created.
     
-    Welcome to EgglessCakes - Gurgaon's premier destination for 100% eggless cakes! 
+    Welcome to CakesBuy - Gurgaon's premier destination for 100% eggless cakes! 
     We're thrilled to have you join our sweet family.
     
     Your Account Details:
@@ -411,7 +411,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean>
     - Set up birthday and anniversary reminders for special discounts
     - Earn loyalty points with every order
     
-    Why Choose EgglessCakes?
+    Why Choose CakesBuy?
     - 100% Eggless: Perfect for vegetarians and health-conscious customers
     - Same Day Delivery: Fresh cakes delivered in Gurgaon
     - Custom Orders: Personalized messages and designs
@@ -422,7 +422,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean>
     
     First Order Tip: Orders above ₹500 get FREE delivery!
     
-    EgglessCakes - Making your celebrations sweeter!
+    CakesBuy - Making your celebrations sweeter!
     Contact: order.cakesbuy@gmail.com
   `;
 
@@ -448,13 +448,13 @@ export async function sendOrderStatusUpdateEmail(data: OrderEmailData): Promise<
   };
   
   const statusInfo = statusMessages[order.status as keyof typeof statusMessages] || statusMessages.pending;
-  const subject = `${statusInfo.title} - Order ${order.orderNumber} | EgglessCakes`;
+  const subject = `${statusInfo.title} - Order ${order.orderNumber} | CakesBuy`;
   
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
       <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #8B4513; margin: 0; font-size: 28px;">🎂 EgglessCakes</h1>
+          <h1 style="color: #8B4513; margin: 0; font-size: 28px;">🎂 CakesBuy</h1>
           <p style="color: #666; margin: 5px 0 0 0;">100% Eggless Cakes for Special Moments</p>
         </div>
         
@@ -512,8 +512,8 @@ export async function sendOrderStatusUpdateEmail(data: OrderEmailData): Promise<
         </div>
         
         <div style="text-align: center; margin-top: 30px; color: #888; font-size: 12px;">
-          <p>EgglessCakes - Making your celebrations sweeter!</p>
-          <p>Call us: +91-XXXXXXXXXX | Email: info@egglesscakes.com</p>
+          <p>CakesBuy - Making your celebrations sweeter!</p>
+          <p>Call us: +91-XXXXXXXXXX | Email: info@cakesbuy.com</p>
         </div>
       </div>
     </div>
@@ -533,12 +533,12 @@ export async function sendOrderStatusUpdateEmail(data: OrderEmailData): Promise<
     
     Track your order at: ${process.env.REPLIT_DEV_DOMAIN || 'https://your-domain.com'}/track-order
     
-    EgglessCakes - Making your celebrations sweeter!
+    CakesBuy - Making your celebrations sweeter!
   `;
 
   return await sendEmail({
     to: customerEmail,
-    from: process.env.GMAIL_USER || 'orders@egglesscakes.com',
+    from: process.env.GMAIL_USER || 'orders@cakesbuy.com',
     subject,
     text,
     html

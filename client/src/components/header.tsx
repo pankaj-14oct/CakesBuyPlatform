@@ -53,7 +53,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <div className="text-2xl font-bold text-brown">
-              🥚 EgglessCakes
+              🥚 CakesBuy
             </div>
             <Badge className="bg-green-500 text-white text-xs px-2 py-1">100% EGGLESS</Badge>
           </Link>

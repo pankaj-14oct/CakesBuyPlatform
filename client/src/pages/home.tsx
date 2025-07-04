@@ -528,7 +528,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-bold text-charcoal mb-4">
-              Why Choose EgglessCakes?
+              Why Choose CakesBuy?
             </h2>
             <p className="text-lg text-charcoal opacity-70">
               Gurgaon's leading 100% eggless cake online delivery service

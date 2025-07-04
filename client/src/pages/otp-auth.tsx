@@ -97,7 +97,7 @@ export default function OtpAuthPage() {
       localStorage.setItem('authToken', data.token);
       toast({
         title: "Registration Successful",
-        description: "Welcome to EgglessCakes!",
+        description: "Welcome to CakesBuy!",
       });
       setLocation('/');
     },
@@ -170,7 +170,7 @@ export default function OtpAuthPage() {
             <CardDescription>
               {step === 'phone' && 'We\'ll send you a verification code'}
               {step === 'otp' && `Enter the 6-digit code sent to ${phone}`}
-              {step === 'register' && 'Create your EgglessCakes account'}
+              {step === 'register' && 'Create your CakesBuy account'}
             </CardDescription>
           </CardHeader>
           <CardContent>

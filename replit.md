@@ -2,7 +2,7 @@
 
 ## Overview
 
-EgglessCakes is a specialized full-stack e-commerce platform for ordering 100% eggless cakes online in Gurgaon. The application provides a comprehensive cake ordering system focused exclusively on egg-free products, featuring category browsing, product customization, shopping cart functionality, and order management. Built as a modern web application with React frontend and Express backend, it offers contactless online delivery with same-day delivery options for vegetarian and health-conscious customers.
+CakesBuy is a specialized full-stack e-commerce platform for ordering 100% eggless cakes online in Gurgaon. The application provides a comprehensive cake ordering system focused exclusively on egg-free products, featuring category browsing, product customization, shopping cart functionality, and order management. Built as a modern web application with React frontend and Express backend, it offers contactless online delivery with same-day delivery options for vegetarian and health-conscious customers.
 
 ## System Architecture
 
@@ -141,7 +141,7 @@ The application uses a comprehensive database schema with the following main ent
 - June 25, 2025. PostgreSQL database integration completed with persistent data storage
 - July 1, 2025. Successfully migrated from Replit Agent to standard Replit environment
 - July 1, 2025. Enhanced homepage with Bakingo.com-inspired sections: Quick Category Access, "Gurgaon Loves" bestsellers, Special Occasions grid, Delivery Promise section, Why Choose Us section
-- July 1, 2025. Rebranded to EgglessCakes - Complete transformation to focus on 100% eggless cake specialty shop with online delivery emphasis
+- July 1, 2025. Rebranded to CakesBuy - Complete transformation to focus on 100% eggless cake specialty shop with online delivery emphasis
 - July 1, 2025. Added admin settings with dummy data management (25 products, 10 categories, 10 users, 5 orders)
 - July 1, 2025. Implemented birthday and anniversary tracking system with automated event reminders sent one week prior to special occasions
 - July 1, 2025. Migrated authentication system to mobile number-based login and registration, removing username field for simplified user experience
@@ -161,6 +161,7 @@ The application uses a comprehensive database schema with the following main ent
 - July 4, 2025. Added email service testing feature to admin settings panel - Administrators can now test email functionality by sending test emails to verify Gmail SMTP configuration, includes professional test email template with system information and timestamp
 - July 4, 2025. Implemented super admin authentication system - Added role-based access control with dedicated admin user (admin@cakesbuy.com / 1111111111), created secure admin login page at /admin-login, implemented admin middleware protection for all admin routes, users must authenticate as admin to access admin panel functionality
 - July 4, 2025. Successfully completed migration from Replit Agent to standard Replit environment - Set up PostgreSQL database with proper schema migrations, created admin user with secure authentication, configured Gmail SMTP email service, verified all features working properly with robust security practices and client/server separation
+- July 4, 2025. Complete rebranding from EgglessCakes to CakesBuy - Updated all branding across the application including HTML titles, email templates, user interface text, and documentation while maintaining the "100% Eggless Cake Shop" identity throughout all customer communications
 
 ## User Preferences
 

@@ -364,13 +364,13 @@ export default function OccasionReminder() {
         <div className="max-w-4xl mx-auto mb-16">
           <div className="bg-white rounded-2xl p-8 shadow-sm border">
             <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
-              FAQ's about EgglessCakes App
+              FAQ's about CakesBuy App
             </h2>
             
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="item-1">
                 <AccordionTrigger className="text-left text-lg font-medium">
-                  What are EgglessCakes occasion reminders?
+                  What are CakesBuy occasion reminders?
                 </AccordionTrigger>
                 <AccordionContent className="text-gray-600">
                   Occasion reminders are a feature that helps you save important dates like birthdays and anniversaries. We'll send you notifications before these special occasions with exclusive offers and discounts.
@@ -379,7 +379,7 @@ export default function OccasionReminder() {
               
               <AccordionItem value="item-2">
                 <AccordionTrigger className="text-left text-lg font-medium">
-                  How do EgglessCakes occasion reminders work?
+                  How do CakesBuy occasion reminders work?
                 </AccordionTrigger>
                 <AccordionContent className="text-gray-600">
                   Simply save the special dates you want to remember. We'll send you email reminders one week before each occasion with exclusive discount codes and cake recommendations perfect for celebrating.
