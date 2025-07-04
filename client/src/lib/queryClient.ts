@@ -13,7 +13,10 @@ export async function apiRequest(
   data?: unknown | undefined,
   headers?: Record<string, string>
 ): Promise<Response> {
-  const token = localStorage.getItem('auth_token');
+  // Check for admin token first for admin routes, then regular auth token
+  const adminToken = localStorage.getItem('admin_token');
+  const authToken = localStorage.getItem('auth_token');
+  const token = url.includes('/admin') ? (adminToken || authToken) : (authToken || adminToken);
   
   const defaultHeaders: Record<string, string> = {};
   if (data) {
@@ -44,7 +47,11 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const token = localStorage.getItem('auth_token');
+    // Check for admin token first for admin routes, then regular auth token
+    const adminToken = localStorage.getItem('admin_token');
+    const authToken = localStorage.getItem('auth_token');
+    const url = queryKey[0] as string;
+    const token = url.includes('/admin') ? (adminToken || authToken) : (authToken || adminToken);
     const headers: Record<string, string> = {};
     
     if (token) {
