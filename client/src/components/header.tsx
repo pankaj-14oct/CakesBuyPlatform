@@ -280,7 +280,7 @@ export default function Header() {
                       
                       <div className="p-1">
                         <DropdownMenuItem 
-                          onClick={() => setLocation('/orders')}
+                          onClick={() => setLocation('/profile?section=orders')}
                           className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
                         >
                           <Package className="h-5 w-5 text-gray-600" />
@@ -539,7 +539,7 @@ export default function Header() {
                 <div className="p-4 space-y-1">
                   <Button
                     onClick={() => {
-                      setLocation('/orders');
+                      setLocation('/profile?section=orders');
                       setIsUserMenuOpen(false);
                     }}
                     variant="ghost"

@@ -86,6 +86,12 @@ export default function ProfilePage() {
     enabled: isAuthenticated
   });
 
+  // Fetch user orders
+  const { data: orders, isLoading: ordersLoading } = useQuery<any>({
+    queryKey: ['/api/auth/orders'],
+    enabled: isAuthenticated
+  });
+
   // Fetch user addresses
   const { data: addresses, isLoading: addressesLoading, error: addressesError } = useQuery({
     queryKey: ['/api/auth/addresses'],
@@ -372,16 +378,67 @@ export default function ProfilePage() {
                     <div className="border-b pb-4 mb-6">
                       <h2 className="text-xl font-semibold text-gray-900">My Orders</h2>
                     </div>
-                    <div className="text-center py-12">
-                      <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-500 mb-4">No orders found</p>
-                      <Button 
-                        onClick={() => setLocation('/')}
-                        className="bg-red-600 hover:bg-red-700"
-                      >
-                        Start Shopping
-                      </Button>
-                    </div>
+                    {ordersLoading ? (
+                      <div className="text-center py-12">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto mb-4"></div>
+                        <p className="text-gray-500">Loading orders...</p>
+                      </div>
+                    ) : orders && orders.length > 0 ? (
+                      <div className="space-y-4">
+                        {orders.map((order: any) => (
+                          <Card key={order.id} className="border border-gray-200">
+                            <CardContent className="p-6">
+                              <div className="flex items-start justify-between">
+                                <div className="space-y-2">
+                                  <div className="flex items-center space-x-2">
+                                    <span className="font-semibold text-gray-900">
+                                      Order #{order.orderNumber || order.id}
+                                    </span>
+                                    <Badge 
+                                      className={`text-xs ${
+                                        order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                                        order.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
+                                        order.status === 'preparing' ? 'bg-yellow-100 text-yellow-800' :
+                                        order.status === 'out-for-delivery' ? 'bg-purple-100 text-purple-800' :
+                                        'bg-gray-100 text-gray-800'
+                                      }`}
+                                    >
+                                      {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1).replace('-', ' ') : 'Pending'}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-gray-600">
+                                    Total: ₹{order.totalAmount}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    Ordered on {new Date(order.createdAt).toLocaleDateString()}
+                                  </p>
+                                </div>
+                                <div className="flex space-x-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setLocation(`/orders/${order.id}`)}
+                                  >
+                                    View Details
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-500 mb-4">No orders found</p>
+                        <Button 
+                          onClick={() => setLocation('/')}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Start Shopping
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
 
