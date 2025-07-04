@@ -1608,11 +1608,24 @@ CakesBuy
       
       const users = await storage.getAllUsers();
       
-      // Remove password field for security
-      const safeUsers = users.map((user: User) => ({
-        ...user,
-        password: undefined
-      }));
+      // Remove password field for security and parse JSON addresses
+      const safeUsers = users.map((user: User) => {
+        let parsedAddresses = user.addresses;
+        if (typeof user.addresses === 'string') {
+          try {
+            parsedAddresses = JSON.parse(user.addresses);
+          } catch (error) {
+            console.error(`Failed to parse addresses for user ${user.id}:`, error);
+            parsedAddresses = [];
+          }
+        }
+        
+        return {
+          ...user,
+          password: undefined,
+          addresses: parsedAddresses
+        };
+      });
       
       res.json(safeUsers);
     } catch (error) {
