@@ -114,6 +114,11 @@ function Router() {
   
   // Check if we're in admin area
   if (location.startsWith('/admin')) {
+    // Admin login page should not be protected
+    if (location === '/admin-login') {
+      return <AdminLogin />;
+    }
+    
     return (
       <AdminProtected>
         <AdminLayout>
