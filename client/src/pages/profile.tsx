@@ -259,6 +259,38 @@ export default function ProfilePage() {
     }
   };
 
+  const handleDownloadInvoice = async (orderId: number) => {
+    try {
+      // First try to get existing invoice for the order
+      let invoiceData;
+      try {
+        const invoiceRes = await apiRequest(`/api/orders/${orderId}/invoice`, 'GET');
+        invoiceData = await invoiceRes.json();
+      } catch (error) {
+        // If invoice doesn't exist, create one
+        const createRes = await apiRequest(`/api/orders/${orderId}/invoice`, 'POST');
+        invoiceData = await createRes.json();
+      }
+      
+      if (invoiceData.invoiceNumber) {
+        // For now, open invoice details in a new tab
+        // In future, this can be replaced with actual PDF generation
+        window.open(`/invoices/${invoiceData.invoiceNumber}`, '_blank');
+        
+        toast({
+          title: "Success",
+          description: "Invoice opened in new tab",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to access invoice",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getAddressIcon = (type: string) => {
     switch (type) {
       case 'home':
@@ -420,6 +452,15 @@ export default function ProfilePage() {
                                     onClick={() => setLocation(`/orders/${order.id}`)}
                                   >
                                     View Details
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleDownloadInvoice(order.id)}
+                                    className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                                  >
+                                    <FileText className="h-4 w-4 mr-1" />
+                                    Invoice
                                   </Button>
                                 </div>
                               </div>

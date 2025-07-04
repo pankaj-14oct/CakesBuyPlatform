@@ -21,6 +21,7 @@ import OccasionReminder from "@/pages/OccasionReminder";
 import ProfilePage from "@/pages/profile";
 import OrdersPage from "@/pages/orders";
 import InvoicesPage from "@/pages/Invoices";
+import InvoiceDetailPage from "@/pages/InvoiceDetail";
 import LoyaltyPage from "@/pages/loyalty";
 import TrackOrderPage from "@/pages/track-order";
 import SearchPage from "@/pages/search";
@@ -182,6 +183,7 @@ function Router() {
         <Route path="/profile" component={ProfilePage} />
         <Route path="/orders" component={OrdersPage} />
         <Route path="/invoices" component={InvoicesPage} />
+        <Route path="/invoices/:invoiceNumber" component={InvoiceDetailPage} />
         <Route path="/loyalty" component={LoyaltyPage} />
         <Route path="/track-order" component={TrackOrderPage} />
         <Route component={NotFound} />

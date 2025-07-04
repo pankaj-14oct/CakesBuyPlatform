@@ -288,14 +288,6 @@ export default function Header() {
                         </DropdownMenuItem>
                         
                         <DropdownMenuItem 
-                          onClick={() => setLocation('/invoices')}
-                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
-                        >
-                          <FileText className="h-5 w-5 text-gray-600" />
-                          <span className="font-medium">My Invoices</span>
-                        </DropdownMenuItem>
-                        
-                        <DropdownMenuItem 
                           onClick={() => setLocation('/occasions')}
                           className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
                         >
@@ -547,18 +539,6 @@ export default function Header() {
                   >
                     <Package className="h-5 w-5 text-gray-600" />
                     <span className="font-medium">My Orders</span>
-                  </Button>
-
-                  <Button
-                    onClick={() => {
-                      setLocation('/invoices');
-                      setIsUserMenuOpen(false);
-                    }}
-                    variant="ghost"
-                    className="w-full justify-start gap-3 h-12 text-left"
-                  >
-                    <FileText className="h-5 w-5 text-gray-600" />
-                    <span className="font-medium">My Invoices</span>
                   </Button>
 
                   <Button
