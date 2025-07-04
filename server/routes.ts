@@ -732,6 +732,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Test email service
+  app.post("/api/admin/test-email", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email address is required" });
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Invalid email address format" });
+      }
+
+      const { sendEmail } = await import("./email-service");
+      
+      const testEmailData = {
+        to: email,
+        from: "order.cakesbuy@gmail.com",
+        subject: "EgglessCakes - Email Service Test",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
+              <h2 style="color: #8B4513; margin-bottom: 20px;">🧪 Email Service Test</h2>
+              
+              <p style="color: #333; margin-bottom: 15px;">
+                This is a test email from your EgglessCakes platform to verify that the email service is working correctly.
+              </p>
+              
+              <div style="background-color: white; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                <h3 style="color: #8B4513; margin-top: 0;">Test Details:</h3>
+                <ul style="color: #666;">
+                  <li><strong>Platform:</strong> EgglessCakes E-commerce</li>
+                  <li><strong>Service:</strong> Gmail SMTP</li>
+                  <li><strong>Test Time:</strong> ${new Date().toLocaleString()}</li>
+                  <li><strong>Status:</strong> ✅ Email Service Active</li>
+                </ul>
+              </div>
+              
+              <p style="color: #666; font-size: 14px;">
+                If you received this email, your email configuration is working properly and you can send customer notifications.
+              </p>
+              
+              <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #8B4513;">
+                <p style="color: #8B4513; font-weight: bold; margin: 0;">EgglessCakes</p>
+                <p style="color: #666; font-size: 12px; margin: 5px 0 0 0;">
+                  100% Eggless Cakes • Online Delivery in Gurgaon
+                </p>
+              </div>
+            </div>
+          </div>
+        `,
+        text: `
+Email Service Test - EgglessCakes
+
+This is a test email from your EgglessCakes platform to verify that the email service is working correctly.
+
+Test Details:
+- Platform: EgglessCakes E-commerce  
+- Service: Gmail SMTP
+- Test Time: ${new Date().toLocaleString()}
+- Status: Email Service Active
+
+If you received this email, your email configuration is working properly and you can send customer notifications.
+
+EgglessCakes
+100% Eggless Cakes • Online Delivery in Gurgaon
+        `
+      };
+
+      const emailSent = await sendEmail(testEmailData);
+      
+      if (emailSent) {
+        res.json({ 
+          message: "Test email sent successfully",
+          email: email,
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        res.status(500).json({ 
+          message: "Failed to send test email. Please check email service configuration." 
+        });
+      }
+    } catch (error) {
+      console.error("Test email error:", error);
+      res.status(500).json({ 
+        message: "Failed to send test email",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // OTP Authentication Routes
   
   // Send OTP for registration

@@ -4,14 +4,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Database, Trash2, Download, Upload } from "lucide-react";
+import { Database, Trash2, Download, Upload, Mail, Send } from "lucide-react";
 
 export default function AdminSettings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
+  const [testEmail, setTestEmail] = useState("");
 
   const importDummyDataMutation = useMutation({
     mutationFn: async () => {
@@ -55,6 +58,27 @@ export default function AdminSettings() {
     },
   });
 
+  const testEmailMutation = useMutation({
+    mutationFn: async (email: string) => {
+      const response = await apiRequest("POST", "/api/admin/test-email", { email });
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Test email sent successfully",
+      });
+      setTestEmail("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send test email",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleImportDummyData = () => {
     setIsLoading(true);
     importDummyDataMutation.mutate();
@@ -67,6 +91,28 @@ export default function AdminSettings() {
       clearDataMutation.mutate();
       setIsLoading(false);
     }
+  };
+
+  const handleTestEmail = () => {
+    if (!testEmail) {
+      toast({
+        title: "Error",
+        description: "Please enter an email address",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(testEmail)) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    testEmailMutation.mutate(testEmail);
   };
 
   return (
@@ -140,6 +186,52 @@ export default function AdminSettings() {
                 <li>• Clear data action is permanent and cannot be undone</li>
                 <li>• Always backup important data before performing destructive actions</li>
                 <li>• Import creates realistic sample data for development and testing</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Email Service Testing */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5" />
+              Email Service Testing
+            </CardTitle>
+            <CardDescription>
+              Test email functionality and verify service configuration
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="testEmail">Test Email Address</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="testEmail"
+                  type="email"
+                  placeholder="Enter email address to test"
+                  value={testEmail}
+                  onChange={(e) => setTestEmail(e.target.value)}
+                  className="flex-1"
+                />
+                <Button 
+                  onClick={handleTestEmail}
+                  disabled={testEmailMutation.isPending || !testEmail}
+                  className="min-w-[100px]"
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  {testEmailMutation.isPending ? "Sending..." : "Send Test"}
+                </Button>
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-medium text-blue-800 mb-2">Email Testing Information:</h4>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• This will send a test email to verify service configuration</li>
+                <li>• Check that Gmail SMTP credentials are properly configured</li>
+                <li>• Useful for testing before sending customer notifications</li>
+                <li>• Test email includes system information and timestamp</li>
               </ul>
             </div>
           </CardContent>
