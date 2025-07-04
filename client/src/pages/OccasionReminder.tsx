@@ -448,7 +448,7 @@ export default function OccasionReminder() {
                   Add New Reminder
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
+              <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Add Reminder</DialogTitle>
                   <DialogDescription>
@@ -456,7 +456,7 @@ export default function OccasionReminder() {
                   </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pb-4">
                     <FormField
                       control={form.control}
                       name="title"
@@ -562,10 +562,10 @@ export default function OccasionReminder() {
                       </div>
                     </div>
                     
-                    <div className="flex justify-center pt-6">
+                    <div className="mt-6 border-t pt-4">
                       <Button 
                         type="submit" 
-                        className="w-full bg-pink-400 hover:bg-pink-500 text-white font-semibold py-3 px-6 rounded-lg"
+                        className="w-full bg-pink-400 hover:bg-pink-500 text-white py-3"
                         disabled={createReminderMutation.isPending}
                       >
                         {createReminderMutation.isPending ? "Adding..." : "Continue"}
