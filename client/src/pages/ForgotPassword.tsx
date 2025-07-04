@@ -91,7 +91,7 @@ export default function ForgotPassword() {
         title: "Password Reset Successful!",
         description: "Your password has been reset. You can now login with your new password.",
       });
-      navigate("/login");
+      navigate("/auth");
     },
     onError: (error: Error) => {
       toast({
@@ -246,7 +246,7 @@ export default function ForgotPassword() {
           
           <div className="text-center text-sm text-gray-600">
             Remember your password?{" "}
-            <Link href="/login" className="text-orange-600 hover:text-orange-800 font-medium">
+            <Link href="/auth" className="text-orange-600 hover:text-orange-800 font-medium">
               Login here
             </Link>
           </div>
