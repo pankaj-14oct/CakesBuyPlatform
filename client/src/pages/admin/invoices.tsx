@@ -223,8 +223,8 @@ export default function AdminInvoices() {
                   </div>
                 </td>
                 <td className="border border-gray-200 p-3 text-center">{item.quantity}</td>
-                <td className="border border-gray-200 p-3 text-right">₹{item.price.toFixed(2)}</td>
-                <td className="border border-gray-200 p-3 text-right">₹{(item.quantity * item.price).toFixed(2)}</td>
+                <td className="border border-gray-200 p-3 text-right">₹{Number(item.price).toFixed(2)}</td>
+                <td className="border border-gray-200 p-3 text-right">₹{(Number(item.quantity) * Number(item.price)).toFixed(2)}</td>
               </tr>
             ))}
           </tbody>
