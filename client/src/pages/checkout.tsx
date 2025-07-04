@@ -232,7 +232,11 @@ export default function CheckoutPage() {
 
   const subtotal = cartState.total;
   const deliveryFee = subtotal >= 500 ? 0 : 50;
-  const total = subtotal + deliveryFee;
+  
+  // Watch delivery time changes to calculate midnight delivery charge
+  const selectedDeliveryTime = form.watch('deliveryTime');
+  const midnightDeliveryCharge = selectedDeliveryTime === 'midnight' ? 250 : 0;
+  const total = subtotal + deliveryFee + midnightDeliveryCharge;
 
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
@@ -1061,6 +1065,13 @@ export default function CheckoutPage() {
                       )}
                     </span>
                   </div>
+
+                  {midnightDeliveryCharge > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-charcoal">Midnight Delivery</span>
+                      <span className="font-medium text-orange-600">{formatPrice(midnightDeliveryCharge)}</span>
+                    </div>
+                  )}
 
                   <Separator />
                   
