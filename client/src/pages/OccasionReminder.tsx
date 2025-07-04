@@ -60,10 +60,24 @@ export default function OccasionReminder() {
     mutationFn: async (data: ReminderFormData) => {
       // Convert to the format expected by the API
       const eventDate = `${data.month.padStart(2, '0')}-${data.day.padStart(2, '0')}`;
+      
+      // Calculate reminder date (7 days before the event)
+      const currentYear = new Date().getFullYear();
+      const [month, day] = [data.month, data.day];
+      const eventDateThisYear = new Date(currentYear, parseInt(month) - 1, parseInt(day));
+      const reminderDate = new Date(eventDateThisYear);
+      reminderDate.setDate(reminderDate.getDate() - 7);
+      
+      // If the reminder date has passed this year, set for next year
+      if (reminderDate < new Date()) {
+        eventDateThisYear.setFullYear(currentYear + 1);
+        reminderDate.setFullYear(currentYear + 1);
+      }
+      
       const apiData = {
         eventType: data.eventType,
         eventDate: eventDate,
-        personName: data.title, // Using title as person name for now
+        reminderDate: reminderDate.toISOString(),
       };
       
       const res = await apiRequest("/api/reminders", "POST", apiData);
