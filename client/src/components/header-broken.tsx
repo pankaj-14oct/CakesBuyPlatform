@@ -261,99 +261,99 @@ export default function Header() {
                         <User className="h-5 w-5" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56 p-0">
-                      <div className="p-3 border-b bg-gray-50">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white font-semibold">
-                            {user?.phone?.slice(-1) || 'P'}
+                  <DropdownMenuContent align="end" className="w-56 p-0">
+                    <div className="p-3 border-b bg-gray-50">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white font-semibold">
+                          {user?.phone?.slice(-1) || 'P'}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-gray-900">
+                            Hey {user?.phone?.slice(-4) || 'User'}!
                           </div>
-                          <div>
-                            <div className="font-semibold text-gray-900">
-                              Hey {user?.phone?.slice(-4) || 'User'}!
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {user?.phone || user?.email}
-                            </div>
+                          <div className="text-sm text-gray-500">
+                            {user?.phone || user?.email}
                           </div>
                         </div>
                       </div>
+                    </div>
+                    
+                    <div className="p-1">
+                      <DropdownMenuItem 
+                        onClick={() => setLocation('/orders')}
+                        className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                      >
+                        <Package className="h-5 w-5 text-gray-600" />
+                        <span className="font-medium">My Orders</span>
+                      </DropdownMenuItem>
                       
-                      <div className="p-1">
-                        <DropdownMenuItem 
-                          onClick={() => setLocation('/orders')}
-                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
-                        >
-                          <Package className="h-5 w-5 text-gray-600" />
-                          <span className="font-medium">My Orders</span>
-                        </DropdownMenuItem>
-                        
-                        <DropdownMenuItem 
-                          onClick={() => setLocation('/invoices')}
-                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
-                        >
-                          <FileText className="h-5 w-5 text-gray-600" />
-                          <span className="font-medium">My Invoices</span>
-                        </DropdownMenuItem>
-                        
-                        <DropdownMenuItem 
-                          onClick={() => setLocation('/wishlist')}
-                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
-                        >
-                          <Heart className="h-5 w-5 text-gray-600" />
-                          <span className="font-medium">My Favourites</span>
-                        </DropdownMenuItem>
-                        
-                        <DropdownMenuItem 
-                          onClick={() => setLocation('/occasions')}
-                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
-                        >
-                          <Calendar className="h-5 w-5 text-gray-600" />
-                          <span className="font-medium">My Occasions</span>
-                        </DropdownMenuItem>
-                        
-                        <DropdownMenuItem 
-                          onClick={() => setLocation('/profile')}
-                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
-                        >
-                          <MapPinIcon className="h-5 w-5 text-gray-600" />
-                          <span className="font-medium">Manage Address</span>
-                        </DropdownMenuItem>
-                        
-                        <DropdownMenuItem 
-                          onClick={() => setLocation('/loyalty')}
-                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
-                        >
-                          <Wallet className="h-5 w-5 text-gray-600" />
-                          <span className="font-medium">My Wallet</span>
-                        </DropdownMenuItem>
-                        
-                        <DropdownMenuItem 
-                          onClick={() => setLocation('/profile')}
-                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
-                        >
-                          <Settings className="h-5 w-5 text-gray-600" />
-                          <span className="font-medium">My Reviews</span>
-                        </DropdownMenuItem>
-                        
-                        <DropdownMenuItem 
-                          onClick={() => window.open('https://wa.me/1234567890', '_blank')}
-                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
-                        >
-                          <MessageCircle className="h-5 w-5 text-green-600" />
-                          <span className="font-medium">WhatsApp</span>
-                        </DropdownMenuItem>
-                      </div>
+                      <DropdownMenuItem 
+                        onClick={() => setLocation('/invoices')}
+                        className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                      >
+                        <FileText className="h-5 w-5 text-gray-600" />
+                        <span className="font-medium">My Invoices</span>
+                      </DropdownMenuItem>
                       
-                      <div className="border-t p-1">
-                        <DropdownMenuItem 
-                          onClick={() => logoutMutation.mutate()}
-                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 text-red-600"
-                        >
-                          <LogOut className="h-5 w-5" />
-                          <span className="font-medium">Logout</span>
-                        </DropdownMenuItem>
-                      </div>
-                    </DropdownMenuContent>
+                      <DropdownMenuItem 
+                        onClick={() => setLocation('/wishlist')}
+                        className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                      >
+                        <Heart className="h-5 w-5 text-gray-600" />
+                        <span className="font-medium">My Favourites</span>
+                      </DropdownMenuItem>
+                      
+                      <DropdownMenuItem 
+                        onClick={() => setLocation('/occasions')}
+                        className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                      >
+                        <Calendar className="h-5 w-5 text-gray-600" />
+                        <span className="font-medium">My Occasions</span>
+                      </DropdownMenuItem>
+                      
+                      <DropdownMenuItem 
+                        onClick={() => setLocation('/profile')}
+                        className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                      >
+                        <MapPinIcon className="h-5 w-5 text-gray-600" />
+                        <span className="font-medium">Manage Address</span>
+                      </DropdownMenuItem>
+                      
+                      <DropdownMenuItem 
+                        onClick={() => setLocation('/loyalty')}
+                        className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                      >
+                        <Wallet className="h-5 w-5 text-gray-600" />
+                        <span className="font-medium">My Wallet</span>
+                      </DropdownMenuItem>
+                      
+                      <DropdownMenuItem 
+                        onClick={() => setLocation('/profile')}
+                        className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                      >
+                        <Settings className="h-5 w-5 text-gray-600" />
+                        <span className="font-medium">My Reviews</span>
+                      </DropdownMenuItem>
+                      
+                      <DropdownMenuItem 
+                        onClick={() => window.open('https://wa.me/1234567890', '_blank')}
+                        className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                      >
+                        <MessageCircle className="h-5 w-5 text-green-600" />
+                        <span className="font-medium">WhatsApp</span>
+                      </DropdownMenuItem>
+                    </div>
+                    
+                    <div className="border-t p-1">
+                      <DropdownMenuItem 
+                        onClick={() => logoutMutation.mutate()}
+                        className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 text-red-600"
+                      >
+                        <LogOut className="h-5 w-5" />
+                        <span className="font-medium">Logout</span>
+                      </DropdownMenuItem>
+                    </div>
+                  </DropdownMenuContent>
                   </DropdownMenu>
                   
                   {/* Mobile User Menu Button */}
