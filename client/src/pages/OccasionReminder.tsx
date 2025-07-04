@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Gift, Heart, Plus, Trash2, Bell, Star, Clock, Tag, ChevronDown, Edit } from "lucide-react";
+import { Calendar, Gift, Heart, Plus, Trash2, Bell, Star, Clock, Tag, ChevronDown, Edit, CalendarIcon } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
@@ -19,8 +19,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 const reminderSchema = z.object({
   eventType: z.enum(["birthday", "anniversary", "christmas", "newyear", "valentine", "womensday", "mothersday", "fathersday"]),
   relationshipType: z.string().min(1, "Please select who this reminder is for"),
-  day: z.string().min(1, "Day is required"),
-  month: z.string().min(1, "Month is required"),
+  eventDate: z.string().min(1, "Date is required"),
+  senderName: z.string().min(1, "Sender name is required"),
+  messageOnCard: z.string().optional(),
+  specialInstructions: z.string().optional(),
 });
 
 type ReminderFormData = z.infer<typeof reminderSchema>;
@@ -45,8 +47,10 @@ export default function OccasionReminder() {
     defaultValues: {
       eventType: "birthday",
       relationshipType: "",
-      day: "",
-      month: "",
+      eventDate: "",
+      senderName: "",
+      messageOnCard: "",
+      specialInstructions: "",
     },
   });
 
@@ -59,32 +63,27 @@ export default function OccasionReminder() {
   // Create reminder mutation
   const createReminderMutation = useMutation({
     mutationFn: async (data: ReminderFormData) => {
-      // Convert to the format expected by the API
-      const eventDate = `${data.month.padStart(2, '0')}-${data.day.padStart(2, '0')}`;
+      // Parse the event date from the input
+      const eventDate = new Date(data.eventDate);
+      const eventDateStr = eventDate.toISOString().split('T')[0]; // YYYY-MM-DD format
       
       // Calculate reminder date (7 days before the event)
-      const currentYear = new Date().getFullYear();
-      const [month, day] = [data.month, data.day];
-      const eventDateThisYear = new Date(currentYear, parseInt(month) - 1, parseInt(day));
-      const reminderDate = new Date(eventDateThisYear);
+      const reminderDate = new Date(eventDate);
       reminderDate.setDate(reminderDate.getDate() - 7);
       
       // If the reminder date has passed this year, set for next year
       if (reminderDate < new Date()) {
-        eventDateThisYear.setFullYear(currentYear + 1);
-        reminderDate.setFullYear(currentYear + 1);
+        eventDate.setFullYear(eventDate.getFullYear() + 1);
+        reminderDate.setFullYear(reminderDate.getFullYear() + 1);
       }
       
-      const apiData = {
-        eventType: data.eventType,
-        eventDate: eventDate,
-        reminderDate: reminderDate,
-      };
-      
-      // Convert Date object to string before sending
       const requestData = {
-        ...apiData,
-        reminderDate: reminderDate.toISOString()
+        eventType: data.eventType,
+        eventDate: eventDateStr,
+        reminderDate: reminderDate.toISOString(),
+        senderName: data.senderName,
+        messageOnCard: data.messageOnCard,
+        specialInstructions: data.specialInstructions,
       };
       
       const res = await apiRequest("/api/reminders", "POST", requestData);
@@ -112,25 +111,27 @@ export default function OccasionReminder() {
   // Update reminder mutation
   const updateReminderMutation = useMutation({
     mutationFn: async (data: ReminderFormData & { id: number }) => {
-      const eventDate = `${data.month.padStart(2, '0')}-${data.day.padStart(2, '0')}`;
+      // Parse the event date from the input
+      const eventDate = new Date(data.eventDate);
+      const eventDateStr = eventDate.toISOString().split('T')[0]; // YYYY-MM-DD format
       
       // Calculate reminder date (7 days before the event)
-      const currentYear = new Date().getFullYear();
-      const [month, day] = [data.month, data.day];
-      const eventDateThisYear = new Date(currentYear, parseInt(month) - 1, parseInt(day));
-      const reminderDate = new Date(eventDateThisYear);
+      const reminderDate = new Date(eventDate);
       reminderDate.setDate(reminderDate.getDate() - 7);
       
       // If the reminder date has passed this year, set for next year
       if (reminderDate < new Date()) {
-        eventDateThisYear.setFullYear(currentYear + 1);
-        reminderDate.setFullYear(currentYear + 1);
+        eventDate.setFullYear(eventDate.getFullYear() + 1);
+        reminderDate.setFullYear(reminderDate.getFullYear() + 1);
       }
       
       const requestData = {
         eventType: data.eventType,
-        eventDate: eventDate,
-        reminderDate: reminderDate.toISOString()
+        eventDate: eventDateStr,
+        reminderDate: reminderDate.toISOString(),
+        senderName: data.senderName,
+        messageOnCard: data.messageOnCard,
+        specialInstructions: data.specialInstructions,
       };
       
       const res = await apiRequest(`/api/reminders/${data.id}`, "PUT", requestData);
@@ -189,13 +190,14 @@ export default function OccasionReminder() {
   };
 
   const handleEditReminder = (reminder: EventReminder) => {
-    const [month, day] = reminder.eventDate.split('-');
     setEditingReminder(reminder);
     form.reset({
       eventType: reminder.eventType,
       relationshipType: reminder.relationshipType,
-      day: day,
-      month: month,
+      eventDate: reminder.eventDate,
+      senderName: reminder.relationshipType, // Use relationship as sender name for backward compatibility
+      messageOnCard: "",
+      specialInstructions: "",
     });
     setIsDialogOpen(true);
   };
@@ -207,8 +209,10 @@ export default function OccasionReminder() {
       form.reset({
         eventType: "birthday",
         relationshipType: "",
-        day: "",
-        month: "",
+        eventDate: "",
+        senderName: "",
+        messageOnCard: "",
+        specialInstructions: "",
       });
     }
   };
@@ -218,8 +222,10 @@ export default function OccasionReminder() {
     form.reset({
       eventType: "birthday",
       relationshipType: "",
-      day: "",
-      month: "",
+      eventDate: "",
+      senderName: "",
+      messageOnCard: "",
+      specialInstructions: "",
     });
     setIsDialogOpen(true);
   };
@@ -565,47 +571,88 @@ export default function OccasionReminder() {
                 </DialogHeader>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pb-4">
+                    {/* Date Field with Calendar Icon */}
+                    <FormField
+                      control={form.control}
+                      name="eventDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-base font-semibold text-charcoal">
+                            Date <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <div className="relative">
+                            <FormControl>
+                              <Input
+                                type="date"
+                                {...field}
+                                className="h-12 text-base pl-12"
+                                min={new Date().toISOString().split('T')[0]}
+                              />
+                            </FormControl>
+                            <CalendarIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Delivery Occasion */}
                     <FormField
                       control={form.control}
                       name="eventType"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base font-semibold text-charcoal">Select Your Special Day</FormLabel>
+                          <FormLabel className="text-base font-semibold text-charcoal">Delivery Occasion</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
-                              <SelectTrigger className="h-12 text-base">
+                              <SelectTrigger className="h-12 text-base border-2 border-blue-300 focus:border-blue-500">
                                 <SelectValue placeholder="Select occasion" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent>
+                            <SelectContent className="max-h-80">
                               <SelectItem value="birthday">Birthday</SelectItem>
-                              <SelectItem value="anniversary">Anniversary</SelectItem>
-                              <SelectItem value="christmas">Christmas</SelectItem>
-                              <SelectItem value="newyear">New Year</SelectItem>
-                              <SelectItem value="valentine">Valentine Day</SelectItem>
-                              <SelectItem value="womensday">Women's Day</SelectItem>
+                              <SelectItem value="anniversary" className="bg-blue-500 text-white">Anniversary</SelectItem>
+                              <SelectItem value="wedding">Wedding</SelectItem>
+                              <SelectItem value="engagement">Engagement</SelectItem>
+                              <SelectItem value="valentine">Valentine's Day</SelectItem>
                               <SelectItem value="mothersday">Mother's Day</SelectItem>
                               <SelectItem value="fathersday">Father's Day</SelectItem>
+                              <SelectItem value="graduation">Graduation</SelectItem>
+                              <SelectItem value="promotion">Promotion</SelectItem>
+                              <SelectItem value="newyear">New Job</SelectItem>
+                              <SelectItem value="christmas">Farewell</SelectItem>
+                              <SelectItem value="womensday">Congratulations</SelectItem>
+                              <SelectItem value="festival">Festival</SelectItem>
+                              <SelectItem value="housewarming">House Warming</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    
+
+                    {/* Relation */}
                     <FormField
                       control={form.control}
                       name="relationshipType"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base font-semibold text-charcoal">Select For</FormLabel>
+                          <FormLabel className="text-base font-semibold text-charcoal">Relation</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger className="h-12 text-base">
-                                <SelectValue placeholder="Select relationship" />
+                                <SelectValue placeholder="Select Relation" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent>
+                            <SelectContent className="max-h-80">
+                              <SelectItem value="birthday">Birthday</SelectItem>
+                              <SelectItem value="engagement" className="bg-blue-500 text-white">Engagement</SelectItem>
+                              <SelectItem value="brideToBe">Bride to be</SelectItem>
+                              <SelectItem value="wedding">Wedding</SelectItem>
+                              <SelectItem value="congratulations">Congratulations</SelectItem>
+                              <SelectItem value="farewell">Farewell</SelectItem>
+                              <SelectItem value="sorry">Sorry</SelectItem>
+                              <SelectItem value="getWellSoon">Get Well Soon</SelectItem>
                               <SelectItem value="son">Son</SelectItem>
                               <SelectItem value="father">Father</SelectItem>
                               <SelectItem value="sister">Sister</SelectItem>
@@ -624,72 +671,73 @@ export default function OccasionReminder() {
                         </FormItem>
                       )}
                     />
-                    
-                    <div>
-                      <FormLabel className="text-sm font-medium">Alert Date</FormLabel>
-                      <div className="grid grid-cols-2 gap-4 mt-2">
-                        <FormField
-                          control={form.control}
-                          name="day"
-                          render={({ field }) => (
-                            <FormItem>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Date" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
-                                    <SelectItem key={day} value={day.toString()}>
-                                      {day}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name="month"
-                          render={({ field }) => (
-                            <FormItem>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Month" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {[
-                                    { value: "1", label: "January" },
-                                    { value: "2", label: "February" },
-                                    { value: "3", label: "March" },
-                                    { value: "4", label: "April" },
-                                    { value: "5", label: "May" },
-                                    { value: "6", label: "June" },
-                                    { value: "7", label: "July" },
-                                    { value: "8", label: "August" },
-                                    { value: "9", label: "September" },
-                                    { value: "10", label: "October" },
-                                    { value: "11", label: "November" },
-                                    { value: "12", label: "December" },
-                                  ].map((month) => (
-                                    <SelectItem key={month.value} value={month.value}>
-                                      {month.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
+
+                    {/* Sender Name */}
+                    <FormField
+                      control={form.control}
+                      name="senderName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-base font-semibold text-charcoal">
+                            Sender Name <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Enter sender name"
+                              className="h-12 text-base"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Message On Card */}
+                    <FormField
+                      control={form.control}
+                      name="messageOnCard"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-base font-semibold text-charcoal">Message On Card</FormLabel>
+                          <FormControl>
+                            <textarea
+                              {...field}
+                              placeholder="Enter your message"
+                              className="w-full h-20 p-3 border border-gray-300 rounded-md text-base resize-none"
+                              maxLength={250}
+                            />
+                          </FormControl>
+                          <div className="flex justify-end text-sm text-gray-500 mt-1">
+                            {field.value?.length || 0}/250
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Special Instructions */}
+                    <FormField
+                      control={form.control}
+                      name="specialInstructions"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-base font-semibold text-charcoal">Special Instructions</FormLabel>
+                          <FormControl>
+                            <textarea
+                              {...field}
+                              placeholder="Any special instructions for delivery"
+                              className="w-full h-20 p-3 border border-gray-300 rounded-md text-base resize-none"
+                              maxLength={500}
+                            />
+                          </FormControl>
+                          <div className="flex justify-end text-sm text-gray-500 mt-1">
+                            {field.value?.length || 0}/500
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     
                     <div className="mt-8">
                       <Button 
