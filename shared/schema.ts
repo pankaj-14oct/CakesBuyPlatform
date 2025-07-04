@@ -259,6 +259,21 @@ export const otpRegisterSchema = z.object({
   path: ["confirmPassword"]
 });
 
+// Password reset schemas
+export const forgotPasswordSchema = z.object({
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
+});
+
+export const resetPasswordSchema = z.object({
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
+  otp: z.string().length(6, 'OTP must be 6 digits'),
+  newPassword: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string()
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"]
+});
+
 // Address schemas
 export const addressSchema = z.object({
   id: z.string().optional(),

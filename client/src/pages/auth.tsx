@@ -8,7 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/use-auth';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import { Cake, User, Mail, Lock, Phone } from 'lucide-react';
 import { useEffect } from 'react';
 
@@ -157,6 +157,12 @@ export default function AuthPage() {
                       </Button>
                     </form>
                   </Form>
+                  
+                  <div className="mt-4 text-center text-sm text-gray-600">
+                    <Link href="/forgot-password" className="text-caramel hover:text-brown font-medium">
+                      Forgot your password?
+                    </Link>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>

@@ -17,7 +17,9 @@ import {
   profileUpdateSchema,
   sendOtpSchema,
   verifyOtpSchema,
-  otpRegisterSchema
+  otpRegisterSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema
 } from "@shared/schema";
 import { 
   generateToken, 
@@ -852,6 +854,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid login data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to login" });
+    }
+  });
+
+  // Forgot Password - Send OTP
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const { phone } = forgotPasswordSchema.parse(req.body);
+      
+      // Check if user exists
+      const user = await storage.getUserByPhone(phone);
+      if (!user) {
+        return res.status(404).json({ message: "No account found with this phone number" });
+      }
+      
+      // Generate 6-digit OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // Set expiry time (5 minutes from now)
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 5);
+      
+      // Store OTP in database
+      await storage.createOtpVerification({
+        phone,
+        otp,
+        expiresAt,
+        isUsed: false
+      });
+      
+      // In a real app, you would send the OTP via SMS here
+      // For demo purposes, we'll return it in the response
+      console.log(`Password reset OTP for ${phone}: ${otp}`);
+      
+      res.json({ 
+        message: "Password reset OTP sent successfully",
+        // Remove this in production - only for demo
+        otp: otp 
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid phone number", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to send password reset OTP" });
+    }
+  });
+
+  // Reset Password with OTP
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { phone, otp, newPassword } = resetPasswordSchema.parse(req.body);
+      
+      // Verify OTP
+      const verification = await storage.verifyOtp(phone, otp);
+      if (!verification) {
+        return res.status(400).json({ message: "Invalid or expired OTP" });
+      }
+      
+      // Get user by phone
+      const user = await storage.getUserByPhone(phone);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Hash new password
+      const hashedPassword = await hashPassword(newPassword);
+      
+      // Update user's password
+      await storage.updateUser(user.id, { password: hashedPassword });
+      
+      res.json({ 
+        message: "Password reset successful. You can now login with your new password." 
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid password reset data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to reset password" });
     }
   });
 
