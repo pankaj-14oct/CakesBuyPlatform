@@ -17,8 +17,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const reminderSchema = z.object({
-  title: z.string().min(1, "Reminder title is required"),
-  eventType: z.enum(["birthday", "anniversary"]),
+  eventType: z.enum(["birthday", "anniversary", "christmas", "newyear", "valentine", "womensday", "mothersday", "fathersday"]),
+  relationshipType: z.string().min(1, "Please select who this reminder is for"),
   day: z.string().min(1, "Day is required"),
   month: z.string().min(1, "Month is required"),
 });
@@ -27,9 +27,9 @@ type ReminderFormData = z.infer<typeof reminderSchema>;
 
 interface EventReminder {
   id: number;
-  eventType: "birthday" | "anniversary";
+  eventType: "birthday" | "anniversary" | "christmas" | "newyear" | "valentine" | "womensday" | "mothersday" | "fathersday";
   eventDate: string;
-  personName: string;
+  relationshipType: string;
   createdAt: string;
 }
 
@@ -42,8 +42,8 @@ export default function OccasionReminder() {
   const form = useForm<ReminderFormData>({
     resolver: zodResolver(reminderSchema),
     defaultValues: {
-      title: "",
       eventType: "birthday",
+      relationshipType: "",
       day: "",
       month: "",
     },
@@ -476,19 +476,30 @@ export default function OccasionReminder() {
                   </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pb-4">
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pb-4">
                     <FormField
                       control={form.control}
-                      name="title"
+                      name="eventType"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Reminder Title</FormLabel>
-                          <FormControl>
-                            <Input 
-                              placeholder="Write reminder title (e.g Mother's Birthday)"
-                              {...field}
-                            />
-                          </FormControl>
+                          <FormLabel className="text-base font-semibold text-charcoal">Select Your Special Day</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="h-12 text-base">
+                                <SelectValue placeholder="Select occasion" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="birthday">Birthday</SelectItem>
+                              <SelectItem value="anniversary">Anniversary</SelectItem>
+                              <SelectItem value="christmas">Christmas</SelectItem>
+                              <SelectItem value="newyear">New Year</SelectItem>
+                              <SelectItem value="valentine">Valentine Day</SelectItem>
+                              <SelectItem value="womensday">Women's Day</SelectItem>
+                              <SelectItem value="mothersday">Mother's Day</SelectItem>
+                              <SelectItem value="fathersday">Father's Day</SelectItem>
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -496,19 +507,29 @@ export default function OccasionReminder() {
                     
                     <FormField
                       control={form.control}
-                      name="eventType"
+                      name="relationshipType"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Event Type</FormLabel>
+                          <FormLabel className="text-base font-semibold text-charcoal">Select For</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select event type" />
+                              <SelectTrigger className="h-12 text-base">
+                                <SelectValue placeholder="Select relationship" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="birthday">Birthday</SelectItem>
-                              <SelectItem value="anniversary">Anniversary</SelectItem>
+                              <SelectItem value="son">Son</SelectItem>
+                              <SelectItem value="father">Father</SelectItem>
+                              <SelectItem value="sister">Sister</SelectItem>
+                              <SelectItem value="daughter">Daughter</SelectItem>
+                              <SelectItem value="mother">Mother</SelectItem>
+                              <SelectItem value="boyfriend">Boyfriend</SelectItem>
+                              <SelectItem value="girlfriend">Girlfriend</SelectItem>
+                              <SelectItem value="husband">Husband</SelectItem>
+                              <SelectItem value="wife">Wife</SelectItem>
+                              <SelectItem value="brother">Brother</SelectItem>
+                              <SelectItem value="friend">Friend</SelectItem>
+                              <SelectItem value="myself">Myself</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -582,13 +603,13 @@ export default function OccasionReminder() {
                       </div>
                     </div>
                     
-                    <div className="mt-6 border-t pt-4">
+                    <div className="mt-8">
                       <Button 
                         type="submit" 
-                        className="w-full bg-pink-400 hover:bg-pink-500 text-white py-3"
+                        className="w-full bg-red-500 hover:bg-red-600 text-white py-4 text-lg font-semibold rounded-lg"
                         disabled={createReminderMutation.isPending}
                       >
-                        {createReminderMutation.isPending ? "Adding..." : "Continue"}
+                        {createReminderMutation.isPending ? "Saving..." : "Save Reminder"}
                       </Button>
                     </div>
                   </form>
@@ -622,7 +643,7 @@ export default function OccasionReminder() {
                             )}
                             <span className="font-medium capitalize">{reminder.eventType}</span>
                           </div>
-                          <h3 className="font-semibold text-lg">{reminder.personName}</h3>
+                          <h3 className="font-semibold text-lg capitalize">{reminder.relationshipType}'s {reminder.eventType}</h3>
                           <p className="text-gray-600">{formatDate(reminder.eventDate)}</p>
                         </div>
                         <Button

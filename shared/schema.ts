@@ -149,8 +149,9 @@ export const reviews = pgTable("reviews", {
 export const eventReminders = pgTable("event_reminders", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
-  eventType: text("event_type").notNull(), // 'birthday' or 'anniversary'
+  eventType: text("event_type").notNull(), // 'birthday', 'anniversary', 'christmas', etc.
   eventDate: text("event_date").notNull(), // MM-DD format
+  relationshipType: text("relationship_type"), // 'son', 'mother', etc.
   reminderDate: timestamp("reminder_date").notNull(),
   isProcessed: boolean("is_processed").default(false),
   notificationSent: boolean("notification_sent").default(false),
