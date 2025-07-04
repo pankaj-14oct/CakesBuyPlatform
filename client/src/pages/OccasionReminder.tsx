@@ -77,7 +77,7 @@ export default function OccasionReminder() {
       const apiData = {
         eventType: data.eventType,
         eventDate: eventDate,
-        reminderDate: reminderDate.toISOString(),
+        reminderDate: reminderDate,
       };
       
       const res = await apiRequest("/api/reminders", "POST", apiData);
