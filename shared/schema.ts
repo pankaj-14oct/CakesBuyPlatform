@@ -274,6 +274,14 @@ export const resetPasswordSchema = z.object({
   path: ["confirmPassword"]
 });
 
+// Occasion reminder schema
+export const occasionReminderSchema = z.object({
+  title: z.string().min(1, "Reminder title is required"),
+  eventType: z.enum(["birthday", "anniversary"]),
+  day: z.string().min(1, "Day is required"),
+  month: z.string().min(1, "Month is required"),
+});
+
 // Address schemas
 export const addressSchema = z.object({
   id: z.string().optional(),

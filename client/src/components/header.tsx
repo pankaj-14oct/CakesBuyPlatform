@@ -21,6 +21,7 @@ export default function Header() {
     { href: '/category/eggless-cakes', label: 'Eggless Cakes' },
     { href: '/category/birthday-cakes', label: 'Birthday' },
     { href: '/category/wedding-cakes', label: 'Wedding' },
+    { href: '/occasions', label: 'Occasions' },
     { href: '/delivery', label: 'Online Delivery' },
   ];
 

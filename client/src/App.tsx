@@ -16,6 +16,7 @@ import DeliveryPage from "@/pages/delivery";
 import AuthPage from "@/pages/auth";
 import OtpAuthPage from "@/pages/otp-auth";
 import ForgotPassword from "@/pages/ForgotPassword";
+import OccasionReminder from "@/pages/OccasionReminder";
 import ProfilePage from "@/pages/profile";
 import OrdersPage from "@/pages/orders";
 import LoyaltyPage from "@/pages/loyalty";
@@ -141,6 +142,7 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <Route path="/otp-register" component={OtpAuthPage} />
       <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/occasions" component={OccasionReminder} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/orders" component={OrdersPage} />
       <Route path="/loyalty" component={LoyaltyPage} />
