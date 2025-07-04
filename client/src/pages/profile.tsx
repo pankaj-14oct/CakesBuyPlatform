@@ -87,11 +87,12 @@ export default function ProfilePage() {
   });
 
   // Fetch user addresses
-  const { data: addresses, isLoading: addressesLoading } = useQuery({
+  const { data: addresses, isLoading: addressesLoading, error: addressesError } = useQuery({
     queryKey: ['/api/auth/addresses'],
     queryFn: async () => {
       const res = await apiRequest('GET', '/api/auth/addresses');
       const data = await res.json();
+      console.log('Addresses API response:', data);
       return data;
     },
     enabled: isAuthenticated
@@ -544,6 +545,8 @@ export default function ProfilePage() {
                     <div className="space-y-4">
                       {addressesLoading ? (
                         <div>Loading addresses...</div>
+                      ) : addressesError ? (
+                        <div className="text-red-600">Error loading addresses: {addressesError.message}</div>
                       ) : addresses && addresses.length > 0 ? (
                         addresses.map((address: any) => (
                           <Card key={address.id} className="border border-gray-200">
