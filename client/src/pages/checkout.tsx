@@ -110,16 +110,18 @@ export default function CheckoutPage() {
       return true;
     }
     
-    // For same-day delivery, check current time
+    // For same-day delivery, check current time (3-hour slots from 9am to 9pm)
     switch (timeSlot) {
-      case 'morning': // 9 AM - 12 PM
-        return currentHour < 9; // Allow morning only if before 9 AM
-      case 'afternoon': // 12 PM - 4 PM  
-        return currentHour < 12; // Allow afternoon only if before 12 PM
-      case 'evening': // 4 PM - 8 PM
-        return currentHour < 16; // Allow evening only if before 4 PM
-      case 'midnight': // 11:30 PM - 12:30 AM
-        return currentHour < 21; // Allow midnight only if before 9 PM (2 hours advance)
+      case 'slot1': // 9 AM - 12 PM
+        return currentHour < 9;
+      case 'slot2': // 12 PM - 3 PM  
+        return currentHour < 12;
+      case 'slot3': // 3 PM - 6 PM
+        return currentHour < 15;
+      case 'slot4': // 6 PM - 9 PM
+        return currentHour < 18;
+      case 'midnight': // 11:30 PM - 12:30 AM (₹250 charge)
+        return currentHour < 21; // Allow midnight only if before 9 PM (2.5 hours advance)
       default:
         return true;
     }
@@ -144,7 +146,7 @@ export default function CheckoutPage() {
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       deliveryDate: getMinDeliveryDate(),
-      deliveryTime: 'evening',
+      deliveryTime: 'slot3',
       deliveryOccasion: '',
       relation: '',
       senderName: '',
@@ -164,7 +166,7 @@ export default function CheckoutPage() {
   
   // Auto-select first available time slot when date changes
   useEffect(() => {
-    const timeSlots = ['morning', 'afternoon', 'evening', 'midnight'];
+    const timeSlots = ['slot1', 'slot2', 'slot3', 'slot4', 'midnight'];
     const currentTimeSlot = form.getValues('deliveryTime');
     
     // If current time slot is not available for selected date, pick first available
@@ -783,29 +785,38 @@ export default function CheckoutPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem 
-                            value="morning" 
-                            disabled={!isTimeSlotAvailable(selectedDate, 'morning')}
+                            value="slot1" 
+                            disabled={!isTimeSlotAvailable(selectedDate, 'slot1')}
                           >
-                            Morning (9 AM - 12 PM)
-                            {!isTimeSlotAvailable(selectedDate, 'morning') && (
+                            9 AM - 12 PM
+                            {!isTimeSlotAvailable(selectedDate, 'slot1') && (
                               <span className="text-red-500 text-xs ml-2">(Not available)</span>
                             )}
                           </SelectItem>
                           <SelectItem 
-                            value="afternoon" 
-                            disabled={!isTimeSlotAvailable(selectedDate, 'afternoon')}
+                            value="slot2" 
+                            disabled={!isTimeSlotAvailable(selectedDate, 'slot2')}
                           >
-                            Afternoon (12 PM - 4 PM)
-                            {!isTimeSlotAvailable(selectedDate, 'afternoon') && (
+                            12 PM - 3 PM
+                            {!isTimeSlotAvailable(selectedDate, 'slot2') && (
                               <span className="text-red-500 text-xs ml-2">(Not available)</span>
                             )}
                           </SelectItem>
                           <SelectItem 
-                            value="evening" 
-                            disabled={!isTimeSlotAvailable(selectedDate, 'evening')}
+                            value="slot3" 
+                            disabled={!isTimeSlotAvailable(selectedDate, 'slot3')}
                           >
-                            Evening (4 PM - 8 PM)
-                            {!isTimeSlotAvailable(selectedDate, 'evening') && (
+                            3 PM - 6 PM
+                            {!isTimeSlotAvailable(selectedDate, 'slot3') && (
+                              <span className="text-red-500 text-xs ml-2">(Not available)</span>
+                            )}
+                          </SelectItem>
+                          <SelectItem 
+                            value="slot4" 
+                            disabled={!isTimeSlotAvailable(selectedDate, 'slot4')}
+                          >
+                            6 PM - 9 PM
+                            {!isTimeSlotAvailable(selectedDate, 'slot4') && (
                               <span className="text-red-500 text-xs ml-2">(Not available)</span>
                             )}
                           </SelectItem>
@@ -813,7 +824,7 @@ export default function CheckoutPage() {
                             value="midnight" 
                             disabled={!isTimeSlotAvailable(selectedDate, 'midnight')}
                           >
-                            Midnight (11:30 PM - 12:30 AM)
+                            11:30 PM - 12:30 AM (₹250 delivery charge)
                             {!isTimeSlotAvailable(selectedDate, 'midnight') && (
                               <span className="text-red-500 text-xs ml-2">(Not available)</span>
                             )}

@@ -68,10 +68,15 @@ export default function TrackOrderPage() {
 
   const formatDeliveryTime = (time: string) => {
     switch (time) {
-      case 'morning': return 'Morning (9 AM - 12 PM)';
-      case 'afternoon': return 'Afternoon (12 PM - 4 PM)';
-      case 'evening': return 'Evening (4 PM - 8 PM)';
-      case 'midnight': return 'Midnight (11 PM - 1 AM)';
+      case 'slot1': return '9 AM - 12 PM';
+      case 'slot2': return '12 PM - 3 PM';
+      case 'slot3': return '3 PM - 6 PM';
+      case 'slot4': return '6 PM - 9 PM';
+      case 'midnight': return '11:30 PM - 12:30 AM (₹250 delivery charge)';
+      // Legacy support for old time slots
+      case 'morning': return '9 AM - 12 PM';
+      case 'afternoon': return '12 PM - 3 PM';
+      case 'evening': return '3 PM - 6 PM';
       default: return time || 'Not specified';
     }
   };

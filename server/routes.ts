@@ -210,6 +210,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderData.userId = req.user.id;
       }
       
+      // Add midnight delivery charge if applicable
+      if (orderData.deliveryTime === 'midnight') {
+        const currentTotal = parseFloat(orderData.total || '0');
+        const midnightCharge = 250; // ₹250 midnight delivery charge
+        orderData.total = (currentTotal + midnightCharge).toString();
+        
+        console.log(`Applied midnight delivery charge: ₹${midnightCharge}. New total: ₹${orderData.total}`);
+      }
+      
       const order = await storage.createOrder(orderData);
       
       // Award loyalty points if user is authenticated
