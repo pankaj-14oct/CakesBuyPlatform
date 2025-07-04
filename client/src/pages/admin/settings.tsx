@@ -18,8 +18,8 @@ export default function AdminSettings() {
 
   const importDummyDataMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/admin/import-dummy-data");
-      return response;
+      const response = await apiRequest("/api/admin/import-dummy-data", "POST");
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -39,8 +39,8 @@ export default function AdminSettings() {
 
   const clearDataMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("DELETE", "/api/admin/clear-data");
-      return response;
+      const response = await apiRequest("/api/admin/clear-data", "DELETE");
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -60,8 +60,8 @@ export default function AdminSettings() {
 
   const testEmailMutation = useMutation({
     mutationFn: async (email: string) => {
-      const response = await apiRequest("POST", "/api/admin/test-email", { email });
-      return response;
+      const response = await apiRequest("/api/admin/test-email", "POST", { email });
+      return response.json();
     },
     onSuccess: () => {
       toast({
