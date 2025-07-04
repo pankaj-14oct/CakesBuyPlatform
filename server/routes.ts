@@ -1512,6 +1512,179 @@ CakesBuy
     }
   });
 
+  // Wallet Management Routes
+  
+  // Get user wallet balance and stats
+  app.get("/api/wallet/balance", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const balance = await storage.getUserWalletBalance(req.user.id);
+      res.json({ balance: parseFloat(balance) });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch wallet balance" });
+    }
+  });
+
+  // Get user wallet transactions
+  app.get("/api/wallet/transactions", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const limit = parseInt(req.query.limit as string) || 50;
+      const transactions = await storage.getUserWalletTransactions(req.user.id, limit);
+      res.json(transactions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch wallet transactions" });
+    }
+  });
+
+  // Admin: Add wallet credit to user
+  app.post("/api/admin/wallet/credit", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { userId, amount, description } = req.body;
+      
+      if (!userId || !amount || amount <= 0) {
+        return res.status(400).json({ message: "Valid user ID and positive amount required" });
+      }
+      
+      const transaction = await storage.updateUserWalletBalance(
+        userId, 
+        parseFloat(amount), 
+        'admin_credit', 
+        description || 'Admin credit', 
+        req.user!.id
+      );
+      
+      res.json({ 
+        message: "Wallet credited successfully", 
+        transaction,
+        newBalance: transaction.balanceAfter 
+      });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to credit wallet" });
+    }
+  });
+
+  // Admin: Debit wallet from user
+  app.post("/api/admin/wallet/debit", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { userId, amount, description } = req.body;
+      
+      if (!userId || !amount || amount <= 0) {
+        return res.status(400).json({ message: "Valid user ID and positive amount required" });
+      }
+      
+      const transaction = await storage.updateUserWalletBalance(
+        userId, 
+        parseFloat(amount), 
+        'admin_debit', 
+        description || 'Admin debit', 
+        req.user!.id
+      );
+      
+      res.json({ 
+        message: "Wallet debited successfully", 
+        transaction,
+        newBalance: transaction.balanceAfter 
+      });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to debit wallet" });
+    }
+  });
+
+  // Admin: Get all wallet transactions for a user
+  app.get("/api/admin/wallet/transactions/:userId", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const limit = parseInt(req.query.limit as string) || 100;
+      
+      const transactions = await storage.getUserWalletTransactions(userId, limit);
+      res.json(transactions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch wallet transactions" });
+    }
+  });
+
+  // Admin Configuration Routes
+  
+  // Get all admin configurations
+  app.get("/api/admin/config", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const configs = await storage.getAllAdminConfigs();
+      res.json(configs);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch configurations" });
+    }
+  });
+
+  // Get specific admin configuration
+  app.get("/api/admin/config/:key", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const config = await storage.getAdminConfig(req.params.key);
+      if (!config) {
+        return res.status(404).json({ message: "Configuration not found" });
+      }
+      res.json(config);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch configuration" });
+    }
+  });
+
+  // Set admin configuration
+  app.post("/api/admin/config", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { key, value, type, description, category } = req.body;
+      
+      if (!key || !value) {
+        return res.status(400).json({ message: "Key and value are required" });
+      }
+      
+      const config = await storage.setAdminConfig({
+        key,
+        value,
+        type: type || 'string',
+        description,
+        category: category || 'general',
+        updatedBy: req.user!.id
+      });
+      
+      res.json({ message: "Configuration saved successfully", config });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to save configuration" });
+    }
+  });
+
+  // Update admin configuration
+  app.put("/api/admin/config/:key", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { value } = req.body;
+      
+      if (!value) {
+        return res.status(400).json({ message: "Value is required" });
+      }
+      
+      await storage.updateAdminConfig(req.params.key, value, req.user!.id);
+      res.json({ message: "Configuration updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update configuration" });
+    }
+  });
+
+  // Delete admin configuration
+  app.delete("/api/admin/config/:key", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      await storage.deleteAdminConfig(req.params.key);
+      res.json({ message: "Configuration deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete configuration" });
+    }
+  });
+
   // Admin: Create loyalty reward
   app.post("/api/admin/loyalty/rewards", requireAdmin, async (req: AuthRequest, res) => {
     try {

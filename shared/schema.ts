@@ -26,6 +26,8 @@ export const users = pgTable("users", {
   loyaltyTier: text("loyalty_tier").default("Bronze"), // Bronze, Silver, Gold, Platinum
   totalSpent: decimal("total_spent", { precision: 10, scale: 2 }).default("0"),
   orderCount: integer("order_count").default(0),
+  // Wallet fields
+  walletBalance: decimal("wallet_balance", { precision: 10, scale: 2 }).default("0"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -265,6 +267,32 @@ export const invoices = pgTable("invoices", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Wallet Transactions
+export const walletTransactions = pgTable("wallet_transactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  type: text("type").notNull(), // 'credit', 'debit', 'refund', 'cashback', 'admin_credit', 'admin_debit'
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  description: text("description").notNull(),
+  orderId: integer("order_id").references(() => orders.id), // Optional: link to order
+  adminId: integer("admin_id").references(() => users.id), // Admin who made the transaction
+  balanceAfter: decimal("balance_after", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Admin Configuration
+export const adminConfigs = pgTable("admin_configs", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  type: text("type").notNull().default("string"), // 'string', 'number', 'boolean', 'json'
+  description: text("description"),
+  category: text("category").default("general"), // 'general', 'wallet', 'loyalty', 'orders', 'email'
+  updatedBy: integer("updated_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertCategorySchema = createInsertSchema(categories).omit({ id: true });
@@ -286,6 +314,10 @@ export const insertUserRewardSchema = createInsertSchema(userRewards).omit({ id:
 
 // Invoice insert schema
 export const insertInvoiceSchema = createInsertSchema(invoices).omit({ id: true, invoiceNumber: true, createdAt: true, updatedAt: true });
+
+// Wallet and Admin Config insert schemas
+export const insertWalletTransactionSchema = createInsertSchema(walletTransactions).omit({ id: true, createdAt: true });
+export const insertAdminConfigSchema = createInsertSchema(adminConfigs).omit({ id: true, createdAt: true, updatedAt: true });
 
 // Auth schemas
 export const loginSchema = z.object({
@@ -403,3 +435,9 @@ export type InsertUserReward = z.infer<typeof insertUserRewardSchema>;
 // Invoice types
 export type Invoice = typeof invoices.$inferSelect;
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+
+// Wallet and Admin Config types
+export type WalletTransaction = typeof walletTransactions.$inferSelect;
+export type InsertWalletTransaction = z.infer<typeof insertWalletTransactionSchema>;
+export type AdminConfig = typeof adminConfigs.$inferSelect;
+export type InsertAdminConfig = z.infer<typeof insertAdminConfigSchema>;

@@ -1,13 +1,14 @@
 import {
   users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews, eventReminders, otpVerifications,
-  loyaltyTransactions, loyaltyRewards, userRewards, invoices,
+  loyaltyTransactions, loyaltyRewards, userRewards, invoices, walletTransactions, adminConfigs,
   type User, type InsertUser, type Category, type InsertCategory,
   type Cake, type InsertCake, type Addon, type InsertAddon,
   type Order, type InsertOrder, type DeliveryArea, type InsertDeliveryArea,
   type PromoCode, type InsertPromoCode, type Review, type InsertReview,
   type EventReminder, type InsertEventReminder, type OtpVerification, type InsertOtpVerification,
   type LoyaltyTransaction, type InsertLoyaltyTransaction, type LoyaltyReward, type InsertLoyaltyReward,
-  type UserReward, type InsertUserReward, type Invoice, type InsertInvoice
+  type UserReward, type InsertUserReward, type Invoice, type InsertInvoice,
+  type WalletTransaction, type InsertWalletTransaction, type AdminConfig, type InsertAdminConfig
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, and, desc, isNotNull, or, gte, lte } from "drizzle-orm";
@@ -119,6 +120,19 @@ export interface IStorage {
   getUserRewards(userId: number): Promise<UserReward[]>;
   getUserReward(code: string): Promise<UserReward | undefined>;
   useUserReward(code: string): Promise<void>;
+
+  // Wallet management
+  getUserWalletBalance(userId: number): Promise<string>;
+  addWalletTransaction(transaction: InsertWalletTransaction): Promise<WalletTransaction>;
+  getUserWalletTransactions(userId: number, limit?: number): Promise<WalletTransaction[]>;
+  updateUserWalletBalance(userId: number, amount: number, type: string, description: string, adminId?: number, orderId?: number): Promise<WalletTransaction>;
+  
+  // Admin Configuration management
+  getAdminConfig(key: string): Promise<AdminConfig | undefined>;
+  setAdminConfig(config: InsertAdminConfig): Promise<AdminConfig>;
+  getAllAdminConfigs(): Promise<AdminConfig[]>;
+  updateAdminConfig(key: string, value: string, updatedBy?: number): Promise<void>;
+  deleteAdminConfig(key: string): Promise<void>;
 }
 
 // DatabaseStorage implementation
@@ -734,6 +748,116 @@ export class DatabaseStorage implements IStorage {
   // Invoice Management
   async getAllInvoices(): Promise<Invoice[]> {
     return db.select().from(invoices).orderBy(desc(invoices.createdAt));
+  }
+
+  // Wallet Management
+  async getUserWalletBalance(userId: number): Promise<string> {
+    const user = await this.getUser(userId);
+    return user?.walletBalance || "0";
+  }
+
+  async addWalletTransaction(transaction: InsertWalletTransaction): Promise<WalletTransaction> {
+    const transactionData = {
+      ...transaction,
+      createdAt: new Date()
+    };
+    const [newTransaction] = await db.insert(walletTransactions).values(transactionData).returning();
+    return newTransaction;
+  }
+
+  async getUserWalletTransactions(userId: number, limit: number = 50): Promise<WalletTransaction[]> {
+    return db.select().from(walletTransactions)
+      .where(eq(walletTransactions.userId, userId))
+      .orderBy(desc(walletTransactions.createdAt))
+      .limit(limit);
+  }
+
+  async updateUserWalletBalance(userId: number, amount: number, type: string, description: string, adminId?: number, orderId?: number): Promise<WalletTransaction> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const currentBalance = parseFloat(user.walletBalance || "0");
+    const newBalance = type === 'credit' || type === 'refund' || type === 'cashback' || type === 'admin_credit' 
+      ? currentBalance + amount 
+      : currentBalance - amount;
+
+    if (newBalance < 0 && (type === 'debit' || type === 'admin_debit')) {
+      throw new Error("Insufficient wallet balance");
+    }
+
+    // Update user's wallet balance
+    await db.update(users)
+      .set({
+        walletBalance: newBalance.toString(),
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+
+    // Create transaction record
+    const transaction = await this.addWalletTransaction({
+      userId,
+      type,
+      amount: amount.toString(),
+      description,
+      orderId,
+      adminId,
+      balanceAfter: newBalance.toString()
+    });
+
+    return transaction;
+  }
+
+  // Admin Configuration Management
+  async getAdminConfig(key: string): Promise<AdminConfig | undefined> {
+    const [config] = await db.select().from(adminConfigs).where(eq(adminConfigs.key, key));
+    return config || undefined;
+  }
+
+  async setAdminConfig(config: InsertAdminConfig): Promise<AdminConfig> {
+    const configData = {
+      ...config,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    // Try to update existing config first
+    const existing = await this.getAdminConfig(config.key);
+    if (existing) {
+      await db.update(adminConfigs)
+        .set({
+          value: config.value,
+          type: config.type,
+          description: config.description,
+          category: config.category,
+          updatedBy: config.updatedBy,
+          updatedAt: new Date()
+        })
+        .where(eq(adminConfigs.key, config.key));
+      return { ...existing, ...config, updatedAt: new Date() };
+    } else {
+      const [newConfig] = await db.insert(adminConfigs).values(configData).returning();
+      return newConfig;
+    }
+  }
+
+  async getAllAdminConfigs(): Promise<AdminConfig[]> {
+    return db.select().from(adminConfigs).orderBy(adminConfigs.category, adminConfigs.key);
+  }
+
+  async updateAdminConfig(key: string, value: string, updatedBy?: number): Promise<void> {
+    await db.update(adminConfigs)
+      .set({
+        value,
+        updatedBy,
+        updatedAt: new Date()
+      })
+      .where(eq(adminConfigs.key, key));
+  }
+
+  async deleteAdminConfig(key: string): Promise<void> {
+    await db.delete(adminConfigs).where(eq(adminConfigs.key, key));
   }
 }
 
