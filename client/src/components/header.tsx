@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/use-auth';
 export default function Header() {
   const [location, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { state: cartState } = useCart();
   const { user, isAuthenticated, logoutMutation } = useAuth();
 
@@ -41,7 +42,7 @@ export default function Header() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Mobile Menu Button */}
-            <Sheet>
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-red-600 p-2">
                   <Menu className="h-6 w-6" />
@@ -62,7 +63,7 @@ export default function Header() {
                   </form>
 
                   {/* Mobile Track Order */}
-                  <Link href="/track-order">
+                  <Link href="/track-order" onClick={() => setIsSheetOpen(false)}>
                     <Button className="bg-red-500 text-white hover:bg-red-600 w-full flex items-center justify-center gap-2 py-3">
                       <Truck className="h-5 w-5" />
                       Track Order
@@ -75,6 +76,7 @@ export default function Header() {
                       <Link
                         key={item.href}
                         href={item.href}
+                        onClick={() => setIsSheetOpen(false)}
                         className={`font-medium transition-colors ${
                           location === item.href
                             ? 'text-red-500'
@@ -112,7 +114,10 @@ export default function Header() {
                       
                       <div className="space-y-2">
                         <Button 
-                          onClick={() => setLocation('/orders')}
+                          onClick={() => {
+                            setLocation('/orders');
+                            setIsSheetOpen(false);
+                          }}
                           variant="outline" 
                           className="w-full justify-start gap-3"
                         >
@@ -121,7 +126,10 @@ export default function Header() {
                         </Button>
                         
                         <Button 
-                          onClick={() => setLocation('/wishlist')}
+                          onClick={() => {
+                            setLocation('/wishlist');
+                            setIsSheetOpen(false);
+                          }}
                           variant="outline" 
                           className="w-full justify-start gap-3"
                         >
@@ -130,7 +138,10 @@ export default function Header() {
                         </Button>
                         
                         <Button 
-                          onClick={() => setLocation('/occasions')}
+                          onClick={() => {
+                            setLocation('/occasions');
+                            setIsSheetOpen(false);
+                          }}
                           variant="outline" 
                           className="w-full justify-start gap-3"
                         >
@@ -139,7 +150,10 @@ export default function Header() {
                         </Button>
                         
                         <Button 
-                          onClick={() => setLocation('/profile')}
+                          onClick={() => {
+                            setLocation('/profile');
+                            setIsSheetOpen(false);
+                          }}
                           variant="outline" 
                           className="w-full justify-start gap-3"
                         >
@@ -148,7 +162,10 @@ export default function Header() {
                         </Button>
                         
                         <Button 
-                          onClick={() => setLocation('/loyalty')}
+                          onClick={() => {
+                            setLocation('/loyalty');
+                            setIsSheetOpen(false);
+                          }}
                           variant="outline" 
                           className="w-full justify-start gap-3"
                         >
@@ -157,7 +174,10 @@ export default function Header() {
                         </Button>
                         
                         <Button 
-                          onClick={() => logoutMutation.mutate()}
+                          onClick={() => {
+                            logoutMutation.mutate();
+                            setIsSheetOpen(false);
+                          }}
                           variant="outline" 
                           className="w-full justify-start gap-3 text-red-600 hover:bg-red-50"
                         >
@@ -167,7 +187,7 @@ export default function Header() {
                       </div>
                     </div>
                   ) : (
-                    <Link href="/auth">
+                    <Link href="/auth" onClick={() => setIsSheetOpen(false)}>
                       <Button className="bg-red-500 text-white hover:bg-red-600 w-full">
                         <User className="h-4 w-4 mr-2" />
                         Sign In
