@@ -7,6 +7,7 @@ import { CartProvider } from "@/components/cart-context";
 import { AuthProvider } from "@/hooks/use-auth";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import { useEffect } from "react";
 import Home from "@/pages/home";
 import Category from "@/pages/category";
 import Product from "@/pages/product";
@@ -41,6 +42,17 @@ import { Link, useLocation } from "wouter";
 import { LayoutDashboard, Package, ShoppingCart, Tags, Percent, Settings, Plus, Mail, Users, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+
+// Component to handle scroll restoration on route changes
+function ScrollRestoration() {
+  const [location] = useLocation();
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
+  
+  return null;
+}
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -120,12 +132,18 @@ function Router() {
   if (location.startsWith('/admin')) {
     // Admin login page should not be protected
     if (location === '/admin-login') {
-      return <AdminLogin />;
+      return (
+        <>
+          <ScrollRestoration />
+          <AdminLogin />
+        </>
+      );
     }
     
     return (
       <AdminProtected>
         <AdminLayout>
+          <ScrollRestoration />
           <Switch>
             <Route path="/admin" component={AdminDashboard} />
             <Route path="/admin/categories" component={AdminCategories} />
@@ -146,26 +164,29 @@ function Router() {
 
   // Regular customer routes
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/search" component={SearchPage} />
-      <Route path="/category/:slug" component={Category} />
-      <Route path="/product/:slug" component={Product} />
-      <Route path="/cart" component={Cart} />
-      <Route path="/checkout" component={Checkout} />
-      <Route path="/delivery" component={DeliveryPage} />
-      <Route path="/auth" component={AuthPage} />
-      <Route path="/otp-register" component={OtpAuthPage} />
-      <Route path="/forgot-password" component={ForgotPassword} />
-      <Route path="/admin-login" component={AdminLogin} />
-      <Route path="/occasions" component={OccasionReminder} />
-      <Route path="/profile" component={ProfilePage} />
-      <Route path="/orders" component={OrdersPage} />
-      <Route path="/invoices" component={InvoicesPage} />
-      <Route path="/loyalty" component={LoyaltyPage} />
-      <Route path="/track-order" component={TrackOrderPage} />
-      <Route component={NotFound} />
-    </Switch>
+    <>
+      <ScrollRestoration />
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/search" component={SearchPage} />
+        <Route path="/category/:slug" component={Category} />
+        <Route path="/product/:slug" component={Product} />
+        <Route path="/cart" component={Cart} />
+        <Route path="/checkout" component={Checkout} />
+        <Route path="/delivery" component={DeliveryPage} />
+        <Route path="/auth" component={AuthPage} />
+        <Route path="/otp-register" component={OtpAuthPage} />
+        <Route path="/forgot-password" component={ForgotPassword} />
+        <Route path="/admin-login" component={AdminLogin} />
+        <Route path="/occasions" component={OccasionReminder} />
+        <Route path="/profile" component={ProfilePage} />
+        <Route path="/orders" component={OrdersPage} />
+        <Route path="/invoices" component={InvoicesPage} />
+        <Route path="/loyalty" component={LoyaltyPage} />
+        <Route path="/track-order" component={TrackOrderPage} />
+        <Route component={NotFound} />
+      </Switch>
+    </>
   );
 }
 
