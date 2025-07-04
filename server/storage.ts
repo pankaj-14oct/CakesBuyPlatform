@@ -1,13 +1,13 @@
 import {
   users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews, eventReminders, otpVerifications,
-  loyaltyTransactions, loyaltyRewards, userRewards,
+  loyaltyTransactions, loyaltyRewards, userRewards, invoices,
   type User, type InsertUser, type Category, type InsertCategory,
   type Cake, type InsertCake, type Addon, type InsertAddon,
   type Order, type InsertOrder, type DeliveryArea, type InsertDeliveryArea,
   type PromoCode, type InsertPromoCode, type Review, type InsertReview,
   type EventReminder, type InsertEventReminder, type OtpVerification, type InsertOtpVerification,
   type LoyaltyTransaction, type InsertLoyaltyTransaction, type LoyaltyReward, type InsertLoyaltyReward,
-  type UserReward, type InsertUserReward
+  type UserReward, type InsertUserReward, type Invoice, type InsertInvoice
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, and, desc, isNotNull, or } from "drizzle-orm";
@@ -681,6 +681,11 @@ export class DatabaseStorage implements IStorage {
           isNotNull(users.anniversary)
         )
       );
+  }
+
+  // Invoice Management
+  async getAllInvoices(): Promise<Invoice[]> {
+    return db.select().from(invoices).orderBy(desc(invoices.createdAt));
   }
 }
 

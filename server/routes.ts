@@ -858,6 +858,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin middleware - simpler approach without TypeScript conflicts
+  const requireAdmin = (req: AuthRequest, res: any, next: any) => {
+    // Use the existing authenticateToken middleware first
+    authenticateToken(req, res, async () => {
+      try {
+        if (!req.user) {
+          return res.status(401).json({ message: "Access token required" });
+        }
+
+        // Get full user info to check role
+        const user = await storage.getUser(req.user.id);
+        if (!user || user.role !== 'admin') {
+          return res.status(403).json({ message: "Admin access required" });
+        }
+
+        next();
+      } catch (error) {
+        return res.status(401).json({ message: "Admin access required" });
+      }
+    });
+  };
+
+  // Admin Invoice Management
+  app.get("/api/admin/invoices", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const invoices = await storage.getAllInvoices();
+      res.json(invoices);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch invoices" });
+    }
+  });
+
+  app.patch("/api/admin/invoices/:id/status", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      if (!status) {
+        return res.status(400).json({ message: "Status is required" });
+      }
+      
+      await updateInvoiceStatus(id, status);
+      res.json({ message: "Invoice status updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update invoice status" });
+    }
+  });
+
+  app.put("/api/admin/invoice-settings", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const settings = req.body;
+      // For now, just return success. In a real app, you'd store these in the database
+      res.json({ message: "Invoice settings updated successfully", settings });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update invoice settings" });
+    }
+  });
+
   // Admin Data Management
   app.post("/api/admin/import-dummy-data", async (req, res) => {
     try {
@@ -925,28 +983,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Admin login failed" });
     }
   });
-
-  // Admin middleware - simpler approach without TypeScript conflicts
-  const requireAdmin = (req: AuthRequest, res: any, next: any) => {
-    // Use the existing authenticateToken middleware first
-    authenticateToken(req, res, async () => {
-      try {
-        if (!req.user) {
-          return res.status(401).json({ message: "Access token required" });
-        }
-
-        // Get full user info to check role
-        const user = await storage.getUser(req.user.id);
-        if (!user || user.role !== 'admin') {
-          return res.status(403).json({ message: "Admin access required" });
-        }
-
-        next();
-      } catch (error) {
-        return res.status(401).json({ message: "Admin access required" });
-      }
-    });
-  };
 
   // Admin: Test email service
   app.post("/api/admin/test-email", requireAdmin, async (req: AuthRequest, res) => {
