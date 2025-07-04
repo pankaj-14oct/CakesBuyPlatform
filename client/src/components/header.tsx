@@ -390,8 +390,8 @@ export default function Header() {
         </div>
       </header>
 
-      {/* Navigation Menu */}
-      <nav className="bg-white border-b shadow-sm">
+      {/* Navigation Menu - Desktop Only */}
+      <nav className="bg-white border-b shadow-sm hidden md:block">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-center space-x-8 py-3 overflow-x-auto">
             {navItems.map((item) => (
