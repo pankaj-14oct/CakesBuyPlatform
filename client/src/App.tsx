@@ -30,6 +30,8 @@ import AdminCoupons from "@/pages/admin/coupons";
 import AdminSettings from "@/pages/admin/settings";
 import AdminAddons from "@/pages/admin/addons";
 import AdminReminders from "@/pages/AdminReminders";
+import AdminLogin from "@/pages/AdminLogin";
+import AdminProtected from "@/components/AdminProtected";
 import NotFound from "@/pages/not-found";
 
 import { Link, useLocation } from "wouter";
@@ -113,20 +115,22 @@ function Router() {
   // Check if we're in admin area
   if (location.startsWith('/admin')) {
     return (
-      <AdminLayout>
-        <Switch>
-          <Route path="/admin" component={AdminDashboard} />
-          <Route path="/admin/categories" component={AdminCategories} />
-          <Route path="/admin/products" component={AdminProducts} />
-          <Route path="/admin/addons" component={AdminAddons} />
-          <Route path="/admin/orders" component={AdminOrders} />
-          <Route path="/admin/users" component={AdminUsers} />
-          <Route path="/admin/coupons" component={AdminCoupons} />
-          <Route path="/admin/reminders" component={AdminReminders} />
-          <Route path="/admin/settings" component={AdminSettings} />
-          <Route component={NotFound} />
-        </Switch>
-      </AdminLayout>
+      <AdminProtected>
+        <AdminLayout>
+          <Switch>
+            <Route path="/admin" component={AdminDashboard} />
+            <Route path="/admin/categories" component={AdminCategories} />
+            <Route path="/admin/products" component={AdminProducts} />
+            <Route path="/admin/addons" component={AdminAddons} />
+            <Route path="/admin/orders" component={AdminOrders} />
+            <Route path="/admin/users" component={AdminUsers} />
+            <Route path="/admin/coupons" component={AdminCoupons} />
+            <Route path="/admin/reminders" component={AdminReminders} />
+            <Route path="/admin/settings" component={AdminSettings} />
+            <Route component={NotFound} />
+          </Switch>
+        </AdminLayout>
+      </AdminProtected>
     );
   }
 
@@ -142,6 +146,7 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <Route path="/otp-register" component={OtpAuthPage} />
       <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/admin-login" component={AdminLogin} />
       <Route path="/occasions" component={OccasionReminder} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/orders" component={OrdersPage} />

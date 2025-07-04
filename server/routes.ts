@@ -732,8 +732,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Login
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const { phone, password } = req.body;
+      
+      if (!phone || !password) {
+        return res.status(400).json({ message: "Phone and password are required" });
+      }
+
+      const user = await storage.getUserByPhone(phone);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Check if user is admin
+      if (user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const isValidPassword = await comparePasswords(password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      const token = generateToken(user.id, user.phone, user.email);
+      
+      res.json({
+        message: "Admin login successful",
+        token,
+        user: {
+          id: user.id,
+          phone: user.phone,
+          email: user.email,
+          role: user.role
+        }
+      });
+    } catch (error) {
+      console.error("Admin login error:", error);
+      res.status(500).json({ message: "Admin login failed" });
+    }
+  });
+
+  // Admin middleware - simpler approach without TypeScript conflicts
+  const requireAdmin = (req: AuthRequest, res: any, next: any) => {
+    // Use the existing authenticateToken middleware first
+    authenticateToken(req, res, async () => {
+      try {
+        if (!req.user) {
+          return res.status(401).json({ message: "Access token required" });
+        }
+
+        // Get full user info to check role
+        const user = await storage.getUser(req.user.id);
+        if (!user || user.role !== 'admin') {
+          return res.status(403).json({ message: "Admin access required" });
+        }
+
+        next();
+      } catch (error) {
+        return res.status(401).json({ message: "Admin access required" });
+      }
+    });
+  };
+
   // Admin: Test email service
-  app.post("/api/admin/test-email", authenticateToken, async (req: AuthRequest, res) => {
+  app.post("/api/admin/test-email", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const { email } = req.body;
       
@@ -1252,7 +1316,7 @@ EgglessCakes
   });
 
   // Admin: Create loyalty reward
-  app.post("/api/admin/loyalty/rewards", authenticateToken, async (req: AuthRequest, res) => {
+  app.post("/api/admin/loyalty/rewards", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const validatedData = insertLoyaltyRewardSchema.parse(req.body);
       const reward = await storage.createLoyaltyReward(validatedData);
@@ -1268,7 +1332,7 @@ EgglessCakes
   // Admin Email Reminder Routes
   
   // Get all pending reminders
-  app.get("/api/admin/reminders/pending", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/admin/reminders/pending", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const pendingReminders = await storage.getPendingReminders();
       res.json(pendingReminders);
@@ -1278,7 +1342,7 @@ EgglessCakes
   });
 
   // Send reminder emails manually
-  app.post("/api/admin/reminders/send", authenticateToken, async (req: AuthRequest, res) => {
+  app.post("/api/admin/reminders/send", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const { reminderIds, discountCode, discountPercentage } = req.body;
       
@@ -1340,7 +1404,7 @@ EgglessCakes
 
   // Get all users with upcoming events
   // Get all users for admin panel
-  app.get("/api/admin/users", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/admin/users", requireAdmin, async (req: AuthRequest, res) => {
     try {
       // Check if user is admin (for now, any authenticated user can access)
       // In a real app, you'd check for admin role
@@ -1360,7 +1424,7 @@ EgglessCakes
     }
   });
 
-  app.get("/api/admin/users/upcoming-events", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/admin/users/upcoming-events", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const users = await storage.getUsersWithUpcomingEvents();
       res.json(users);
@@ -1370,7 +1434,7 @@ EgglessCakes
   });
 
   // Create bulk reminders for users with birthday/anniversary data
-  app.post("/api/admin/reminders/create-bulk", authenticateToken, async (req: AuthRequest, res) => {
+  app.post("/api/admin/reminders/create-bulk", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const users = await storage.getUsersWithEventDates();
       const created = [];

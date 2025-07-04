@@ -201,16 +201,17 @@ export const dummyData = {
   ],
 
   users: [
-    { username: "john_doe", email: "john@example.com", phone: "9876543210", addresses: [] },
-    { username: "jane_smith", email: "jane@example.com", phone: "9876543211", addresses: [] },
-    { username: "mike_johnson", email: "mike@example.com", phone: "9876543212", addresses: [] },
-    { username: "sarah_wilson", email: "sarah@example.com", phone: "9876543213", addresses: [] },
-    { username: "david_brown", email: "david@example.com", phone: "9876543214", addresses: [] },
-    { username: "lisa_garcia", email: "lisa@example.com", phone: "9876543215", addresses: [] },
-    { username: "tom_anderson", email: "tom@example.com", phone: "9876543216", addresses: [] },
-    { username: "emma_davis", email: "emma@example.com", phone: "9876543217", addresses: [] },
-    { username: "alex_martinez", email: "alex@example.com", phone: "9876543218", addresses: [] },
-    { username: "olivia_taylor", email: "olivia@example.com", phone: "9876543219", addresses: [] },
+    { email: "admin@cakesbuy.com", phone: "1111111111", addresses: [], role: "admin" },
+    { email: "john@example.com", phone: "9876543210", addresses: [], role: "customer" },
+    { email: "jane@example.com", phone: "9876543211", addresses: [], role: "customer" },
+    { email: "mike@example.com", phone: "9876543212", addresses: [], role: "customer" },
+    { email: "sarah@example.com", phone: "9876543213", addresses: [], role: "customer" },
+    { email: "david@example.com", phone: "9876543214", addresses: [], role: "customer" },
+    { email: "lisa@example.com", phone: "9876543215", addresses: [], role: "customer" },
+    { email: "tom@example.com", phone: "9876543216", addresses: [], role: "customer" },
+    { email: "emma@example.com", phone: "9876543217", addresses: [], role: "customer" },
+    { email: "alex@example.com", phone: "9876543218", addresses: [], role: "customer" },
+    { email: "olivia@example.com", phone: "9876543219", addresses: [], role: "customer" },
   ],
 
   orders: [

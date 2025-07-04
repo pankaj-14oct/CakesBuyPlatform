@@ -7,6 +7,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
   phone: text("phone").notNull().unique(),
+  role: text("role").default("customer"), // customer, admin
   birthday: text("birthday"), // Format: MM-DD
   anniversary: text("anniversary"), // Format: MM-DD
   addresses: jsonb("addresses").$type<Array<{
