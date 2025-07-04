@@ -33,6 +33,9 @@ const checkoutSchema = z.object({
   // Delivery Options
   deliveryDate: z.string().min(1, 'Delivery date is required'),
   deliveryTime: z.string().min(1, 'Delivery time is required'),
+  deliveryOccasion: z.string().optional(),
+  relation: z.string().optional(),
+  senderName: z.string().optional(),
   
   // Payment
   paymentMethod: z.string().min(1, 'Payment method is required'),
@@ -142,6 +145,9 @@ export default function CheckoutPage() {
     defaultValues: {
       deliveryDate: getMinDeliveryDate(),
       deliveryTime: 'evening',
+      deliveryOccasion: '',
+      relation: '',
+      senderName: '',
       paymentMethod: 'upi',
       guestCity: 'Gurgaon',
       guestName: '',
@@ -355,6 +361,9 @@ export default function CheckoutPage() {
       deliveryAddress,
       deliveryDate: data.deliveryDate,
       deliveryTime: data.deliveryTime,
+      deliveryOccasion: data.deliveryOccasion,
+      relation: data.relation,
+      senderName: data.senderName,
       paymentMethod: data.paymentMethod,
       specialInstructions: data.specialInstructions,
       status: 'pending',
@@ -753,7 +762,7 @@ export default function CheckoutPage() {
                 <CardContent className="space-y-4">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="deliveryDate">Delivery Date *</Label>
+                      <Label htmlFor="deliveryDate">Date *</Label>
                       <Input
                         id="deliveryDate"
                         type="date"
@@ -826,6 +835,88 @@ export default function CheckoutPage() {
                         )}
                       </div>
                     </div>
+                  </div>
+
+                  {/* Additional Delivery Fields */}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Delivery Occasion</Label>
+                      <Select onValueChange={(value) => form.setValue('deliveryOccasion', value)} value={form.watch('deliveryOccasion')}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Occasion" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="birthday">Birthday</SelectItem>
+                          <SelectItem value="anniversary">Anniversary</SelectItem>
+                          <SelectItem value="wedding">Wedding</SelectItem>
+                          <SelectItem value="engagement">Engagement</SelectItem>
+                          <SelectItem value="valentine">Valentine's Day</SelectItem>
+                          <SelectItem value="mothers-day">Mother's Day</SelectItem>
+                          <SelectItem value="fathers-day">Father's Day</SelectItem>
+                          <SelectItem value="graduation">Graduation</SelectItem>
+                          <SelectItem value="promotion">Promotion</SelectItem>
+                          <SelectItem value="new-job">New Job</SelectItem>
+                          <SelectItem value="farewell">Farewell</SelectItem>
+                          <SelectItem value="congratulations">Congratulations</SelectItem>
+                          <SelectItem value="festival">Festival</SelectItem>
+                          <SelectItem value="house-warming">House Warming</SelectItem>
+                          <SelectItem value="retirement">Retirement</SelectItem>
+                          <SelectItem value="baby-shower">Baby Shower</SelectItem>
+                          <SelectItem value="get-well-soon">Get Well Soon</SelectItem>
+                          <SelectItem value="apology">Apology</SelectItem>
+                          <SelectItem value="thank-you">Thank You</SelectItem>
+                          <SelectItem value="surprise">Surprise</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Relation</Label>
+                      <Select onValueChange={(value) => form.setValue('relation', value)} value={form.watch('relation')}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Relation" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="mother">Mother</SelectItem>
+                          <SelectItem value="father">Father</SelectItem>
+                          <SelectItem value="sister">Sister</SelectItem>
+                          <SelectItem value="brother">Brother</SelectItem>
+                          <SelectItem value="wife">Wife</SelectItem>
+                          <SelectItem value="husband">Husband</SelectItem>
+                          <SelectItem value="daughter">Daughter</SelectItem>
+                          <SelectItem value="son">Son</SelectItem>
+                          <SelectItem value="girlfriend">Girlfriend</SelectItem>
+                          <SelectItem value="boyfriend">Boyfriend</SelectItem>
+                          <SelectItem value="friend">Friend</SelectItem>
+                          <SelectItem value="colleague">Colleague</SelectItem>
+                          <SelectItem value="boss">Boss</SelectItem>
+                          <SelectItem value="teacher">Teacher</SelectItem>
+                          <SelectItem value="student">Student</SelectItem>
+                          <SelectItem value="neighbor">Neighbor</SelectItem>
+                          <SelectItem value="cousin">Cousin</SelectItem>
+                          <SelectItem value="aunt">Aunt</SelectItem>
+                          <SelectItem value="uncle">Uncle</SelectItem>
+                          <SelectItem value="grandparents">Grandparents</SelectItem>
+                          <SelectItem value="client">Client</SelectItem>
+                          <SelectItem value="business-partner">Business Partner</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="senderName">Sender Name *</Label>
+                    <Input
+                      id="senderName"
+                      {...form.register('senderName')}
+                      placeholder="Enter sender name"
+                    />
+                    {form.formState.errors.senderName && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {form.formState.errors.senderName.message}
+                      </p>
+                    )}
                   </div>
 
                   <div className="bg-mint/10 border border-mint/20 rounded-lg p-4">

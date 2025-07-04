@@ -104,6 +104,9 @@ export const orders = pgTable("orders", {
   }>().notNull(),
   deliveryDate: timestamp("delivery_date").notNull(),
   deliveryTime: text("delivery_time"), // morning, afternoon, evening, midnight, specific_time
+  deliveryOccasion: text("delivery_occasion"), // birthday, anniversary, wedding, etc.
+  relation: text("relation"), // mother, father, friend, etc.
+  senderName: text("sender_name"), // name of person sending the cake
   specialInstructions: text("special_instructions"),
   promoCode: text("promo_code"),
   createdAt: timestamp("created_at").defaultNow(),
