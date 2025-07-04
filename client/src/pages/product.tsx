@@ -29,7 +29,7 @@ export default function ProductPage() {
   const { dispatch } = useCart();
   const { toast } = useToast();
 
-  const { data: cake, isLoading: cakeLoading } = useQuery<Cake>({
+  const { data: cake, isLoading: cakeLoading, error } = useQuery<Cake>({
     queryKey: ['/api/cakes', slug],
     queryFn: async () => {
       const response = await fetch(`/api/cakes/${slug}`);
@@ -69,7 +69,7 @@ export default function ProductPage() {
     );
   }
 
-  if (!cake) {
+  if (!cakeLoading && !cake) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
         <Card className="p-8 text-center">
@@ -81,6 +81,10 @@ export default function ProductPage() {
         </Card>
       </div>
     );
+  }
+
+  if (!cake) {
+    return null; // Still loading
   }
 
   const selectedWeightData = cake.weights?.find(w => w.weight === selectedWeight);
