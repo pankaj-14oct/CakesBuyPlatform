@@ -609,7 +609,7 @@ export default function OccasionReminder() {
                                 <SelectValue placeholder="Select occasion" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent className="max-h-80">
+                            <SelectContent className="max-h-60 overflow-y-auto">
                               <SelectItem value="birthday">Birthday</SelectItem>
                               <SelectItem value="anniversary" className="bg-blue-500 text-white">Anniversary</SelectItem>
                               <SelectItem value="wedding">Wedding</SelectItem>
@@ -644,7 +644,7 @@ export default function OccasionReminder() {
                                 <SelectValue placeholder="Select Relation" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent className="max-h-80">
+                            <SelectContent className="max-h-60 overflow-y-auto">
                               <SelectItem value="birthday">Birthday</SelectItem>
                               <SelectItem value="engagement" className="bg-blue-500 text-white">Engagement</SelectItem>
                               <SelectItem value="brideToBe">Bride to be</SelectItem>
