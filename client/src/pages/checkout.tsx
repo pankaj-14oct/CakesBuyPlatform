@@ -70,6 +70,8 @@ export default function CheckoutPage() {
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
   const [useGuestCheckout, setUseGuestCheckout] = useState(!isAuthenticated);
   const [showAddAddressDialog, setShowAddAddressDialog] = useState(false);
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [useWalletPayment, setUseWalletPayment] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -84,6 +86,23 @@ export default function CheckoutPage() {
   });
 
   const addresses = addressesData || [];
+
+  // Fetch wallet balance for authenticated users
+  const { data: walletData } = useQuery({
+    queryKey: ['/api/wallet/balance'],
+    queryFn: async () => {
+      const res = await apiRequest('/api/wallet/balance', 'GET');
+      return res.json();
+    },
+    enabled: isAuthenticated
+  });
+
+  // Update wallet balance when data changes
+  useEffect(() => {
+    if (walletData?.balance !== undefined) {
+      setWalletBalance(walletData.balance);
+    }
+  }, [walletData]);
 
   // Address form for adding new addresses
   const addressForm = useForm<AddressForm>({
@@ -345,6 +364,19 @@ export default function CheckoutPage() {
       };
     }
     
+    // Check wallet balance for wallet payments
+    if (data.paymentMethod === 'wallet' && isAuthenticated) {
+      if (walletBalance < total) {
+        toast({
+          title: "Insufficient wallet balance",
+          description: `Your wallet balance is ₹${walletBalance.toFixed(2)} but the order total is ₹${total.toFixed(2)}`,
+          variant: "destructive"
+        });
+        setIsPlacingOrder(false);
+        return;
+      }
+    }
+
     const orderData = {
       items: cartState.items.map(item => ({
         cakeId: item.cake.id,
@@ -986,6 +1018,33 @@ export default function CheckoutPage() {
                         <span>Cash on Delivery</span>
                       </Label>
                     </div>
+
+                    {/* Wallet Payment Option - Only show for authenticated users */}
+                    {isAuthenticated && (
+                      <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                        <RadioGroupItem 
+                          value="wallet" 
+                          id="wallet" 
+                          disabled={walletBalance < cartState.total}
+                        />
+                        <Label htmlFor="wallet" className="flex items-center justify-between cursor-pointer flex-1">
+                          <div className="flex items-center space-x-2">
+                            <Wallet className="h-4 w-4 text-caramel" />
+                            <span>Wallet Payment</span>
+                          </div>
+                          <div className="text-sm">
+                            <span className="text-caramel font-medium">
+                              Balance: ₹{walletBalance.toFixed(2)}
+                            </span>
+                            {walletBalance < cartState.total && (
+                              <span className="text-red-500 text-xs block">
+                                Insufficient balance
+                              </span>
+                            )}
+                          </div>
+                        </Label>
+                      </div>
+                    )}
                   </RadioGroup>
                   
                   {form.formState.errors.paymentMethod && (

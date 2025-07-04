@@ -210,9 +210,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderData.userId = req.user.id;
       }
       
-
-      
       const order = await storage.createOrder(orderData);
+      
+      // Handle wallet payment after order creation
+      if (orderData.paymentMethod === 'wallet' && req.user) {
+        try {
+          const user = await storage.getUser(req.user.id);
+          if (!user) {
+            throw new Error("User not found");
+          }
+          
+          const userWalletBalance = parseFloat(user.walletBalance || '0');
+          const orderTotal = parseFloat(orderData.total);
+          
+          if (userWalletBalance < orderTotal) {
+            return res.status(400).json({
+              message: "Insufficient wallet balance",
+              walletBalance: userWalletBalance,
+              required: orderTotal
+            });
+          }
+          
+          // Deduct amount from wallet
+          await storage.updateUserWalletBalance(
+            req.user.id, 
+            orderTotal, 
+            'debit', 
+            `Payment for order ${order.orderNumber}`,
+            undefined, // adminId 
+            order.id   // orderId
+          );
+          
+        } catch (walletError) {
+          console.error('Wallet payment failed:', walletError);
+          return res.status(500).json({ message: "Wallet payment failed" });
+        }
+      }
       
       // Award loyalty points if user is authenticated
       if (req.user && orderData.userId) {
