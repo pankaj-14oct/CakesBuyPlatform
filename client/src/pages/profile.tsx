@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,13 +10,14 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { Home, Building, MapPin, Plus, Edit, Trash2, User, Calendar, Bell, Package, Coins } from 'lucide-react';
+import { 
+  Home, Building, MapPin, Plus, Edit, Trash2, User, Calendar, Bell, Package, Coins,
+  Wallet, CreditCard, Star, Settings, FileText, PlusCircle, Mail, Phone
+} from 'lucide-react';
 import { useLocation, Link } from 'wouter';
-import { useEffect } from 'react';
 
 const addressSchema = z.object({
   id: z.string().optional(),
@@ -40,6 +41,14 @@ const profileSchema = z.object({
 type AddressForm = z.infer<typeof addressSchema>;
 type ProfileForm = z.infer<typeof profileSchema>;
 
+interface SidebarItem {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  badge?: string;
+  badgeColor?: string;
+}
+
 export default function ProfilePage() {
   const { user, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
@@ -47,6 +56,16 @@ export default function ProfilePage() {
   const queryClient = useQueryClient();
   const [editingAddress, setEditingAddress] = useState<any>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [activeSection, setActiveSection] = useState('orders');
+
+  // Handle URL parameters to set active section
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const section = params.get('section');
+    if (section) {
+      setActiveSection(section);
+    }
+  }, []);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -73,9 +92,14 @@ export default function ProfilePage() {
     queryFn: async () => {
       const res = await apiRequest('GET', '/api/auth/addresses');
       const data = await res.json();
-      console.log('Addresses response:', data);
       return data;
     },
+    enabled: isAuthenticated
+  });
+
+  // Fetch loyalty stats
+  const { data: loyaltyStats } = useQuery<any>({
+    queryKey: ['/api/loyalty/stats'],
     enabled: isAuthenticated
   });
 
@@ -202,8 +226,6 @@ export default function ProfilePage() {
     saveAddressMutation.mutate(data);
   };
 
-
-
   const handleEditAddress = (address: any) => {
     setEditingAddress(address);
     addressForm.reset(address);
@@ -241,263 +263,410 @@ export default function ProfilePage() {
     }
   };
 
+  const sidebarItems: SidebarItem[] = [
+    {
+      id: 'orders',
+      label: 'My Orders',
+      icon: <Package className="h-5 w-5" />
+    },
+    {
+      id: 'wallet',
+      label: 'My Wallet',
+      icon: <Wallet className="h-5 w-5" />,
+      badge: loyaltyStats?.totalPoints ? `₹${loyaltyStats.totalPoints}` : '₹150',
+      badgeColor: 'bg-red-500'
+    },
+    {
+      id: 'addresses',
+      label: 'Address Book',
+      icon: <Home className="h-5 w-5" />
+    },
+    {
+      id: 'cards',
+      label: 'Manage Saved Cards',
+      icon: <CreditCard className="h-5 w-5" />
+    },
+    {
+      id: 'upi',
+      label: 'Manage Saved UPI',
+      icon: <FileText className="h-5 w-5" />
+    },
+    {
+      id: 'reviews',
+      label: 'My Reviews',
+      icon: <Star className="h-5 w-5" />
+    },
+    {
+      id: 'profile',
+      label: 'My Profile',
+      icon: <User className="h-5 w-5" />
+    },
+    {
+      id: 'settings',
+      label: 'Account Settings',
+      icon: <Settings className="h-5 w-5" />
+    }
+  ];
+
   if (!isAuthenticated) {
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-cream py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-charcoal mb-2">My Profile</h1>
-          <p className="text-charcoal opacity-70">Manage your account, special dates, and delivery addresses</p>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 max-w-7xl py-8">
+        {/* Header */}
+        <div className="mb-8 bg-white rounded-lg p-6 shadow-sm border">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="bg-pink-100 p-4 rounded-full">
+                <User className="h-8 w-8 text-pink-600" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {userProfile?.username || user?.phone || 'pankaj'}
+                </h1>
+                <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
+                  {userProfile?.email && (
+                    <div className="flex items-center space-x-1">
+                      <Mail className="h-4 w-4" />
+                      <span>{userProfile.email}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center space-x-1">
+                    <Phone className="h-4 w-4" />
+                    <span>{userProfile?.phone || user?.phone}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Quick Navigation Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Link href="/orders">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer border-2 hover:border-caramel">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="bg-caramel/10 p-3 rounded-lg">
-                    <Package className="h-6 w-6 text-caramel" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-charcoal">My Orders</h3>
-                    <p className="text-sm text-charcoal opacity-70">View order history and track deliveries</p>
-                  </div>
+        <div className="grid grid-cols-12 gap-6">
+          {/* Sidebar */}
+          <div className="col-span-12 lg:col-span-4">
+            <Card className="shadow-sm">
+              <CardContent className="p-0">
+                <div className="space-y-1">
+                  {sidebarItems.map((item, index) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveSection(item.id)}
+                      className={`w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors ${
+                        activeSection === item.id 
+                          ? 'bg-red-50 border-r-2 border-red-500 text-red-600' 
+                          : 'text-gray-700'
+                      } ${index === 0 ? 'border-b-2 border-red-500' : ''}`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        {item.icon}
+                        <span className="font-medium">{item.label}</span>
+                      </div>
+                      {item.badge && (
+                        <Badge 
+                          className={`${item.badgeColor || 'bg-gray-500'} text-white text-xs`}
+                        >
+                          {item.badge}
+                        </Badge>
+                      )}
+                    </button>
+                  ))}
                 </div>
               </CardContent>
             </Card>
-          </Link>
-          
-          <Link href="/loyalty">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer border-2 hover:border-caramel">
+          </div>
+
+          {/* Main Content */}
+          <div className="col-span-12 lg:col-span-8">
+            <Card className="shadow-sm">
               <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="bg-caramel/10 p-3 rounded-lg">
-                    <Coins className="h-6 w-6 text-caramel" />
-                  </div>
+                {activeSection === 'orders' && (
                   <div>
-                    <h3 className="font-semibold text-charcoal">Loyalty Program</h3>
-                    <p className="text-sm text-charcoal opacity-70">Earn points and redeem rewards</p>
+                    <div className="border-b pb-4 mb-6">
+                      <h2 className="text-xl font-semibold text-gray-900">My Orders</h2>
+                    </div>
+                    <div className="text-center py-12">
+                      <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500 mb-4">No orders found</p>
+                      <Button 
+                        onClick={() => setLocation('/')}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Start Shopping
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        </div>
+                )}
 
-        <Tabs defaultValue="personal" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="personal" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Personal Info
-            </TabsTrigger>
-            <TabsTrigger value="addresses" className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              Addresses
-            </TabsTrigger>
-            <TabsTrigger value="reminders" className="flex items-center gap-2">
-              <Bell className="h-4 w-4" />
-              Event Reminders
-            </TabsTrigger>
-          </TabsList>
+                {activeSection === 'wallet' && (
+                  <div>
+                    <div className="border-b pb-4 mb-6">
+                      <h2 className="text-xl font-semibold text-gray-900">My Wallet</h2>
+                    </div>
+                    <div className="space-y-6">
+                      <div className="bg-gradient-to-r from-red-500 to-pink-500 rounded-lg p-6 text-white">
+                        <h3 className="text-lg font-semibold mb-2">Wallet Balance</h3>
+                        <p className="text-3xl font-bold">
+                          ₹{loyaltyStats?.totalPoints || 150}
+                        </p>
+                        <p className="text-red-100 mt-2">Available for use</p>
+                      </div>
+                      <div className="text-center py-8">
+                        <Wallet className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-500">No transactions yet</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-          {/* Personal Information Tab */}
-          <TabsContent value="personal">
-            <Card>
-              <CardHeader>
-                <CardTitle>Personal Information</CardTitle>
-                <CardDescription>
-                  Update your profile details and special dates for personalized reminders
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...profileForm}>
-                  <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField
-                        control={profileForm.control}
-                        name="username"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Username</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="Your username" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                {activeSection === 'addresses' && (
+                  <div>
+                    <div className="border-b pb-4 mb-6 flex items-center justify-between">
+                      <h2 className="text-xl font-semibold text-gray-900">Address Book</h2>
+                      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+                        <DialogTrigger asChild>
+                          <Button onClick={handleAddNew} className="bg-red-600 hover:bg-red-700">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Address
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-md">
+                          <DialogHeader>
+                            <DialogTitle>
+                              {editingAddress ? 'Edit Address' : 'Add New Address'}
+                            </DialogTitle>
+                          </DialogHeader>
+                          <Form {...addressForm}>
+                            <form onSubmit={addressForm.handleSubmit(onSubmitAddress)} className="space-y-4">
+                              <FormField
+                                control={addressForm.control}
+                                name="name"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Address Name</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} placeholder="e.g. Home, Office" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
 
-                      <FormField
-                        control={profileForm.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input {...field} type="email" placeholder="your@email.com" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                              <FormField
+                                control={addressForm.control}
+                                name="type"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Address Type</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select address type" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="home">Home</SelectItem>
+                                        <SelectItem value="work">Work</SelectItem>
+                                        <SelectItem value="other">Other</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
 
-                      <FormField
-                        control={profileForm.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Phone Number</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="+91 9876543210" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                              <FormField
+                                control={addressForm.control}
+                                name="address"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Full Address</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} placeholder="House number, street, area" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
 
-                      <FormField
-                        control={profileForm.control}
-                        name="birthday"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4" />
-                              Birthday (MM-DD)
-                            </FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="12-25" maxLength={5} />
-                            </FormControl>
-                            <FormMessage />
-                            <p className="text-xs text-charcoal opacity-70">
-                              We'll send you a cake reminder one week before your birthday!
-                            </p>
-                          </FormItem>
-                        )}
-                      />
+                              <div className="grid grid-cols-2 gap-4">
+                                <FormField
+                                  control={addressForm.control}
+                                  name="pincode"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Pincode</FormLabel>
+                                      <FormControl>
+                                        <Input {...field} placeholder="122001" />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
 
-                      <FormField
-                        control={profileForm.control}
-                        name="anniversary"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4" />
-                              Anniversary (MM-DD)
-                            </FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="06-15" maxLength={5} />
-                            </FormControl>
-                            <FormMessage />
-                            <p className="text-xs text-charcoal opacity-70">
-                              Get reminded to order a special anniversary cake!
-                            </p>
-                          </FormItem>
-                        )}
-                      />
+                                <FormField
+                                  control={addressForm.control}
+                                  name="city"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>City</FormLabel>
+                                      <FormControl>
+                                        <Input {...field} placeholder="Gurgaon" />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+
+                              <FormField
+                                control={addressForm.control}
+                                name="landmark"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Landmark (Optional)</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} placeholder="Near metro station" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <div className="flex justify-end space-x-2 pt-4">
+                                <Button 
+                                  type="button" 
+                                  variant="outline" 
+                                  onClick={() => setShowAddDialog(false)}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button 
+                                  type="submit" 
+                                  className="bg-red-600 hover:bg-red-700"
+                                  disabled={saveAddressMutation.isPending}
+                                >
+                                  {saveAddressMutation.isPending ? 'Saving...' : 'Save Address'}
+                                </Button>
+                              </div>
+                            </form>
+                          </Form>
+                        </DialogContent>
+                      </Dialog>
                     </div>
 
-                    <Button 
-                      type="submit" 
-                      className="bg-caramel hover:bg-brown"
-                      disabled={updateProfileMutation.isPending}
-                    >
-                      {updateProfileMutation.isPending ? 'Updating...' : 'Update Profile'}
-                    </Button>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                    <div className="space-y-4">
+                      {addressesLoading ? (
+                        <div>Loading addresses...</div>
+                      ) : addresses && addresses.length > 0 ? (
+                        addresses.map((address: any) => (
+                          <Card key={address.id} className="border border-gray-200">
+                            <CardContent className="p-4">
+                              <div className="flex items-start justify-between">
+                                <div className="space-y-2">
+                                  <div className="flex items-center space-x-2">
+                                    {getAddressIcon(address.type)}
+                                    <span className="font-semibold text-gray-900">{address.name}</span>
+                                    <Badge variant="outline" className="text-xs">
+                                      {address.type.charAt(0).toUpperCase() + address.type.slice(1)}
+                                    </Badge>
+                                    {address.isDefault && (
+                                      <Badge className="bg-green-100 text-green-800 text-xs">Default</Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-gray-600">{address.address}</p>
+                                  <p className="text-sm text-gray-500">
+                                    {address.city} - {address.pincode}
+                                    {address.landmark && ` • Near ${address.landmark}`}
+                                  </p>
+                                </div>
+                                <div className="flex space-x-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleEditAddress(address)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleDeleteAddress(address.id)}
+                                    className="text-red-600 hover:text-red-700"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <MapPin className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                          <p className="text-gray-500 mb-4">No addresses saved yet</p>
+                          <Button onClick={handleAddNew} className="bg-red-600 hover:bg-red-700">
+                            Add Your First Address
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
-          {/* Addresses Tab */}
-          <TabsContent value="addresses">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Delivery Addresses</CardTitle>
-                  <CardDescription>
-                    Manage your saved delivery addresses
-                  </CardDescription>
-                </div>
-                <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-                  <DialogTrigger asChild>
-                    <Button onClick={handleAddNew} className="bg-caramel hover:bg-brown">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Address
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>
-                        {editingAddress ? 'Edit Address' : 'Add New Address'}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <Form {...addressForm}>
-                      <form onSubmit={addressForm.handleSubmit(onSubmitAddress)} className="space-y-4">
-                        <FormField
-                          control={addressForm.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Address Name</FormLabel>
-                              <FormControl>
-                                <Input {...field} placeholder="e.g., Home, Office" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                {activeSection === 'cards' && (
+                  <div>
+                    <div className="border-b pb-4 mb-6">
+                      <h2 className="text-xl font-semibold text-gray-900">Manage Saved Cards</h2>
+                    </div>
+                    <div className="text-center py-12">
+                      <CreditCard className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500">No saved cards</p>
+                    </div>
+                  </div>
+                )}
 
-                        <FormField
-                          control={addressForm.control}
-                          name="type"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Address Type</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select type" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="home">Home</SelectItem>
-                                  <SelectItem value="work">Work</SelectItem>
-                                  <SelectItem value="other">Other</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                {activeSection === 'upi' && (
+                  <div>
+                    <div className="border-b pb-4 mb-6">
+                      <h2 className="text-xl font-semibold text-gray-900">Manage Saved UPI</h2>
+                    </div>
+                    <div className="text-center py-12">
+                      <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500">No saved UPI IDs</p>
+                    </div>
+                  </div>
+                )}
 
-                        <FormField
-                          control={addressForm.control}
-                          name="address"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Full Address</FormLabel>
-                              <FormControl>
-                                <Input {...field} placeholder="House/Flat no, Street, Area" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                {activeSection === 'reviews' && (
+                  <div>
+                    <div className="border-b pb-4 mb-6">
+                      <h2 className="text-xl font-semibold text-gray-900">My Reviews</h2>
+                    </div>
+                    <div className="text-center py-12">
+                      <Star className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500">No reviews yet</p>
+                    </div>
+                  </div>
+                )}
 
-                        <div className="grid grid-cols-2 gap-4">
+                {activeSection === 'profile' && (
+                  <div>
+                    <div className="border-b pb-4 mb-6">
+                      <h2 className="text-xl font-semibold text-gray-900">My Profile</h2>
+                    </div>
+                    <Form {...profileForm}>
+                      <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <FormField
-                            control={addressForm.control}
-                            name="pincode"
+                            control={profileForm.control}
+                            name="username"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Pincode</FormLabel>
+                                <FormLabel>Username</FormLabel>
                                 <FormControl>
-                                  <Input {...field} placeholder="122001" />
+                                  <Input {...field} placeholder="Your username" />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -505,148 +674,118 @@ export default function ProfilePage() {
                           />
 
                           <FormField
-                            control={addressForm.control}
-                            name="city"
+                            control={profileForm.control}
+                            name="email"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>City</FormLabel>
+                                <FormLabel>Email</FormLabel>
                                 <FormControl>
-                                  <Input {...field} placeholder="Gurgaon" />
+                                  <Input {...field} type="email" placeholder="your@email.com" />
                                 </FormControl>
                                 <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={profileForm.control}
+                            name="phone"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Phone Number</FormLabel>
+                                <FormControl>
+                                  <Input {...field} placeholder="+91 9876543210" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={profileForm.control}
+                            name="birthday"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="flex items-center gap-2">
+                                  <Calendar className="h-4 w-4" />
+                                  Birthday (MM-DD)
+                                </FormLabel>
+                                <FormControl>
+                                  <Input {...field} placeholder="12-25" maxLength={5} />
+                                </FormControl>
+                                <FormMessage />
+                                <p className="text-xs text-gray-500">
+                                  We'll send you a cake reminder one week before your birthday!
+                                </p>
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={profileForm.control}
+                            name="anniversary"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="flex items-center gap-2">
+                                  <Calendar className="h-4 w-4" />
+                                  Anniversary (MM-DD)
+                                </FormLabel>
+                                <FormControl>
+                                  <Input {...field} placeholder="06-15" maxLength={5} />
+                                </FormControl>
+                                <FormMessage />
+                                <p className="text-xs text-gray-500">
+                                  Get reminded to order a special anniversary cake!
+                                </p>
                               </FormItem>
                             )}
                           />
                         </div>
 
-                        <FormField
-                          control={addressForm.control}
-                          name="landmark"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Landmark (Optional)</FormLabel>
-                              <FormControl>
-                                <Input {...field} placeholder="Near Metro Station" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <Button type="submit" disabled={saveAddressMutation.isPending} className="w-full bg-caramel hover:bg-brown">
-                          {saveAddressMutation.isPending ? 'Saving...' : 'Save Address'}
+                        <Button 
+                          type="submit" 
+                          className="bg-red-600 hover:bg-red-700"
+                          disabled={updateProfileMutation.isPending}
+                        >
+                          {updateProfileMutation.isPending ? 'Updating...' : 'Update Profile'}
                         </Button>
                       </form>
                     </Form>
-                  </DialogContent>
-                </Dialog>
-              </CardHeader>
-              <CardContent>
-                {addressesLoading ? (
-                  <p className="text-center py-8 text-charcoal opacity-70">Loading addresses...</p>
-                ) : !addresses || addresses.length === 0 ? (
-                  <div className="text-center py-8">
-                    <MapPin className="h-12 w-12 mx-auto text-charcoal opacity-30 mb-4" />
-                    <p className="text-charcoal opacity-70 mb-4">No addresses saved yet</p>
-                    <p className="text-sm text-charcoal opacity-60">
-                      Add your first delivery address above
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {addresses.map((address: any) => (
-                      <div key={address.id} className="border rounded-lg p-4 bg-white hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-medium text-charcoal capitalize flex items-center gap-2">
-                              {address.type === 'home' && <Home className="h-4 w-4" />}
-                              {address.type === 'work' && <Building className="h-4 w-4" />}
-                              {address.type === 'other' && <MapPin className="h-4 w-4" />}
-                              {address.name}
-                            </h3>
-                            {address.isDefault && (
-                              <Badge variant="secondary" className="text-xs">Default</Badge>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditAddress(address)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteAddress(address.id)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        <p className="text-sm text-charcoal opacity-70">
-                          {address.address}, {address.city} - {address.pincode}
-                          {address.landmark && `, ${address.landmark}`}
-                        </p>
-                      </div>
-                    ))}
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </TabsContent>
 
-          {/* Event Reminders Tab */}
-          <TabsContent value="reminders">
-            <Card>
-              <CardHeader>
-                <CardTitle>Event Reminders</CardTitle>
-                <CardDescription>
-                  View your upcoming birthday and anniversary reminders
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {remindersLoading ? (
-                  <p className="text-center py-8 text-charcoal opacity-70">Loading reminders...</p>
-                ) : !reminders || !Array.isArray(reminders) || reminders.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Calendar className="h-12 w-12 mx-auto text-charcoal opacity-30 mb-4" />
-                    <p className="text-charcoal opacity-70 mb-4">No event reminders set up yet</p>
-                    <p className="text-sm text-charcoal opacity-60">
-                      Add your birthday and anniversary in Personal Info to get reminders!
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {reminders.map((reminder: any) => (
-                      <div key={reminder.id} className="border rounded-lg p-4 bg-white">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h3 className="font-medium text-charcoal capitalize">
-                              {reminder.eventType} Reminder
-                            </h3>
-                            <p className="text-sm text-charcoal opacity-70">
-                              Event Date: {reminder.eventDate} • Reminder: {new Date(reminder.reminderDate).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {reminder.notificationSent ? (
-                              <Badge variant="secondary">Sent</Badge>
-                            ) : (
-                              <Badge className="bg-caramel">Pending</Badge>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                {activeSection === 'settings' && (
+                  <div>
+                    <div className="border-b pb-4 mb-6">
+                      <h2 className="text-xl font-semibold text-gray-900">Account Settings</h2>
+                    </div>
+                    <div className="space-y-6">
+                      <Card className="border border-gray-200">
+                        <CardContent className="p-4">
+                          <h3 className="font-semibold text-gray-900 mb-2">Notifications</h3>
+                          <p className="text-gray-600 text-sm mb-4">Manage your notification preferences</p>
+                          <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                            Manage Notifications
+                          </Button>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="border border-gray-200">
+                        <CardContent className="p-4">
+                          <h3 className="font-semibold text-gray-900 mb-2">Privacy Settings</h3>
+                          <p className="text-gray-600 text-sm mb-4">Control your privacy and data settings</p>
+                          <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                            Privacy Settings
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </div>
                   </div>
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ShoppingCart, Menu, MapPin, Search, User, LogOut, Package, Heart, Calendar, Wallet, MapPinIcon, MessageCircle, Settings, Truck, FileText } from 'lucide-react';
+import { ShoppingCart, Menu, MapPin, Search, User, LogOut, Package, Heart, Calendar, Wallet, MapPinIcon, MessageCircle, Settings, Truck, FileText, CreditCard, Star } from 'lucide-react';
 import { useCart } from './cart-context';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -312,15 +312,15 @@ export default function Header() {
                         </DropdownMenuItem>
                         
                         <DropdownMenuItem 
-                          onClick={() => setLocation('/profile')}
+                          onClick={() => setLocation('/profile?section=addresses')}
                           className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
                         >
                           <MapPinIcon className="h-5 w-5 text-gray-600" />
-                          <span className="font-medium">Manage Address</span>
+                          <span className="font-medium">Address Book</span>
                         </DropdownMenuItem>
                         
                         <DropdownMenuItem 
-                          onClick={() => setLocation('/loyalty')}
+                          onClick={() => setLocation('/profile?section=wallet')}
                           className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
                         >
                           <Wallet className="h-5 w-5 text-gray-600" />
@@ -328,11 +328,43 @@ export default function Header() {
                         </DropdownMenuItem>
                         
                         <DropdownMenuItem 
-                          onClick={() => setLocation('/profile')}
+                          onClick={() => setLocation('/profile?section=cards')}
+                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                        >
+                          <CreditCard className="h-5 w-5 text-gray-600" />
+                          <span className="font-medium">Manage Saved Cards</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem 
+                          onClick={() => setLocation('/profile?section=upi')}
+                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                        >
+                          <FileText className="h-5 w-5 text-gray-600" />
+                          <span className="font-medium">Manage Saved UPI</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem 
+                          onClick={() => setLocation('/profile?section=reviews')}
+                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                        >
+                          <Star className="h-5 w-5 text-gray-600" />
+                          <span className="font-medium">My Reviews</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem 
+                          onClick={() => setLocation('/profile?section=profile')}
+                          className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
+                        >
+                          <User className="h-5 w-5 text-gray-600" />
+                          <span className="font-medium">My Profile</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem 
+                          onClick={() => setLocation('/profile?section=settings')}
                           className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
                         >
                           <Settings className="h-5 w-5 text-gray-600" />
-                          <span className="font-medium">My Reviews</span>
+                          <span className="font-medium">Account Settings</span>
                         </DropdownMenuItem>
                         
                         <DropdownMenuItem 
