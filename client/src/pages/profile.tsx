@@ -31,7 +31,7 @@ const addressSchema = z.object({
 });
 
 const profileSchema = z.object({
-  username: z.string().min(2, 'Username must be at least 2 characters').optional(),
+  username: z.string().min(2, 'Name must be at least 2 characters').optional(),
   email: z.string().email('Invalid email address').optional(),
   phone: z.string().optional(),
   birthday: z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/, 'Birthday must be in MM-DD format').optional(),
@@ -615,9 +615,9 @@ export default function ProfilePage() {
                             name="username"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Username</FormLabel>
+                                <FormLabel>Name</FormLabel>
                                 <FormControl>
-                                  <Input {...field} placeholder="Your username" />
+                                  <Input {...field} placeholder="Your name" />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
