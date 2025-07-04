@@ -198,7 +198,21 @@ export default function AdminInvoices() {
           <p className="font-medium text-gray-900">{invoice.customerName}</p>
           <p className="text-gray-600">{invoice.customerEmail}</p>
           <p className="text-gray-600">{invoice.customerPhone}</p>
-          <p className="text-gray-600">{invoice.billingAddress}</p>
+          {invoice.billingAddress && (
+            <div className="text-gray-600">
+              {typeof invoice.billingAddress === 'string' ? (
+                <p>{invoice.billingAddress}</p>
+              ) : (
+                <div>
+                  <p>{invoice.billingAddress.address}</p>
+                  <p>{invoice.billingAddress.city} - {invoice.billingAddress.pincode}</p>
+                  {invoice.billingAddress.landmark && (
+                    <p>Landmark: {invoice.billingAddress.landmark}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
