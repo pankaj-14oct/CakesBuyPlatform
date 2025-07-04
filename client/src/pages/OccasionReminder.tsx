@@ -399,13 +399,15 @@ export default function OccasionReminder() {
                       </div>
                     </div>
                     
-                    <Button 
-                      type="submit" 
-                      className="w-full bg-pink-400 hover:bg-pink-500 text-white mt-6"
-                      disabled={createReminderMutation.isPending}
-                    >
-                      {createReminderMutation.isPending ? "Adding..." : "Continue"}
-                    </Button>
+                    <div className="flex justify-center pt-6">
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-pink-400 hover:bg-pink-500 text-white font-semibold py-3 px-6 rounded-lg"
+                        disabled={createReminderMutation.isPending}
+                      >
+                        {createReminderMutation.isPending ? "Adding..." : "Continue"}
+                      </Button>
+                    </div>
                   </form>
                 </Form>
               </DialogContent>
