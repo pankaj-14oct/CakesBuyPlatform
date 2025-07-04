@@ -168,6 +168,7 @@ The application uses a comprehensive database schema with the following main ent
 - July 4, 2025. Redesigned profile page with sidebar navigation layout - Created comprehensive profile dashboard with sections for My Orders, My Wallet, Address Book, My Profile, and Account Settings, removed unused sections (Saved Cards, UPI, Reviews, Favourites), updated header navigation links to point to specific profile sections using URL parameters, improved user experience with clean modern design matching industry standards
 - July 4, 2025. Enhanced occasion reminder form with improved design - Updated form layout to match provided design mockups with calendar icon for date field, better dropdown styling with blue borders, expanded occasion and relation options, added sender name field, message on card textarea, special instructions field, implemented scrollable dropdowns with max height for better UX
 - July 4, 2025. Applied scrollable dropdown styling across checkout page - Enhanced all SelectContent components in checkout form with max-h-60 overflow-y-auto classes for address type, delivery time slots, delivery occasions, and relation dropdowns to improve navigation through long option lists and prevent viewport overflow
+- July 4, 2025. Fixed admin invoices page number formatting errors - Resolved .toFixed is not a function errors by wrapping all amount fields (totalAmount, subtotal, discountAmount, taxAmount) with Number() conversion before calling toFixed(2), ensuring proper currency display in admin panel invoice management
 
 ## User Preferences
 

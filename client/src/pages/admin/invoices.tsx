@@ -236,23 +236,23 @@ export default function AdminInvoices() {
         <div className="w-64">
           <div className="flex justify-between py-2">
             <span className="text-gray-600">Subtotal:</span>
-            <span className="font-medium">₹{invoice.subtotal.toFixed(2)}</span>
+            <span className="font-medium">₹{Number(invoice.subtotal).toFixed(2)}</span>
           </div>
           {invoice.discountAmount > 0 && (
             <div className="flex justify-between py-2">
               <span className="text-gray-600">Discount:</span>
-              <span className="font-medium text-green-600">-₹{invoice.discountAmount.toFixed(2)}</span>
+              <span className="font-medium text-green-600">-₹{Number(invoice.discountAmount).toFixed(2)}</span>
             </div>
           )}
           {invoice.taxAmount > 0 && (
             <div className="flex justify-between py-2">
               <span className="text-gray-600">Tax ({invoiceSettings.taxRate}%):</span>
-              <span className="font-medium">₹{invoice.taxAmount.toFixed(2)}</span>
+              <span className="font-medium">₹{Number(invoice.taxAmount).toFixed(2)}</span>
             </div>
           )}
           <div className="flex justify-between py-2 border-t border-gray-200">
             <span className="text-lg font-semibold">Total:</span>
-            <span className="text-lg font-bold text-caramel-600">₹{invoice.totalAmount.toFixed(2)}</span>
+            <span className="text-lg font-bold text-caramel-600">₹{Number(invoice.totalAmount).toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -355,7 +355,7 @@ export default function AdminInvoices() {
                           <div className="mt-2 text-sm text-gray-600">
                             <p><strong>Customer:</strong> {invoice.customerName}</p>
                             <p><strong>Email:</strong> {invoice.customerEmail}</p>
-                            <p><strong>Amount:</strong> ₹{invoice.totalAmount.toFixed(2)}</p>
+                            <p><strong>Amount:</strong> ₹{Number(invoice.totalAmount).toFixed(2)}</p>
                             <p><strong>Date:</strong> {new Date(invoice.issueDate).toLocaleDateString()}</p>
                           </div>
                         </div>
