@@ -40,20 +40,158 @@ export default function Header() {
       <header className="bg-red-500 text-white sticky top-0 z-50">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
+            {/* Mobile Menu Button */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-red-600 p-2">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px]">
+                <div className="flex flex-col space-y-4 mt-8">
+                  {/* Mobile Search */}
+                  <form onSubmit={handleSearch} className="relative">
+                    <Input
+                      type="text"
+                      placeholder="Search For Cakes..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2"
+                    />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  </form>
+
+                  {/* Mobile Track Order */}
+                  <Link href="/track-order">
+                    <Button className="bg-red-500 text-white hover:bg-red-600 w-full flex items-center justify-center gap-2 py-3">
+                      <Truck className="h-5 w-5" />
+                      Track Order
+                    </Button>
+                  </Link>
+
+                  {/* Mobile Navigation */}
+                  <nav className="flex flex-col space-y-4">
+                    {navItems.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`font-medium transition-colors ${
+                          location === item.href
+                            ? 'text-red-500'
+                            : 'text-gray-700 hover:text-red-500'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          {item.label}
+                          {item.badge && (
+                            <Badge className="bg-red-500 text-white text-xs">
+                              {item.badge}
+                            </Badge>
+                          )}
+                        </div>
+                      </Link>
+                    ))}
+                  </nav>
+
+                  {/* Mobile User Menu */}
+                  {isAuthenticated ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white font-semibold">
+                          {user?.phone?.slice(-1) || 'P'}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-gray-900">
+                            Hey {user?.phone?.slice(-4) || 'User'}!
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {user?.phone || user?.email}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Button 
+                          onClick={() => setLocation('/orders')}
+                          variant="outline" 
+                          className="w-full justify-start gap-3"
+                        >
+                          <Package className="h-4 w-4" />
+                          My Orders
+                        </Button>
+                        
+                        <Button 
+                          onClick={() => setLocation('/wishlist')}
+                          variant="outline" 
+                          className="w-full justify-start gap-3"
+                        >
+                          <Heart className="h-4 w-4" />
+                          My Favourites
+                        </Button>
+                        
+                        <Button 
+                          onClick={() => setLocation('/occasions')}
+                          variant="outline" 
+                          className="w-full justify-start gap-3"
+                        >
+                          <Calendar className="h-4 w-4" />
+                          My Occasions
+                        </Button>
+                        
+                        <Button 
+                          onClick={() => setLocation('/profile')}
+                          variant="outline" 
+                          className="w-full justify-start gap-3"
+                        >
+                          <MapPinIcon className="h-4 w-4" />
+                          Manage Address
+                        </Button>
+                        
+                        <Button 
+                          onClick={() => setLocation('/loyalty')}
+                          variant="outline" 
+                          className="w-full justify-start gap-3"
+                        >
+                          <Wallet className="h-4 w-4" />
+                          My Wallet
+                        </Button>
+                        
+                        <Button 
+                          onClick={() => logoutMutation.mutate()}
+                          variant="outline" 
+                          className="w-full justify-start gap-3 text-red-600 hover:bg-red-50"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Logout
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Link href="/auth">
+                      <Button className="bg-red-500 text-white hover:bg-red-600 w-full">
+                        <User className="h-4 w-4 mr-2" />
+                        Sign In
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
+
             {/* Logo */}
-            <Link href="/" className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center">
               <div className="text-2xl font-bold text-white">
                 CakesBuy
               </div>
             </Link>
 
-            {/* Location Selector */}
+            {/* Location Selector - Desktop */}
             <div className="hidden md:flex items-center space-x-2">
               <MapPin className="h-4 w-4" />
               <span className="text-sm">Gurgaon</span>
             </div>
 
-            {/* Search Bar */}
+            {/* Search Bar - Desktop */}
             <div className="flex-1 max-w-md mx-8 hidden md:block">
               <form onSubmit={handleSearch} className="relative">
                 <Input
@@ -68,8 +206,8 @@ export default function Header() {
             </div>
 
             {/* Right Side Actions */}
-            <div className="flex items-center space-x-4">
-              {/* Track Order */}
+            <div className="flex items-center space-x-1">
+              {/* Track Order - Desktop */}
               <Link href="/track-order">
                 <Button variant="ghost" className="text-white hover:bg-red-600 hidden md:flex items-center gap-2 px-4 py-2 text-sm font-medium">
                   <Truck className="h-4 w-4" />
@@ -77,14 +215,19 @@ export default function Header() {
                 </Button>
               </Link>
 
+              {/* Search - Mobile */}
+              <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-red-600 p-2">
+                <Search className="h-5 w-5" />
+              </Button>
+
               {/* Cart */}
               <Link href="/cart" className="relative">
-                <Button variant="ghost" size="icon" className="text-white hover:bg-red-600">
+                <Button variant="ghost" size="icon" className="text-white hover:bg-red-600 p-2">
                   <ShoppingCart className="h-5 w-5" />
                   {cartState.itemCount > 0 && (
                     <Badge 
                       variant="secondary" 
-                      className="absolute -top-1 -right-1 bg-yellow-400 text-red-900 text-xs h-5 w-5 flex items-center justify-center p-0"
+                      className="absolute -top-1 -right-1 bg-yellow-400 text-red-900 text-xs h-5 w-5 flex items-center justify-center p-0 rounded-full"
                     >
                       {cartState.itemCount}
                     </Badge>
@@ -96,7 +239,7 @@ export default function Header() {
               {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="text-white hover:bg-red-600">
+                    <Button variant="ghost" size="icon" className="text-white hover:bg-red-600 p-2 hidden md:flex">
                       <User className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -195,151 +338,21 @@ export default function Header() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Link href="/auth">
-                  <Button variant="ghost" className="text-white hover:bg-red-600">
-                    <User className="h-4 w-4 mr-2" />
-                    My Account
-                  </Button>
-                </Link>
+                <>
+                  <Link href="/auth">
+                    <Button variant="ghost" className="text-white hover:bg-red-600 hidden md:flex">
+                      <User className="h-4 w-4 mr-2" />
+                      My Account
+                    </Button>
+                  </Link>
+                  {/* Mobile User Icon */}
+                  <Link href="/auth">
+                    <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-red-600 p-2">
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </Link>
+                </>
               )}
-
-              {/* Mobile Menu */}
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-red-600">
-                    <Menu className="h-5 w-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-[300px]">
-                  <div className="flex flex-col space-y-4 mt-8">
-                    {/* Mobile Search */}
-                    <form onSubmit={handleSearch} className="relative">
-                      <Input
-                        type="text"
-                        placeholder="Search For Cakes..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2"
-                      />
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    </form>
-
-                    {/* Mobile Track Order */}
-                    <Link href="/track-order">
-                      <Button className="bg-red-500 text-white hover:bg-red-600 w-full flex items-center justify-center gap-2 py-3">
-                        <Truck className="h-5 w-5" />
-                        Track Order
-                      </Button>
-                    </Link>
-
-                    {/* Mobile Navigation */}
-                    <nav className="flex flex-col space-y-4">
-                      {navItems.map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className={`font-medium transition-colors ${
-                            location === item.href
-                              ? 'text-red-500'
-                              : 'text-gray-700 hover:text-red-500'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            {item.label}
-                            {item.badge && (
-                              <Badge className="bg-red-500 text-white text-xs">
-                                {item.badge}
-                              </Badge>
-                            )}
-                          </div>
-                        </Link>
-                      ))}
-                    </nav>
-
-                    {/* Mobile User Menu */}
-                    {isAuthenticated ? (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                          <div className="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white font-semibold">
-                            {user?.phone?.slice(-1) || 'P'}
-                          </div>
-                          <div>
-                            <div className="font-semibold text-gray-900">
-                              Hey {user?.phone?.slice(-4) || 'User'}!
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {user?.phone || user?.email}
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Button 
-                            onClick={() => setLocation('/orders')}
-                            variant="outline" 
-                            className="w-full justify-start gap-3"
-                          >
-                            <Package className="h-4 w-4" />
-                            My Orders
-                          </Button>
-                          
-                          <Button 
-                            onClick={() => setLocation('/wishlist')}
-                            variant="outline" 
-                            className="w-full justify-start gap-3"
-                          >
-                            <Heart className="h-4 w-4" />
-                            My Favourites
-                          </Button>
-                          
-                          <Button 
-                            onClick={() => setLocation('/occasions')}
-                            variant="outline" 
-                            className="w-full justify-start gap-3"
-                          >
-                            <Calendar className="h-4 w-4" />
-                            My Occasions
-                          </Button>
-                          
-                          <Button 
-                            onClick={() => setLocation('/profile')}
-                            variant="outline" 
-                            className="w-full justify-start gap-3"
-                          >
-                            <MapPinIcon className="h-4 w-4" />
-                            Manage Address
-                          </Button>
-                          
-                          <Button 
-                            onClick={() => setLocation('/loyalty')}
-                            variant="outline" 
-                            className="w-full justify-start gap-3"
-                          >
-                            <Wallet className="h-4 w-4" />
-                            My Wallet
-                          </Button>
-                          
-                          <Button 
-                            onClick={() => logoutMutation.mutate()}
-                            variant="outline" 
-                            className="w-full justify-start gap-3 text-red-600 hover:bg-red-50"
-                          >
-                            <LogOut className="h-4 w-4" />
-                            Logout
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <Link href="/auth">
-                        <Button className="bg-red-500 text-white hover:bg-red-600 w-full">
-                          <User className="h-4 w-4 mr-2" />
-                          Sign In
-                        </Button>
-                      </Link>
-                    )}
-                  </div>
-                </SheetContent>
-              </Sheet>
             </div>
           </div>
         </div>
