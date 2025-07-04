@@ -204,10 +204,10 @@ export default function AdminInvoices() {
                 <p>{invoice.billingAddress}</p>
               ) : (
                 <div>
-                  <p>{invoice.billingAddress.address}</p>
-                  <p>{invoice.billingAddress.city} - {invoice.billingAddress.pincode}</p>
-                  {invoice.billingAddress.landmark && (
-                    <p>Landmark: {invoice.billingAddress.landmark}</p>
+                  <p>{(invoice.billingAddress as any).address}</p>
+                  <p>{(invoice.billingAddress as any).city} - {(invoice.billingAddress as any).pincode}</p>
+                  {(invoice.billingAddress as any).landmark && (
+                    <p>Landmark: {(invoice.billingAddress as any).landmark}</p>
                   )}
                 </div>
               )}

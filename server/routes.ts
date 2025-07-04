@@ -396,7 +396,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/invoices/:invoiceNumber", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/invoices/:invoiceNumber", optionalAuth, async (req: AuthRequest, res) => {
     try {
       const invoiceNumber = req.params.invoiceNumber;
       const invoice = await getInvoiceByNumber(invoiceNumber);
@@ -405,10 +405,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Invoice not found" });
       }
 
-      // Check if user owns this invoice
-      if (invoice.userId && invoice.userId !== req.user!.id) {
+      // If user is authenticated, check if they own this invoice
+      if (req.user && invoice.userId && invoice.userId !== req.user.id) {
         return res.status(403).json({ message: "Access denied" });
       }
+
+      // If no user is authenticated, allow access (public invoice view)
+      // This allows invoice sharing via direct link
 
       const invoiceWithOrder = await getInvoiceWithOrder(invoice.id);
       const displayData = getInvoiceDisplayData(invoiceWithOrder!);

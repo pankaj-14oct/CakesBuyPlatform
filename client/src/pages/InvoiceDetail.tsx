@@ -46,17 +46,6 @@ export default function InvoiceDetailPage() {
 
   const { data: invoice, isLoading, error } = useQuery<InvoiceDisplayData>({
     queryKey: ['/api/invoices', invoiceNumber],
-    queryFn: async () => {
-      const response = await fetch(`/api/invoices/${invoiceNumber}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch invoice');
-      }
-      return response.json();
-    },
     enabled: isAuthenticated && !!invoiceNumber
   });
 
