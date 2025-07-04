@@ -569,7 +569,7 @@ export default function CheckoutPage() {
                                           <SelectValue placeholder="Select type" />
                                         </SelectTrigger>
                                       </FormControl>
-                                      <SelectContent>
+                                      <SelectContent className="max-h-60 overflow-y-auto">
                                         <SelectItem value="home">Home</SelectItem>
                                         <SelectItem value="work">Work</SelectItem>
                                         <SelectItem value="other">Other</SelectItem>
@@ -787,7 +787,7 @@ export default function CheckoutPage() {
                         <SelectTrigger>
                           <SelectValue placeholder="Select time slot" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-60 overflow-y-auto">
                           <SelectItem 
                             value="slot1" 
                             disabled={!isTimeSlotAvailable(selectedDate, 'slot1')}
@@ -860,7 +860,7 @@ export default function CheckoutPage() {
                         <SelectTrigger>
                           <SelectValue placeholder="Select Occasion" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-60 overflow-y-auto">
                           <SelectItem value="birthday">Birthday</SelectItem>
                           <SelectItem value="anniversary">Anniversary</SelectItem>
                           <SelectItem value="wedding">Wedding</SelectItem>
@@ -891,7 +891,7 @@ export default function CheckoutPage() {
                         <SelectTrigger>
                           <SelectValue placeholder="Select Relation" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-60 overflow-y-auto">
                           <SelectItem value="mother">Mother</SelectItem>
                           <SelectItem value="father">Father</SelectItem>
                           <SelectItem value="sister">Sister</SelectItem>
