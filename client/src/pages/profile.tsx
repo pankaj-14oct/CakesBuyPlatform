@@ -31,7 +31,7 @@ const addressSchema = z.object({
 });
 
 const profileSchema = z.object({
-  username: z.string().min(2, 'Name must be at least 2 characters').optional(),
+  name: z.string().min(2, 'Name must be at least 2 characters').optional(),
   email: z.string().email('Invalid email address').optional(),
   phone: z.string().optional(),
   birthday: z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/, 'Birthday must be in MM-DD format').optional(),
@@ -119,7 +119,7 @@ export default function ProfilePage() {
   const profileForm = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      username: userProfile?.username || '',
+      name: userProfile?.name || '',
       email: userProfile?.email || '',
       phone: userProfile?.phone || '',
       birthday: userProfile?.birthday || '',
@@ -131,7 +131,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (userProfile) {
       profileForm.reset({
-        username: userProfile.username || '',
+        name: userProfile.name || '',
         email: userProfile.email || '',
         phone: userProfile.phone || '',
         birthday: userProfile.birthday || '',
@@ -309,7 +309,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  {userProfile?.username || user?.phone || 'pankaj'}
+                  {userProfile?.name || user?.phone || 'pankaj'}
                 </h1>
                 <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
                   {userProfile?.email && (
@@ -612,7 +612,7 @@ export default function ProfilePage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <FormField
                             control={profileForm.control}
-                            name="username"
+                            name="name"
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Name</FormLabel>

@@ -7,6 +7,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
   phone: text("phone").notNull().unique(),
+  name: text("name"), // User's display name
   role: text("role").default("customer"), // customer, admin
   birthday: text("birthday"), // Format: MM-DD
   anniversary: text("anniversary"), // Format: MM-DD
@@ -362,6 +363,7 @@ export const createAddressSchema = addressSchema.omit({ id: true });
 
 // Profile update schema
 export const profileUpdateSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters').optional(),
   email: z.string().email('Invalid email address').optional(),
   phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number').optional(),
   birthday: z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/, 'Birthday must be in MM-DD format').optional(),
