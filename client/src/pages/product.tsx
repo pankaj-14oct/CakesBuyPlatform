@@ -17,6 +17,7 @@ import { formatPrice } from '@/lib/utils';
 import { useCart } from '@/components/cart-context';
 import { useToast } from '@/hooks/use-toast';
 import AddonSelectionModal from '@/components/addon-selection-modal';
+import PhotoCakeCustomizer from '@/components/PhotoCakeCustomizer';
 
 export default function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -26,6 +27,8 @@ export default function ProductPage() {
   const [quantity, setQuantity] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
   const [showAddonModal, setShowAddonModal] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<string>('');
+  const [customText, setCustomText] = useState('');
   const { dispatch } = useCart();
   const { toast } = useToast();
 
@@ -91,6 +94,31 @@ export default function ProductPage() {
   const basePrice = selectedWeightData?.price || cake.weights?.[0]?.price || 0;
   const totalPrice = basePrice * quantity;
 
+  // Check if this is a photo cake
+  const isPhotoCake = cake.slug?.includes('photo') || cake.name?.toLowerCase().includes('photo');
+
+  const handleImageUpload = (file: File) => {
+    if (!file) {
+      setUploadedImage('');
+      return;
+    }
+
+    // Create a URL for the uploaded image
+    const imageUrl = URL.createObjectURL(file);
+    setUploadedImage(imageUrl);
+
+    // In a real app, you would upload this to a server
+    // For now, we'll just store the local URL
+    toast({
+      title: "Photo uploaded successfully!",
+      description: "Your photo has been added to the cake customization."
+    });
+  };
+
+  const handleCustomTextChange = (text: string) => {
+    setCustomText(text);
+  };
+
   const handleAddToCart = () => {
     // Validate required selections
     if (!selectedWeight && cake.weights && cake.weights.length > 1) {
@@ -106,6 +134,16 @@ export default function ProductPage() {
       toast({
         title: "Please select a flavor",
         description: "Choose your preferred cake flavor before adding to cart.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate photo cake requirements
+    if (isPhotoCake && !uploadedImage) {
+      toast({
+        title: "Please upload a photo",
+        description: "Photo cakes require an image to be uploaded for customization.",
         variant: "destructive"
       });
       return;
@@ -127,6 +165,8 @@ export default function ProductPage() {
       weight,
       flavor,
       customMessage: customMessage.trim() || undefined,
+      customImage: uploadedImage || undefined,
+      customText: customText.trim() || undefined,
       price,
       addons: selectedAddons
     };
@@ -322,6 +362,15 @@ export default function ProductPage() {
               </CardContent>
             </Card>
 
+            {/* Photo Cake Customizer */}
+            <PhotoCakeCustomizer
+              isPhotoCake={isPhotoCake}
+              onImageUpload={handleImageUpload}
+              onTextChange={handleCustomTextChange}
+              uploadedImage={uploadedImage}
+              customText={customText}
+            />
+
             {/* Action Buttons */}
             <div className="space-y-3">
               <Button
@@ -429,7 +478,7 @@ export default function ProductPage() {
                         <div key={review.id} className="border-b border-gray-100 pb-6 last:border-b-0 last:pb-0">
                           <div className="flex items-center space-x-2 mb-2">
                             <div className="flex text-yellow-400">
-                              {[...Array(parseInt(review.rating))].map((_, i) => (
+                              {Array.from({ length: review.rating }).map((_, i) => (
                                 <Star key={i} className="h-4 w-4 fill-current" />
                               ))}
                             </div>
@@ -437,7 +486,7 @@ export default function ProductPage() {
                           </div>
                           <p className="text-charcoal mb-2">{review.comment}</p>
                           <div className="text-sm text-charcoal opacity-60">
-                            By {review.customerName || 'Anonymous'} on {new Date(review.createdAt).toLocaleDateString()}
+                            By Anonymous on {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'Unknown date'}
                           </div>
                         </div>
                       ))}
