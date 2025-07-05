@@ -31,6 +31,8 @@ export default function ProductPage() {
   const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string>('');
   const [customText, setCustomText] = useState('');
+  const [imagePosition, setImagePosition] = useState<{ x: number; y: number }>({ x: 50, y: 40 });
+  const [textPosition, setTextPosition] = useState<{ x: number; y: number }>({ x: 50, y: 70 });
   const { dispatch } = useCart();
   const { toast } = useToast();
 
@@ -103,17 +105,19 @@ export default function ProductPage() {
                      cake.name?.toLowerCase().includes('poster') ||
                      cake.categoryId === 6; // Photo Cakes category
 
-  const handlePhotoModalSave = (imageFile: File | null, text: string) => {
+  const handlePhotoModalSave = (imageFile: File | null, text: string, imgPos?: { x: number; y: number }, txtPos?: { x: number; y: number }) => {
     if (imageFile) {
       const imageUrl = URL.createObjectURL(imageFile);
       setUploadedImage(imageUrl);
       setUploadedImageFile(imageFile);
     }
     setCustomText(text);
+    if (imgPos) setImagePosition(imgPos);
+    if (txtPos) setTextPosition(txtPos);
     
     toast({
       title: "Photo customization saved!",
-      description: "Your photo and text have been added to the cake."
+      description: "Your photo and text positioning have been saved."
     });
   };
 
@@ -377,14 +381,44 @@ export default function ProductPage() {
                       </p>
                       {uploadedImage && (
                         <div className="flex items-center gap-3">
-                          <img 
-                            src={uploadedImage} 
-                            alt="Uploaded preview" 
-                            className="w-16 h-16 object-cover rounded-lg border-2 border-red-200"
-                          />
+                          {/* Mini preview with positioning */}
+                          <div className="relative w-16 h-16 bg-gray-100 rounded-lg border-2 border-red-200 overflow-hidden">
+                            <img 
+                              src={cake.images?.[0] || '/api/placeholder/64/64'} 
+                              alt="Cake base" 
+                              className="w-full h-full object-cover"
+                            />
+                            <div 
+                              className="absolute w-6 h-6 rounded-full overflow-hidden border border-white"
+                              style={{
+                                left: `${imagePosition.x}%`,
+                                top: `${imagePosition.y}%`,
+                                transform: 'translate(-50%, -50%)'
+                              }}
+                            >
+                              <img 
+                                src={uploadedImage} 
+                                alt="Uploaded photo" 
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            {customText && (
+                              <div 
+                                className="absolute bg-white bg-opacity-80 px-1 py-0.5 rounded text-xs"
+                                style={{
+                                  left: `${textPosition.x}%`,
+                                  top: `${textPosition.y}%`,
+                                  transform: 'translate(-50%, -50%)',
+                                  fontSize: '6px'
+                                }}
+                              >
+                                {customText}
+                              </div>
+                            )}
+                          </div>
                           <div className="text-sm text-red-700">
-                            <p className="font-medium">Ready for customization!</p>
-                            <p>Text: {customText || 'No text added'}</p>
+                            <p className="font-medium">✅ Personalization Complete</p>
+                            <p>Photo positioned & text: "{customText || 'None'}"</p>
                           </div>
                         </div>
                       )}

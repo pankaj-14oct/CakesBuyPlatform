@@ -8,9 +8,14 @@ import { Upload, X, Camera } from 'lucide-react';
 interface PhotoCakeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (imageFile: File | null, customText: string) => void;
+  onSave: (imageFile: File | null, customText: string, imagePosition?: { x: number; y: number }, textPosition?: { x: number; y: number }) => void;
   cakePreviewImage?: string;
   initialText?: string;
+}
+
+interface Position {
+  x: number;
+  y: number;
 }
 
 export default function PhotoCakeModal({
@@ -24,7 +29,11 @@ export default function PhotoCakeModal({
   const [customText, setCustomText] = useState(initialText);
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [imagePosition, setImagePosition] = useState<Position>({ x: 50, y: 40 }); // Center position as percentage
+  const [textPosition, setTextPosition] = useState<Position>({ x: 50, y: 70 }); // Below image
+  const [isDragging, setIsDragging] = useState<'image' | 'text' | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -73,8 +82,35 @@ export default function PhotoCakeModal({
   };
 
   const handleSave = () => {
-    onSave(uploadedFile, customText);
+    onSave(uploadedFile, customText, imagePosition, textPosition);
     onClose();
+  };
+
+  const handleMouseDown = (element: 'image' | 'text', e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(element);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !previewRef.current) return;
+
+    const rect = previewRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    // Constrain to preview area
+    const constrainedX = Math.max(5, Math.min(95, x));
+    const constrainedY = Math.max(5, Math.min(95, y));
+
+    if (isDragging === 'image') {
+      setImagePosition({ x: constrainedX, y: constrainedY });
+    } else if (isDragging === 'text') {
+      setTextPosition({ x: constrainedX, y: constrainedY });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(null);
   };
 
   const handleClose = () => {
@@ -96,31 +132,65 @@ export default function PhotoCakeModal({
           <div className="flex-1 flex overflow-hidden">
             {/* Left Side - Cake Preview */}
             <div className="w-1/2 p-6 bg-gray-50 flex items-center justify-center">
-              <div className="relative">
+              <div 
+                ref={previewRef}
+                className="relative w-80 h-80 cursor-crosshair"
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+              >
                 {/* Base cake image */}
                 <img 
                   src={cakePreviewImage || '/api/placeholder/400/400'} 
                   alt="Cake preview"
-                  className="w-80 h-80 object-cover rounded-full shadow-lg"
+                  className="w-full h-full object-cover rounded-full shadow-lg"
+                  draggable={false}
                 />
                 
-                {/* Uploaded image overlay */}
+                {/* Uploaded image overlay - draggable */}
                 {uploadedImage && (
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full overflow-hidden border-4 border-white shadow-md">
+                  <div 
+                    className="absolute w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md cursor-move hover:border-blue-400 transition-colors"
+                    style={{
+                      left: `${imagePosition.x}%`,
+                      top: `${imagePosition.y}%`,
+                      transform: 'translate(-50%, -50%)',
+                      zIndex: isDragging === 'image' ? 20 : 10
+                    }}
+                    onMouseDown={(e) => handleMouseDown('image', e)}
+                  >
                     <img 
                       src={uploadedImage} 
                       alt="Uploaded photo"
                       className="w-full h-full object-cover"
+                      draggable={false}
                     />
+                    {/* Drag indicator */}
+                    <div className="absolute inset-0 bg-blue-500 bg-opacity-0 hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+                      <div className="text-white text-xs font-medium opacity-0 hover:opacity-100">
+                        Drag to move
+                      </div>
+                    </div>
                   </div>
                 )}
                 
-                {/* Custom text overlay */}
+                {/* Custom text overlay - draggable */}
                 {customText && (
-                  <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-90 px-4 py-2 rounded-lg shadow-md">
-                    <p className="text-center font-semibold text-brown text-sm">
+                  <div 
+                    className="absolute bg-white bg-opacity-90 px-3 py-2 rounded-lg shadow-md cursor-move hover:bg-opacity-100 hover:shadow-lg transition-all duration-200"
+                    style={{
+                      left: `${textPosition.x}%`,
+                      top: `${textPosition.y}%`,
+                      transform: 'translate(-50%, -50%)',
+                      zIndex: isDragging === 'text' ? 20 : 10
+                    }}
+                    onMouseDown={(e) => handleMouseDown('text', e)}
+                  >
+                    <p className="text-center font-semibold text-brown text-sm whitespace-nowrap">
                       {customText}
                     </p>
+                    {/* Drag indicator */}
+                    <div className="absolute inset-0 bg-blue-500 bg-opacity-0 hover:bg-opacity-10 rounded-lg transition-all duration-200"></div>
                   </div>
                 )}
                 
@@ -131,6 +201,13 @@ export default function PhotoCakeModal({
                       <Camera className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                       <p className="text-xs text-gray-500">Your photo here</p>
                     </div>
+                  </div>
+                )}
+
+                {/* Instructions overlay */}
+                {uploadedImage && (
+                  <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-lg opacity-75">
+                    💡 Drag image & text to position
                   </div>
                 )}
               </div>
