@@ -33,6 +33,7 @@ export default function ProductPage() {
   const [customText, setCustomText] = useState('');
   const [imagePosition, setImagePosition] = useState<{ x: number; y: number }>({ x: 50, y: 40 });
   const [textPosition, setTextPosition] = useState<{ x: number; y: number }>({ x: 50, y: 70 });
+  const [imageSize, setImageSize] = useState(32);
   const { dispatch } = useCart();
   const { toast } = useToast();
 
@@ -105,7 +106,7 @@ export default function ProductPage() {
                      cake.name?.toLowerCase().includes('poster') ||
                      cake.categoryId === 6; // Photo Cakes category
 
-  const handlePhotoModalSave = (imageFile: File | null, text: string, imgPos?: { x: number; y: number }, txtPos?: { x: number; y: number }) => {
+  const handlePhotoModalSave = (imageFile: File | null, text: string, imgPos?: { x: number; y: number }, txtPos?: { x: number; y: number }, imgSize?: number) => {
     if (imageFile) {
       const imageUrl = URL.createObjectURL(imageFile);
       setUploadedImage(imageUrl);
@@ -114,10 +115,11 @@ export default function ProductPage() {
     setCustomText(text);
     if (imgPos) setImagePosition(imgPos);
     if (txtPos) setTextPosition(txtPos);
+    if (imgSize) setImageSize(imgSize);
     
     toast({
       title: "Photo customization saved!",
-      description: "Your photo and text positioning have been saved."
+      description: "Your photo, text positioning, and sizing have been saved."
     });
   };
 
@@ -389,10 +391,12 @@ export default function ProductPage() {
                               className="w-full h-full object-cover"
                             />
                             <div 
-                              className="absolute w-6 h-6 rounded-full overflow-hidden border border-white"
+                              className="absolute rounded overflow-hidden border border-white"
                               style={{
                                 left: `${imagePosition.x}%`,
                                 top: `${imagePosition.y}%`,
+                                width: `${(imageSize / 100) * 24}px`, // Scale down from cake size
+                                height: `${(imageSize / 100) * 24}px`,
                                 transform: 'translate(-50%, -50%)'
                               }}
                             >

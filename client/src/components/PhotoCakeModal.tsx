@@ -8,7 +8,7 @@ import { Upload, X, Camera } from 'lucide-react';
 interface PhotoCakeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (imageFile: File | null, customText: string, imagePosition?: { x: number; y: number }, textPosition?: { x: number; y: number }) => void;
+  onSave: (imageFile: File | null, customText: string, imagePosition?: { x: number; y: number }, textPosition?: { x: number; y: number }, imageSize?: number) => void;
   cakePreviewImage?: string;
   initialText?: string;
 }
@@ -31,6 +31,7 @@ export default function PhotoCakeModal({
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [imagePosition, setImagePosition] = useState<Position>({ x: 50, y: 40 }); // Center position as percentage
   const [textPosition, setTextPosition] = useState<Position>({ x: 50, y: 70 }); // Below image
+  const [imageSize, setImageSize] = useState(32); // Size in percentage of cake (32 = 128px on 400px cake)
   const [isDragging, setIsDragging] = useState<'image' | 'text' | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -82,7 +83,7 @@ export default function PhotoCakeModal({
   };
 
   const handleSave = () => {
-    onSave(uploadedFile, customText, imagePosition, textPosition);
+    onSave(uploadedFile, customText, imagePosition, textPosition, imageSize);
     onClose();
   };
 
@@ -147,13 +148,15 @@ export default function PhotoCakeModal({
                   draggable={false}
                 />
                 
-                {/* Uploaded image overlay - draggable */}
+                {/* Uploaded image overlay - draggable and resizable */}
                 {uploadedImage && (
                   <div 
-                    className="absolute w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md cursor-move hover:border-blue-400 transition-colors"
+                    className="absolute rounded-lg overflow-hidden border-2 border-white shadow-lg cursor-move hover:border-blue-400 transition-colors"
                     style={{
                       left: `${imagePosition.x}%`,
                       top: `${imagePosition.y}%`,
+                      width: `${imageSize}%`,
+                      height: `${imageSize}%`,
                       transform: 'translate(-50%, -50%)',
                       zIndex: isDragging === 'image' ? 20 : 10
                     }}
@@ -165,10 +168,10 @@ export default function PhotoCakeModal({
                       className="w-full h-full object-cover"
                       draggable={false}
                     />
-                    {/* Drag indicator */}
-                    <div className="absolute inset-0 bg-blue-500 bg-opacity-0 hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
-                      <div className="text-white text-xs font-medium opacity-0 hover:opacity-100">
-                        Drag to move
+                    {/* Drag indicator overlay */}
+                    <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
+                      <div className="text-white text-xs font-semibold opacity-0 hover:opacity-100 bg-black bg-opacity-50 px-2 py-1 rounded">
+                        🤏 Drag the image to adjust it
                       </div>
                     </div>
                   </div>
@@ -280,6 +283,37 @@ export default function PhotoCakeModal({
                 )}
               </div>
 
+              {/* Resize Section */}
+              {uploadedImage && (
+                <div className="mb-4 flex-shrink-0">
+                  <div className="bg-pink-100 px-3 py-2 rounded-t-lg">
+                    <h3 className="text-sm font-medium text-pink-800 text-center">🔄 Resize</h3>
+                  </div>
+                  <div className="border border-pink-200 rounded-b-lg p-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-gray-600 min-w-12">Small</span>
+                      <div className="flex-1">
+                        <input
+                          type="range"
+                          min="20"
+                          max="50"
+                          value={imageSize}
+                          onChange={(e) => setImageSize(Number(e.target.value))}
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                          style={{
+                            background: `linear-gradient(to right, #ef4444 0%, #ef4444 ${((imageSize - 20) / (50 - 20)) * 100}%, #e5e7eb ${((imageSize - 20) / (50 - 20)) * 100}%, #e5e7eb 100%)`
+                          }}
+                        />
+                      </div>
+                      <span className="text-sm text-gray-600 min-w-12">Large</span>
+                    </div>
+                    <p className="text-xs text-gray-500 text-center mt-2">
+                      Drag the slider to adjust image size
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Custom Message Section */}
               <div className="mb-4 flex-shrink-0">
                 <div className="bg-pink-100 px-3 py-2 rounded-t-lg">
@@ -299,6 +333,11 @@ export default function PhotoCakeModal({
                       {customText.length} / 15
                     </span>
                   </div>
+                  {customText && (
+                    <p className="text-xs text-blue-600 mt-2 text-center">
+                      💡 Drag your message text on the cake preview to position it
+                    </p>
+                  )}
                 </div>
               </div>
 
