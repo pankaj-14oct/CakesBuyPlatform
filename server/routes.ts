@@ -717,7 +717,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bodyData.reminderDate = new Date(bodyData.reminderDate);
       }
       
-      const { eventType, eventDate, reminderDate, relationshipType } = insertEventReminderSchema.parse(bodyData);
+      const { eventType, eventDate, reminderDate, relationshipType } = insertEventReminderSchema.omit({ userId: true }).parse(bodyData);
       
       const updatedReminder = await storage.updateEventReminder(id, {
         eventType,
