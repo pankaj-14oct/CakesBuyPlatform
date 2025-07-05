@@ -710,17 +710,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/reminders/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const id = parseInt(req.params.id);
-      const { eventType, eventDate, reminderDate } = insertEventReminderSchema.parse(req.body);
+      
+      // Convert reminderDate string to Date object if needed
+      const bodyData = { ...req.body };
+      if (bodyData.reminderDate && typeof bodyData.reminderDate === 'string') {
+        bodyData.reminderDate = new Date(bodyData.reminderDate);
+      }
+      
+      const { eventType, eventDate, reminderDate, relationshipType } = insertEventReminderSchema.parse(bodyData);
       
       const updatedReminder = await storage.updateEventReminder(id, {
         eventType,
         eventDate,
-        reminderDate: new Date(reminderDate)
+        reminderDate: new Date(reminderDate),
+        relationshipType
       });
       
       res.json(updatedReminder);
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.error('Reminder update validation error:', JSON.stringify(error.errors, null, 2));
         return res.status(400).json({ message: "Invalid reminder data", errors: error.errors });
       }
       console.error('Reminder update error:', error);

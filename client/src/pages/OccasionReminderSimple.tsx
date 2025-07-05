@@ -75,7 +75,6 @@ export default function OccasionReminderSimple() {
         eventType: data.eventType,
         eventDate: alertDateStr,
         relationshipType: data.relationshipType,
-        reminderTitle: data.reminderTitle,
         reminderDate: reminderDate.toISOString(),
       };
       
@@ -125,7 +124,6 @@ export default function OccasionReminderSimple() {
         eventType: data.eventType,
         eventDate: alertDateStr,
         relationshipType: data.relationshipType,
-        reminderTitle: data.reminderTitle,
         reminderDate: reminderDate.toISOString(),
       };
       
