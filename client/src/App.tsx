@@ -17,7 +17,7 @@ import DeliveryPage from "@/pages/delivery";
 import AuthPage from "@/pages/auth";
 import OtpAuthPage from "@/pages/otp-auth";
 import ForgotPassword from "@/pages/ForgotPassword";
-import OccasionReminder from "@/pages/OccasionReminder";
+import OccasionReminder from "@/pages/OccasionReminderSimple";
 import ProfilePage from "@/pages/profile";
 import OrdersPage from "@/pages/orders";
 import InvoicesPage from "@/pages/Invoices";
