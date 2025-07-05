@@ -189,11 +189,58 @@ export default function CartPage() {
                   <div className="flex gap-4">
                     {/* Product Image */}
                     <div className="flex-shrink-0">
-                      <img 
-                        src={(item.cake.images && item.cake.images[0]) || '/api/placeholder/200/200'} 
-                        alt={item.cake.name}
-                        className="w-24 h-24 object-cover rounded-lg"
-                      />
+                      {item.customImage ? (
+                        // Photo cake with customization preview
+                        <div className="relative w-24 h-24 bg-gray-100 rounded-lg overflow-hidden border-2 border-red-200">
+                          <img 
+                            src={(item.cake.images && item.cake.images[0]) || '/api/placeholder/96/96'} 
+                            alt={item.cake.name}
+                            className="w-full h-full object-cover"
+                          />
+                          {/* Positioned custom image */}
+                          <div 
+                            className="absolute rounded overflow-hidden border border-white"
+                            style={{
+                              left: `${item.imagePosition?.x || 50}%`,
+                              top: `${item.imagePosition?.y || 40}%`,
+                              width: `${((item.imageSize || 32) / 100) * 24}px`,
+                              height: `${((item.imageSize || 32) / 100) * 24}px`,
+                              transform: 'translate(-50%, -50%)'
+                            }}
+                          >
+                            <img 
+                              src={item.customImage} 
+                              alt="Custom photo" 
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          {/* Custom text overlay */}
+                          {item.customMessage && (
+                            <div 
+                              className="absolute bg-white bg-opacity-90 px-1 py-0.5 rounded text-xs"
+                              style={{
+                                left: `${item.textPosition?.x || 50}%`,
+                                top: `${item.textPosition?.y || 70}%`,
+                                transform: 'translate(-50%, -50%)',
+                                fontSize: '8px'
+                              }}
+                            >
+                              {item.customMessage}
+                            </div>
+                          )}
+                          {/* Personalized indicator */}
+                          <div className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1 py-0.5 rounded">
+                            📸
+                          </div>
+                        </div>
+                      ) : (
+                        // Regular cake image
+                        <img 
+                          src={(item.cake.images && item.cake.images[0]) || '/api/placeholder/200/200'} 
+                          alt={item.cake.name}
+                          className="w-24 h-24 object-cover rounded-lg"
+                        />
+                      )}
                     </div>
 
                     {/* Product Details */}
@@ -212,6 +259,31 @@ export default function CartPage() {
                               <p>Message: "{item.customMessage}"</p>
                             )}
                           </div>
+                          
+                          {/* Photo Cake Personalization Details */}
+                          {item.customImage && (
+                            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-xs font-semibold text-red-700">📸 Personalization Applied</span>
+                              </div>
+                              <div className="text-xs text-red-600 space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <span>✅ Custom photo uploaded</span>
+                                </div>
+                                {item.customMessage && (
+                                  <div className="flex items-center gap-2">
+                                    <span>✅ Custom text: "{item.customMessage}"</span>
+                                  </div>
+                                )}
+                                <div className="flex items-center gap-2">
+                                  <span>✅ Positioned & sized perfectly</span>
+                                </div>
+                                <div className="text-xs text-red-500 mt-2 italic">
+                                  Your cake will be printed exactly as positioned in the preview
+                                </div>
+                              </div>
+                            </div>
+                          )}
                           
                           {/* Add-ons */}
                           {item.addons.length > 0 && (

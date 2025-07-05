@@ -168,9 +168,11 @@ export default function ProductPage() {
       quantity,
       weight,
       flavor,
-      customMessage: customMessage.trim() || undefined,
+      customMessage: customMessage.trim() || customText.trim() || undefined,
       customImage: uploadedImage || undefined,
-      customText: customText.trim() || undefined,
+      imagePosition: uploadedImage ? imagePosition : undefined,
+      textPosition: customText.trim() ? textPosition : undefined,
+      imageSize: uploadedImage ? imageSize : undefined,
       price,
       addons: selectedAddons
     };

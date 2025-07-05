@@ -9,6 +9,9 @@ export interface CartItem {
   flavor: string;
   customMessage?: string;
   customImage?: string;
+  imagePosition?: { x: number; y: number };
+  textPosition?: { x: number; y: number };
+  imageSize?: number;
   price: number;
   addons: Array<{
     addon: Addon;

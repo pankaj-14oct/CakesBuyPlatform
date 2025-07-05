@@ -1088,28 +1088,80 @@ export default function CheckoutPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {cartState.items.map((item) => (
-                    <div key={item.id} className="flex gap-3">
-                      <img 
-                        src={(item.cake.images && item.cake.images[0]) || '/placeholder-cake.jpg'} 
-                        alt={item.cake.name}
-                        className="w-12 h-12 object-cover rounded"
-                      />
-                      <div className="flex-1">
-                        <h4 className="font-medium text-charcoal text-sm">{item.cake.name}</h4>
-                        <p className="text-xs text-charcoal opacity-70">
-                          {item.weight} • {item.flavor} • Qty: {item.quantity}
-                        </p>
-                        {item.addons.length > 0 && (
-                          <p className="text-xs text-charcoal opacity-60">
-                            + {item.addons.length} add-on{item.addons.length > 1 ? 's' : ''}
-                          </p>
+                    <div key={item.id} className="space-y-2">
+                      <div className="flex gap-3">
+                        {item.customImage ? (
+                          // Photo cake preview
+                          <div className="relative w-12 h-12 bg-gray-100 rounded overflow-hidden border border-red-200">
+                            <img 
+                              src={(item.cake.images && item.cake.images[0]) || '/placeholder-cake.jpg'} 
+                              alt={item.cake.name}
+                              className="w-full h-full object-cover"
+                            />
+                            <div 
+                              className="absolute rounded overflow-hidden border border-white"
+                              style={{
+                                left: `${item.imagePosition?.x || 50}%`,
+                                top: `${item.imagePosition?.y || 40}%`,
+                                width: `${((item.imageSize || 32) / 100) * 12}px`,
+                                height: `${((item.imageSize || 32) / 100) * 12}px`,
+                                transform: 'translate(-50%, -50%)'
+                              }}
+                            >
+                              <img 
+                                src={item.customImage} 
+                                alt="Custom photo" 
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            {item.customMessage && (
+                              <div 
+                                className="absolute bg-white bg-opacity-90 px-0.5 py-0.5 rounded text-xs"
+                                style={{
+                                  left: `${item.textPosition?.x || 50}%`,
+                                  top: `${item.textPosition?.y || 70}%`,
+                                  transform: 'translate(-50%, -50%)',
+                                  fontSize: '6px'
+                                }}
+                              >
+                                {item.customMessage}
+                              </div>
+                            )}
+                            <div className="absolute top-0 right-0 bg-red-500 text-white text-xs px-1 rounded-bl">📸</div>
+                          </div>
+                        ) : (
+                          <img 
+                            src={(item.cake.images && item.cake.images[0]) || '/placeholder-cake.jpg'} 
+                            alt={item.cake.name}
+                            className="w-12 h-12 object-cover rounded"
+                          />
                         )}
+                        <div className="flex-1">
+                          <h4 className="font-medium text-charcoal text-sm">{item.cake.name}</h4>
+                          <p className="text-xs text-charcoal opacity-70">
+                            {item.weight} • {item.flavor} • Qty: {item.quantity}
+                          </p>
+                          {item.addons.length > 0 && (
+                            <p className="text-xs text-charcoal opacity-60">
+                              + {item.addons.length} add-on{item.addons.length > 1 ? 's' : ''}
+                            </p>
+                          )}
+                        </div>
+                        <div className="text-sm font-medium text-brown">
+                          {formatPrice((item.price + item.addons.reduce((sum, addon) => 
+                            sum + parseFloat(addon.addon.price) * addon.quantity, 0
+                          )) * item.quantity)}
+                        </div>
                       </div>
-                      <div className="text-sm font-medium text-brown">
-                        {formatPrice((item.price + item.addons.reduce((sum, addon) => 
-                          sum + parseFloat(addon.addon.price) * addon.quantity, 0
-                        )) * item.quantity)}
-                      </div>
+                      {/* Personalization Summary */}
+                      {item.customImage && (
+                        <div className="ml-15 p-2 bg-red-50 border border-red-200 rounded text-xs">
+                          <span className="text-red-700 font-medium">📸 Personalized:</span>
+                          <span className="text-red-600 ml-1">
+                            Custom photo + {item.customMessage ? `"${item.customMessage}"` : 'positioned perfectly'}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </CardContent>
