@@ -61,11 +61,22 @@ export default function OccasionReminderSimple() {
       const alertDate = new Date(data.alertDate);
       const alertDateStr = alertDate.toISOString().split('T')[0];
       
+      // Calculate reminder date (7 days before the event)
+      const reminderDate = new Date(alertDate);
+      reminderDate.setDate(reminderDate.getDate() - 7);
+      
+      // If the reminder date has passed this year, set for next year
+      if (reminderDate < new Date()) {
+        alertDate.setFullYear(alertDate.getFullYear() + 1);
+        reminderDate.setFullYear(reminderDate.getFullYear() + 1);
+      }
+      
       const requestData = {
         eventType: data.eventType,
         eventDate: alertDateStr,
         relationshipType: data.relationshipType,
         reminderTitle: data.reminderTitle,
+        reminderDate: reminderDate.toISOString(),
       };
       
       const res = await apiRequest("/api/reminders", "POST", requestData);
@@ -100,11 +111,22 @@ export default function OccasionReminderSimple() {
       const alertDate = new Date(data.alertDate);
       const alertDateStr = alertDate.toISOString().split('T')[0];
       
+      // Calculate reminder date (7 days before the event)
+      const reminderDate = new Date(alertDate);
+      reminderDate.setDate(reminderDate.getDate() - 7);
+      
+      // If the reminder date has passed this year, set for next year
+      if (reminderDate < new Date()) {
+        alertDate.setFullYear(alertDate.getFullYear() + 1);
+        reminderDate.setFullYear(reminderDate.getFullYear() + 1);
+      }
+      
       const requestData = {
         eventType: data.eventType,
         eventDate: alertDateStr,
         relationshipType: data.relationshipType,
         reminderTitle: data.reminderTitle,
+        reminderDate: reminderDate.toISOString(),
       };
       
       const res = await apiRequest(`/api/reminders/${data.id}`, "PUT", requestData);
