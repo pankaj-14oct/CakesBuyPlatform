@@ -212,8 +212,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const order = await storage.createOrder(orderData);
       
-      // Handle wallet payment after order creation
-      if (orderData.paymentMethod === 'wallet' && req.user) {
+      // Handle partial wallet payment after order creation
+      if ((orderData.paymentMethod === 'partial_wallet' || orderData.paymentMethod === 'wallet') && req.user) {
         try {
           const user = await storage.getUser(req.user.id);
           if (!user) {
@@ -221,25 +221,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           const userWalletBalance = parseFloat(user.walletBalance || '0');
-          const orderTotal = parseFloat(orderData.total);
+          const walletAmountUsed = parseFloat((orderData as any).walletAmountUsed || '0');
           
-          if (userWalletBalance < orderTotal) {
-            return res.status(400).json({
-              message: "Insufficient wallet balance",
-              walletBalance: userWalletBalance,
-              required: orderTotal
-            });
+          if (walletAmountUsed > 0) {
+            if (userWalletBalance < walletAmountUsed) {
+              return res.status(400).json({
+                message: "Insufficient wallet balance",
+                walletBalance: userWalletBalance,
+                required: walletAmountUsed
+              });
+            }
+            
+            // Deduct wallet amount from user balance
+            await storage.updateUserWalletBalance(
+              req.user.id, 
+              walletAmountUsed, 
+              'debit', 
+              `Partial wallet payment for order ${order.orderNumber} (${Math.round((walletAmountUsed / parseFloat(orderData.total)) * 100)}% of order value)`,
+              undefined, // adminId 
+              order.id   // orderId
+            );
           }
-          
-          // Deduct amount from wallet
-          await storage.updateUserWalletBalance(
-            req.user.id, 
-            orderTotal, 
-            'debit', 
-            `Payment for order ${order.orderNumber}`,
-            undefined, // adminId 
-            order.id   // orderId
-          );
           
         } catch (walletError) {
           console.error('Wallet payment failed:', walletError);

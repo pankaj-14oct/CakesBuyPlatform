@@ -110,6 +110,18 @@ export default function ProfilePage() {
     enabled: isAuthenticated
   });
 
+  // Fetch wallet balance
+  const { data: walletBalance } = useQuery<{ balance: string }>({
+    queryKey: ['/api/wallet/balance'],
+    enabled: isAuthenticated
+  });
+
+  // Fetch wallet transactions
+  const { data: walletTransactions } = useQuery<any[]>({
+    queryKey: ['/api/wallet/transactions'],
+    enabled: isAuthenticated
+  });
+
   const addressForm = useForm<AddressForm>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
@@ -489,16 +501,76 @@ export default function ProfilePage() {
                       <h2 className="text-xl font-semibold text-gray-900">My Wallet</h2>
                     </div>
                     <div className="space-y-6">
-                      <div className="bg-gradient-to-r from-red-500 to-pink-500 rounded-lg p-6 text-white">
-                        <h3 className="text-lg font-semibold mb-2">Wallet Balance</h3>
-                        <p className="text-3xl font-bold">
-                          ₹{loyaltyStats?.totalPoints || 150}
-                        </p>
-                        <p className="text-red-100 mt-2">Available for use</p>
+                      {/* CakesBuy Credits Card */}
+                      <div className="bg-gradient-to-r from-pink-50 to-red-50 rounded-lg p-6 border border-pink-100">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">CakesBuy Credits</h3>
+                            <p className="text-gray-600 text-sm">
+                              Current Balance: <span className="font-semibold text-gray-800">₹{parseFloat(walletBalance?.balance || "0").toFixed(0)}</span> Cash | <span className="font-semibold text-red-600">{loyaltyStats?.points || 0}</span> Rewards
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-3xl font-bold text-gray-900">₹{parseFloat(walletBalance?.balance || "0").toFixed(0)}</div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-center py-8">
-                        <Wallet className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                        <p className="text-gray-500">No transactions yet</p>
+
+                      {/* Transaction History */}
+                      <div className="bg-white rounded-lg border border-gray-200">
+                        <div className="p-6 border-b border-gray-200">
+                          <h3 className="text-lg font-semibold text-gray-900 text-center">Transaction History</h3>
+                        </div>
+                        <div className="p-6">
+                          {walletTransactions && walletTransactions.length > 0 ? (
+                            <div className="space-y-4">
+                              {walletTransactions.map((transaction: any) => (
+                                <div key={transaction.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+                                  <div>
+                                    <p className={`font-semibold ${transaction.type === 'credit' || transaction.type === 'cashback' || transaction.type === 'refund' ? 'text-green-600' : 'text-red-600'}`}>
+                                      {transaction.type === 'credit' && 'Earn Reward'}
+                                      {transaction.type === 'debit' && 'Payment'}
+                                      {transaction.type === 'cashback' && 'Cashback'}
+                                      {transaction.type === 'refund' && 'Refund'}
+                                      {transaction.type === 'admin_credit' && 'Admin Credit'}
+                                      {transaction.type === 'admin_debit' && 'Admin Debit'}
+                                    </p>
+                                    <p className="text-sm text-gray-500">
+                                      {new Date(transaction.createdAt).toLocaleDateString('en-IN', {
+                                        month: 'short',
+                                        day: '2-digit',
+                                        year: 'numeric'
+                                      })}
+                                    </p>
+                                    {transaction.description && (
+                                      <p className="text-xs text-gray-400 mt-1">{transaction.description}</p>
+                                    )}
+                                  </div>
+                                  <div className="text-right">
+                                    <p className={`font-bold ${transaction.type === 'credit' || transaction.type === 'cashback' || transaction.type === 'refund' ? 'text-green-600' : 'text-red-600'}`}>
+                                      {transaction.type === 'credit' || transaction.type === 'cashback' || transaction.type === 'refund' || transaction.type === 'admin_credit' ? '+' : '-'}₹{parseFloat(transaction.amount).toFixed(0)}
+                                    </p>
+                                    {transaction.type === 'credit' && (
+                                      <p className="text-xs text-gray-500">
+                                        Expire On {new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', {
+                                          month: 'short',
+                                          day: '2-digit',
+                                          year: 'numeric'
+                                        })}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-8">
+                              <Wallet className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                              <p className="text-gray-500">No transactions yet</p>
+                              <p className="text-sm text-gray-400 mt-2">Your wallet transactions will appear here</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

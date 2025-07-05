@@ -364,17 +364,14 @@ export default function CheckoutPage() {
       };
     }
     
-    // Check wallet balance for wallet payments
-    if (data.paymentMethod === 'wallet' && isAuthenticated) {
-      if (walletBalance < total) {
-        toast({
-          title: "Insufficient wallet balance",
-          description: `Your wallet balance is ₹${walletBalance.toFixed(2)} but the order total is ₹${total.toFixed(2)}`,
-          variant: "destructive"
-        });
-        setIsPlacingOrder(false);
-        return;
-      }
+    // Calculate wallet usage for partial payments
+    let walletAmountUsed = 0;
+    let remainingAmount = total;
+    
+    if (useWalletPayment && isAuthenticated && walletBalance > 0) {
+      // Use up to 10% of order value from wallet
+      walletAmountUsed = Math.min(walletBalance, total * 0.1);
+      remainingAmount = total - walletAmountUsed;
     }
 
     const orderData = {
@@ -402,10 +399,12 @@ export default function CheckoutPage() {
       deliveryOccasion: data.deliveryOccasion,
       relation: data.relation,
       senderName: data.senderName,
-      paymentMethod: data.paymentMethod,
+      paymentMethod: useWalletPayment && walletAmountUsed > 0 ? 'partial_wallet' : data.paymentMethod,
       specialInstructions: data.specialInstructions,
       status: 'pending',
-      paymentStatus: data.paymentMethod === 'cod' ? 'pending' : 'paid'
+      paymentStatus: data.paymentMethod === 'cod' ? 'pending' : 'paid',
+      walletAmountUsed: walletAmountUsed.toString(),
+      remainingAmount: remainingAmount.toString()
     };
 
     createOrderMutation.mutate(orderData);
@@ -1019,30 +1018,40 @@ export default function CheckoutPage() {
                       </Label>
                     </div>
 
-                    {/* Wallet Payment Option - Only show for authenticated users */}
-                    {isAuthenticated && (
-                      <div className="flex items-center space-x-3 p-3 border rounded-lg">
-                        <RadioGroupItem 
-                          value="wallet" 
-                          id="wallet" 
-                          disabled={walletBalance < cartState.total}
-                        />
-                        <Label htmlFor="wallet" className="flex items-center justify-between cursor-pointer flex-1">
-                          <div className="flex items-center space-x-2">
+                    {/* Partial Wallet Payment Option - Only show for authenticated users */}
+                    {isAuthenticated && walletBalance > 0 && (
+                      <div className="space-y-3 p-3 border rounded-lg bg-pink-50 border-pink-200">
+                        <div className="flex items-center space-x-3">
+                          <input
+                            type="checkbox"
+                            id="use-wallet"
+                            checked={useWalletPayment}
+                            onChange={(e) => setUseWalletPayment(e.target.checked)}
+                            className="rounded border-gray-300 text-caramel focus:ring-caramel"
+                          />
+                          <Label htmlFor="use-wallet" className="flex items-center space-x-2 cursor-pointer flex-1">
                             <Wallet className="h-4 w-4 text-caramel" />
-                            <span>Wallet Payment</span>
+                            <span className="font-medium">Use Wallet Credits</span>
+                          </Label>
+                        </div>
+                        
+                        {useWalletPayment && (
+                          <div className="ml-8 space-y-2">
+                            <div className="text-sm text-gray-600">
+                              <p>Available Balance: ₹{walletBalance.toFixed(2)}</p>
+                              <p>Maximum Usable (10%): ₹{Math.min(walletBalance, cartState.total * 0.1).toFixed(2)}</p>
+                            </div>
+                            <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                              <p className="text-sm text-blue-700 font-medium">
+                                💡 You can use up to 10% of your order value from wallet credits
+                              </p>
+                              <div className="text-xs text-blue-600 mt-1">
+                                Wallet: ₹{Math.min(walletBalance, cartState.total * 0.1).toFixed(2)} + 
+                                Other Payment: ₹{(cartState.total - Math.min(walletBalance, cartState.total * 0.1)).toFixed(2)}
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-sm">
-                            <span className="text-caramel font-medium">
-                              Balance: ₹{walletBalance.toFixed(2)}
-                            </span>
-                            {walletBalance < cartState.total && (
-                              <span className="text-red-500 text-xs block">
-                                Insufficient balance
-                              </span>
-                            )}
-                          </div>
-                        </Label>
+                        )}
                       </div>
                     )}
                   </RadioGroup>
@@ -1133,6 +1142,25 @@ export default function CheckoutPage() {
                   )}
 
                   <Separator />
+                  
+                  {/* Wallet Usage Breakdown */}
+                  {useWalletPayment && walletBalance > 0 && (
+                    <>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-green-600">Wallet Credits Used</span>
+                        <span className="font-medium text-green-600">
+                          -{formatPrice(Math.min(walletBalance, total * 0.1))}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-charcoal">Remaining to Pay</span>
+                        <span className="font-medium">
+                          {formatPrice(total - Math.min(walletBalance, total * 0.1))}
+                        </span>
+                      </div>
+                      <Separator />
+                    </>
+                  )}
                   
                   <div className="flex justify-between text-lg font-bold">
                     <span className="text-charcoal">Total</span>
