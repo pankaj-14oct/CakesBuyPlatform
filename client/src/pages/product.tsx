@@ -95,7 +95,11 @@ export default function ProductPage() {
   const totalPrice = basePrice * quantity;
 
   // Check if this is a photo cake
-  const isPhotoCake = cake.slug?.includes('photo') || cake.name?.toLowerCase().includes('photo');
+  const isPhotoCake = cake.slug?.includes('photo') || 
+                     cake.name?.toLowerCase().includes('photo') ||
+                     cake.slug?.includes('poster') ||
+                     cake.name?.toLowerCase().includes('poster') ||
+                     cake.categoryId === 6; // Photo Cakes category
 
   const handleImageUpload = (file: File) => {
     if (!file) {
