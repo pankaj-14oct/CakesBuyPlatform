@@ -324,7 +324,7 @@ export default function ProfilePage() {
       id: 'wallet',
       label: 'My Wallet',
       icon: <Wallet className="h-5 w-5" />,
-      badge: loyaltyStats?.totalPoints ? `₹${loyaltyStats.totalPoints}` : '₹150',
+      badge: `₹${parseFloat(walletBalance?.balance || "0").toFixed(0)}`,
       badgeColor: 'bg-red-500'
     },
     {
