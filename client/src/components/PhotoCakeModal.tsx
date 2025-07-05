@@ -87,7 +87,7 @@ export default function PhotoCakeModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl w-full h-[80vh] p-0">
+      <DialogContent className="max-w-4xl w-full max-h-[90vh] p-0 overflow-hidden">
         <div className="flex flex-col h-full">
           <DialogHeader className="p-6 pb-4">
             <DialogTitle className="text-xl font-semibold">Personalise your cake</DialogTitle>
@@ -137,9 +137,9 @@ export default function PhotoCakeModal({
             </div>
             
             {/* Right Side - Customization Options */}
-            <div className="w-1/2 p-6 flex flex-col">
+            <div className="w-1/2 p-6 flex flex-col max-h-[calc(90vh-120px)] overflow-y-auto">
               {/* Photo Upload Section */}
-              <div className="mb-6">
+              <div className="mb-4 flex-shrink-0">
                 <div className="bg-pink-100 px-3 py-2 rounded-t-lg">
                   <h3 className="text-sm font-medium text-pink-800 text-center">Upload Photo</h3>
                 </div>
@@ -204,7 +204,7 @@ export default function PhotoCakeModal({
               </div>
 
               {/* Custom Message Section */}
-              <div className="mb-6">
+              <div className="mb-4 flex-shrink-0">
                 <div className="bg-pink-100 px-3 py-2 rounded-t-lg">
                   <h3 className="text-sm font-medium text-pink-800 text-center">Cake Message</h3>
                 </div>
@@ -226,7 +226,7 @@ export default function PhotoCakeModal({
               </div>
 
               {/* Tips Section */}
-              <div className="bg-blue-50 p-4 rounded-lg mb-6 flex-1">
+              <div className="bg-blue-50 p-4 rounded-lg mb-4 flex-shrink-0">
                 <h4 className="font-medium text-blue-900 mb-2">✨ Pro Tips:</h4>
                 <ul className="text-sm text-blue-800 space-y-1">
                   <li>• Use bright, clear photos with good lighting</li>
@@ -236,14 +236,16 @@ export default function PhotoCakeModal({
                 </ul>
               </div>
 
-              {/* Save Button */}
-              <Button
-                onClick={handleSave}
-                className="w-full bg-red-500 hover:bg-red-600 text-white py-3"
-                disabled={!uploadedImage}
-              >
-                Save Personalisation
-              </Button>
+              {/* Save Button - Fixed at bottom */}
+              <div className="mt-auto pt-4 flex-shrink-0">
+                <Button
+                  onClick={handleSave}
+                  className="w-full bg-red-500 hover:bg-red-600 text-white py-3 text-lg font-semibold"
+                  disabled={!uploadedImage}
+                >
+                  Save Personalisation
+                </Button>
+              </div>
             </div>
           </div>
         </div>
