@@ -30,6 +30,7 @@ interface EventReminder {
   eventType: "birthday" | "anniversary" | "christmas" | "newyear" | "valentine" | "womensday" | "mothersday" | "fathersday";
   eventDate: string;
   relationshipType: string;
+  title?: string;
   createdAt: string;
 }
 
@@ -78,6 +79,7 @@ export default function OccasionReminder() {
         eventDate: alertDateStr,
         reminderDate: reminderDate.toISOString(),
         relationshipType: data.relationshipType,
+        title: data.reminderTitle,
       };
       
       const res = await apiRequest("/api/reminders", "POST", requestData);
@@ -124,6 +126,7 @@ export default function OccasionReminder() {
         eventDate: alertDateStr,
         reminderDate: reminderDate.toISOString(),
         relationshipType: data.relationshipType,
+        title: data.reminderTitle,
       };
       
       const res = await apiRequest(`/api/reminders/${data.id}`, "PUT", requestData);
@@ -721,7 +724,7 @@ export default function OccasionReminder() {
                             )}
                             <span className="font-medium capitalize">{reminder.eventType}</span>
                           </div>
-                          <h3 className="font-semibold text-lg capitalize">{reminder.relationshipType}'s {reminder.eventType}</h3>
+                          <h3 className="font-semibold text-lg capitalize">{reminder.title || `${reminder.relationshipType}'s ${reminder.eventType}`}</h3>
                           <p className="text-gray-600">{formatDate(reminder.eventDate)}</p>
                         </div>
                         <div className="flex gap-1">

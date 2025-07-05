@@ -29,6 +29,7 @@ interface EventReminder {
   eventType: "birthday" | "anniversary" | "christmas" | "newyear" | "valentine" | "womensday" | "mothersday" | "fathersday";
   eventDate: string;
   relationshipType: string;
+  title?: string;
   createdAt: string;
 }
 
@@ -75,6 +76,7 @@ export default function OccasionReminderSimple() {
         eventType: data.eventType,
         eventDate: alertDateStr,
         relationshipType: data.relationshipType,
+        title: data.reminderTitle,
         reminderDate: reminderDate.toISOString(),
       };
       
@@ -124,6 +126,7 @@ export default function OccasionReminderSimple() {
         eventType: data.eventType,
         eventDate: alertDateStr,
         relationshipType: data.relationshipType,
+        title: data.reminderTitle,
         reminderDate: reminderDate.toISOString(),
       };
       
@@ -448,7 +451,7 @@ export default function OccasionReminderSimple() {
                           <div className="flex items-center gap-2 mb-2">
                             <Calendar className="h-4 w-4 text-red-500" />
                             <span className="font-medium text-gray-900">
-                              {reminder.relationshipType}'s {reminder.eventType}
+                              {reminder.title || `${reminder.relationshipType}'s ${reminder.eventType}`}
                             </span>
                           </div>
                           <p className="text-sm text-gray-600 mb-1">

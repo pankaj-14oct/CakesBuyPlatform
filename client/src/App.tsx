@@ -183,6 +183,7 @@ function Router() {
         <Route path="/forgot-password" component={ForgotPassword} />
         <Route path="/admin-login" component={AdminLogin} />
         <Route path="/occasions" component={OccasionReminder} />
+        <Route path="/occasion-reminder" component={OccasionReminder} />
         <Route path="/profile" component={ProfilePage} />
         <Route path="/orders" component={OrdersPage} />
         <Route path="/invoices" component={InvoicesPage} />

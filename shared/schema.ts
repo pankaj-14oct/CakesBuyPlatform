@@ -159,6 +159,7 @@ export const eventReminders = pgTable("event_reminders", {
   eventType: text("event_type").notNull(), // 'birthday', 'anniversary', 'christmas', etc.
   eventDate: text("event_date").notNull(), // MM-DD format
   relationshipType: text("relationship_type"), // 'son', 'mother', etc.
+  title: text("title"), // User-entered reminder title like "Mom's Birthday"
   reminderDate: timestamp("reminder_date").notNull(),
   isProcessed: boolean("is_processed").default(false),
   notificationSent: boolean("notification_sent").default(false),
