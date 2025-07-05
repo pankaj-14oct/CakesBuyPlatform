@@ -361,17 +361,15 @@ export default function Header() {
               ) : (
                 <>
                   <Link href="/auth">
-                    <Button variant="ghost" className="text-white hover:bg-red-600 hidden md:flex">
+                    <Button className="bg-white text-red-600 hover:bg-gray-100 font-semibold px-4 py-2 rounded-lg hidden md:flex">
                       <User className="h-4 w-4 mr-2" />
-                      My Account
+                      Login / Sign Up
                     </Button>
                   </Link>
                   {/* Mobile User Icon */}
                   <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="md:hidden text-white hover:bg-red-600 p-2"
-                    onClick={() => setIsUserMenuOpen(true)}
+                    onClick={() => setLocation('/auth')}
+                    className="md:hidden bg-white text-red-600 hover:bg-gray-100 p-2 rounded-lg"
                   >
                     <User className="h-5 w-5" />
                   </Button>
