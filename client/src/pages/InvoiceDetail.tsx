@@ -46,7 +46,7 @@ export default function InvoiceDetailPage() {
 
   const { data: invoice, isLoading, error } = useQuery<InvoiceDisplayData>({
     queryKey: ['/api/invoices', invoiceNumber],
-    enabled: isAuthenticated && !!invoiceNumber
+    enabled: !!invoiceNumber
   });
 
   const getStatusColor = (status: string) => {
@@ -62,25 +62,7 @@ export default function InvoiceDetailPage() {
     window.print();
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center">Authentication Required</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center">
-            <p className="mb-4">Please log in to view your invoice.</p>
-            <Link href="/auth">
-              <Button className="bg-red-600 hover:bg-red-700">
-                Login
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+
 
   if (isLoading) {
     return (
