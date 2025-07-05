@@ -215,11 +215,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Handle partial wallet payment after order creation
       if ((orderData.paymentMethod === 'partial_wallet' || orderData.paymentMethod === 'wallet') && req.user) {
         try {
-          console.log('=== WALLET PAYMENT PROCESSING ===');
-          console.log('Payment method:', orderData.paymentMethod);
-          console.log('User ID:', req.user.id);
-          console.log('Wallet amount used (raw):', (orderData as any).walletAmountUsed);
-          
           const user = await storage.getUser(req.user.id);
           if (!user) {
             throw new Error("User not found");
@@ -228,13 +223,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const userWalletBalance = parseFloat(user.walletBalance || '0');
           const walletAmountUsed = parseFloat((orderData as any).walletAmountUsed || '0');
           
-          console.log('User wallet balance:', userWalletBalance);
-          console.log('Wallet amount used (parsed):', walletAmountUsed);
-          
           if (walletAmountUsed > 0) {
-            console.log('Processing wallet deduction...');
             if (userWalletBalance < walletAmountUsed) {
-              console.log('Insufficient wallet balance!');
               return res.status(400).json({
                 message: "Insufficient wallet balance",
                 walletBalance: userWalletBalance,
@@ -243,8 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
             
             // Deduct wallet amount from user balance
-            console.log('Calling updateUserWalletBalance...');
-            const transaction = await storage.updateUserWalletBalance(
+            await storage.updateUserWalletBalance(
               req.user.id, 
               walletAmountUsed, 
               'debit', 
@@ -252,22 +241,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               undefined, // adminId 
               order.id   // orderId
             );
-            console.log('Wallet transaction created:', transaction);
-          } else {
-            console.log('No wallet amount to deduct (walletAmountUsed is 0 or negative)');
           }
           
         } catch (walletError) {
           console.error('Wallet payment failed:', walletError);
           return res.status(500).json({ message: "Wallet payment failed" });
         }
-      } else {
-        console.log('Skipping wallet payment - conditions not met:', {
-          paymentMethod: orderData.paymentMethod,
-          isPartialWallet: orderData.paymentMethod === 'partial_wallet',
-          isWallet: orderData.paymentMethod === 'wallet',
-          hasUser: !!req.user
-        });
       }
       
       // Award loyalty points if user is authenticated

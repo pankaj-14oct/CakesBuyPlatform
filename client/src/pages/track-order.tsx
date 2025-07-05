@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,16 @@ export default function TrackOrderPage() {
   const [orderNumber, setOrderNumber] = useState('');
   const [searchClicked, setSearchClicked] = useState(false);
   const { isAuthenticated } = useAuth();
+
+  // Check for order number in URL parameters
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const orderParam = params.get('order');
+    if (orderParam) {
+      setOrderNumber(orderParam);
+      setSearchClicked(true);
+    }
+  }, []);
 
   // Fetch order details
   const { data: order, isLoading, error } = useQuery<Order>({

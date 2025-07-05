@@ -451,7 +451,7 @@ export default function ProfilePage() {
                                     </Badge>
                                   </div>
                                   <p className="text-gray-600">
-                                    Total: ₹{order.totalAmount}
+                                    Total: ₹{parseFloat(order.total || 0).toFixed(2)}
                                   </p>
                                   <p className="text-sm text-gray-500">
                                     Ordered on {new Date(order.createdAt).toLocaleDateString()}
@@ -461,7 +461,7 @@ export default function ProfilePage() {
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => setLocation(`/orders/${order.id}`)}
+                                    onClick={() => setLocation(`/track-order?order=${order.orderNumber}`)}
                                   >
                                     View Details
                                   </Button>
