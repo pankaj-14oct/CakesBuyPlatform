@@ -222,8 +222,21 @@ export default function OccasionReminderSimple() {
   };
 
   const formatDate = (dateStr: string) => {
-    const [month, day] = dateStr.split('-');
-    const date = new Date(2024, parseInt(month) - 1, parseInt(day));
+    // Handle both YYYY-MM-DD and MM-DD formats
+    const parts = dateStr.split('-');
+    let month: number, day: number;
+    
+    if (parts.length === 3) {
+      // YYYY-MM-DD format
+      month = parseInt(parts[1]);
+      day = parseInt(parts[2]);
+    } else {
+      // MM-DD format
+      month = parseInt(parts[0]);
+      day = parseInt(parts[1]);
+    }
+    
+    const date = new Date(2024, month - 1, day);
     return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
   };
 
