@@ -17,7 +17,7 @@ import { formatPrice } from '@/lib/utils';
 import { useCart } from '@/components/cart-context';
 import { useToast } from '@/hooks/use-toast';
 import AddonSelectionModal from '@/components/addon-selection-modal';
-import PhotoCakeCustomizer from '@/components/PhotoCakeCustomizer';
+import PhotoCakeModal from '@/components/PhotoCakeModal';
 
 export default function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -27,6 +27,8 @@ export default function ProductPage() {
   const [quantity, setQuantity] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
   const [showAddonModal, setShowAddonModal] = useState(false);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string>('');
   const [customText, setCustomText] = useState('');
   const { dispatch } = useCart();
@@ -101,26 +103,18 @@ export default function ProductPage() {
                      cake.name?.toLowerCase().includes('poster') ||
                      cake.categoryId === 6; // Photo Cakes category
 
-  const handleImageUpload = (file: File) => {
-    if (!file) {
-      setUploadedImage('');
-      return;
+  const handlePhotoModalSave = (imageFile: File | null, text: string) => {
+    if (imageFile) {
+      const imageUrl = URL.createObjectURL(imageFile);
+      setUploadedImage(imageUrl);
+      setUploadedImageFile(imageFile);
     }
-
-    // Create a URL for the uploaded image
-    const imageUrl = URL.createObjectURL(file);
-    setUploadedImage(imageUrl);
-
-    // In a real app, you would upload this to a server
-    // For now, we'll just store the local URL
-    toast({
-      title: "Photo uploaded successfully!",
-      description: "Your photo has been added to the cake customization."
-    });
-  };
-
-  const handleCustomTextChange = (text: string) => {
     setCustomText(text);
+    
+    toast({
+      title: "Photo customization saved!",
+      description: "Your photo and text have been added to the cake."
+    });
   };
 
   const handleAddToCart = () => {
@@ -146,8 +140,8 @@ export default function ProductPage() {
     // Validate photo cake requirements
     if (isPhotoCake && !uploadedImage) {
       toast({
-        title: "Please upload a photo",
-        description: "Photo cakes require an image to be uploaded for customization.",
+        title: "Please personalize your cake",
+        description: "Click 'Personalise Your Cake' to upload a photo and add custom text.",
         variant: "destructive"
       });
       return;
@@ -366,14 +360,46 @@ export default function ProductPage() {
               </CardContent>
             </Card>
 
-            {/* Photo Cake Customizer */}
-            <PhotoCakeCustomizer
-              isPhotoCake={isPhotoCake}
-              onImageUpload={handleImageUpload}
-              onTextChange={handleCustomTextChange}
-              uploadedImage={uploadedImage}
-              customText={customText}
-            />
+            {/* Photo Cake Customization Button */}
+            {isPhotoCake && (
+              <Card className="border-2 border-red-200 bg-red-50/30">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-red-800 mb-2">
+                        📸 Personalize Your Photo Cake
+                      </h3>
+                      <p className="text-sm text-red-600 mb-3">
+                        {uploadedImage ? 
+                          `✅ Photo uploaded • Custom text: "${customText || 'None'}"` : 
+                          'Upload your photo and add custom text to make it special!'
+                        }
+                      </p>
+                      {uploadedImage && (
+                        <div className="flex items-center gap-3">
+                          <img 
+                            src={uploadedImage} 
+                            alt="Uploaded preview" 
+                            className="w-16 h-16 object-cover rounded-lg border-2 border-red-200"
+                          />
+                          <div className="text-sm text-red-700">
+                            <p className="font-medium">Ready for customization!</p>
+                            <p>Text: {customText || 'No text added'}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      onClick={() => setShowPhotoModal(true)}
+                      className="bg-red-500 hover:bg-red-600 text-white"
+                      size="lg"
+                    >
+                      {uploadedImage ? 'Edit Personalization' : 'Personalise Your Cake'}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Action Buttons */}
             <div className="space-y-3">
@@ -547,6 +573,15 @@ export default function ProductPage() {
         isOpen={showAddonModal}
         onClose={() => setShowAddonModal(false)}
         onContinue={handleAddonSelection}
+      />
+
+      {/* Photo Cake Modal */}
+      <PhotoCakeModal
+        isOpen={showPhotoModal}
+        onClose={() => setShowPhotoModal(false)}
+        onSave={handlePhotoModalSave}
+        cakePreviewImage={cake.images?.[0] || '/api/placeholder/400/400'}
+        initialText={customText}
       />
     </div>
   );
