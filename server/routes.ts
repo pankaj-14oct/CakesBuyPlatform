@@ -719,13 +719,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { eventType, eventDate, reminderDate, relationshipType } = insertEventReminderSchema.omit({ userId: true }).parse(bodyData);
       
-      const updatedReminder = await storage.updateEventReminder(id, {
+      await storage.updateEventReminder(id, {
         eventType,
         eventDate,
         reminderDate: new Date(reminderDate),
         relationshipType
       });
       
+      // Fetch the updated reminder to return it
+      const updatedReminder = await storage.getEventReminder(id);
       res.json(updatedReminder);
     } catch (error) {
       if (error instanceof z.ZodError) {
