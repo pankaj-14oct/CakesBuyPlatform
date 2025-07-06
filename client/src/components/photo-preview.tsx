@@ -16,6 +16,9 @@ interface PhotoPreviewProps {
   showDownload?: boolean;
   textPosition?: { x: number; y: number };
   onTextPositionChange?: (position: { x: number; y: number }) => void;
+  occasionType?: 'birthday' | 'anniversary';
+  textColor?: string;
+  fontSize?: number;
 }
 
 export function PhotoPreview({ 
@@ -29,7 +32,10 @@ export function PhotoPreview({
   className = "",
   showDownload = false,
   textPosition = { x: 50, y: 70 },
-  onTextPositionChange
+  onTextPositionChange,
+  occasionType = 'birthday',
+  textColor = '#DC2626',
+  fontSize = 100
 }: PhotoPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -175,19 +181,19 @@ export function PhotoPreview({
         const textY = (textPosition.y / 100) * size;
         
         // Add "Happy" text
-        ctx.fillStyle = '#DC2626'; // Red color like in your example
-        ctx.font = 'bold 32px Arial';
+        ctx.fillStyle = textColor;
+        ctx.font = `bold ${Math.round(32 * fontSize / 100)}px Arial`;
         ctx.textAlign = 'center';
         ctx.fillText('Happy', textX, textY - 40);
         
-        // Add "Birthday" text  
-        ctx.fillStyle = '#DC2626';
-        ctx.font = 'bold 36px Arial';
-        ctx.fillText('Birthday', textX, textY);
+        // Add occasion text (Birthday or Anniversary)
+        ctx.fillStyle = textColor;
+        ctx.font = `bold ${Math.round(36 * fontSize / 100)}px Arial`;
+        ctx.fillText(occasionType === 'birthday' ? 'Birthday' : 'Anniversary', textX, textY);
         
         // Add custom name text
         ctx.fillStyle = '#555';
-        ctx.font = '18px Arial';
+        ctx.font = `${Math.round(18 * fontSize / 100)}px Arial`;
         ctx.fillText(customText, textX, textY + 30);
       }
 
@@ -281,12 +287,23 @@ export function PhotoPreview({
                     top: `${textPosition.y}%`,
                     transform: 'translate(-50%, -50%)',
                     textShadow: '2px 2px 4px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.8)',
-                    filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.8))'
+                    filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.8))',
+                    fontSize: `${fontSize}%`
                   }}
                   onMouseDown={handleTextMouseDown}
                 >
-                  <div className="text-red-500 text-lg font-bold">Happy</div>
-                  <div className="text-red-500 text-xl font-bold">Birthday</div>
+                  <div 
+                    className="text-lg font-bold"
+                    style={{ color: textColor }}
+                  >
+                    Happy
+                  </div>
+                  <div 
+                    className="text-xl font-bold"
+                    style={{ color: textColor }}
+                  >
+                    {occasionType === 'birthday' ? 'Birthday' : 'Anniversary'}
+                  </div>
                   <div className="text-gray-600 text-sm mt-1">{customText}</div>
                 </div>
               )}

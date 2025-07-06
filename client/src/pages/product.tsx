@@ -34,6 +34,9 @@ export default function ProductPage() {
   const [imagePosition, setImagePosition] = useState<{ x: number; y: number }>({ x: 50, y: 40 });
   const [textPosition, setTextPosition] = useState<{ x: number; y: number }>({ x: 50, y: 70 });
   const [imageSize, setImageSize] = useState(32);
+  const [occasionType, setOccasionType] = useState<'birthday' | 'anniversary'>('birthday');
+  const [textColor, setTextColor] = useState('#DC2626');
+  const [fontSize, setFontSize] = useState(100);
   const { dispatch } = useCart();
   const { toast } = useToast();
 
@@ -102,7 +105,7 @@ export default function ProductPage() {
   // Check if this is a photo cake
   const isPhotoCake = cake.isPhotoCake || false;
 
-  const handlePhotoModalSave = (imageFile: File | null, text: string, imgPos?: { x: number; y: number }, txtPos?: { x: number; y: number }, imgSize?: number) => {
+  const handlePhotoModalSave = (imageFile: File | null, text: string, imgPos?: { x: number; y: number }, txtPos?: { x: number; y: number }, imgSize?: number, occasion?: 'birthday' | 'anniversary', color?: string, fontScale?: number) => {
     if (imageFile) {
       const imageUrl = URL.createObjectURL(imageFile);
       setUploadedImage(imageUrl);
@@ -112,10 +115,13 @@ export default function ProductPage() {
     if (imgPos) setImagePosition(imgPos);
     if (txtPos) setTextPosition(txtPos);
     if (imgSize) setImageSize(imgSize);
+    if (occasion) setOccasionType(occasion);
+    if (color) setTextColor(color);
+    if (fontScale) setFontSize(fontScale);
     
     toast({
       title: "Photo customization saved!",
-      description: "Your photo, text positioning, and sizing have been saved."
+      description: "Your photo, text, colors, and sizing have been saved."
     });
   };
 
@@ -624,9 +630,9 @@ export default function ProductPage() {
         onClose={() => setShowPhotoModal(false)}
         onSave={handlePhotoModalSave}
         cakePreviewImage={cake.images?.[0] || '/api/placeholder/400/400'}
-        backgroundImage={cake.backgroundImage}
+        backgroundImage={cake.backgroundImage ?? undefined}
         initialText={customText}
-        photoPreviewShape={cake.photoPreviewShape || 'circle'}
+        photoPreviewShape={(['circle', 'heart', 'square'].includes(cake.photoPreviewShape) ? cake.photoPreviewShape : 'circle') as 'circle' | 'heart' | 'square'}
       />
     </div>
   );

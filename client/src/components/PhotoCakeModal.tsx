@@ -3,13 +3,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 import { Upload, X, Camera } from 'lucide-react';
 import { PhotoPreview } from './photo-preview';
 
 interface PhotoCakeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (imageFile: File | null, customText: string, imagePosition?: { x: number; y: number }, textPosition?: { x: number; y: number }, imageSize?: number) => void;
+  onSave: (imageFile: File | null, customText: string, imagePosition?: { x: number; y: number }, textPosition?: { x: number; y: number }, imageSize?: number, occasionType?: 'birthday' | 'anniversary', textColor?: string, fontSize?: number) => void;
   cakePreviewImage?: string;
   backgroundImage?: string;
   initialText?: string;
@@ -38,6 +40,9 @@ export default function PhotoCakeModal({
   const [textPosition, setTextPosition] = useState<Position>({ x: 50, y: 70 });
   const [imageSize, setImageSize] = useState(70);
   const [isDragging, setIsDragging] = useState<'image' | 'text' | null>(null);
+  const [occasionType, setOccasionType] = useState<'birthday' | 'anniversary'>('birthday');
+  const [textColor, setTextColor] = useState('#DC2626');
+  const [fontSize, setFontSize] = useState(100);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
@@ -93,7 +98,7 @@ export default function PhotoCakeModal({
   };
 
   const handleSave = () => {
-    onSave(uploadedFile, customText, imagePosition, textPosition, imageSize);
+    onSave(uploadedFile, customText, imagePosition, textPosition, imageSize, occasionType, textColor, fontSize);
     onClose();
   };
 
@@ -127,6 +132,9 @@ export default function PhotoCakeModal({
                 className="h-full"
                 textPosition={textPosition}
                 onTextPositionChange={setTextPosition}
+                occasionType={occasionType}
+                textColor={textColor}
+                fontSize={fontSize}
               />
               {uploadedImage && (
                 <div className="text-center mt-4">
@@ -231,7 +239,23 @@ export default function PhotoCakeModal({
               {/* Message Section */}
               <div className="mb-6">
                 <h3 className="text-lg font-medium mb-4">Cake Message</h3>
-                <div>
+                
+                {/* Occasion Type */}
+                <div className="mb-4">
+                  <Label className="text-sm font-medium mb-2 block">Occasion Type</Label>
+                  <Select value={occasionType} onValueChange={(value: 'birthday' | 'anniversary') => setOccasionType(value)}>
+                    <SelectTrigger className="border-gray-300 focus:border-red-500">
+                      <SelectValue placeholder="Select occasion" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 overflow-y-auto">
+                      <SelectItem value="birthday">Birthday</SelectItem>
+                      <SelectItem value="anniversary">Anniversary</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Name Input */}
+                <div className="mb-4">
                   <Label className="text-sm font-medium mb-2 block">Name on Cake</Label>
                   <div className="relative">
                     <Input
@@ -244,6 +268,55 @@ export default function PhotoCakeModal({
                     <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">
                       {customText.length} / 15
                     </span>
+                  </div>
+                </div>
+
+                {/* Text Color */}
+                <div className="mb-4">
+                  <Label className="text-sm font-medium mb-2 block">Text Color</Label>
+                  <div className="flex gap-2">
+                    {[
+                      { color: '#DC2626', name: 'Red' },
+                      { color: '#059669', name: 'Green' },
+                      { color: '#2563EB', name: 'Blue' },
+                      { color: '#7C3AED', name: 'Purple' },
+                      { color: '#EA580C', name: 'Orange' },
+                      { color: '#BE185D', name: 'Pink' },
+                      { color: '#000000', name: 'Black' },
+                      { color: '#FFFFFF', name: 'White' }
+                    ].map((item) => (
+                      <button
+                        key={item.color}
+                        onClick={() => setTextColor(item.color)}
+                        className={`w-8 h-8 rounded-full border-2 ${
+                          textColor === item.color ? 'border-gray-800' : 'border-gray-300'
+                        }`}
+                        style={{ backgroundColor: item.color }}
+                        title={item.name}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Font Size */}
+                <div className="mb-4">
+                  <Label className="text-sm font-medium mb-2 block">Font Size</Label>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-gray-500">Small</span>
+                    <div className="flex-1">
+                      <Slider
+                        value={[fontSize]}
+                        onValueChange={(value) => setFontSize(value[0])}
+                        max={150}
+                        min={50}
+                        step={10}
+                        className="w-full"
+                      />
+                    </div>
+                    <span className="text-xs text-gray-500">Large</span>
+                  </div>
+                  <div className="text-center text-xs text-gray-500 mt-1">
+                    {fontSize}%
                   </div>
                 </div>
               </div>
