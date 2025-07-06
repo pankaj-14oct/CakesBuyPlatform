@@ -136,7 +136,7 @@ export function PhotoPreview({
         // Heart shape path
         const centerX = size / 2;
         const centerY = size / 2;
-        const heartSize = size * 0.4;
+        const heartSize = size * 0.45;
         
         ctx.beginPath();
         ctx.moveTo(centerX, centerY + heartSize * 0.3);
@@ -216,7 +216,7 @@ export function PhotoPreview({
         
         const centerX = size / 2;
         const centerY = size / 2;
-        const heartSize = size * 0.4;
+        const heartSize = size * 0.45;
         
         ctx.beginPath();
         ctx.moveTo(centerX, centerY + heartSize * 0.3);
@@ -269,7 +269,7 @@ export function PhotoPreview({
                 width: `${fixedSize}px`,
                 height: `${fixedSize}px`,
                 clipPath: shape === 'heart' 
-                  ? 'polygon(50% 100%, 20% 60%, 20% 40%, 30% 30%, 40% 30%, 50% 40%, 60% 30%, 70% 30%, 80% 40%, 80% 60%)'
+                  ? 'polygon(50% 100%, 10% 50%, 10% 25%, 25% 10%, 45% 25%, 50% 30%, 55% 25%, 75% 10%, 90% 25%, 90% 50%)'
                   : shape === 'circle' 
                     ? 'circle(50%)'
                     : 'none',
@@ -351,7 +351,7 @@ export function PhotoPreview({
                 width: `${fixedSize}px`,
                 height: `${fixedSize}px`,
                 clipPath: shape === 'heart' 
-                  ? 'polygon(50% 100%, 20% 60%, 20% 40%, 30% 30%, 40% 30%, 50% 40%, 60% 30%, 70% 30%, 80% 40%, 80% 60%)'
+                  ? 'polygon(50% 100%, 10% 50%, 10% 25%, 25% 10%, 45% 25%, 50% 30%, 55% 25%, 75% 10%, 90% 25%, 90% 50%)'
                   : shape === 'circle' 
                     ? 'circle(50%)'
                     : 'none',
