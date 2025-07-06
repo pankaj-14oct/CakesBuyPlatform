@@ -186,8 +186,8 @@ export function PhotoPreview({
         ctx.fillStyle = textColor;
         
         // Calculate font sizes to exactly match the preview CSS
-        // The preview uses relative font sizes, so we need to calculate the actual pixel values
-        const previewBaseSize = 16; // Base font size in pixels
+        // The preview uses much larger font sizes than we were calculating
+        const previewBaseSize = 64; // Increased base size to match preview appearance
         const scaledBaseSize = previewBaseSize * scale;
         
         // Calculate each text size based on the fontSize slider value and relative multipliers
@@ -196,9 +196,9 @@ export function PhotoPreview({
         const nameSize = Math.round((fontSize / 100) * scaledBaseSize * 0.26);
         
         // Calculate proper line spacing that matches the CSS mb-2 and mb-3 classes
-        // CSS margin-bottom classes translate to specific pixel spacing
-        const mb2Spacing = 8 * scale; // mb-2 = 0.5rem = 8px
-        const mb3Spacing = 12 * scale; // mb-3 = 0.75rem = 12px
+        // Increased spacing proportionally to match larger font sizes
+        const mb2Spacing = 16 * scale; // Increased proportionally for larger fonts
+        const mb3Spacing = 24 * scale; // Increased proportionally for larger fonts
         
         // Position text lines to match preview exactly
         // Calculate total text height to center the group properly
