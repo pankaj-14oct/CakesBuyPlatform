@@ -146,7 +146,6 @@ export default function PhotoCakeModal({
             <div className="w-1/2 p-6 bg-gray-50">
               <PhotoPreview
                 shape={photoPreviewShape}
-                backgroundImage={backgroundImage}
                 uploadedImage={uploadedImage}
                 customText={customText}
                 imageSize={imageSize}
