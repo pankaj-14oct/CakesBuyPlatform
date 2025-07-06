@@ -285,8 +285,8 @@ export function PhotoPreview({
                   }}
                   onMouseDown={(e) => handleMouseDown(e, 'text')}
                 >
-                  <div className="text-sm leading-tight">Happy</div>
-                  <div className="text-base leading-tight">
+                  <div className="leading-tight" style={{ fontSize: `${fontSize * 0.28}%` }}>Happy</div>
+                  <div className="leading-tight" style={{ fontSize: `${fontSize * 0.32}%` }}>
                     {occasionType === 'birthday' ? 'Birthday' : 
                      occasionType === 'anniversary' ? 'Anniversary' :
                      occasionType === 'wedding' ? 'Wedding' :
@@ -297,7 +297,7 @@ export function PhotoPreview({
                      occasionType === 'fathers-day' ? "Father's Day" :
                      'Celebration'}
                   </div>
-                  <div className="text-sm font-bold leading-tight">{customText}</div>
+                  <div className="font-bold leading-tight" style={{ fontSize: `${fontSize * 0.26}%` }}>{customText}</div>
                 </div>
               )}
             </div>
