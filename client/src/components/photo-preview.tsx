@@ -170,22 +170,25 @@ export function PhotoPreview({
 
       // Add text if present
       if (customText) {
+        // Calculate text position based on textPosition prop
+        const textX = (textPosition.x / 100) * size;
+        const textY = (textPosition.y / 100) * size;
+        
+        // Add "Happy" text
         ctx.fillStyle = '#DC2626'; // Red color like in your example
         ctx.font = 'bold 32px Arial';
         ctx.textAlign = 'center';
-        
-        // Add "Happy" text
-        ctx.fillText('Happy', size / 2, size - 80);
+        ctx.fillText('Happy', textX, textY - 40);
         
         // Add "Birthday" text  
         ctx.fillStyle = '#DC2626';
         ctx.font = 'bold 36px Arial';
-        ctx.fillText('Birthday', size / 2, size - 40);
+        ctx.fillText('Birthday', textX, textY);
         
         // Add custom name text
         ctx.fillStyle = '#555';
         ctx.font = '18px Arial';
-        ctx.fillText(customText, size / 2, size - 10);
+        ctx.fillText(customText, textX, textY + 30);
       }
 
       // Add heart outline
@@ -272,7 +275,7 @@ export function PhotoPreview({
               {/* Draggable text overlay */}
               {customText && (
                 <div 
-                  className="absolute text-white font-bold text-lg cursor-move select-none z-10"
+                  className="absolute text-white font-bold text-center cursor-move select-none z-10"
                   style={{
                     left: `${textPosition.x}%`,
                     top: `${textPosition.y}%`,
@@ -282,7 +285,9 @@ export function PhotoPreview({
                   }}
                   onMouseDown={handleTextMouseDown}
                 >
-                  {customText}
+                  <div className="text-red-500 text-lg font-bold">Happy</div>
+                  <div className="text-red-500 text-xl font-bold">Birthday</div>
+                  <div className="text-gray-600 text-sm mt-1">{customText}</div>
                 </div>
               )}
             </div>
