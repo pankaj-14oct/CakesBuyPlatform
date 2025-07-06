@@ -172,14 +172,15 @@ export function PhotoPreview({
         ctx.shadowOffsetX = 4 * scale;
         ctx.shadowOffsetY = 4 * scale;
         
-        // Add "Happy" text
+        // Add text with proper sizing to match preview (much smaller)
         ctx.fillStyle = textColor;
-        ctx.font = `bold ${Math.round(28 * fontSize / 100 * scale)}px ${fontFamily}`;
-        ctx.fillText('Happy', textX, textY - 25 * scale);
         
-        // Add occasion text (Birthday or Anniversary)
-        ctx.fillStyle = textColor;
-        ctx.font = `bold ${Math.round(32 * fontSize / 100 * scale)}px ${fontFamily}`;
+        // "Happy" text - smaller size
+        ctx.font = `bold ${Math.round(14 * fontSize / 100 * scale)}px ${fontFamily}`;
+        ctx.fillText('Happy', textX, textY - 12 * scale);
+        
+        // Occasion text - slightly larger than Happy
+        ctx.font = `bold ${Math.round(16 * fontSize / 100 * scale)}px ${fontFamily}`;
         ctx.fillText(occasionType === 'birthday' ? 'Birthday' : 
                      occasionType === 'anniversary' ? 'Anniversary' :
                      occasionType === 'wedding' ? 'Wedding' :
@@ -188,12 +189,11 @@ export function PhotoPreview({
                      occasionType === 'valentine' ? "Valentine's Day" :
                      occasionType === 'mothers-day' ? "Mother's Day" :
                      occasionType === 'fathers-day' ? "Father's Day" :
-                     'Celebration', textX, textY + 5 * scale);
+                     'Celebration', textX, textY + 2 * scale);
         
-        // Add custom name text (increased font size for better visibility)
-        ctx.fillStyle = textColor;
-        ctx.font = `bold ${Math.round(26 * fontSize / 100 * scale)}px ${fontFamily}`;
-        ctx.fillText(customText, textX, textY + 35 * scale);
+        // Custom name text - similar size to Happy
+        ctx.font = `bold ${Math.round(13 * fontSize / 100 * scale)}px ${fontFamily}`;
+        ctx.fillText(customText, textX, textY + 16 * scale);
         
         // Reset shadow for other drawing operations
         ctx.shadowColor = 'transparent';
