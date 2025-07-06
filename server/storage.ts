@@ -1,6 +1,6 @@
 import {
   users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews, eventReminders, otpVerifications,
-  loyaltyTransactions, loyaltyRewards, userRewards, invoices, walletTransactions, adminConfigs,
+  loyaltyTransactions, loyaltyRewards, userRewards, invoices, walletTransactions, adminConfigs, imageCropConfigs,
   type User, type InsertUser, type Category, type InsertCategory,
   type Cake, type InsertCake, type Addon, type InsertAddon,
   type Order, type InsertOrder, type DeliveryArea, type InsertDeliveryArea,
@@ -8,7 +8,8 @@ import {
   type EventReminder, type InsertEventReminder, type OtpVerification, type InsertOtpVerification,
   type LoyaltyTransaction, type InsertLoyaltyTransaction, type LoyaltyReward, type InsertLoyaltyReward,
   type UserReward, type InsertUserReward, type Invoice, type InsertInvoice,
-  type WalletTransaction, type InsertWalletTransaction, type AdminConfig, type InsertAdminConfig
+  type WalletTransaction, type InsertWalletTransaction, type AdminConfig, type InsertAdminConfig,
+  type ImageCropConfig, type InsertImageCropConfig
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, and, desc, isNotNull, or, gte, lte } from "drizzle-orm";
@@ -134,6 +135,13 @@ export interface IStorage {
   getAllAdminConfigs(): Promise<AdminConfig[]>;
   updateAdminConfig(key: string, value: string, updatedBy?: number): Promise<void>;
   deleteAdminConfig(key: string): Promise<void>;
+
+  // Image Crop Configuration management
+  getImageCropConfigs(): Promise<ImageCropConfig[]>;
+  getImageCropConfig(id: number): Promise<ImageCropConfig | undefined>;
+  createImageCropConfig(config: InsertImageCropConfig): Promise<ImageCropConfig>;
+  updateImageCropConfig(id: number, updates: Partial<ImageCropConfig>): Promise<ImageCropConfig>;
+  deleteImageCropConfig(id: number): Promise<void>;
 }
 
 // DatabaseStorage implementation
@@ -865,6 +873,45 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAdminConfig(key: string): Promise<void> {
     await db.delete(adminConfigs).where(eq(adminConfigs.key, key));
+  }
+
+  // Image Crop Configuration Management
+  async getImageCropConfigs(): Promise<ImageCropConfig[]> {
+    return await db.select().from(imageCropConfigs).orderBy(imageCropConfigs.sortOrder, imageCropConfigs.name);
+  }
+
+  async getImageCropConfig(id: number): Promise<ImageCropConfig | undefined> {
+    const [config] = await db.select().from(imageCropConfigs).where(eq(imageCropConfigs.id, id));
+    return config || undefined;
+  }
+
+  async createImageCropConfig(config: InsertImageCropConfig): Promise<ImageCropConfig> {
+    const configData = {
+      ...config,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    const [created] = await db.insert(imageCropConfigs).values(configData).returning();
+    return created;
+  }
+
+  async updateImageCropConfig(id: number, updates: Partial<ImageCropConfig>): Promise<ImageCropConfig> {
+    const updateData = {
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    const [updated] = await db.update(imageCropConfigs)
+      .set(updateData)
+      .where(eq(imageCropConfigs.id, id))
+      .returning();
+    
+    return updated;
+  }
+
+  async deleteImageCropConfig(id: number): Promise<void> {
+    await db.delete(imageCropConfigs).where(eq(imageCropConfigs.id, id));
   }
 }
 

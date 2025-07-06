@@ -305,6 +305,26 @@ export const adminConfigs = pgTable("admin_configs", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Image Crop Configurations
+export const imageCropConfigs = pgTable("image_crop_configs", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  shape: text("shape").notNull(), // 'circle', 'square', 'heart', 'rectangle', 'rounded-square'
+  aspectRatio: text("aspect_ratio").default("1:1"), // '1:1', '16:9', '4:3', '3:2', 'custom'
+  customWidth: integer("custom_width"),
+  customHeight: integer("custom_height"),
+  borderRadius: integer("border_radius").default(0), // For rounded corners
+  isActive: boolean("is_active").default(true),
+  isDefault: boolean("is_default").default(false),
+  sortOrder: integer("sort_order").default(0),
+  allowedFor: jsonb("allowed_for").$type<string[]>().default(['products', 'cakes', 'photos']), // Where this crop can be used
+  svgPath: text("svg_path"), // Custom SVG path for complex shapes like heart
+  createdBy: integer("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertCategorySchema = createInsertSchema(categories).omit({ id: true });
@@ -330,6 +350,7 @@ export const insertInvoiceSchema = createInsertSchema(invoices).omit({ id: true,
 // Wallet and Admin Config insert schemas
 export const insertWalletTransactionSchema = createInsertSchema(walletTransactions).omit({ id: true, createdAt: true });
 export const insertAdminConfigSchema = createInsertSchema(adminConfigs).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertImageCropConfigSchema = createInsertSchema(imageCropConfigs).omit({ id: true, createdAt: true, updatedAt: true });
 
 // Auth schemas
 export const loginSchema = z.object({
@@ -453,3 +474,5 @@ export type WalletTransaction = typeof walletTransactions.$inferSelect;
 export type InsertWalletTransaction = z.infer<typeof insertWalletTransactionSchema>;
 export type AdminConfig = typeof adminConfigs.$inferSelect;
 export type InsertAdminConfig = z.infer<typeof insertAdminConfigSchema>;
+export type ImageCropConfig = typeof imageCropConfigs.$inferSelect;
+export type InsertImageCropConfig = z.infer<typeof insertImageCropConfigSchema>;
