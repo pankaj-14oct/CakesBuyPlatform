@@ -139,20 +139,34 @@ export function PhotoPreview({
         const heartSize = size * 0.45;
         
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY + heartSize * 0.3);
+        ctx.moveTo(centerX, centerY - heartSize * 0.3);
         
-        // Left curve
+        // Left curve (top left circle)
         ctx.bezierCurveTo(
-          centerX - heartSize * 0.5, centerY - heartSize * 0.3,
-          centerX - heartSize, centerY + heartSize * 0.1,
-          centerX, centerY + heartSize * 0.7
+          centerX - heartSize * 0.5, centerY - heartSize * 0.7,
+          centerX - heartSize * 0.9, centerY - heartSize * 0.3,
+          centerX - heartSize * 0.5, centerY
         );
         
-        // Right curve  
+        // Left side to bottom
         ctx.bezierCurveTo(
-          centerX + heartSize, centerY + heartSize * 0.1,
-          centerX + heartSize * 0.5, centerY - heartSize * 0.3,
-          centerX, centerY + heartSize * 0.3
+          centerX - heartSize * 0.3, centerY + heartSize * 0.3,
+          centerX - heartSize * 0.1, centerY + heartSize * 0.7,
+          centerX, centerY + heartSize * 0.9
+        );
+        
+        // Right side from bottom
+        ctx.bezierCurveTo(
+          centerX + heartSize * 0.1, centerY + heartSize * 0.7,
+          centerX + heartSize * 0.3, centerY + heartSize * 0.3,
+          centerX + heartSize * 0.5, centerY
+        );
+        
+        // Right curve (top right circle)  
+        ctx.bezierCurveTo(
+          centerX + heartSize * 0.9, centerY - heartSize * 0.3,
+          centerX + heartSize * 0.5, centerY - heartSize * 0.7,
+          centerX, centerY - heartSize * 0.3
         );
         
         ctx.closePath();
@@ -219,20 +233,34 @@ export function PhotoPreview({
         const heartSize = size * 0.45;
         
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY + heartSize * 0.3);
+        ctx.moveTo(centerX, centerY - heartSize * 0.3);
         
-        // Left curve
+        // Left curve (top left circle)
         ctx.bezierCurveTo(
-          centerX - heartSize * 0.5, centerY - heartSize * 0.3,
-          centerX - heartSize, centerY + heartSize * 0.1,
-          centerX, centerY + heartSize * 0.7
+          centerX - heartSize * 0.5, centerY - heartSize * 0.7,
+          centerX - heartSize * 0.9, centerY - heartSize * 0.3,
+          centerX - heartSize * 0.5, centerY
         );
         
-        // Right curve  
+        // Left side to bottom
         ctx.bezierCurveTo(
-          centerX + heartSize, centerY + heartSize * 0.1,
-          centerX + heartSize * 0.5, centerY - heartSize * 0.3,
-          centerX, centerY + heartSize * 0.3
+          centerX - heartSize * 0.3, centerY + heartSize * 0.3,
+          centerX - heartSize * 0.1, centerY + heartSize * 0.7,
+          centerX, centerY + heartSize * 0.9
+        );
+        
+        // Right side from bottom
+        ctx.bezierCurveTo(
+          centerX + heartSize * 0.1, centerY + heartSize * 0.7,
+          centerX + heartSize * 0.3, centerY + heartSize * 0.3,
+          centerX + heartSize * 0.5, centerY
+        );
+        
+        // Right curve (top right circle)  
+        ctx.bezierCurveTo(
+          centerX + heartSize * 0.9, centerY - heartSize * 0.3,
+          centerX + heartSize * 0.5, centerY - heartSize * 0.7,
+          centerX, centerY - heartSize * 0.3
         );
         
         ctx.closePath();
@@ -269,7 +297,7 @@ export function PhotoPreview({
                 width: `${fixedSize}px`,
                 height: `${fixedSize}px`,
                 clipPath: shape === 'heart' 
-                  ? 'polygon(50% 100%, 10% 50%, 10% 25%, 25% 10%, 45% 25%, 50% 30%, 55% 25%, 75% 10%, 90% 25%, 90% 50%)'
+                  ? 'path("M140,20 C90,5 20,40 20,85 C20,130 140,200 140,200 C140,200 260,130 260,85 C260,40 190,5 140,20 Z")'
                   : shape === 'circle' 
                     ? 'circle(50%)'
                     : 'none',
@@ -351,7 +379,7 @@ export function PhotoPreview({
                 width: `${fixedSize}px`,
                 height: `${fixedSize}px`,
                 clipPath: shape === 'heart' 
-                  ? 'polygon(50% 100%, 10% 50%, 10% 25%, 25% 10%, 45% 25%, 50% 30%, 55% 25%, 75% 10%, 90% 25%, 90% 50%)'
+                  ? 'path("M140,20 C90,5 20,40 20,85 C20,130 140,200 140,200 C140,200 260,130 260,85 C260,40 190,5 140,20 Z")'
                   : shape === 'circle' 
                     ? 'circle(50%)'
                     : 'none',
