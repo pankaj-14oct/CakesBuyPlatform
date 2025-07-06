@@ -185,8 +185,7 @@ export function PhotoPreview({
   };
 
   const renderPreviewWithOverlay = () => {
-    const baseSize = 320; // Larger base size
-    const actualSize = (imageSize / 100) * baseSize;
+    const fixedSize = 280; // Fixed circle/shape size
     
     return (
       <div className="flex items-center justify-center h-96">
@@ -194,10 +193,10 @@ export function PhotoPreview({
           {/* Main photo with shape */}
           {uploadedImage ? (
             <div 
-              className="border-4 border-gray-200 shadow-xl overflow-hidden bg-white"
+              className="border-4 border-gray-200 shadow-xl overflow-hidden bg-white relative"
               style={{
-                width: `${actualSize}px`,
-                height: `${actualSize}px`,
+                width: `${fixedSize}px`,
+                height: `${fixedSize}px`,
                 clipPath: shape === 'heart' 
                   ? 'polygon(50% 100%, 20% 60%, 20% 40%, 30% 30%, 40% 30%, 50% 40%, 60% 30%, 70% 30%, 80% 40%, 80% 60%)'
                   : shape === 'circle' 
@@ -206,18 +205,26 @@ export function PhotoPreview({
                 borderRadius: shape === 'square' ? '16px' : '0'
               }}
             >
+              {/* Image with zoom functionality - keeps circle fixed, zooms image within */}
               <img 
                 src={uploadedImage} 
                 alt="Uploaded photo" 
-                className="w-full h-full object-cover"
+                className="absolute top-1/2 left-1/2 object-cover"
+                style={{
+                  width: `${imageSize}%`,
+                  height: `${imageSize}%`,
+                  transform: 'translate(-50%, -50%)',
+                  minWidth: '100%',
+                  minHeight: '100%'
+                }}
               />
             </div>
           ) : (
             <div 
               className="border-4 border-dashed border-gray-300 flex items-center justify-center bg-gray-50"
               style={{
-                width: `${baseSize * 0.8}px`,
-                height: `${baseSize * 0.8}px`,
+                width: `${fixedSize}px`,
+                height: `${fixedSize}px`,
                 clipPath: shape === 'heart' 
                   ? 'polygon(50% 100%, 20% 60%, 20% 40%, 30% 30%, 40% 30%, 50% 40%, 60% 30%, 70% 30%, 80% 40%, 80% 60%)'
                   : shape === 'circle' 
@@ -260,21 +267,21 @@ export function PhotoPreview({
           {/* Main Preview */}
           {renderPreviewWithOverlay()}
           
-          {/* Resize Slider */}
+          {/* Image Zoom Slider */}
           {uploadedImage && onImageSizeChange && (
             <div className="space-y-2 px-4">
-              <p className="text-sm text-gray-600">Drag the slider to adjust image size</p>
+              <p className="text-sm text-gray-600">Drag the slider to zoom in/out on your image</p>
               <Slider
                 value={[imageSize]}
                 onValueChange={(value) => onImageSizeChange(value[0])}
-                max={100}
-                min={40}
-                step={2}
+                max={200}
+                min={100}
+                step={5}
                 className="w-full"
               />
               <div className="flex justify-between text-xs text-gray-500">
-                <span>Small</span>
-                <span>Large</span>
+                <span>Zoom Out</span>
+                <span>Zoom In</span>
               </div>
             </div>
           )}
