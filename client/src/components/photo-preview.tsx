@@ -90,112 +90,43 @@ export function PhotoPreview({
         <div className="relative">
           {/* Main photo with shape */}
           {uploadedImage ? (
-            <div className="relative">
-              {shape === 'heart' ? (
-                // CSS-based heart shape
-                <div
-                  className="relative bg-white border-4 border-gray-200 shadow-xl"
-                  style={{
-                    width: `${actualSize}px`,
-                    height: `${actualSize * 0.85}px`,
-                    transform: 'rotate(-45deg)',
-                    borderRadius: '50px 50px 0 50px'
-                  }}
-                >
-                  <div
-                    className="absolute bg-white border-4 border-gray-200"
-                    style={{
-                      width: `${actualSize}px`,
-                      height: `${actualSize * 0.85}px`,
-                      top: `-${actualSize * 0.425}px`,
-                      left: 0,
-                      borderRadius: '50px 50px 50px 0',
-                      transform: 'rotate(-90deg)',
-                      transformOrigin: 'center bottom'
-                    }}
-                  />
-                  <img 
-                    src={uploadedImage} 
-                    alt="Uploaded photo" 
-                    className="absolute inset-0 w-full h-full object-cover"
-                    style={{
-                      transform: 'rotate(45deg) scale(1.4)',
-                      transformOrigin: 'center center'
-                    }}
-                  />
-                </div>
-              ) : (
-                <div 
-                  className="border-4 border-gray-200 shadow-xl overflow-hidden bg-white"
-                  style={{
-                    width: `${actualSize}px`,
-                    height: `${actualSize}px`,
-                    clipPath: shape === 'circle' ? 'circle(50%)' : 'none',
-                    borderRadius: shape === 'square' ? '16px' : '0'
-                  }}
-                >
-                  <img 
-                    src={uploadedImage} 
-                    alt="Uploaded photo" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
+            <div 
+              className="border-4 border-gray-200 shadow-xl overflow-hidden bg-white"
+              style={{
+                width: `${actualSize}px`,
+                height: `${actualSize}px`,
+                clipPath: shape === 'heart' 
+                  ? 'polygon(50% 100%, 20% 60%, 20% 40%, 30% 30%, 40% 30%, 50% 40%, 60% 30%, 70% 30%, 80% 40%, 80% 60%)'
+                  : shape === 'circle' 
+                    ? 'circle(50%)'
+                    : 'none',
+                borderRadius: shape === 'square' ? '16px' : '0'
+              }}
+            >
+              <img 
+                src={uploadedImage} 
+                alt="Uploaded photo" 
+                className="w-full h-full object-cover"
+              />
             </div>
           ) : (
-            <div className="relative">
-              {shape === 'heart' ? (
-                // CSS-based heart placeholder
-                <div
-                  className="relative bg-gray-50 border-4 border-dashed border-gray-300 flex items-center justify-center"
-                  style={{
-                    width: `${baseSize * 0.8}px`,
-                    height: `${baseSize * 0.8 * 0.85}px`,
-                    transform: 'rotate(-45deg)',
-                    borderRadius: '50px 50px 0 50px'
-                  }}
-                >
-                  <div
-                    className="absolute bg-gray-50 border-4 border-dashed border-gray-300"
-                    style={{
-                      width: `${baseSize * 0.8}px`,
-                      height: `${baseSize * 0.8 * 0.85}px`,
-                      top: `-${baseSize * 0.8 * 0.425}px`,
-                      left: 0,
-                      borderRadius: '50px 50px 50px 0',
-                      transform: 'rotate(-90deg)',
-                      transformOrigin: 'center bottom'
-                    }}
-                  />
-                  <div 
-                    className="absolute inset-0 flex items-center justify-center text-gray-400"
-                    style={{
-                      transform: 'rotate(45deg)',
-                      transformOrigin: 'center center'
-                    }}
-                  >
-                    <div className="text-center">
-                      {getShapeIcon()}
-                      <p className="text-sm mt-2 font-medium">Photo</p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div 
-                  className="border-4 border-dashed border-gray-300 flex items-center justify-center bg-gray-50"
-                  style={{
-                    width: `${baseSize * 0.8}px`,
-                    height: `${baseSize * 0.8}px`,
-                    clipPath: shape === 'circle' ? 'circle(50%)' : 'none',
-                    borderRadius: shape === 'square' ? '16px' : '0'
-                  }}
-                >
-                  <div className="text-gray-400 text-center">
-                    {getShapeIcon()}
-                    <p className="text-sm mt-2 font-medium">Photo</p>
-                  </div>
-                </div>
-              )}
+            <div 
+              className="border-4 border-dashed border-gray-300 flex items-center justify-center bg-gray-50"
+              style={{
+                width: `${baseSize * 0.8}px`,
+                height: `${baseSize * 0.8}px`,
+                clipPath: shape === 'heart' 
+                  ? 'polygon(50% 100%, 20% 60%, 20% 40%, 30% 30%, 40% 30%, 50% 40%, 60% 30%, 70% 30%, 80% 40%, 80% 60%)'
+                  : shape === 'circle' 
+                    ? 'circle(50%)'
+                    : 'none',
+                borderRadius: shape === 'square' ? '16px' : '0'
+              }}
+            >
+              <div className="text-gray-400 text-center">
+                {getShapeIcon()}
+                <p className="text-sm mt-2 font-medium">Photo</p>
+              </div>
             </div>
           )}
           
