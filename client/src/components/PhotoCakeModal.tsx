@@ -36,7 +36,7 @@ export default function PhotoCakeModal({
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [imagePosition, setImagePosition] = useState<Position>({ x: 50, y: 40 }); // Center position as percentage
   const [textPosition, setTextPosition] = useState<Position>({ x: 50, y: 70 }); // Below image
-  const [imageSize, setImageSize] = useState(32); // Size in percentage of cake (32 = 128px on 400px cake)
+  const [imageSize, setImageSize] = useState(70); // Size in percentage for the new preview system
   const [isDragging, setIsDragging] = useState<'image' | 'text' | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);

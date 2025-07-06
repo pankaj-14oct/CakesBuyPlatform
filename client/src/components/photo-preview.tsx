@@ -21,7 +21,7 @@ export function PhotoPreview({
   onImageUpload, 
   uploadedImage,
   customText,
-  imageSize = 60,
+  imageSize = 70,
   onImageSizeChange,
   className = "" 
 }: PhotoPreviewProps) {
@@ -82,70 +82,65 @@ export function PhotoPreview({
   };
 
   const renderPreviewWithOverlay = () => {
-    const sizePercent = `${imageSize}%`;
+    const baseSize = 320; // Larger base size
+    const actualSize = (imageSize / 100) * baseSize;
     
     return (
-      <div className="relative w-80 h-80 mx-auto">
-        {/* Background cake image */}
-        <img 
-          src={backgroundImage || '/api/placeholder/400/400'} 
-          alt="Cake background" 
-          className="w-full h-full object-cover rounded-lg shadow-lg"
-        />
-        
-        {/* Uploaded image overlay with shape */}
-        {uploadedImage && (
-          <div 
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border-2 border-white shadow-lg overflow-hidden"
-            style={{
-              width: sizePercent,
-              height: sizePercent,
-              clipPath: shape === 'heart' 
-                ? 'polygon(50% 85%, 20% 50%, 20% 35%, 30% 20%, 50% 35%, 70% 20%, 80% 35%, 80% 50%)'
-                : shape === 'circle' 
-                  ? 'circle(50%)'
-                  : 'none',
-              borderRadius: shape === 'square' ? '8px' : '0'
-            }}
-          >
-            <img 
-              src={uploadedImage} 
-              alt="Uploaded photo" 
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
-        
-        {/* Text overlay */}
-        {customText && (
-          <div 
-            className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-90 px-4 py-2 rounded-lg shadow-md"
-          >
-            <p className="text-center font-semibold text-brown text-sm whitespace-nowrap">
-              {customText}
-            </p>
-          </div>
-        )}
-        
-        {/* Placeholder when no image */}
-        {!uploadedImage && (
-          <div 
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-2 border-dashed border-gray-300 flex items-center justify-center bg-white bg-opacity-80"
-            style={{
-              clipPath: shape === 'heart' 
-                ? 'polygon(50% 85%, 20% 50%, 20% 35%, 30% 20%, 50% 35%, 70% 20%, 80% 35%, 80% 50%)'
-                : shape === 'circle' 
-                  ? 'circle(50%)'
-                  : 'none',
-              borderRadius: shape === 'square' ? '8px' : '0'
-            }}
-          >
-            <div className="text-gray-400 text-center">
-              {getShapeIcon()}
-              <p className="text-xs mt-1">Photo</p>
+      <div className="flex items-center justify-center h-96">
+        <div className="relative">
+          {/* Main photo with shape */}
+          {uploadedImage ? (
+            <div 
+              className="border-4 border-gray-200 shadow-xl overflow-hidden bg-white"
+              style={{
+                width: `${actualSize}px`,
+                height: `${actualSize}px`,
+                clipPath: shape === 'heart' 
+                  ? 'polygon(50% 85%, 20% 50%, 20% 35%, 30% 20%, 50% 35%, 70% 20%, 80% 35%, 80% 50%)'
+                  : shape === 'circle' 
+                    ? 'circle(50%)'
+                    : 'none',
+                borderRadius: shape === 'square' ? '16px' : '0'
+              }}
+            >
+              <img 
+                src={uploadedImage} 
+                alt="Uploaded photo" 
+                className="w-full h-full object-cover"
+              />
             </div>
-          </div>
-        )}
+          ) : (
+            <div 
+              className="border-4 border-dashed border-gray-300 flex items-center justify-center bg-gray-50"
+              style={{
+                width: `${baseSize * 0.8}px`,
+                height: `${baseSize * 0.8}px`,
+                clipPath: shape === 'heart' 
+                  ? 'polygon(50% 85%, 20% 50%, 20% 35%, 30% 20%, 50% 35%, 70% 20%, 80% 35%, 80% 50%)'
+                  : shape === 'circle' 
+                    ? 'circle(50%)'
+                    : 'none',
+                borderRadius: shape === 'square' ? '16px' : '0'
+              }}
+            >
+              <div className="text-gray-400 text-center">
+                {getShapeIcon()}
+                <p className="text-sm mt-2 font-medium">Photo</p>
+              </div>
+            </div>
+          )}
+          
+          {/* Text overlay */}
+          {customText && (
+            <div 
+              className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-95 px-4 py-2 rounded-lg shadow-lg border"
+            >
+              <p className="text-center font-semibold text-gray-800 text-sm whitespace-nowrap">
+                {customText}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     );
   };
@@ -169,9 +164,9 @@ export function PhotoPreview({
               <Slider
                 value={[imageSize]}
                 onValueChange={(value) => onImageSizeChange(value[0])}
-                max={80}
-                min={20}
-                step={1}
+                max={100}
+                min={40}
+                step={2}
                 className="w-full"
               />
               <div className="flex justify-between text-xs text-gray-500">
