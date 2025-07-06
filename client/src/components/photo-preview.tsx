@@ -185,12 +185,22 @@ export function PhotoPreview({
         // Add text with proper vertical spacing to prevent overlapping
         ctx.fillStyle = textColor;
         
-        // "Happy" text - positioned above center (increased spacing by 15%)
-        ctx.font = `bold ${Math.round(8 * fontSize / 100 * scale)}px ${fontFamily}`;
-        ctx.fillText('Happy', textX, textY - 23 * scale);
+        // Calculate font sizes to match the preview exactly
+        // Preview uses fontSize as a percentage base, then multiplies by decimals
+        const baseFontSize = (fontSize / 100) * 16 * scale; // Convert % to base size
+        const happySize = Math.round(baseFontSize * 0.28 * 4); // Match preview calculations
+        const occasionSize = Math.round(baseFontSize * 0.32 * 4);
+        const nameSize = Math.round(baseFontSize * 0.26 * 4);
         
-        // Occasion text - positioned at center
-        ctx.font = `bold ${Math.round(10 * fontSize / 100 * scale)}px ${fontFamily}`;
+        // Position text to match preview layout exactly
+        const lineSpacing = 8 * scale; // Spacing between lines
+        
+        // "Happy" text - positioned above center
+        ctx.font = `bold ${happySize}px ${fontFamily}`;
+        ctx.fillText('Happy', textX, textY - lineSpacing * 2);
+        
+        // Occasion text - positioned at center  
+        ctx.font = `bold ${occasionSize}px ${fontFamily}`;
         ctx.fillText(occasionType === 'birthday' ? 'Birthday' : 
                      occasionType === 'anniversary' ? 'Anniversary' :
                      occasionType === 'wedding' ? 'Wedding' :
@@ -199,11 +209,11 @@ export function PhotoPreview({
                      occasionType === 'valentine' ? "Valentine's Day" :
                      occasionType === 'mothers-day' ? "Mother's Day" :
                      occasionType === 'fathers-day' ? "Father's Day" :
-                     'Celebration', textX, textY + 2 * scale);
+                     'Celebration', textX, textY);
         
-        // Custom name text - positioned below center (increased spacing by 15%)
-        ctx.font = `bold ${Math.round(7 * fontSize / 100 * scale)}px ${fontFamily}`;
-        ctx.fillText(customText, textX, textY + 21 * scale);
+        // Custom name text - positioned below center
+        ctx.font = `bold ${nameSize}px ${fontFamily}`;
+        ctx.fillText(customText, textX, textY + lineSpacing * 2);
         
         // Reset shadow for other drawing operations
         ctx.shadowColor = 'transparent';
