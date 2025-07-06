@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Upload, X, Image as ImageIcon, Type, Palette } from 'lucide-react';
+import { PhotoCakeSummary } from './PhotoCakeSummary';
+import { PreviewPersonalisedImage } from './PreviewPersonalisedImage';
 
 interface PhotoCakeCustomizerProps {
   onImageUpload: (file: File) => void;
@@ -23,10 +25,25 @@ export default function PhotoCakeCustomizer({
   isPhotoCake = false
 }: PhotoCakeCustomizerProps) {
   const [dragActive, setDragActive] = useState(false);
+  const [showCustomizer, setShowCustomizer] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isPhotoCake) {
     return null;
+  }
+
+  // Show summary if both image and text are provided and customizer is hidden
+  const isPersonalizationComplete = uploadedImage && customText.trim() && !showCustomizer;
+  
+  if (isPersonalizationComplete) {
+    return (
+      <PhotoCakeSummary
+        uploadedImage={uploadedImage}
+        customText={customText}
+        shape="circle"
+        onEditPersonalization={() => setShowCustomizer(true)}
+      />
+    );
   }
 
   const handleDrag = (e: React.DragEvent) => {
@@ -89,24 +106,11 @@ export default function PhotoCakeCustomizer({
           </Label>
           
           {uploadedImage ? (
-            <div className="relative">
-              <img 
-                src={uploadedImage} 
-                alt="Uploaded photo" 
-                className="w-full h-48 object-cover rounded-lg border-2 border-pink-200"
-              />
-              <Button
-                variant="destructive"
-                size="sm"
-                className="absolute top-2 right-2"
-                onClick={removeImage}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-              <Badge className="absolute bottom-2 left-2 bg-green-500 text-white">
-                Photo Uploaded
-              </Badge>
-            </div>
+            <PreviewPersonalisedImage
+              uploadedImage={uploadedImage}
+              shape="heart"
+              onRemove={removeImage}
+            />
           ) : (
             <div
               className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
@@ -191,6 +195,18 @@ export default function PhotoCakeCustomizer({
             <li>• 100% eggless and fresh</li>
           </ul>
         </div>
+
+        {/* Done Button - Show when both image and text are provided */}
+        {uploadedImage && customText.trim() && (
+          <div className="pt-4 border-t">
+            <Button 
+              onClick={() => setShowCustomizer(false)}
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium"
+            >
+              ✓ Personalization Complete
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
