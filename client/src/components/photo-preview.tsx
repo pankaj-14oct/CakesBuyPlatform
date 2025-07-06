@@ -154,13 +154,15 @@ export function PhotoPreview({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size
-    const size = 500;
+    // Set canvas size for high-quality print (increased resolution)
+    const size = 1000; // Higher resolution for better print quality
     canvas.width = size;
     canvas.height = size;
 
-    // Clear canvas
+    // Clear canvas and set white background
     ctx.clearRect(0, 0, size, size);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, size, size);
 
     // Create image
     const img = new Image();
@@ -211,7 +213,7 @@ export function PhotoPreview({
         ctx.clip();
       } else if (shape === 'circle') {
         ctx.beginPath();
-        ctx.arc(size / 2, size / 2, size * 0.4, 0, 2 * Math.PI);
+        ctx.arc(size / 2, size / 2, size * 0.45, 0, 2 * Math.PI);
         ctx.clip();
       } else if (shape === 'square') {
         const squareSize = size * 0.8;
@@ -222,29 +224,50 @@ export function PhotoPreview({
         ctx.clip();
       }
 
-      // Draw image
-      const imgSize = size * 0.8;
-      const imgX = (size - imgSize) / 2;
-      const imgY = (size - imgSize) / 2;
-      ctx.drawImage(img, imgX, imgY, imgSize, imgSize);
+      // Draw image with proper positioning and scaling to match preview
+      const scaledImageSize = (imageSize / 100) * size;
+      const imgX = (imagePosition.x / 100) * size - scaledImageSize / 2;
+      const imgY = (imagePosition.y / 100) * size - scaledImageSize / 2;
+      
+      // Calculate aspect ratio to preserve image proportions
+      const aspectRatio = img.naturalWidth / img.naturalHeight;
+      let drawWidth = scaledImageSize;
+      let drawHeight = scaledImageSize;
+      
+      if (aspectRatio > 1) {
+        drawHeight = scaledImageSize / aspectRatio;
+      } else {
+        drawWidth = scaledImageSize * aspectRatio;
+      }
+      
+      ctx.drawImage(img, imgX, imgY, drawWidth, drawHeight);
       
       ctx.restore();
 
       // Add text if present
       if (customText) {
-        // Calculate text position based on textPosition prop
+        // Calculate text position based on textPosition prop to match preview exactly
         const textX = (textPosition.x / 100) * size;
         const textY = (textPosition.y / 100) * size;
         
+        // Set text properties with shadow for better visibility
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Add text shadow effect to match preview styling
+        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+        
         // Add "Happy" text
         ctx.fillStyle = textColor;
-        ctx.font = `bold ${Math.round(32 * fontSize / 100)}px ${fontFamily}`;
-        ctx.textAlign = 'center';
-        ctx.fillText('Happy', textX, textY - 40);
+        ctx.font = `bold ${Math.round(28 * fontSize / 100)}px ${fontFamily}`;
+        ctx.fillText('Happy', textX, textY - 25);
         
         // Add occasion text (Birthday or Anniversary)
         ctx.fillStyle = textColor;
-        ctx.font = `bold ${Math.round(36 * fontSize / 100)}px ${fontFamily}`;
+        ctx.font = `bold ${Math.round(32 * fontSize / 100)}px ${fontFamily}`;
         ctx.fillText(occasionType === 'birthday' ? 'Birthday' : 
                      occasionType === 'anniversary' ? 'Anniversary' :
                      occasionType === 'wedding' ? 'Wedding' :
@@ -253,12 +276,18 @@ export function PhotoPreview({
                      occasionType === 'valentine' ? "Valentine's Day" :
                      occasionType === 'mothers-day' ? "Mother's Day" :
                      occasionType === 'fathers-day' ? "Father's Day" :
-                     'Celebration', textX, textY);
+                     'Celebration', textX, textY + 5);
         
         // Add custom name text
         ctx.fillStyle = textColor;
-        ctx.font = `${Math.round(18 * fontSize / 100)}px ${fontFamily}`;
-        ctx.fillText(customText, textX, textY + 30);
+        ctx.font = `${Math.round(20 * fontSize / 100)}px ${fontFamily}`;
+        ctx.fillText(customText, textX, textY + 35);
+        
+        // Reset shadow for other drawing operations
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
       }
 
       // Add heart outline
