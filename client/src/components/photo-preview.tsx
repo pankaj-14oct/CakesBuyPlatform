@@ -343,20 +343,27 @@ export function PhotoPreview({
               }}
             >
               {/* Draggable Image with zoom functionality - no cropping, preserve original quality */}
-              <img 
-                src={uploadedImage} 
-                alt="Uploaded photo" 
-                className="absolute object-contain cursor-move select-none high-quality-image image-drag-smooth" 
+              <div
+                className="absolute cursor-move select-none image-drag-smooth"
                 style={{
                   width: `${imageSize}%`,
                   height: `${imageSize}%`,
                   left: `${imagePosition.x}%`,
                   top: `${imagePosition.y}%`,
-                  transform: 'translate(-50%, -50%)'
+                  transform: 'translate(-50%, -50%)',
+                  minWidth: `${imageSize}%`,
+                  minHeight: `${imageSize}%`,
+
                 }}
                 onMouseDown={handleImageMouseDown}
-                draggable={false}
-              />
+              >
+                <img 
+                  src={uploadedImage} 
+                  alt="Uploaded photo" 
+                  className="w-full h-full object-contain high-quality-image" 
+                  draggable={false}
+                />
+              </div>
               
               {/* Draggable text overlay */}
               {customText && (
