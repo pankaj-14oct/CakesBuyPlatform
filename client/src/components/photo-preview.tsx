@@ -1,151 +1,83 @@
-import { useState, useRef } from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState, useRef, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Slider } from '@/components/ui/slider';
-import { Upload, Heart, Circle, Square, Download } from 'lucide-react';
-
-type OccasionType = 'birthday' | 'anniversary' | 'wedding' | 'graduation' | 'congratulations' | 'valentine' | 'mothers-day' | 'fathers-day' | 'celebration';
+import { Button } from '@/components/ui/button';
+import { Download } from 'lucide-react';
 
 interface PhotoPreviewProps {
-  shape: 'circle' | 'heart' | 'square';
-  backgroundImage?: string;
-  onImageUpload?: (file: File) => void;
   uploadedImage?: string;
   customText?: string;
-  imageSize?: number;
-  onImageSizeChange?: (size: number) => void;
-  className?: string;
-  showDownload?: boolean;
+  imagePosition?: { x: number; y: number };
   textPosition?: { x: number; y: number };
-  onTextPositionChange?: (position: { x: number; y: number }) => void;
-  occasionType?: OccasionType;
+  imageSize?: number;
+  shape?: 'circle' | 'heart' | 'square';
   textColor?: string;
   fontSize?: number;
   fontFamily?: string;
+  occasionType?: 'birthday' | 'anniversary' | 'wedding' | 'graduation' | 'congratulations' | 'valentine' | 'mothers-day' | 'fathers-day' | 'celebration';
+  onImagePositionChange?: (position: { x: number; y: number }) => void;
+  onTextPositionChange?: (position: { x: number; y: number }) => void;
+  onRemovePhoto?: () => void;
+  showDownload?: boolean;
 }
 
-export function PhotoPreview({ 
-  shape, 
-  backgroundImage, 
-  onImageUpload, 
+export function PhotoPreview({
   uploadedImage,
   customText,
-  imageSize = 120,
-  onImageSizeChange,
-  className = "",
-  showDownload = false,
+  imagePosition = { x: 50, y: 50 },
   textPosition = { x: 50, y: 70 },
-  onTextPositionChange,
-  occasionType = 'birthday',
-  textColor = '#DC2626',
+  imageSize = 120,
+  shape = 'circle',
+  textColor = '#FFFFFF',
   fontSize = 100,
-  fontFamily = 'Arial'
+  fontFamily = 'Arial',
+  occasionType = 'birthday',
+  onImagePositionChange,
+  onTextPositionChange,
+  onRemovePhoto,
+  showDownload = true
 }: PhotoPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [imagePosition, setImagePosition] = useState({ x: 50, y: 50 });
-  const [isImageDragging, setIsImageDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState<'image' | 'text' | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
-  const handleTextMouseDown = (e: React.MouseEvent) => {
-    if (!onTextPositionChange) return;
+  // Mouse event handlers for dragging
+  const handleMouseDown = useCallback((e: React.MouseEvent, type: 'image' | 'text') => {
+    if (!containerRef.current) return;
     
-    e.preventDefault();
-    setIsDragging(true);
+    setIsDragging(type);
+    const rect = containerRef.current.getBoundingClientRect();
+    const currentPosition = type === 'image' ? imagePosition : textPosition;
+    const elementX = (currentPosition.x / 100) * rect.width;
+    const elementY = (currentPosition.y / 100) * rect.height;
     
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (rect) {
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      setDragOffset({
-        x: x - (textPosition.x * rect.width / 100),
-        y: y - (textPosition.y * rect.height / 100)
-      });
-    }
-  };
+    setDragOffset({
+      x: e.clientX - rect.left - elementX,
+      y: e.clientY - rect.top - elementY
+    });
+  }, [imagePosition, textPosition]);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging && onTextPositionChange) {
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (rect) {
-        const x = e.clientX - rect.left - dragOffset.x;
-        const y = e.clientY - rect.top - dragOffset.y;
-        
-        // Convert to percentage
-        const newX = Math.max(0, Math.min(100, (x / rect.width) * 100));
-        const newY = Math.max(0, Math.min(100, (y / rect.height) * 100));
-        
-        onTextPositionChange({ x: newX, y: newY });
-      }
-    }
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDragging || !containerRef.current) return;
     
-    if (isImageDragging) {
-      handleImageMove(e);
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-    setIsImageDragging(false);
-  };
-
-  const handleImageMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsImageDragging(true);
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left - dragOffset.x) / rect.width) * 100;
+    const y = ((e.clientY - rect.top - dragOffset.y) / rect.height) * 100;
     
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (rect) {
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      setDragOffset({
-        x: x - (imagePosition.x * rect.width / 100),
-        y: y - (imagePosition.y * rect.height / 100)
-      });
-    }
-  };
-
-  const handleImageMove = (e: React.MouseEvent) => {
-    if (!isImageDragging) return;
+    const clampedX = Math.max(0, Math.min(100, x));
+    const clampedY = Math.max(0, Math.min(100, y));
     
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (rect) {
-      const x = e.clientX - rect.left - dragOffset.x;
-      const y = e.clientY - rect.top - dragOffset.y;
-      
-      // Convert to percentage and constrain within bounds
-      const newX = Math.max(10, Math.min(90, (x / rect.width) * 100));
-      const newY = Math.max(10, Math.min(90, (y / rect.height) * 100));
-      
-      setImagePosition({ x: newX, y: newY });
+    if (isDragging === 'image' && onImagePositionChange) {
+      onImagePositionChange({ x: clampedX, y: clampedY });
+    } else if (isDragging === 'text' && onTextPositionChange) {
+      onTextPositionChange({ x: clampedX, y: clampedY });
     }
-  };
+  }, [isDragging, dragOffset, onImagePositionChange, onTextPositionChange]);
 
-  const getShapeClasses = () => {
-    switch (shape) {
-      case 'circle':
-        return 'rounded-full';
-      case 'heart':
-        return 'rounded-t-full rounded-b-full transform rotate-45';
-      case 'square':
-        return 'rounded-lg';
-      default:
-        return 'rounded-full';
-    }
-  };
-
-  const getShapeIcon = () => {
-    switch (shape) {
-      case 'circle':
-        return <Circle className="w-8 h-8" />;
-      case 'heart':
-        return <Heart className="w-8 h-8" />;
-      case 'square':
-        return <Square className="w-8 h-8" />;
-      default:
-        return <Circle className="w-8 h-8" />;
-    }
-  };
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(null);
+    setDragOffset({ x: 0, y: 0 });
+  }, []);
 
   const downloadCustomizedImage = async () => {
     if (!uploadedImage || !canvasRef.current) return;
@@ -154,101 +86,81 @@ export function PhotoPreview({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size for high-quality print (increased resolution)
-    const size = 1000; // Higher resolution for better print quality
-    canvas.width = size;
-    canvas.height = size;
+    // Set canvas size to match preview container (scaled up for print quality)
+    const previewSize = 280; // This matches the fixedSize in preview
+    const scale = 4; // Scale factor for high resolution
+    const canvasSize = previewSize * scale;
+    
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
 
     // Clear canvas and set white background
-    ctx.clearRect(0, 0, size, size);
+    ctx.clearRect(0, 0, canvasSize, canvasSize);
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, size, size);
+    ctx.fillRect(0, 0, canvasSize, canvasSize);
 
     // Create image
     const img = new Image();
     img.crossOrigin = 'anonymous';
     
     img.onload = () => {
-      // Create clipping path for heart shape
+      // Create clipping path that matches preview exactly
       ctx.save();
       
-      if (shape === 'heart') {
-        // Heart shape path
-        const centerX = size / 2;
-        const centerY = size / 2;
-        const heartSize = size * 0.45;
-        
+      if (shape === 'circle') {
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY - heartSize * 0.1);
-        
-        // Left top curve (left lobe)
-        ctx.bezierCurveTo(
-          centerX - heartSize * 0.3, centerY - heartSize * 0.7,
-          centerX - heartSize * 0.8, centerY - heartSize * 0.4,
-          centerX - heartSize * 0.6, centerY - heartSize * 0.1
-        );
-        
-        // Left side to bottom
-        ctx.bezierCurveTo(
-          centerX - heartSize * 0.5, centerY + heartSize * 0.2,
-          centerX - heartSize * 0.2, centerY + heartSize * 0.6,
-          centerX, centerY + heartSize * 0.8
-        );
-        
-        // Right side from bottom
-        ctx.bezierCurveTo(
-          centerX + heartSize * 0.2, centerY + heartSize * 0.6,
-          centerX + heartSize * 0.5, centerY + heartSize * 0.2,
-          centerX + heartSize * 0.6, centerY - heartSize * 0.1
-        );
-        
-        // Right top curve (right lobe)
-        ctx.bezierCurveTo(
-          centerX + heartSize * 0.8, centerY - heartSize * 0.4,
-          centerX + heartSize * 0.3, centerY - heartSize * 0.7,
-          centerX, centerY - heartSize * 0.1
-        );
-        
-        ctx.closePath();
+        ctx.arc(canvasSize / 2, canvasSize / 2, canvasSize / 2, 0, 2 * Math.PI);
         ctx.clip();
-      } else if (shape === 'circle') {
-        ctx.beginPath();
-        ctx.arc(size / 2, size / 2, size * 0.45, 0, 2 * Math.PI);
-        ctx.clip();
+      } else if (shape === 'heart') {
+        // Heart shape path scaled to canvas size
+        const heartPath = new Path2D("M140,45 C140,25 115,5 85,5 C55,5 30,25 30,55 C30,85 55,110 140,190 C225,110 250,85 250,55 C250,25 225,5 195,5 C165,5 140,25 140,45 Z");
+        ctx.scale(canvasSize / 280, canvasSize / 280);
+        ctx.clip(heartPath);
+        ctx.scale(280 / canvasSize, 280 / canvasSize);
       } else if (shape === 'square') {
-        const squareSize = size * 0.8;
-        const x = (size - squareSize) / 2;
-        const y = (size - squareSize) / 2;
+        const borderRadius = 16 * scale;
         ctx.beginPath();
-        ctx.rect(x, y, squareSize, squareSize);
+        ctx.roundRect(0, 0, canvasSize, canvasSize, borderRadius);
         ctx.clip();
       }
 
-      // Draw image with proper positioning and scaling to match preview
-      const scaledImageSize = (imageSize / 100) * size;
-      const imgX = (imagePosition.x / 100) * size - scaledImageSize / 2;
-      const imgY = (imagePosition.y / 100) * size - scaledImageSize / 2;
+      // Calculate image container dimensions that match preview exactly
+      const containerWidth = (imageSize / 100) * canvasSize;
+      const containerHeight = (imageSize / 100) * canvasSize;
       
-      // Calculate aspect ratio to preserve image proportions
-      const aspectRatio = img.naturalWidth / img.naturalHeight;
-      let drawWidth = scaledImageSize;
-      let drawHeight = scaledImageSize;
+      // Position container based on imagePosition (matching preview logic)
+      const containerX = (imagePosition.x / 100) * canvasSize - containerWidth / 2;
+      const containerY = (imagePosition.y / 100) * canvasSize - containerHeight / 2;
       
-      if (aspectRatio > 1) {
-        drawHeight = scaledImageSize / aspectRatio;
+      // Draw image using object-contain logic (like CSS object-contain)
+      const imgAspectRatio = img.naturalWidth / img.naturalHeight;
+      const containerAspectRatio = containerWidth / containerHeight;
+      
+      let drawWidth, drawHeight, drawX, drawY;
+      
+      if (imgAspectRatio > containerAspectRatio) {
+        // Image is wider than container - fit width
+        drawWidth = containerWidth;
+        drawHeight = containerWidth / imgAspectRatio;
+        drawX = containerX;
+        drawY = containerY + (containerHeight - drawHeight) / 2;
       } else {
-        drawWidth = scaledImageSize * aspectRatio;
+        // Image is taller than container - fit height
+        drawWidth = containerHeight * imgAspectRatio;
+        drawHeight = containerHeight;
+        drawX = containerX + (containerWidth - drawWidth) / 2;
+        drawY = containerY;
       }
       
-      ctx.drawImage(img, imgX, imgY, drawWidth, drawHeight);
+      ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
       
       ctx.restore();
 
-      // Add text if present
+      // Add text if present (matching preview text positioning and styling)
       if (customText) {
         // Calculate text position based on textPosition prop to match preview exactly
-        const textX = (textPosition.x / 100) * size;
-        const textY = (textPosition.y / 100) * size;
+        const textX = (textPosition.x / 100) * canvasSize;
+        const textY = (textPosition.y / 100) * canvasSize;
         
         // Set text properties with shadow for better visibility
         ctx.textAlign = 'center';
@@ -256,18 +168,18 @@ export function PhotoPreview({
         
         // Add text shadow effect to match preview styling
         ctx.shadowColor = 'rgba(0,0,0,0.8)';
-        ctx.shadowBlur = 4;
-        ctx.shadowOffsetX = 2;
-        ctx.shadowOffsetY = 2;
+        ctx.shadowBlur = 8 * scale;
+        ctx.shadowOffsetX = 4 * scale;
+        ctx.shadowOffsetY = 4 * scale;
         
         // Add "Happy" text
         ctx.fillStyle = textColor;
-        ctx.font = `bold ${Math.round(28 * fontSize / 100)}px ${fontFamily}`;
-        ctx.fillText('Happy', textX, textY - 25);
+        ctx.font = `bold ${Math.round(28 * fontSize / 100 * scale)}px ${fontFamily}`;
+        ctx.fillText('Happy', textX, textY - 25 * scale);
         
         // Add occasion text (Birthday or Anniversary)
         ctx.fillStyle = textColor;
-        ctx.font = `bold ${Math.round(32 * fontSize / 100)}px ${fontFamily}`;
+        ctx.font = `bold ${Math.round(32 * fontSize / 100 * scale)}px ${fontFamily}`;
         ctx.fillText(occasionType === 'birthday' ? 'Birthday' : 
                      occasionType === 'anniversary' ? 'Anniversary' :
                      occasionType === 'wedding' ? 'Wedding' :
@@ -276,12 +188,12 @@ export function PhotoPreview({
                      occasionType === 'valentine' ? "Valentine's Day" :
                      occasionType === 'mothers-day' ? "Mother's Day" :
                      occasionType === 'fathers-day' ? "Father's Day" :
-                     'Celebration', textX, textY + 5);
+                     'Celebration', textX, textY + 5 * scale);
         
         // Add custom name text
         ctx.fillStyle = textColor;
-        ctx.font = `${Math.round(20 * fontSize / 100)}px ${fontFamily}`;
-        ctx.fillText(customText, textX, textY + 35);
+        ctx.font = `${Math.round(20 * fontSize / 100 * scale)}px ${fontFamily}`;
+        ctx.fillText(customText, textX, textY + 35 * scale);
         
         // Reset shadow for other drawing operations
         ctx.shadowColor = 'transparent';
@@ -290,55 +202,19 @@ export function PhotoPreview({
         ctx.shadowOffsetY = 0;
       }
 
-      // Add heart outline
-      if (shape === 'heart') {
-        ctx.strokeStyle = '#DC2626';
-        ctx.lineWidth = 4;
-        
-        const centerX = size / 2;
-        const centerY = size / 2;
-        const heartSize = size * 0.45;
-        
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY - heartSize * 0.1);
-        
-        // Left top curve (left lobe)
-        ctx.bezierCurveTo(
-          centerX - heartSize * 0.3, centerY - heartSize * 0.7,
-          centerX - heartSize * 0.8, centerY - heartSize * 0.4,
-          centerX - heartSize * 0.6, centerY - heartSize * 0.1
-        );
-        
-        // Left side to bottom
-        ctx.bezierCurveTo(
-          centerX - heartSize * 0.5, centerY + heartSize * 0.2,
-          centerX - heartSize * 0.2, centerY + heartSize * 0.6,
-          centerX, centerY + heartSize * 0.8
-        );
-        
-        // Right side from bottom
-        ctx.bezierCurveTo(
-          centerX + heartSize * 0.2, centerY + heartSize * 0.6,
-          centerX + heartSize * 0.5, centerY + heartSize * 0.2,
-          centerX + heartSize * 0.6, centerY - heartSize * 0.1
-        );
-        
-        // Right top curve (right lobe)
-        ctx.bezierCurveTo(
-          centerX + heartSize * 0.8, centerY - heartSize * 0.4,
-          centerX + heartSize * 0.3, centerY - heartSize * 0.7,
-          centerX, centerY - heartSize * 0.1
-        );
-        
-        ctx.closePath();
-        ctx.stroke();
-      }
-
       // Download the image
-      const link = document.createElement('a');
-      link.download = `customized-${shape}-cake.png`;
-      link.href = canvas.toDataURL();
-      link.click();
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `customized-${shape}-cake-${Date.now()}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }
+      }, 'image/png');
     };
 
     img.src = uploadedImage;
@@ -381,10 +257,9 @@ export function PhotoPreview({
                   top: `${imagePosition.y}%`,
                   transform: 'translate(-50%, -50%)',
                   minWidth: `${imageSize}%`,
-                  minHeight: `${imageSize}%`,
-
+                  minHeight: `${imageSize}%`
                 }}
-                onMouseDown={handleImageMouseDown}
+                onMouseDown={(e) => handleMouseDown(e, 'image')}
               >
                 <img 
                   src={uploadedImage} 
@@ -403,28 +278,15 @@ export function PhotoPreview({
                     top: `${textPosition.y}%`,
                     transform: 'translate(-50%, -50%)',
                     textShadow: '2px 2px 4px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.8)',
-                    filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.8))'
+                    filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.8))',
+                    color: textColor,
+                    fontSize: `${fontSize}%`,
+                    fontFamily: fontFamily
                   }}
-                  onMouseDown={handleTextMouseDown}
+                  onMouseDown={(e) => handleMouseDown(e, 'text')}
                 >
-                  <div 
-                    className="font-bold"
-                    style={{ 
-                      color: textColor,
-                      fontSize: `${Math.round(18 * fontSize / 100)}px`,
-                      fontFamily: fontFamily
-                    }}
-                  >
-                    Happy
-                  </div>
-                  <div 
-                    className="font-bold"
-                    style={{ 
-                      color: textColor,
-                      fontSize: `${Math.round(22 * fontSize / 100)}px`,
-                      fontFamily: fontFamily
-                    }}
-                  >
+                  <div className="text-sm leading-tight">Happy</div>
+                  <div className="text-base leading-tight">
                     {occasionType === 'birthday' ? 'Birthday' : 
                      occasionType === 'anniversary' ? 'Anniversary' :
                      occasionType === 'wedding' ? 'Wedding' :
@@ -435,22 +297,13 @@ export function PhotoPreview({
                      occasionType === 'fathers-day' ? "Father's Day" :
                      'Celebration'}
                   </div>
-                  <div 
-                    className="mt-1"
-                    style={{ 
-                      color: textColor,
-                      fontSize: `${Math.round(14 * fontSize / 100)}px`,
-                      fontFamily: fontFamily
-                    }}
-                  >
-                    {customText}
-                  </div>
+                  <div className="text-xs leading-tight">{customText}</div>
                 </div>
               )}
             </div>
           ) : (
             <div 
-              className="border-4 border-dashed border-gray-300 flex items-center justify-center bg-gray-50"
+              className="border-4 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center text-gray-500"
               style={{
                 width: `${fixedSize}px`,
                 height: `${fixedSize}px`,
@@ -462,10 +315,7 @@ export function PhotoPreview({
                 borderRadius: shape === 'square' ? '16px' : '0'
               }}
             >
-              <div className="text-gray-400 text-center">
-                {getShapeIcon()}
-                <p className="text-sm mt-2 font-medium">Photo</p>
-              </div>
+              <span>No photo uploaded</span>
             </div>
           )}
         </div>
@@ -474,38 +324,31 @@ export function PhotoPreview({
   };
 
   return (
-    <Card className={`relative ${className}`}>
+    <Card className="w-full max-w-md mx-auto">
       <CardContent className="p-6">
-        <div className="text-center space-y-4">
-          <h3 className="text-lg font-semibold">Photo Preview</h3>
+        <div className="text-center mb-4">
+          <h3 className="text-lg font-semibold mb-2">Photo Preview</h3>
           <p className="text-sm text-gray-600">
             Your uploaded photo will appear in {shape} shape
           </p>
           {uploadedImage && (
-            <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded-lg">
-              💡 <strong>Drag the image</strong> to position it within the {shape} shape
-            </div>
+            <p className="text-xs text-blue-600 mt-2">
+              💡 Drag the image to position it within the {shape} shape
+            </p>
           )}
-          
-          {/* Main Preview */}
+        </div>
+        
+        <div className="mb-6">
           {renderPreviewWithOverlay()}
-          
-
-          
-
-          
+        </div>
+        
+        <div className="space-y-2">
           {uploadedImage && (
-            <div className="space-y-4">
-              
+            <div className="flex flex-col space-y-2">
               <Button 
                 variant="outline" 
-                onClick={() => {
-                  if (onImageUpload) {
-                    // Call with null to indicate image removal
-                    onImageUpload(null as any);
-                  }
-                }}
-                className="text-red-600 hover:text-red-700"
+                onClick={onRemovePhoto}
+                className="text-red-600 border-red-200 hover:bg-red-50"
               >
                 Remove Photo
               </Button>
