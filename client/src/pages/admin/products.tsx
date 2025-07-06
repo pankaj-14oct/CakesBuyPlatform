@@ -122,6 +122,8 @@ export default function AdminProducts() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/cakes'] });
       setEditingProduct(null);
+      setIsCreateDialogOpen(false);
+      form.reset();
       toast({ title: "Product updated successfully!" });
     },
     onError: () => {
@@ -168,6 +170,7 @@ export default function AdminProducts() {
       isBestseller: product.isBestseller || false,
       isPhotoCake: product.isPhotoCake || false,
       backgroundImage: product.backgroundImage || '',
+      photoPreviewShape: product.photoPreviewShape || 'circle',
       tags: product.tags || [],
       rating: product.rating || "0",
       reviewCount: product.reviewCount || 0,
