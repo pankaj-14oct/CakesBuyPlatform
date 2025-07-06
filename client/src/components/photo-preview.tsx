@@ -190,9 +190,9 @@ export function PhotoPreview({
                      occasionType === 'fathers-day' ? "Father's Day" :
                      'Celebration', textX, textY + 5 * scale);
         
-        // Add custom name text
+        // Add custom name text (increased font size for better visibility)
         ctx.fillStyle = textColor;
-        ctx.font = `${Math.round(20 * fontSize / 100 * scale)}px ${fontFamily}`;
+        ctx.font = `bold ${Math.round(26 * fontSize / 100 * scale)}px ${fontFamily}`;
         ctx.fillText(customText, textX, textY + 35 * scale);
         
         // Reset shadow for other drawing operations
@@ -297,7 +297,7 @@ export function PhotoPreview({
                      occasionType === 'fathers-day' ? "Father's Day" :
                      'Celebration'}
                   </div>
-                  <div className="text-xs leading-tight">{customText}</div>
+                  <div className="text-sm font-bold leading-tight">{customText}</div>
                 </div>
               )}
             </div>
