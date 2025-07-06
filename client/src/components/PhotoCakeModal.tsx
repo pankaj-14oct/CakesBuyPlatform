@@ -133,7 +133,7 @@ export default function PhotoCakeModal({
             </div>
             
             {/* Right Side - Simple Upload and Text Controls */}
-            <div className="w-1/2 p-6 flex flex-col">
+            <div className="w-1/2 p-6 flex flex-col max-h-[500px] overflow-y-auto">
               {/* Upload Section */}
               <div className="mb-6">
                 <h3 className="text-lg font-medium mb-4">Upload Image</h3>
