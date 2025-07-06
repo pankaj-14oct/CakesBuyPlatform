@@ -148,6 +148,9 @@ export default function PhotoCakeModal({
                 shape={photoPreviewShape}
                 backgroundImage={backgroundImage}
                 uploadedImage={uploadedImage}
+                customText={customText}
+                imageSize={imageSize}
+                onImageSizeChange={setImageSize}
                 onImageUpload={handleFileUpload}
                 className="h-full"
               />

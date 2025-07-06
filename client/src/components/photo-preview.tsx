@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Slider } from '@/components/ui/slider';
 import { Upload, Heart, Circle, Square } from 'lucide-react';
 
 interface PhotoPreviewProps {
@@ -8,6 +9,9 @@ interface PhotoPreviewProps {
   backgroundImage?: string;
   onImageUpload?: (file: File) => void;
   uploadedImage?: string;
+  customText?: string;
+  imageSize?: number;
+  onImageSizeChange?: (size: number) => void;
   className?: string;
 }
 
@@ -15,7 +19,10 @@ export function PhotoPreview({
   shape, 
   backgroundImage, 
   onImageUpload, 
-  uploadedImage, 
+  uploadedImage,
+  customText,
+  imageSize = 60,
+  onImageSizeChange,
   className = "" 
 }: PhotoPreviewProps) {
   const [isDragging, setIsDragging] = useState(false);
@@ -74,29 +81,74 @@ export function PhotoPreview({
     }
   };
 
-  const renderHeartShape = () => (
-    <div className="relative w-48 h-48 mx-auto">
-      {/* Heart shape using CSS */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: uploadedImage ? `url(${uploadedImage})` : 'none',
-          clipPath: 'polygon(50% 85%, 20% 50%, 20% 35%, 30% 20%, 50% 35%, 70% 20%, 80% 35%, 80% 50%)',
-        }}
-      />
-      {!uploadedImage && (
-        <div 
-          className="absolute inset-0 flex items-center justify-center text-gray-400"
-          style={{
-            clipPath: 'polygon(50% 85%, 20% 50%, 20% 35%, 30% 20%, 50% 35%, 70% 20%, 80% 35%, 80% 50%)',
-            backgroundColor: '#f3f4f6'
-          }}
-        >
-          <Heart className="w-12 h-12" />
-        </div>
-      )}
-    </div>
-  );
+  const renderPreviewWithOverlay = () => {
+    const sizePercent = `${imageSize}%`;
+    
+    return (
+      <div className="relative w-80 h-80 mx-auto">
+        {/* Background cake image */}
+        <img 
+          src={backgroundImage || '/api/placeholder/400/400'} 
+          alt="Cake background" 
+          className="w-full h-full object-cover rounded-lg shadow-lg"
+        />
+        
+        {/* Uploaded image overlay with shape */}
+        {uploadedImage && (
+          <div 
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border-2 border-white shadow-lg overflow-hidden"
+            style={{
+              width: sizePercent,
+              height: sizePercent,
+              clipPath: shape === 'heart' 
+                ? 'polygon(50% 85%, 20% 50%, 20% 35%, 30% 20%, 50% 35%, 70% 20%, 80% 35%, 80% 50%)'
+                : shape === 'circle' 
+                  ? 'circle(50%)'
+                  : 'none',
+              borderRadius: shape === 'square' ? '8px' : '0'
+            }}
+          >
+            <img 
+              src={uploadedImage} 
+              alt="Uploaded photo" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+        
+        {/* Text overlay */}
+        {customText && (
+          <div 
+            className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-90 px-4 py-2 rounded-lg shadow-md"
+          >
+            <p className="text-center font-semibold text-brown text-sm whitespace-nowrap">
+              {customText}
+            </p>
+          </div>
+        )}
+        
+        {/* Placeholder when no image */}
+        {!uploadedImage && (
+          <div 
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-2 border-dashed border-gray-300 flex items-center justify-center bg-white bg-opacity-80"
+            style={{
+              clipPath: shape === 'heart' 
+                ? 'polygon(50% 85%, 20% 50%, 20% 35%, 30% 20%, 50% 35%, 70% 20%, 80% 35%, 80% 50%)'
+                : shape === 'circle' 
+                  ? 'circle(50%)'
+                  : 'none',
+              borderRadius: shape === 'square' ? '8px' : '0'
+            }}
+          >
+            <div className="text-gray-400 text-center">
+              {getShapeIcon()}
+              <p className="text-xs mt-1">Photo</p>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <Card className={`relative ${className}`}>
@@ -107,63 +159,25 @@ export function PhotoPreview({
             Your uploaded photo will appear in {shape} shape
           </p>
           
-          {/* Background Image */}
-          {backgroundImage && (
-            <div className="relative">
-              <img 
-                src={backgroundImage} 
-                alt="Background" 
-                className="w-full h-64 object-cover rounded-lg opacity-80"
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                {/* Photo Preview based on shape */}
-                {shape === 'heart' ? (
-                  renderHeartShape()
-                ) : (
-                  <div 
-                    className={`w-48 h-48 ${getShapeClasses()} bg-gray-100 border-4 border-white shadow-lg flex items-center justify-center overflow-hidden`}
-                  >
-                    {uploadedImage ? (
-                      <img 
-                        src={uploadedImage} 
-                        alt="Uploaded photo" 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="text-gray-400 text-center">
-                        {getShapeIcon()}
-                        <p className="text-sm mt-2">Your photo here</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          {/* Main Preview */}
+          {renderPreviewWithOverlay()}
           
-          {/* Without Background Image */}
-          {!backgroundImage && (
-            <div className="flex items-center justify-center">
-              {shape === 'heart' ? (
-                renderHeartShape()
-              ) : (
-                <div 
-                  className={`w-48 h-48 ${getShapeClasses()} bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden`}
-                >
-                  {uploadedImage ? (
-                    <img 
-                      src={uploadedImage} 
-                      alt="Uploaded photo" 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="text-gray-400 text-center">
-                      {getShapeIcon()}
-                      <p className="text-sm mt-2">Your photo here</p>
-                    </div>
-                  )}
-                </div>
-              )}
+          {/* Resize Slider */}
+          {uploadedImage && onImageSizeChange && (
+            <div className="space-y-2 px-4">
+              <p className="text-sm text-gray-600">Drag the slider to adjust image size</p>
+              <Slider
+                value={[imageSize]}
+                onValueChange={(value) => onImageSizeChange(value[0])}
+                max={80}
+                min={20}
+                step={1}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>Small</span>
+                <span>Large</span>
+              </div>
             </div>
           )}
           
