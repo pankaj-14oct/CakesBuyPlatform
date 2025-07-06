@@ -1067,48 +1067,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Image Crop Configuration Management
-  app.get("/api/admin/image-crops", requireAdmin, async (req: AuthRequest, res) => {
-    try {
-      const crops = await storage.getImageCropConfigs();
-      res.json(crops);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch crop configurations" });
-    }
-  });
 
-  app.post("/api/admin/image-crops", requireAdmin, async (req: AuthRequest, res) => {
-    try {
-      const cropData = {
-        ...req.body,
-        createdBy: req.user.id
-      };
-      const crop = await storage.createImageCropConfig(cropData);
-      res.json(crop);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to create crop configuration" });
-    }
-  });
-
-  app.put("/api/admin/image-crops/:id", requireAdmin, async (req: AuthRequest, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const crop = await storage.updateImageCropConfig(id, req.body);
-      res.json(crop);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to update crop configuration" });
-    }
-  });
-
-  app.delete("/api/admin/image-crops/:id", requireAdmin, async (req: AuthRequest, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteImageCropConfig(id);
-      res.json({ message: "Crop configuration deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete crop configuration" });
-    }
-  });
 
   // Admin Data Management
   app.post("/api/admin/import-dummy-data", async (req, res) => {
