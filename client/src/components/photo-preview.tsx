@@ -139,34 +139,34 @@ export function PhotoPreview({
         const heartSize = size * 0.45;
         
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY - heartSize * 0.3);
+        ctx.moveTo(centerX, centerY - heartSize * 0.1);
         
-        // Left curve (top left circle)
+        // Left top curve (left lobe)
         ctx.bezierCurveTo(
-          centerX - heartSize * 0.5, centerY - heartSize * 0.7,
-          centerX - heartSize * 0.9, centerY - heartSize * 0.3,
-          centerX - heartSize * 0.5, centerY
+          centerX - heartSize * 0.3, centerY - heartSize * 0.7,
+          centerX - heartSize * 0.8, centerY - heartSize * 0.4,
+          centerX - heartSize * 0.6, centerY - heartSize * 0.1
         );
         
         // Left side to bottom
         ctx.bezierCurveTo(
-          centerX - heartSize * 0.3, centerY + heartSize * 0.3,
-          centerX - heartSize * 0.1, centerY + heartSize * 0.7,
-          centerX, centerY + heartSize * 0.9
+          centerX - heartSize * 0.5, centerY + heartSize * 0.2,
+          centerX - heartSize * 0.2, centerY + heartSize * 0.6,
+          centerX, centerY + heartSize * 0.8
         );
         
         // Right side from bottom
         ctx.bezierCurveTo(
-          centerX + heartSize * 0.1, centerY + heartSize * 0.7,
-          centerX + heartSize * 0.3, centerY + heartSize * 0.3,
-          centerX + heartSize * 0.5, centerY
+          centerX + heartSize * 0.2, centerY + heartSize * 0.6,
+          centerX + heartSize * 0.5, centerY + heartSize * 0.2,
+          centerX + heartSize * 0.6, centerY - heartSize * 0.1
         );
         
-        // Right curve (top right circle)  
+        // Right top curve (right lobe)
         ctx.bezierCurveTo(
-          centerX + heartSize * 0.9, centerY - heartSize * 0.3,
-          centerX + heartSize * 0.5, centerY - heartSize * 0.7,
-          centerX, centerY - heartSize * 0.3
+          centerX + heartSize * 0.8, centerY - heartSize * 0.4,
+          centerX + heartSize * 0.3, centerY - heartSize * 0.7,
+          centerX, centerY - heartSize * 0.1
         );
         
         ctx.closePath();
@@ -233,34 +233,34 @@ export function PhotoPreview({
         const heartSize = size * 0.45;
         
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY - heartSize * 0.3);
+        ctx.moveTo(centerX, centerY - heartSize * 0.1);
         
-        // Left curve (top left circle)
+        // Left top curve (left lobe)
         ctx.bezierCurveTo(
-          centerX - heartSize * 0.5, centerY - heartSize * 0.7,
-          centerX - heartSize * 0.9, centerY - heartSize * 0.3,
-          centerX - heartSize * 0.5, centerY
+          centerX - heartSize * 0.3, centerY - heartSize * 0.7,
+          centerX - heartSize * 0.8, centerY - heartSize * 0.4,
+          centerX - heartSize * 0.6, centerY - heartSize * 0.1
         );
         
         // Left side to bottom
         ctx.bezierCurveTo(
-          centerX - heartSize * 0.3, centerY + heartSize * 0.3,
-          centerX - heartSize * 0.1, centerY + heartSize * 0.7,
-          centerX, centerY + heartSize * 0.9
+          centerX - heartSize * 0.5, centerY + heartSize * 0.2,
+          centerX - heartSize * 0.2, centerY + heartSize * 0.6,
+          centerX, centerY + heartSize * 0.8
         );
         
         // Right side from bottom
         ctx.bezierCurveTo(
-          centerX + heartSize * 0.1, centerY + heartSize * 0.7,
-          centerX + heartSize * 0.3, centerY + heartSize * 0.3,
-          centerX + heartSize * 0.5, centerY
+          centerX + heartSize * 0.2, centerY + heartSize * 0.6,
+          centerX + heartSize * 0.5, centerY + heartSize * 0.2,
+          centerX + heartSize * 0.6, centerY - heartSize * 0.1
         );
         
-        // Right curve (top right circle)  
+        // Right top curve (right lobe)
         ctx.bezierCurveTo(
-          centerX + heartSize * 0.9, centerY - heartSize * 0.3,
-          centerX + heartSize * 0.5, centerY - heartSize * 0.7,
-          centerX, centerY - heartSize * 0.3
+          centerX + heartSize * 0.8, centerY - heartSize * 0.4,
+          centerX + heartSize * 0.3, centerY - heartSize * 0.7,
+          centerX, centerY - heartSize * 0.1
         );
         
         ctx.closePath();
@@ -297,7 +297,7 @@ export function PhotoPreview({
                 width: `${fixedSize}px`,
                 height: `${fixedSize}px`,
                 clipPath: shape === 'heart' 
-                  ? 'path("M140,20 C90,5 20,40 20,85 C20,130 140,200 140,200 C140,200 260,130 260,85 C260,40 190,5 140,20 Z")'
+                  ? 'path("M140,45 C140,25 115,5 85,5 C55,5 30,25 30,55 C30,85 55,110 140,190 C225,110 250,85 250,55 C250,25 225,5 195,5 C165,5 140,25 140,45 Z")'
                   : shape === 'circle' 
                     ? 'circle(50%)'
                     : 'none',
@@ -379,7 +379,7 @@ export function PhotoPreview({
                 width: `${fixedSize}px`,
                 height: `${fixedSize}px`,
                 clipPath: shape === 'heart' 
-                  ? 'path("M140,20 C90,5 20,40 20,85 C20,130 140,200 140,200 C140,200 260,130 260,85 C260,40 190,5 140,20 Z")'
+                  ? 'path("M140,45 C140,25 115,5 85,5 C55,5 30,25 30,55 C30,85 55,110 140,190 C225,110 250,85 250,55 C250,25 225,5 195,5 C165,5 140,25 140,45 Z")'
                   : shape === 'circle' 
                     ? 'circle(50%)'
                     : 'none',
