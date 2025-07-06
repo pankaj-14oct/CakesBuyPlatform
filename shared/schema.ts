@@ -55,6 +55,7 @@ export const cakes = pgTable("cakes", {
   isCustomizable: boolean("is_customizable").default(true),
   isAvailable: boolean("is_available").default(true),
   isBestseller: boolean("is_bestseller").default(false),
+  isPhotoCake: boolean("is_photo_cake").default(false),
   tags: jsonb("tags").$type<string[]>().default([]),
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
   reviewCount: integer("review_count").default(0),

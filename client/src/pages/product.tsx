@@ -100,11 +100,7 @@ export default function ProductPage() {
   const totalPrice = basePrice * quantity;
 
   // Check if this is a photo cake
-  const isPhotoCake = cake.slug?.includes('photo') || 
-                     cake.name?.toLowerCase().includes('photo') ||
-                     cake.slug?.includes('poster') ||
-                     cake.name?.toLowerCase().includes('poster') ||
-                     cake.categoryId === 6; // Photo Cakes category
+  const isPhotoCake = cake.isPhotoCake || false;
 
   const handlePhotoModalSave = (imageFile: File | null, text: string, imgPos?: { x: number; y: number }, txtPos?: { x: number; y: number }, imgSize?: number) => {
     if (imageFile) {

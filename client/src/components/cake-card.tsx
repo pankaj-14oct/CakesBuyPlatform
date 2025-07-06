@@ -69,6 +69,11 @@ export default function CakeCard({ cake }: CakeCardProps) {
                 Eggless
               </Badge>
             )}
+            {cake.isPhotoCake && (
+              <Badge className="bg-blue-500 text-white text-xs font-semibold">
+                📸 Photo
+              </Badge>
+            )}
           </div>
           
           {/* Like Button */}

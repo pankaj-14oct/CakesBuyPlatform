@@ -35,6 +35,7 @@ const productSchema = z.object({
   isCustomizable: z.boolean().default(true),
   isAvailable: z.boolean().default(true),
   isBestseller: z.boolean().default(false),
+  isPhotoCake: z.boolean().default(false),
   tags: z.array(z.string()).default([]),
   rating: z.string().default("0"),
   reviewCount: z.number().default(0),
@@ -80,6 +81,7 @@ export default function AdminProducts() {
       isCustomizable: true,
       isAvailable: true,
       isBestseller: false,
+      isPhotoCake: false,
       tags: [],
       rating: "0",
       reviewCount: 0,
@@ -159,6 +161,7 @@ export default function AdminProducts() {
       isCustomizable: product.isCustomizable || true,
       isAvailable: product.isAvailable || true,
       isBestseller: product.isBestseller || false,
+      isPhotoCake: product.isPhotoCake || false,
       tags: product.tags || [],
       rating: product.rating || "0",
       reviewCount: product.reviewCount || 0,
@@ -419,7 +422,7 @@ export default function AdminProducts() {
               </div>
 
               {/* Checkboxes */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="isEggless"
@@ -454,6 +457,15 @@ export default function AdminProducts() {
                     onCheckedChange={(checked) => form.setValue('isBestseller', checked)}
                   />
                   <Label htmlFor="isBestseller">Bestseller</Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="isPhotoCake"
+                    checked={form.watch('isPhotoCake')}
+                    onCheckedChange={(checked) => form.setValue('isPhotoCake', checked)}
+                  />
+                  <Label htmlFor="isPhotoCake">Photo Cake</Label>
                 </div>
               </div>
 
@@ -531,6 +543,9 @@ export default function AdminProducts() {
                               )}
                               {product.isEggless && (
                                 <Badge variant="outline" className="text-xs">Eggless</Badge>
+                              )}
+                              {product.isPhotoCake && (
+                                <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">📸 Photo</Badge>
                               )}
                             </div>
                           </div>
