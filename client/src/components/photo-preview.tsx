@@ -96,7 +96,7 @@ export function PhotoPreview({
                 width: `${actualSize}px`,
                 height: `${actualSize}px`,
                 clipPath: shape === 'heart' 
-                  ? 'polygon(50% 85%, 20% 50%, 20% 35%, 30% 20%, 50% 35%, 70% 20%, 80% 35%, 80% 50%)'
+                  ? 'polygon(50% 95%, 10% 55%, 10% 40%, 25% 25%, 40% 35%, 50% 25%, 60% 35%, 75% 25%, 90% 40%, 90% 55%)'
                   : shape === 'circle' 
                     ? 'circle(50%)'
                     : 'none',
@@ -116,7 +116,7 @@ export function PhotoPreview({
                 width: `${baseSize * 0.8}px`,
                 height: `${baseSize * 0.8}px`,
                 clipPath: shape === 'heart' 
-                  ? 'polygon(50% 85%, 20% 50%, 20% 35%, 30% 20%, 50% 35%, 70% 20%, 80% 35%, 80% 50%)'
+                  ? 'polygon(50% 95%, 10% 55%, 10% 40%, 25% 25%, 40% 35%, 50% 25%, 60% 35%, 75% 25%, 90% 40%, 90% 55%)'
                   : shape === 'circle' 
                     ? 'circle(50%)'
                     : 'none',
