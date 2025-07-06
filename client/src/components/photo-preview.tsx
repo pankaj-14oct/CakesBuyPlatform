@@ -18,6 +18,9 @@ interface PhotoPreviewProps {
   onTextPositionChange?: (position: { x: number; y: number }) => void;
   onRemovePhoto?: () => void;
   showDownload?: boolean;
+  onImageSizeChange?: (size: number) => void;
+  onImageUpload?: (file: File) => void;
+  className?: string;
 }
 
 export function PhotoPreview({
@@ -34,8 +37,15 @@ export function PhotoPreview({
   onImagePositionChange,
   onTextPositionChange,
   onRemovePhoto,
-  showDownload = true
+  showDownload = true,
+  onImageSizeChange,
+  onImageUpload,
+  className
 }: PhotoPreviewProps) {
+  // Adjust text position for heart shape to be more centered
+  const effectiveTextPosition = shape === 'heart' && textPosition.y === 70 
+    ? { x: textPosition.x, y: 55 } 
+    : textPosition;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState<'image' | 'text' | null>(null);
@@ -47,7 +57,7 @@ export function PhotoPreview({
     
     setIsDragging(type);
     const rect = containerRef.current.getBoundingClientRect();
-    const currentPosition = type === 'image' ? imagePosition : textPosition;
+    const currentPosition = type === 'image' ? imagePosition : effectiveTextPosition;
     const elementX = (currentPosition.x / 100) * rect.width;
     const elementY = (currentPosition.y / 100) * rect.height;
     
@@ -55,7 +65,7 @@ export function PhotoPreview({
       x: e.clientX - rect.left - elementX,
       y: e.clientY - rect.top - elementY
     });
-  }, [imagePosition, textPosition]);
+  }, [imagePosition, effectiveTextPosition]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isDragging || !containerRef.current) return;
@@ -158,9 +168,9 @@ export function PhotoPreview({
 
       // Add text if present (matching preview text positioning and styling)
       if (customText) {
-        // Calculate text position based on textPosition prop to match preview exactly
-        const textX = (textPosition.x / 100) * canvasSize;
-        const textY = (textPosition.y / 100) * canvasSize;
+        // Calculate text position based on effectiveTextPosition to match preview exactly
+        const textX = (effectiveTextPosition.x / 100) * canvasSize;
+        const textY = (effectiveTextPosition.y / 100) * canvasSize;
         
         // Set text properties with shadow for better visibility
         ctx.textAlign = 'center';
@@ -274,8 +284,8 @@ export function PhotoPreview({
                 <div 
                   className="absolute text-white font-bold text-center cursor-move select-none z-10"
                   style={{
-                    left: `${textPosition.x}%`,
-                    top: `${textPosition.y}%`,
+                    left: `${effectiveTextPosition.x}%`,
+                    top: `${effectiveTextPosition.y}%`,
                     transform: 'translate(-50%, -50%)',
                     textShadow: '2px 2px 4px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.8)',
                     filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.8))',

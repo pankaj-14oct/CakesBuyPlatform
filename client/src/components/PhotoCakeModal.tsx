@@ -39,7 +39,7 @@ export default function PhotoCakeModal({
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [imagePosition, setImagePosition] = useState<Position>({ x: 50, y: 40 });
-  const [textPosition, setTextPosition] = useState<Position>({ x: 50, y: 70 });
+  const [textPosition, setTextPosition] = useState<Position>({ x: 50, y: photoPreviewShape === 'heart' ? 55 : 70 });
   const [imageSize, setImageSize] = useState(120);
   const [isDragging, setIsDragging] = useState<'image' | 'text' | null>(null);
   const [occasionType, setOccasionType] = useState<OccasionType>('birthday');
