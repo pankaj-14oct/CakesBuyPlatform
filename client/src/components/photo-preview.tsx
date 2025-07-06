@@ -185,9 +185,9 @@ export function PhotoPreview({
         // Add text with proper vertical spacing to prevent overlapping
         ctx.fillStyle = textColor;
         
-        // "Happy" text - positioned above center (increased spacing)
+        // "Happy" text - positioned above center
         ctx.font = `bold ${Math.round(8 * fontSize / 100 * scale)}px ${fontFamily}`;
-        ctx.fillText('Happy', textX, textY - 24 * scale);
+        ctx.fillText('Happy', textX, textY - 20 * scale);
         
         // Occasion text - positioned at center
         ctx.font = `bold ${Math.round(10 * fontSize / 100 * scale)}px ${fontFamily}`;
@@ -199,11 +199,11 @@ export function PhotoPreview({
                      occasionType === 'valentine' ? "Valentine's Day" :
                      occasionType === 'mothers-day' ? "Mother's Day" :
                      occasionType === 'fathers-day' ? "Father's Day" :
-                     'Celebration', textX, textY);
+                     'Celebration', textX, textY + 2 * scale);
         
-        // Custom name text - positioned below center (increased spacing)
+        // Custom name text - positioned below center
         ctx.font = `bold ${Math.round(7 * fontSize / 100 * scale)}px ${fontFamily}`;
-        ctx.fillText(customText, textX, textY + 24 * scale);
+        ctx.fillText(customText, textX, textY + 18 * scale);
         
         // Reset shadow for other drawing operations
         ctx.shadowColor = 'transparent';
