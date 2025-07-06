@@ -44,7 +44,7 @@ export default function PhotoCakeModal({
   const [isDragging, setIsDragging] = useState<'image' | 'text' | null>(null);
   const [occasionType, setOccasionType] = useState<OccasionType>('birthday');
   const [textColor, setTextColor] = useState('#DC2626');
-  const [fontSize, setFontSize] = useState(100);
+  const [fontSize, setFontSize] = useState(150);
   const [fontFamily, setFontFamily] = useState('Arial');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -341,7 +341,7 @@ export default function PhotoCakeModal({
                       <Slider
                         value={[fontSize]}
                         onValueChange={(value) => setFontSize(value[0])}
-                        max={150}
+                        max={300}
                         min={50}
                         step={10}
                         className="w-full"

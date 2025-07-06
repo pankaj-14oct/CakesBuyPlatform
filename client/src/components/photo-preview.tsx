@@ -172,15 +172,15 @@ export function PhotoPreview({
         ctx.shadowOffsetX = 4 * scale;
         ctx.shadowOffsetY = 4 * scale;
         
-        // Add text with proper sizing to match preview (much smaller)
+        // Add text with exact preview sizing - much smaller to match preview
         ctx.fillStyle = textColor;
         
-        // "Happy" text - smaller size
-        ctx.font = `bold ${Math.round(14 * fontSize / 100 * scale)}px ${fontFamily}`;
-        ctx.fillText('Happy', textX, textY - 12 * scale);
+        // "Happy" text - very small to match preview
+        ctx.font = `bold ${Math.round(8 * fontSize / 100 * scale)}px ${fontFamily}`;
+        ctx.fillText('Happy', textX, textY - 8 * scale);
         
-        // Occasion text - slightly larger than Happy
-        ctx.font = `bold ${Math.round(16 * fontSize / 100 * scale)}px ${fontFamily}`;
+        // Occasion text - slightly larger but still small
+        ctx.font = `bold ${Math.round(10 * fontSize / 100 * scale)}px ${fontFamily}`;
         ctx.fillText(occasionType === 'birthday' ? 'Birthday' : 
                      occasionType === 'anniversary' ? 'Anniversary' :
                      occasionType === 'wedding' ? 'Wedding' :
@@ -189,11 +189,11 @@ export function PhotoPreview({
                      occasionType === 'valentine' ? "Valentine's Day" :
                      occasionType === 'mothers-day' ? "Mother's Day" :
                      occasionType === 'fathers-day' ? "Father's Day" :
-                     'Celebration', textX, textY + 2 * scale);
+                     'Celebration', textX, textY + 1 * scale);
         
-        // Custom name text - similar size to Happy
-        ctx.font = `bold ${Math.round(13 * fontSize / 100 * scale)}px ${fontFamily}`;
-        ctx.fillText(customText, textX, textY + 16 * scale);
+        // Custom name text - small like Happy
+        ctx.font = `bold ${Math.round(7 * fontSize / 100 * scale)}px ${fontFamily}`;
+        ctx.fillText(customText, textX, textY + 9 * scale);
         
         // Reset shadow for other drawing operations
         ctx.shadowColor = 'transparent';
