@@ -1,5 +1,6 @@
 import { db } from "./db";
 import { users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews } from "@shared/schema";
+import { hashPassword } from "./auth";
 
 const seedData = {
   categories: [
@@ -159,6 +160,21 @@ const seedData = {
 export async function seedDatabase() {
   try {
     console.log("🌱 Starting database seeding...");
+
+    // Seed admin user first
+    console.log("👤 Seeding admin user...");
+    const adminPassword = await hashPassword("password123");
+    const adminUser = {
+      phone: "1111111111",
+      email: "admin@cakesbuy.com",
+      password: adminPassword,
+      name: "Admin User",
+      role: "admin" as const,
+      walletBalance: "0",
+      loyaltyPoints: 0,
+      loyaltyTier: "bronze" as const
+    };
+    await db.insert(users).values(adminUser).onConflictDoNothing();
 
     // Seed categories
     console.log("📂 Seeding categories...");
