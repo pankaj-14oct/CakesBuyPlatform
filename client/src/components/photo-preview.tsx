@@ -32,7 +32,7 @@ export function PhotoPreview({
   shape = 'circle',
   textColor = '#FFFFFF',
   fontSize = 100,
-  fontFamily = 'Arial',
+  fontFamily = 'Dancing Script',
   occasionType = 'birthday',
   onImagePositionChange,
   onTextPositionChange,

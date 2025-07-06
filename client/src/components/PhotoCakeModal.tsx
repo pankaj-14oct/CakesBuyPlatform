@@ -45,7 +45,7 @@ export default function PhotoCakeModal({
   const [occasionType, setOccasionType] = useState<OccasionType>('birthday');
   const [textColor, setTextColor] = useState('#DC2626');
   const [fontSize, setFontSize] = useState(150);
-  const [fontFamily, setFontFamily] = useState('Arial');
+  const [fontFamily, setFontFamily] = useState('Dancing Script');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
@@ -320,14 +320,11 @@ export default function PhotoCakeModal({
                       <SelectValue placeholder="Select font style" />
                     </SelectTrigger>
                     <SelectContent className="max-h-60 overflow-y-auto">
-                      <SelectItem value="Arial">Arial (Classic)</SelectItem>
-                      <SelectItem value="Georgia">Georgia (Elegant)</SelectItem>
-                      <SelectItem value="Times New Roman">Times New Roman (Traditional)</SelectItem>
-                      <SelectItem value="Impact">Impact (Bold)</SelectItem>
-                      <SelectItem value="Comic Sans MS">Comic Sans MS (Playful)</SelectItem>
-                      <SelectItem value="Courier New">Courier New (Typewriter)</SelectItem>
-                      <SelectItem value="Verdana">Verdana (Modern)</SelectItem>
-                      <SelectItem value="Trebuchet MS">Trebuchet MS (Rounded)</SelectItem>
+                      <SelectItem value="Dancing Script">Dancing Script (Elegant Cursive)</SelectItem>
+                      <SelectItem value="Pacifico">Pacifico (Italian Style)</SelectItem>
+                      <SelectItem value="Great Vibes">Great Vibes (Luxury Script)</SelectItem>
+                      <SelectItem value="Satisfy">Satisfy (Handwritten)</SelectItem>
+                      <SelectItem value="Lobster">Lobster (Bold Curves)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
