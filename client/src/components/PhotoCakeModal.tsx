@@ -135,24 +135,156 @@ export default function PhotoCakeModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl w-full max-h-[90vh] p-0 overflow-hidden">
+      <DialogContent className="max-w-4xl w-full max-h-[90vh] p-0 overflow-hidden">
         <div className="flex flex-col h-full">
           <DialogHeader className="p-6 pb-4">
             <DialogTitle className="text-xl font-semibold">Personalise your cake</DialogTitle>
           </DialogHeader>
           
-          <div className="flex-1 p-6 bg-gray-50">
-            {/* Only Left Side - Photo Preview */}
-            <PhotoPreview
-              shape={photoPreviewShape}
-              uploadedImage={uploadedImage}
-              customText={customText}
-              imageSize={imageSize}
-              onImageSizeChange={setImageSize}
-              onImageUpload={handleFileUpload}
-              showDownload={true}
-              className="h-full"
-            />
+          <div className="flex-1 flex overflow-hidden">
+            {/* Left Side - Photo Preview */}
+            <div className="w-1/2 p-6 bg-gray-50">
+              <PhotoPreview
+                shape={photoPreviewShape}
+                uploadedImage={uploadedImage}
+                customText={customText}
+                imageSize={imageSize}
+                onImageSizeChange={setImageSize}
+                onImageUpload={handleFileUpload}
+                showDownload={true}
+                className="h-full"
+              />
+            </div>
+            
+            {/* Right Side - Upload and Text Controls */}
+            <div className="w-1/2 p-6 flex flex-col max-h-[calc(90vh-120px)] overflow-y-auto">
+              {/* Photo Upload Section */}
+              <div className="mb-4 flex-shrink-0">
+                <div className="bg-pink-100 px-3 py-2 rounded-t-lg">
+                  <h3 className="text-sm font-medium text-pink-800 text-center">Upload</h3>
+                </div>
+                
+                {uploadedImage ? (
+                  <div className="border border-pink-200 rounded-b-lg p-4">
+                    <div className="flex items-center justify-between bg-green-50 p-3 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <img 
+                          src={uploadedImage} 
+                          alt="Uploaded" 
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                        <span className="text-sm text-green-700 font-medium">✓ Saved</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={removeImage}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className={`border border-pink-200 rounded-b-lg p-6 text-center transition-colors ${
+                      dragActive 
+                        ? 'border-pink-500 bg-pink-50' 
+                        : 'hover:border-pink-400'
+                    }`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                  >
+                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-3" />
+                    <p className="text-sm font-medium text-gray-900 mb-2">
+                      Drop your photo here
+                    </p>
+                    <p className="text-xs text-gray-600 mb-4">
+                      Or click to browse (JPG, PNG up to 10MB)
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-pink-300 text-pink-600 hover:bg-pink-50"
+                    >
+                      Choose Photo
+                    </Button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Resize Section - Only show after image upload */}
+              {uploadedImage && (
+                <div className="mb-4 flex-shrink-0">
+                  <div className="bg-pink-100 px-3 py-2 rounded-t-lg">
+                    <h3 className="text-sm font-medium text-pink-800 text-center flex items-center justify-center gap-2">
+                      <span>🔄</span> Resize
+                    </h3>
+                  </div>
+                  <div className="border border-pink-200 rounded-b-lg p-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-gray-600 min-w-12">Small</span>
+                      <div className="flex-1">
+                        <input
+                          type="range"
+                          min="20"
+                          max="50"
+                          value={imageSize}
+                          onChange={(e) => setImageSize(Number(e.target.value))}
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                          style={{
+                            background: `linear-gradient(to right, #ef4444 0%, #ef4444 ${((imageSize - 20) / (50 - 20)) * 100}%, #e5e7eb ${((imageSize - 20) / (50 - 20)) * 100}%, #e5e7eb 100%)`
+                          }}
+                        />
+                      </div>
+                      <span className="text-sm text-gray-600 min-w-12">Large</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Custom Message Section */}
+              <div className="mb-4 flex-shrink-0">
+                <div className="bg-pink-100 px-3 py-2 rounded-t-lg">
+                  <h3 className="text-sm font-medium text-pink-800 text-center">Cake Message</h3>
+                </div>
+                <div className="border border-pink-200 rounded-b-lg p-4">
+                  <Label className="text-sm font-medium mb-2 block">Name on Cake</Label>
+                  <div className="relative">
+                    <Input
+                      placeholder="Text"
+                      value={customText}
+                      onChange={(e) => setCustomText(e.target.value)}
+                      maxLength={15}
+                      className="border-blue-300 focus:border-blue-500 pr-12"
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">
+                      {customText.length} / 15
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Save Button - Fixed at bottom */}
+              <div className="mt-auto pt-4 flex-shrink-0">
+                <Button
+                  onClick={handleSave}
+                  className="w-full bg-red-500 hover:bg-red-600 text-white py-3 text-lg font-semibold"
+                >
+                  Save & Continue
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </DialogContent>
