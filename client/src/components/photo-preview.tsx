@@ -172,14 +172,14 @@ export function PhotoPreview({
         ctx.shadowOffsetX = 4 * scale;
         ctx.shadowOffsetY = 4 * scale;
         
-        // Add text with exact preview sizing - much smaller to match preview
+        // Add text with proper vertical spacing to prevent overlapping
         ctx.fillStyle = textColor;
         
-        // "Happy" text - very small to match preview
+        // "Happy" text - positioned above center
         ctx.font = `bold ${Math.round(8 * fontSize / 100 * scale)}px ${fontFamily}`;
-        ctx.fillText('Happy', textX, textY - 8 * scale);
+        ctx.fillText('Happy', textX, textY - 15 * scale);
         
-        // Occasion text - slightly larger but still small
+        // Occasion text - positioned at center
         ctx.font = `bold ${Math.round(10 * fontSize / 100 * scale)}px ${fontFamily}`;
         ctx.fillText(occasionType === 'birthday' ? 'Birthday' : 
                      occasionType === 'anniversary' ? 'Anniversary' :
@@ -189,11 +189,11 @@ export function PhotoPreview({
                      occasionType === 'valentine' ? "Valentine's Day" :
                      occasionType === 'mothers-day' ? "Mother's Day" :
                      occasionType === 'fathers-day' ? "Father's Day" :
-                     'Celebration', textX, textY + 1 * scale);
+                     'Celebration', textX, textY);
         
-        // Custom name text - small like Happy
+        // Custom name text - positioned below center
         ctx.font = `bold ${Math.round(7 * fontSize / 100 * scale)}px ${fontFamily}`;
-        ctx.fillText(customText, textX, textY + 9 * scale);
+        ctx.fillText(customText, textX, textY + 15 * scale);
         
         // Reset shadow for other drawing operations
         ctx.shadowColor = 'transparent';
