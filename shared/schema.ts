@@ -88,6 +88,15 @@ export const orders = pgTable("orders", {
     flavor: string;
     customMessage?: string;
     customImage?: string;
+    photoCustomization?: {
+      uploadedImage?: string;
+      customText?: string;
+      imagePosition?: { x: number; y: number };
+      textPosition?: { x: number; y: number };
+      imageSize?: number;
+      backgroundImage?: string;
+      compositeImage?: string; // Generated final image combining background + user photo + text
+    };
     price: number;
     addons?: Array<{ id: number; name: string; price: number; quantity: number }>;
   }>>().notNull(),

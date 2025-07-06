@@ -36,6 +36,7 @@ import {
 } from "./auth";
 import { sendReminderEmail, type ReminderEmailData, sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, type OrderEmailData, sendWelcomeEmail, type WelcomeEmailData } from "./email-service";
 import { createInvoiceForOrder, updateInvoiceStatus, getInvoiceByOrderId, getInvoiceByNumber, getUserInvoices, getInvoiceWithOrder, getInvoiceDisplayData } from "./invoice-service";
+import { processPhotoCakeItems } from "./photo-cake-service";
 import type { User } from "@shared/schema";
 
 // Helper function to create event reminders
@@ -265,7 +266,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderData.userId = req.user.id;
       }
       
+      // Process photo cake items and generate composite images
+      try {
+        orderData.items = await processPhotoCakeItems(orderData.items, `TEMP-${Date.now()}`);
+      } catch (error) {
+        console.error('Failed to process photo cake items:', error);
+        // Continue with order creation even if photo processing fails
+      }
+      
       const order = await storage.createOrder(orderData);
+      
+      // Update photo cake items with actual order number
+      if (order && orderData.items.some(item => item.photoCustomization?.compositeImage)) {
+        try {
+          const updatedItems = await processPhotoCakeItems(orderData.items, order.orderNumber);
+          await storage.updateOrder(order.id, { ...order, items: updatedItems });
+        } catch (error) {
+          console.error('Failed to update photo cake items with order number:', error);
+        }
+      }
       
       // Handle partial wallet payment after order creation
       if ((orderData.paymentMethod === 'partial_wallet' || orderData.paymentMethod === 'wallet') && req.user) {

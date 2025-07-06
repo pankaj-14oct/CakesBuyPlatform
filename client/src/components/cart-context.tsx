@@ -12,6 +12,13 @@ export interface CartItem {
   imagePosition?: { x: number; y: number };
   textPosition?: { x: number; y: number };
   imageSize?: number;
+  photoCustomization?: {
+    uploadedImage?: string;
+    customText?: string;
+    imagePosition?: { x: number; y: number };
+    textPosition?: { x: number; y: number };
+    imageSize?: number;
+  };
   price: number;
   addons: Array<{
     addon: Addon;

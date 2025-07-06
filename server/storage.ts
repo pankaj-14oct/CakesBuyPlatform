@@ -44,6 +44,7 @@ export interface IStorage {
   getOrder(id: number): Promise<Order | undefined>;
   getOrderByNumber(orderNumber: string): Promise<Order | undefined>;
   getUserOrders(userId: number): Promise<Order[]>;
+  updateOrder(id: number, updates: Partial<Order>): Promise<void>;
   updateOrderStatus(id: number, status: string): Promise<void>;
 
   // Delivery Areas
@@ -341,6 +342,12 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(orders)
       .where(eq(orders.userId, userId))
       .orderBy(desc(orders.createdAt));
+  }
+
+  async updateOrder(id: number, updates: Partial<Order>): Promise<void> {
+    await db.update(orders)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(orders.id, id));
   }
 
   async updateOrderStatus(id: number, status: string): Promise<void> {

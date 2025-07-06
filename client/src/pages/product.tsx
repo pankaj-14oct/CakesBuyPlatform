@@ -169,6 +169,13 @@ export default function ProductPage() {
       imagePosition: uploadedImage ? imagePosition : undefined,
       textPosition: customText.trim() ? textPosition : undefined,
       imageSize: uploadedImage ? imageSize : undefined,
+      photoCustomization: (isPhotoCake && (uploadedImage || customText.trim())) ? {
+        uploadedImage: uploadedImage || undefined,
+        customText: customText.trim() || undefined,
+        imagePosition: uploadedImage ? imagePosition : undefined,
+        textPosition: customText.trim() ? textPosition : undefined,
+        imageSize: uploadedImage ? imageSize : undefined
+      } : undefined,
       price,
       addons: selectedAddons
     };

@@ -293,6 +293,20 @@ export default function OrdersPage() {
                                     {item.customMessage && (
                                       <p>Message: "{item.customMessage}"</p>
                                     )}
+                                    {item.photoCustomization?.compositeImage && (
+                                      <div className="mt-3">
+                                        <p className="font-medium text-pink-600 mb-2">📸 Personalized Photo Cake:</p>
+                                        <div className="bg-white p-2 rounded border inline-block">
+                                          <iframe
+                                            src={item.photoCustomization.compositeImage}
+                                            width="200"
+                                            height="200"
+                                            className="rounded border-0"
+                                            title="Personalized cake preview"
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
                                     {item.addons && item.addons.length > 0 && (
                                       <div>
                                         <p className="font-medium">Add-ons:</p>

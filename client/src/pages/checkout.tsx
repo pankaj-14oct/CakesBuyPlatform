@@ -383,6 +383,14 @@ export default function CheckoutPage() {
         flavor: item.flavor,
         customMessage: item.customMessage,
         price: item.price,
+        photoCustomization: item.photoCustomization ? {
+          uploadedImage: item.photoCustomization.uploadedImage,
+          customText: item.photoCustomization.customText,
+          imagePosition: item.photoCustomization.imagePosition,
+          textPosition: item.photoCustomization.textPosition,
+          imageSize: item.photoCustomization.imageSize,
+          backgroundImage: item.cake?.backgroundImage
+        } : undefined,
         addons: item.addons.map(addon => ({
           id: addon.addon.id,
           name: addon.addon.name,
