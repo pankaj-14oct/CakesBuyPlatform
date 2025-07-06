@@ -185,9 +185,9 @@ export function PhotoPreview({
         // Add text with proper vertical spacing to prevent overlapping
         ctx.fillStyle = textColor;
         
-        // "Happy" text - positioned above center
+        // "Happy" text - positioned above center (increased spacing by 15%)
         ctx.font = `bold ${Math.round(8 * fontSize / 100 * scale)}px ${fontFamily}`;
-        ctx.fillText('Happy', textX, textY - 20 * scale);
+        ctx.fillText('Happy', textX, textY - 23 * scale);
         
         // Occasion text - positioned at center
         ctx.font = `bold ${Math.round(10 * fontSize / 100 * scale)}px ${fontFamily}`;
@@ -201,9 +201,9 @@ export function PhotoPreview({
                      occasionType === 'fathers-day' ? "Father's Day" :
                      'Celebration', textX, textY + 2 * scale);
         
-        // Custom name text - positioned below center
+        // Custom name text - positioned below center (increased spacing by 15%)
         ctx.font = `bold ${Math.round(7 * fontSize / 100 * scale)}px ${fontFamily}`;
-        ctx.fillText(customText, textX, textY + 18 * scale);
+        ctx.fillText(customText, textX, textY + 21 * scale);
         
         // Reset shadow for other drawing operations
         ctx.shadowColor = 'transparent';
@@ -295,8 +295,8 @@ export function PhotoPreview({
                   }}
                   onMouseDown={(e) => handleMouseDown(e, 'text')}
                 >
-                  <div className="leading-tight mb-1" style={{ fontSize: `${fontSize * 0.28}%` }}>Happy</div>
-                  <div className="leading-tight mb-2" style={{ fontSize: `${fontSize * 0.32}%` }}>
+                  <div className="leading-tight mb-2" style={{ fontSize: `${fontSize * 0.28}%` }}>Happy</div>
+                  <div className="leading-tight mb-3" style={{ fontSize: `${fontSize * 0.32}%` }}>
                     {occasionType === 'birthday' ? 'Birthday' : 
                      occasionType === 'anniversary' ? 'Anniversary' :
                      occasionType === 'wedding' ? 'Wedding' :
