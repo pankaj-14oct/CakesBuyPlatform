@@ -36,6 +36,7 @@ const productSchema = z.object({
   isAvailable: z.boolean().default(true),
   isBestseller: z.boolean().default(false),
   isPhotoCake: z.boolean().default(false),
+  backgroundImage: z.string().optional(),
   tags: z.array(z.string()).default([]),
   rating: z.string().default("0"),
   reviewCount: z.number().default(0),
@@ -82,6 +83,7 @@ export default function AdminProducts() {
       isAvailable: true,
       isBestseller: false,
       isPhotoCake: false,
+      backgroundImage: '',
       tags: [],
       rating: "0",
       reviewCount: 0,
@@ -162,6 +164,7 @@ export default function AdminProducts() {
       isAvailable: product.isAvailable || true,
       isBestseller: product.isBestseller || false,
       isPhotoCake: product.isPhotoCake || false,
+      backgroundImage: product.backgroundImage || '',
       tags: product.tags || [],
       rating: product.rating || "0",
       reviewCount: product.reviewCount || 0,
@@ -240,6 +243,31 @@ export default function AdminProducts() {
   const removeImage = (index: number) => {
     const currentImages = form.getValues('images');
     form.setValue('images', currentImages.filter((_, i) => i !== index));
+  };
+
+  const handleBackgroundImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        form.setValue('backgroundImage', data.url);
+        toast({ title: "Background image uploaded successfully!" });
+      } else {
+        toast({ title: "Failed to upload image", variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Failed to upload image", variant: "destructive" });
+    }
   };
 
   return (
@@ -468,6 +496,47 @@ export default function AdminProducts() {
                   <Label htmlFor="isPhotoCake">Photo Cake</Label>
                 </div>
               </div>
+
+              {/* Background Image for Photo Cakes */}
+              {form.watch('isPhotoCake') && (
+                <div>
+                  <Label htmlFor="backgroundImage">Background Image (for Photo Cakes)</Label>
+                  <div className="space-y-2">
+                    <Input
+                      id="backgroundImage"
+                      {...form.register('backgroundImage')}
+                      placeholder="Background image URL"
+                      readOnly
+                    />
+                    <div className="flex space-x-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleBackgroundImageUpload}
+                        className="hidden"
+                        id="backgroundImageFile"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => document.getElementById('backgroundImageFile')?.click()}
+                      >
+                        Upload Background Image
+                      </Button>
+                      {form.watch('backgroundImage') && (
+                        <img 
+                          src={form.watch('backgroundImage')} 
+                          alt="Background preview" 
+                          className="w-20 h-20 object-cover rounded border"
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    This image will appear as the background, with user's uploaded photo as foreground
+                  </p>
+                </div>
+              )}
 
               <div className="flex space-x-2">
                 <Button

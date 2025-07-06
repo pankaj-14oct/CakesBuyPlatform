@@ -617,7 +617,8 @@ export default function ProductPage() {
         onClose={() => setShowPhotoModal(false)}
         onSave={handlePhotoModalSave}
         cakePreviewImage={cake.images?.[0] || '/api/placeholder/400/400'}
-        initialText={customText}
+        backgroundImage={cake.backgroundImage}
+        initialText={customText}t={customText}
       />
     </div>
   );
