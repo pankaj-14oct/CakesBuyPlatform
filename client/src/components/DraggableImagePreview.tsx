@@ -19,7 +19,7 @@ export function DraggableImagePreview({
   shape,
   onImagePositionChange,
   onImageSizeChange,
-  imageSize = 100,
+  imageSize = 120,
   initialPosition = { x: 50, y: 50 },
   className = ''
 }: DraggableImagePreviewProps) {
@@ -209,11 +209,11 @@ export function DraggableImagePreview({
                   borderRadius: shape === 'square' ? '16px' : '0'
                 }}
               >
-                {/* Draggable Image */}
+                {/* Draggable Image - preserve original quality, no cropping */}
                 <img 
                   src={uploadedImage} 
                   alt="Uploaded photo" 
-                  className="absolute object-cover select-none"
+                  className="absolute object-contain select-none high-quality-image image-drag-smooth"
                   style={{
                     width: `${imageSize}%`,
                     height: `${imageSize}%`,

@@ -110,10 +110,10 @@ export function PreviewPersonalisedImage({
             <img 
               src={uploadedImage} 
               alt="Preview" 
-              className="absolute object-cover select-none"
+              className="absolute object-contain select-none high-quality-image image-drag-smooth"
               style={{
-                width: '120%',
-                height: '120%',
+                width: '140%',
+                height: '140%',
                 left: `${imagePosition.x}%`,
                 top: `${imagePosition.y}%`,
                 transform: 'translate(-50%, -50%)',

@@ -2,7 +2,7 @@
 
 ## Overview
 
-CakesBuy is a specialized full-stack e-commerce platform for ordering 100% eggless cakes online in Gurgaon. The application provides a comprehensive cake ordering system focused exclusively on egg-free products, featuring category browsing, product customization, shopping cart functionality, and order management. Built as a modern web application with React frontend and Express backend, it offers contactless online delivery with same-day delivery options for vegetarian and health-conscious customers.
+CakesBuy is a specialized full-stack e-commerce platform for ordering 100% eggless cakes online in Gurgaon. The application provides a comprehensive cake ordering system focused exclusively on egg-free products, featuring category browsing, product customization (including high-quality photo cakes), shopping cart functionality, and order management. Built as a modern web application with React frontend and Express backend, it offers contactless online delivery with same-day delivery options for vegetarian and health-conscious customers.
 
 ## System Architecture
 
@@ -46,6 +46,17 @@ The application uses a comprehensive database schema with the following main ent
 8. **Promo Codes**: Discount management system with usage tracking and expiration dates
 9. **Event Reminders**: Birthday/anniversary tracking with automated email notifications
 10. **Loyalty Rewards**: Points-based reward system with tier management and redemption tracking
+
+## Recent Changes
+
+### Image Upload & Photo Cake Enhancement (Latest)
+- **High-Quality Image Support**: Enhanced image upload to support print-quality files up to 20MB
+- **No-Crop Preview**: Changed image display from `object-cover` to `object-contain` to preserve original image proportions
+- **Extended Zoom Range**: Increased zoom capability from 100-200% to 80-300% for better positioning control
+- **Enhanced Rendering**: Added CSS classes for high-quality image rendering with hardware acceleration
+- **Print-Ready Quality**: Implemented image rendering optimizations for professional printing
+- **Multi-Format Support**: Added support for JPEG, PNG, WebP, TIFF, and BMP formats
+- **User Guidance**: Enhanced upload interface with quality recommendations and format guidance
 
 ### Frontend Components
 - **Layout Components**: Header with navigation, Footer with contact info

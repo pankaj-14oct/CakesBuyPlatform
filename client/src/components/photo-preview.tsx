@@ -30,7 +30,7 @@ export function PhotoPreview({
   onImageUpload, 
   uploadedImage,
   customText,
-  imageSize = 70,
+  imageSize = 120,
   onImageSizeChange,
   className = "",
   showDownload = false,
@@ -342,11 +342,11 @@ export function PhotoPreview({
                 borderRadius: shape === 'square' ? '16px' : '0'
               }}
             >
-              {/* Draggable Image with zoom functionality */}
+              {/* Draggable Image with zoom functionality - no cropping, preserve original quality */}
               <img 
                 src={uploadedImage} 
                 alt="Uploaded photo" 
-                className="absolute object-cover cursor-move select-none"
+                className="absolute object-contain cursor-move select-none high-quality-image image-drag-smooth" 
                 style={{
                   width: `${imageSize}%`,
                   height: `${imageSize}%`,

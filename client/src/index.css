@@ -207,3 +207,39 @@ input[type="range"]::-moz-range-track {
     min-width: 0;
   }
 }
+
+/* Enhanced image rendering for photo cakes - preserves print quality */
+.high-quality-image {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  image-rendering: high-quality;
+  -ms-interpolation-mode: nearest-neighbor;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Print-quality image container */
+.print-quality-container {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* Smooth dragging for image positioning */
+.image-drag-smooth {
+  will-change: transform;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* No compression for uploaded images */
+.no-compression {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
