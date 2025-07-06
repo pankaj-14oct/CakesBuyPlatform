@@ -101,6 +101,7 @@ export default function PhotoCakeModal({
     setUploadedImage('');
     setUploadedFile(null);
     setCustomText(initialText);
+    setTextPosition({ x: 50, y: 70 });
     onClose();
   };
 
@@ -124,6 +125,8 @@ export default function PhotoCakeModal({
                 onImageUpload={handleFileUpload}
                 showDownload={true}
                 className="h-full"
+                textPosition={textPosition}
+                onTextPositionChange={setTextPosition}
               />
               {uploadedImage && (
                 <div className="text-center mt-4">

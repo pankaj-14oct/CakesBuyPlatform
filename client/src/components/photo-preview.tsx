@@ -14,6 +14,8 @@ interface PhotoPreviewProps {
   onImageSizeChange?: (size: number) => void;
   className?: string;
   showDownload?: boolean;
+  textPosition?: { x: number; y: number };
+  onTextPositionChange?: (position: { x: number; y: number }) => void;
 }
 
 export function PhotoPreview({ 
@@ -25,9 +27,51 @@ export function PhotoPreview({
   imageSize = 70,
   onImageSizeChange,
   className = "",
-  showDownload = false
+  showDownload = false,
+  textPosition = { x: 50, y: 70 },
+  onTextPositionChange
 }: PhotoPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleTextMouseDown = (e: React.MouseEvent) => {
+    if (!onTextPositionChange) return;
+    
+    e.preventDefault();
+    setIsDragging(true);
+    
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) {
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      setDragOffset({
+        x: x - (textPosition.x * rect.width / 100),
+        y: y - (textPosition.y * rect.height / 100)
+      });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !onTextPositionChange) return;
+    
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) {
+      const x = e.clientX - rect.left - dragOffset.x;
+      const y = e.clientY - rect.top - dragOffset.y;
+      
+      // Convert to percentage
+      const newX = Math.max(0, Math.min(100, (x / rect.width) * 100));
+      const newY = Math.max(0, Math.min(100, (y / rect.height) * 100));
+      
+      onTextPositionChange({ x: newX, y: newY });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
 
   const getShapeClasses = () => {
     switch (shape) {
@@ -189,7 +233,13 @@ export function PhotoPreview({
     
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="relative">
+        <div 
+          ref={containerRef}
+          className="relative"
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        >
           {/* Main photo with shape */}
           {uploadedImage ? (
             <div 
@@ -218,6 +268,23 @@ export function PhotoPreview({
                   minHeight: '100%'
                 }}
               />
+              
+              {/* Draggable text overlay */}
+              {customText && (
+                <div 
+                  className="absolute text-white font-bold text-lg cursor-move select-none z-10"
+                  style={{
+                    left: `${textPosition.x}%`,
+                    top: `${textPosition.y}%`,
+                    transform: 'translate(-50%, -50%)',
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.8)',
+                    filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.8))'
+                  }}
+                  onMouseDown={handleTextMouseDown}
+                >
+                  {customText}
+                </div>
+              )}
             </div>
           ) : (
             <div 
@@ -237,17 +304,6 @@ export function PhotoPreview({
                 {getShapeIcon()}
                 <p className="text-sm mt-2 font-medium">Photo</p>
               </div>
-            </div>
-          )}
-          
-          {/* Text overlay */}
-          {customText && (
-            <div 
-              className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-95 px-4 py-2 rounded-lg shadow-lg border"
-            >
-              <p className="text-center font-semibold text-gray-800 text-sm whitespace-nowrap">
-                {customText}
-              </p>
             </div>
           )}
         </div>
