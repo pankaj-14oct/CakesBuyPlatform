@@ -185,22 +185,33 @@ export function PhotoPreview({
         // Add text with proper vertical spacing to prevent overlapping
         ctx.fillStyle = textColor;
         
-        // Calculate font sizes to match the preview exactly
-        // Preview uses fontSize as a percentage base, then multiplies by decimals
-        const baseFontSize = (fontSize / 100) * 16 * scale; // Convert % to base size
-        const happySize = Math.round(baseFontSize * 0.28 * 4); // Match preview calculations
-        const occasionSize = Math.round(baseFontSize * 0.32 * 4);
-        const nameSize = Math.round(baseFontSize * 0.26 * 4);
+        // Calculate font sizes to exactly match the preview CSS
+        // The preview uses relative font sizes, so we need to calculate the actual pixel values
+        const previewBaseSize = 16; // Base font size in pixels
+        const scaledBaseSize = previewBaseSize * scale;
         
-        // Position text to match preview layout exactly
-        const lineSpacing = 8 * scale; // Spacing between lines
+        // Calculate each text size based on the fontSize slider value and relative multipliers
+        const happySize = Math.round((fontSize / 100) * scaledBaseSize * 0.28);
+        const occasionSize = Math.round((fontSize / 100) * scaledBaseSize * 0.32);
+        const nameSize = Math.round((fontSize / 100) * scaledBaseSize * 0.26);
         
-        // "Happy" text - positioned above center
+        // Calculate proper line spacing that matches the CSS mb-2 and mb-3 classes
+        // CSS margin-bottom classes translate to specific pixel spacing
+        const mb2Spacing = 8 * scale; // mb-2 = 0.5rem = 8px
+        const mb3Spacing = 12 * scale; // mb-3 = 0.75rem = 12px
+        
+        // Position text lines to match preview exactly
+        // Calculate total text height to center the group properly
+        const totalTextHeight = happySize + mb2Spacing + occasionSize + mb3Spacing + nameSize;
+        const startY = textY - (totalTextHeight / 2) + (happySize / 2);
+        
+        // "Happy" text - top line
         ctx.font = `bold ${happySize}px ${fontFamily}`;
-        ctx.fillText('Happy', textX, textY - lineSpacing * 2);
+        ctx.fillText('Happy', textX, startY);
         
-        // Occasion text - positioned at center  
+        // Occasion text - middle line with mb-2 spacing
         ctx.font = `bold ${occasionSize}px ${fontFamily}`;
+        const occasionY = startY + happySize + mb2Spacing + (occasionSize / 2);
         ctx.fillText(occasionType === 'birthday' ? 'Birthday' : 
                      occasionType === 'anniversary' ? 'Anniversary' :
                      occasionType === 'wedding' ? 'Wedding' :
@@ -209,11 +220,12 @@ export function PhotoPreview({
                      occasionType === 'valentine' ? "Valentine's Day" :
                      occasionType === 'mothers-day' ? "Mother's Day" :
                      occasionType === 'fathers-day' ? "Father's Day" :
-                     'Celebration', textX, textY);
+                     'Celebration', textX, occasionY);
         
-        // Custom name text - positioned below center
+        // Custom name text - bottom line with mb-3 spacing
         ctx.font = `bold ${nameSize}px ${fontFamily}`;
-        ctx.fillText(customText, textX, textY + lineSpacing * 2);
+        const nameY = occasionY + (occasionSize / 2) + mb3Spacing + (nameSize / 2);
+        ctx.fillText(customText, textX, nameY);
         
         // Reset shadow for other drawing operations
         ctx.shadowColor = 'transparent';
