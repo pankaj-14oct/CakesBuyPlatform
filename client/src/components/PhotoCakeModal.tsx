@@ -151,6 +151,7 @@ export default function PhotoCakeModal({
                 imageSize={imageSize}
                 onImageSizeChange={setImageSize}
                 onImageUpload={handleFileUpload}
+                showDownload={true}
                 className="h-full"
               />
             </div>
@@ -221,6 +222,42 @@ export default function PhotoCakeModal({
                   </div>
                 )}
               </div>
+
+              {/* Upload Image Preview */}
+              {uploadedImage && (
+                <div className="mb-4 flex-shrink-0">
+                  <div className="bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded border border-red-200 overflow-hidden">
+                          <img 
+                            src={uploadedImage} 
+                            alt="Upload preview" 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-red-700">
+                            Preview Personalised Image
+                          </p>
+                          <p className="text-xs text-red-600">✓ Saved</p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setUploadedImage('');
+                          setUploadedFile(null);
+                        }}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Resize Section */}
               {uploadedImage && (
