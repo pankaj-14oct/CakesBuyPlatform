@@ -97,7 +97,7 @@ const upload = multer({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // File upload endpoint
+  // Single file upload endpoint
   app.post("/api/upload", upload.single('image'), (req, res) => {
     try {
       if (!req.file) {
@@ -109,6 +109,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "File uploaded successfully", 
         url: fileUrl,
         filename: req.file.filename 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Upload failed" });
+    }
+  });
+
+  // Multiple file upload endpoint for product images
+  app.post("/api/upload/multiple", upload.array('images', 10), (req, res) => {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ message: "No files uploaded" });
+      }
+      
+      const files = req.files as Express.Multer.File[];
+      const uploadedUrls = files.map(file => ({
+        url: `/uploads/${file.filename}`,
+        filename: file.filename
+      }));
+      
+      res.json({ 
+        message: `${files.length} files uploaded successfully`, 
+        files: uploadedUrls
       });
     } catch (error) {
       res.status(500).json({ message: "Upload failed" });

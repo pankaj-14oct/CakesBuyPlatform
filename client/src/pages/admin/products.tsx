@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Edit, Trash2, Package, Star } from 'lucide-react';
+import { Plus, Edit, Trash2, Package, Star, Upload, X, ImageIcon } from 'lucide-react';
 import { Cake, Category } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -55,7 +55,8 @@ export default function AdminProducts() {
   const [weightInput, setWeightInput] = useState({ weight: '', price: '' });
   const [flavorInput, setFlavorInput] = useState('');
   const [tagInput, setTagInput] = useState('');
-  const [imageInput, setImageInput] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -232,18 +233,7 @@ export default function AdminProducts() {
     form.setValue('tags', currentTags.filter((_, i) => i !== index));
   };
 
-  const addImage = () => {
-    if (imageInput.trim()) {
-      const currentImages = form.getValues('images');
-      form.setValue('images', [...currentImages, imageInput.trim()]);
-      setImageInput('');
-    }
-  };
 
-  const removeImage = (index: number) => {
-    const currentImages = form.getValues('images');
-    form.setValue('images', currentImages.filter((_, i) => i !== index));
-  };
 
   const handleBackgroundImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -268,6 +258,47 @@ export default function AdminProducts() {
     } catch (error) {
       toast({ title: "Failed to upload image", variant: "destructive" });
     }
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    
+    for (let i = 0; i < files.length; i++) {
+      formData.append('images', files[i]);
+    }
+
+    try {
+      const response = await fetch('/api/upload/multiple', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const currentImages = form.getValues('images');
+        const newImages = data.files.map((file: any) => file.url);
+        form.setValue('images', [...currentImages, ...newImages]);
+        toast({ title: `${data.files.length} image(s) uploaded successfully!` });
+      } else {
+        toast({ title: "Failed to upload images", variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Failed to upload images", variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const currentImages = form.getValues('images');
+    form.setValue('images', currentImages.filter((_, i) => i !== index));
   };
 
   return (
@@ -407,25 +438,69 @@ export default function AdminProducts() {
 
               {/* Images */}
               <div>
-                <Label>Images (URLs)</Label>
-                <div className="flex space-x-2 mb-2">
-                  <Input
-                    placeholder="Image URL"
-                    value={imageInput}
-                    onChange={(e) => setImageInput(e.target.value)}
-                  />
-                  <Button type="button" onClick={addImage}>Add</Button>
-                </div>
-                <div className="space-y-2">
-                  {form.watch('images').map((image, index) => (
-                    <div key={index} className="flex items-center space-x-2 p-2 border rounded">
-                      <img src={image} alt="" className="w-12 h-12 object-cover rounded" />
-                      <span className="flex-1 text-sm truncate">{image}</span>
-                      <Button type="button" variant="outline" size="sm" onClick={() => removeImage(index)}>
-                        Remove
-                      </Button>
+                <Label>Product Images</Label>
+                <div className="space-y-4">
+                  {/* File Upload Section */}
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <div className="space-y-2">
+                      <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
+                      <div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploading}
+                        >
+                          {isUploading ? (
+                            <>
+                              <Upload className="mr-2 h-4 w-4 animate-spin" />
+                              Uploading...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="mr-2 h-4 w-4" />
+                              Choose Images
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                      <p className="text-sm text-gray-500">
+                        Select multiple images (JPG, PNG, GIF) - Max 10 images, 5MB each
+                      </p>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Image Preview Grid */}
+                  {form.watch('images').length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {form.watch('images').map((image, index) => (
+                        <div key={index} className="relative group">
+                          <img 
+                            src={image} 
+                            alt={`Product image ${index + 1}`} 
+                            className="w-full h-32 object-cover rounded-lg border"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => removeImage(index)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
