@@ -204,7 +204,7 @@ export function PhotoPreview({
                      'Celebration', textX, textY);
         
         // Add custom name text
-        ctx.fillStyle = '#555';
+        ctx.fillStyle = textColor;
         ctx.font = `${Math.round(18 * fontSize / 100)}px ${fontFamily}`;
         ctx.fillText(customText, textX, textY + 30);
       }
@@ -332,8 +332,9 @@ export function PhotoPreview({
                      'Celebration'}
                   </div>
                   <div 
-                    className="text-gray-600 mt-1"
+                    className="mt-1"
                     style={{ 
+                      color: textColor,
                       fontSize: `${Math.round(14 * fontSize / 100)}px`,
                       fontFamily: fontFamily
                     }}
