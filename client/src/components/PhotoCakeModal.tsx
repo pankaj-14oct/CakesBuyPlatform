@@ -8,10 +8,12 @@ import { Slider } from '@/components/ui/slider';
 import { Upload, X, Camera } from 'lucide-react';
 import { PhotoPreview } from './photo-preview';
 
+type OccasionType = 'birthday' | 'anniversary' | 'wedding' | 'graduation' | 'congratulations' | 'valentine' | 'mothers-day' | 'fathers-day' | 'celebration';
+
 interface PhotoCakeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (imageFile: File | null, customText: string, imagePosition?: { x: number; y: number }, textPosition?: { x: number; y: number }, imageSize?: number, occasionType?: 'birthday' | 'anniversary', textColor?: string, fontSize?: number) => void;
+  onSave: (imageFile: File | null, customText: string, imagePosition?: { x: number; y: number }, textPosition?: { x: number; y: number }, imageSize?: number, occasionType?: OccasionType, textColor?: string, fontSize?: number, fontFamily?: string) => void;
   cakePreviewImage?: string;
   backgroundImage?: string;
   initialText?: string;
@@ -40,9 +42,10 @@ export default function PhotoCakeModal({
   const [textPosition, setTextPosition] = useState<Position>({ x: 50, y: 70 });
   const [imageSize, setImageSize] = useState(70);
   const [isDragging, setIsDragging] = useState<'image' | 'text' | null>(null);
-  const [occasionType, setOccasionType] = useState<'birthday' | 'anniversary'>('birthday');
+  const [occasionType, setOccasionType] = useState<OccasionType>('birthday');
   const [textColor, setTextColor] = useState('#DC2626');
   const [fontSize, setFontSize] = useState(100);
+  const [fontFamily, setFontFamily] = useState('Arial');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
@@ -98,7 +101,7 @@ export default function PhotoCakeModal({
   };
 
   const handleSave = () => {
-    onSave(uploadedFile, customText, imagePosition, textPosition, imageSize, occasionType, textColor, fontSize);
+    onSave(uploadedFile, customText, imagePosition, textPosition, imageSize, occasionType, textColor, fontSize, fontFamily);
     onClose();
   };
 
@@ -135,6 +138,7 @@ export default function PhotoCakeModal({
                 occasionType={occasionType}
                 textColor={textColor}
                 fontSize={fontSize}
+                fontFamily={fontFamily}
               />
               {uploadedImage && (
                 <div className="text-center mt-4">
@@ -243,13 +247,20 @@ export default function PhotoCakeModal({
                 {/* Occasion Type */}
                 <div className="mb-4">
                   <Label className="text-sm font-medium mb-2 block">Occasion Type</Label>
-                  <Select value={occasionType} onValueChange={(value: 'birthday' | 'anniversary') => setOccasionType(value)}>
+                  <Select value={occasionType} onValueChange={(value: OccasionType) => setOccasionType(value)}>
                     <SelectTrigger className="border-gray-300 focus:border-red-500">
                       <SelectValue placeholder="Select occasion" />
                     </SelectTrigger>
                     <SelectContent className="max-h-60 overflow-y-auto">
                       <SelectItem value="birthday">Birthday</SelectItem>
                       <SelectItem value="anniversary">Anniversary</SelectItem>
+                      <SelectItem value="wedding">Wedding</SelectItem>
+                      <SelectItem value="graduation">Graduation</SelectItem>
+                      <SelectItem value="congratulations">Congratulations</SelectItem>
+                      <SelectItem value="valentine">Valentine's Day</SelectItem>
+                      <SelectItem value="mothers-day">Mother's Day</SelectItem>
+                      <SelectItem value="fathers-day">Father's Day</SelectItem>
+                      <SelectItem value="celebration">Celebration</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -296,6 +307,26 @@ export default function PhotoCakeModal({
                       />
                     ))}
                   </div>
+                </div>
+
+                {/* Font Style */}
+                <div className="mb-4">
+                  <Label className="text-sm font-medium mb-2 block">Font Style</Label>
+                  <Select value={fontFamily} onValueChange={setFontFamily}>
+                    <SelectTrigger className="border-gray-300 focus:border-red-500">
+                      <SelectValue placeholder="Select font style" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 overflow-y-auto">
+                      <SelectItem value="Arial">Arial (Classic)</SelectItem>
+                      <SelectItem value="Georgia">Georgia (Elegant)</SelectItem>
+                      <SelectItem value="Times New Roman">Times New Roman (Traditional)</SelectItem>
+                      <SelectItem value="Impact">Impact (Bold)</SelectItem>
+                      <SelectItem value="Comic Sans MS">Comic Sans MS (Playful)</SelectItem>
+                      <SelectItem value="Courier New">Courier New (Typewriter)</SelectItem>
+                      <SelectItem value="Verdana">Verdana (Modern)</SelectItem>
+                      <SelectItem value="Trebuchet MS">Trebuchet MS (Rounded)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Font Size */}

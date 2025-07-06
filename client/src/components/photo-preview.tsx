@@ -4,6 +4,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Upload, Heart, Circle, Square, Download } from 'lucide-react';
 
+type OccasionType = 'birthday' | 'anniversary' | 'wedding' | 'graduation' | 'congratulations' | 'valentine' | 'mothers-day' | 'fathers-day' | 'celebration';
+
 interface PhotoPreviewProps {
   shape: 'circle' | 'heart' | 'square';
   backgroundImage?: string;
@@ -16,9 +18,10 @@ interface PhotoPreviewProps {
   showDownload?: boolean;
   textPosition?: { x: number; y: number };
   onTextPositionChange?: (position: { x: number; y: number }) => void;
-  occasionType?: 'birthday' | 'anniversary';
+  occasionType?: OccasionType;
   textColor?: string;
   fontSize?: number;
+  fontFamily?: string;
 }
 
 export function PhotoPreview({ 
@@ -35,7 +38,8 @@ export function PhotoPreview({
   onTextPositionChange,
   occasionType = 'birthday',
   textColor = '#DC2626',
-  fontSize = 100
+  fontSize = 100,
+  fontFamily = 'Arial'
 }: PhotoPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -182,18 +186,26 @@ export function PhotoPreview({
         
         // Add "Happy" text
         ctx.fillStyle = textColor;
-        ctx.font = `bold ${Math.round(32 * fontSize / 100)}px Arial`;
+        ctx.font = `bold ${Math.round(32 * fontSize / 100)}px ${fontFamily}`;
         ctx.textAlign = 'center';
         ctx.fillText('Happy', textX, textY - 40);
         
         // Add occasion text (Birthday or Anniversary)
         ctx.fillStyle = textColor;
-        ctx.font = `bold ${Math.round(36 * fontSize / 100)}px Arial`;
-        ctx.fillText(occasionType === 'birthday' ? 'Birthday' : 'Anniversary', textX, textY);
+        ctx.font = `bold ${Math.round(36 * fontSize / 100)}px ${fontFamily}`;
+        ctx.fillText(occasionType === 'birthday' ? 'Birthday' : 
+                     occasionType === 'anniversary' ? 'Anniversary' :
+                     occasionType === 'wedding' ? 'Wedding' :
+                     occasionType === 'graduation' ? 'Graduation' :
+                     occasionType === 'congratulations' ? 'Congratulations' :
+                     occasionType === 'valentine' ? "Valentine's Day" :
+                     occasionType === 'mothers-day' ? "Mother's Day" :
+                     occasionType === 'fathers-day' ? "Father's Day" :
+                     'Celebration', textX, textY);
         
         // Add custom name text
         ctx.fillStyle = '#555';
-        ctx.font = `${Math.round(18 * fontSize / 100)}px Arial`;
+        ctx.font = `${Math.round(18 * fontSize / 100)}px ${fontFamily}`;
         ctx.fillText(customText, textX, textY + 30);
       }
 
@@ -287,24 +299,47 @@ export function PhotoPreview({
                     top: `${textPosition.y}%`,
                     transform: 'translate(-50%, -50%)',
                     textShadow: '2px 2px 4px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.8)',
-                    filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.8))',
-                    fontSize: `${fontSize}%`
+                    filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.8))'
                   }}
                   onMouseDown={handleTextMouseDown}
                 >
                   <div 
-                    className="text-lg font-bold"
-                    style={{ color: textColor }}
+                    className="font-bold"
+                    style={{ 
+                      color: textColor,
+                      fontSize: `${Math.round(18 * fontSize / 100)}px`,
+                      fontFamily: fontFamily
+                    }}
                   >
                     Happy
                   </div>
                   <div 
-                    className="text-xl font-bold"
-                    style={{ color: textColor }}
+                    className="font-bold"
+                    style={{ 
+                      color: textColor,
+                      fontSize: `${Math.round(22 * fontSize / 100)}px`,
+                      fontFamily: fontFamily
+                    }}
                   >
-                    {occasionType === 'birthday' ? 'Birthday' : 'Anniversary'}
+                    {occasionType === 'birthday' ? 'Birthday' : 
+                     occasionType === 'anniversary' ? 'Anniversary' :
+                     occasionType === 'wedding' ? 'Wedding' :
+                     occasionType === 'graduation' ? 'Graduation' :
+                     occasionType === 'congratulations' ? 'Congratulations' :
+                     occasionType === 'valentine' ? "Valentine's Day" :
+                     occasionType === 'mothers-day' ? "Mother's Day" :
+                     occasionType === 'fathers-day' ? "Father's Day" :
+                     'Celebration'}
                   </div>
-                  <div className="text-gray-600 text-sm mt-1">{customText}</div>
+                  <div 
+                    className="text-gray-600 mt-1"
+                    style={{ 
+                      fontSize: `${Math.round(14 * fontSize / 100)}px`,
+                      fontFamily: fontFamily
+                    }}
+                  >
+                    {customText}
+                  </div>
                 </div>
               )}
             </div>

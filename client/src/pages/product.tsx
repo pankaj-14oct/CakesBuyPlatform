@@ -34,9 +34,10 @@ export default function ProductPage() {
   const [imagePosition, setImagePosition] = useState<{ x: number; y: number }>({ x: 50, y: 40 });
   const [textPosition, setTextPosition] = useState<{ x: number; y: number }>({ x: 50, y: 70 });
   const [imageSize, setImageSize] = useState(32);
-  const [occasionType, setOccasionType] = useState<'birthday' | 'anniversary'>('birthday');
+  const [occasionType, setOccasionType] = useState<'birthday' | 'anniversary' | 'wedding' | 'graduation' | 'congratulations' | 'valentine' | 'mothers-day' | 'fathers-day' | 'celebration'>('birthday');
   const [textColor, setTextColor] = useState('#DC2626');
   const [fontSize, setFontSize] = useState(100);
+  const [fontFamily, setFontFamily] = useState('Arial');
   const { dispatch } = useCart();
   const { toast } = useToast();
 
@@ -105,7 +106,7 @@ export default function ProductPage() {
   // Check if this is a photo cake
   const isPhotoCake = cake.isPhotoCake || false;
 
-  const handlePhotoModalSave = (imageFile: File | null, text: string, imgPos?: { x: number; y: number }, txtPos?: { x: number; y: number }, imgSize?: number, occasion?: 'birthday' | 'anniversary', color?: string, fontScale?: number) => {
+  const handlePhotoModalSave = (imageFile: File | null, text: string, imgPos?: { x: number; y: number }, txtPos?: { x: number; y: number }, imgSize?: number, occasion?: 'birthday' | 'anniversary' | 'wedding' | 'graduation' | 'congratulations' | 'valentine' | 'mothers-day' | 'fathers-day' | 'celebration', color?: string, fontScale?: number, font?: string) => {
     if (imageFile) {
       const imageUrl = URL.createObjectURL(imageFile);
       setUploadedImage(imageUrl);
@@ -118,10 +119,11 @@ export default function ProductPage() {
     if (occasion) setOccasionType(occasion);
     if (color) setTextColor(color);
     if (fontScale) setFontSize(fontScale);
+    if (font) setFontFamily(font);
     
     toast({
       title: "Photo customization saved!",
-      description: "Your photo, text, colors, and sizing have been saved."
+      description: "Your photo, text, colors, sizing, and font style have been saved."
     });
   };
 
@@ -630,9 +632,9 @@ export default function ProductPage() {
         onClose={() => setShowPhotoModal(false)}
         onSave={handlePhotoModalSave}
         cakePreviewImage={cake.images?.[0] || '/api/placeholder/400/400'}
-        backgroundImage={cake.backgroundImage ?? undefined}
+        backgroundImage={cake.backgroundImage || undefined}
         initialText={customText}
-        photoPreviewShape={(['circle', 'heart', 'square'].includes(cake.photoPreviewShape) ? cake.photoPreviewShape : 'circle') as 'circle' | 'heart' | 'square'}
+        photoPreviewShape={(cake.photoPreviewShape && ['circle', 'heart', 'square'].includes(cake.photoPreviewShape) ? cake.photoPreviewShape : 'circle') as 'circle' | 'heart' | 'square'}
       />
     </div>
   );
