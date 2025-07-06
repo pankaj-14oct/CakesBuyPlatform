@@ -141,8 +141,11 @@ export default function PhotoCakeModal({
                 fontFamily={fontFamily}
               />
               {uploadedImage && (
-                <div className="text-center mt-4">
+                <div className="text-center mt-4 space-y-2">
                   <span className="text-sm text-gray-600">💡 Drag the image to adjust it</span>
+                  <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                    Current zoom: {imageSize}%
+                  </div>
                 </div>
               )}
             </div>

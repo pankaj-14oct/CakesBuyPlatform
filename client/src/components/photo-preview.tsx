@@ -352,9 +352,7 @@ export function PhotoPreview({
                   height: `${imageSize}%`,
                   left: `${imagePosition.x}%`,
                   top: `${imagePosition.y}%`,
-                  transform: 'translate(-50%, -50%)',
-                  minWidth: '100%',
-                  minHeight: '100%'
+                  transform: 'translate(-50%, -50%)'
                 }}
                 onMouseDown={handleImageMouseDown}
                 draggable={false}
@@ -462,22 +460,6 @@ export function PhotoPreview({
           
           {uploadedImage && (
             <div className="space-y-4">
-              {/* Image Size Control */}
-              {onImageSizeChange && (
-                <div className="px-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Image Size: {imageSize}%
-                  </label>
-                  <Slider
-                    value={[imageSize]}
-                    onValueChange={(value) => onImageSizeChange(value[0])}
-                    min={50}
-                    max={150}
-                    step={5}
-                    className="w-full"
-                  />
-                </div>
-              )}
               
               <Button 
                 variant="outline" 
