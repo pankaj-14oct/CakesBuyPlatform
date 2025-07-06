@@ -194,27 +194,31 @@ export default function PhotoCakeModal({
                       </Button>
                     </div>
 
-                    {/* Resize Slider */}
+                    {/* Image Zoom Slider */}
                     <div>
                       <div className="flex items-center gap-2 mb-3">
-                        <span className="text-sm font-medium">🔄 Resize</span>
+                        <span className="text-sm font-medium">🔍 Zoom Image</span>
                       </div>
+                      <p className="text-xs text-gray-600 mb-3">
+                        Drag the slider to zoom in/out on your image
+                      </p>
                       <div className="flex items-center gap-3">
-                        <span className="text-xs text-gray-500">Small</span>
+                        <span className="text-xs text-gray-500">Zoom Out</span>
                         <div className="flex-1">
                           <input
                             type="range"
-                            min="20"
-                            max="80"
+                            min="100"
+                            max="200"
+                            step="5"
                             value={imageSize}
                             onChange={(e) => setImageSize(Number(e.target.value))}
                             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                             style={{
-                              background: `linear-gradient(to right, #ef4444 0%, #ef4444 ${((imageSize - 20) / (80 - 20)) * 100}%, #e5e7eb ${((imageSize - 20) / (80 - 20)) * 100}%, #e5e7eb 100%)`
+                              background: `linear-gradient(to right, #ea580c 0%, #ea580c ${((imageSize - 100) / (200 - 100)) * 100}%, #fed7aa ${((imageSize - 100) / (200 - 100)) * 100}%, #fed7aa 100%)`
                             }}
                           />
                         </div>
-                        <span className="text-xs text-gray-500">Large</span>
+                        <span className="text-xs text-gray-500">Zoom In</span>
                       </div>
                     </div>
                   </div>

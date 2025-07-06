@@ -267,24 +267,7 @@ export function PhotoPreview({
           {/* Main Preview */}
           {renderPreviewWithOverlay()}
           
-          {/* Image Zoom Slider */}
-          {uploadedImage && onImageSizeChange && (
-            <div className="space-y-2 px-4">
-              <p className="text-sm text-gray-600">Drag the slider to zoom in/out on your image</p>
-              <Slider
-                value={[imageSize]}
-                onValueChange={(value) => onImageSizeChange(value[0])}
-                max={200}
-                min={100}
-                step={5}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-gray-500">
-                <span>Zoom Out</span>
-                <span>Zoom In</span>
-              </div>
-            </div>
-          )}
+
           
 
           
