@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Upload, X, Camera } from 'lucide-react';
+import { PhotoPreview } from './photo-preview';
 
 interface PhotoCakeModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface PhotoCakeModalProps {
   cakePreviewImage?: string;
   backgroundImage?: string;
   initialText?: string;
+  photoPreviewShape?: 'circle' | 'heart' | 'square';
 }
 
 interface Position {
@@ -25,7 +27,8 @@ export default function PhotoCakeModal({
   onSave,
   cakePreviewImage,
   backgroundImage,
-  initialText = ''
+  initialText = '',
+  photoPreviewShape = 'circle'
 }: PhotoCakeModalProps) {
   const [uploadedImage, setUploadedImage] = useState<string>('');
   const [customText, setCustomText] = useState(initialText);
@@ -70,7 +73,13 @@ export default function PhotoCakeModal({
     }
   };
 
-  const handleFileUpload = (file: File) => {
+  const handleFileUpload = (file: File | null) => {
+    if (!file) {
+      // Handle removal
+      setUploadedImage('');
+      setUploadedFile(null);
+      return;
+    }
     const imageUrl = URL.createObjectURL(file);
     setUploadedImage(imageUrl);
     setUploadedFile(file);
@@ -133,120 +142,15 @@ export default function PhotoCakeModal({
           </DialogHeader>
           
           <div className="flex-1 flex overflow-hidden">
-            {/* Left Side - Cake Preview */}
-            <div className="w-1/2 p-6 bg-gray-50 flex items-center justify-center">
-              <div 
-                ref={previewRef}
-                className="relative w-80 h-80 cursor-crosshair"
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-              >
-                {/* Base cake image with background */}
-                <img 
-                  src={backgroundImage || cakePreviewImage || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgNDAwIj4KICA8IS0tIENha2UgQmFzZSAtLT4KICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIyMDAiIHI9IjE5MCIgZmlsbD0iI2Y0ZTRjMSIgc3Ryb2tlPSIjZDRjNGExIiBzdHJva2Utd2lkdGg9IjQiLz4KICA8IS0tIENha2UgTGF5ZXJzIC0tPgogIDxjaXJjbGUgY3g9IjIwMCIgY3k9IjIwMCIgcj0iMTgwIiBmaWxsPSIjZjhmMGQ4IiBzdHJva2U9IiNlOGQ4YzgiIHN0cm9rZS13aWR0aD0iMiIvPgogIDxjaXJjbGUgY3g9IjIwMCIgY3k9IjIwMCIgcj0iMTcwIiBmaWxsPSIjZmRmNmUzIiBzdHJva2U9IiNlZGUzZDMiIHN0cm9rZS13aWR0aD0iMSIvPgogIDwhLS0gRGVjb3JhdGl2ZSBCb3JkZXIgLS0+CiAgPGNpcmNsZSBjeD0iMjAwIiBjeT0iMjAwIiByPSIxNzUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2Q0YjhhMSIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtZGFzaGFycmF5PSI4LDQiLz4KICA8IS0tIFBob3RvIEFyZWEgUGxhY2Vob2xkZXIgLS0+CiAgPGNpcmNsZSBjeD0iMjAwIiBjeT0iMTYwIiByPSI3MCIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjZTBlMGUwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cmVjdCB4PSIxNjAiIHk9IjEyMCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiByeD0iOCIgZmlsbD0iI2Y4ZjhmOCIgc3Ryb2tlPSIjZDBkMGQwIiBzdHJva2Utd2lkdGg9IjEiLz4KICA8IS0tIFBob3RvIHBsYWNlaG9sZGVyIGljb24gLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjAwLDE2MCkiPgogICAgPGNpcmNsZSByPSIyMCIgZmlsbD0iI2U4ZThlOCIvPgogICAgPHBhdGggZD0iTSAtMTIsLTggTCAxMiwtOCBMIDgsLTQgTCAtOCwtNCBaIiBmaWxsPSIjYzBjMGMwIi8+CiAgICA8Y2lyY2xlIHI9IjYiIGZpbGw9IiNhMGEwYTAiLz4KICAgIDxjaXJjbGUgcj0iMyIgZmlsbD0iI2ZmZmZmZiIvPgogIDwvZz4KICA8IS0tIFRleHQgcGxhY2Vob2xkZXIgYXJlYSAtLT4KICA8cmVjdCB4PSIxNDAiIHk9IjI1MCIgd2lkdGg9IjEyMCIgaGVpZ2h0PSIyNSIgcng9IjEyIiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNlMGUwZTAiIHN0cm9rZS13aWR0aD0iMSIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMjY3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM5OTkiPllvdXIgTWVzc2FnZTwvdGV4dD4KICA8IS0tIERlY29yYXRpdmUgZWxlbWVudHMgLS0+CiAgPGcgc3Ryb2tlPSIjZDRiOGExIiBzdHJva2Utd2lkdGg9IjIiIGZpbGw9Im5vbmUiPgogICAgPCEtLSBUb3AgZGVjb3JhdGl2ZSBzd2lybHMgLS0+CiAgICA8cGF0aCBkPSJNIDgwLDEwMCBRIDkwLDkwIDEwMCwxMDAgUSAxMTAsMTEwIDEyMCwxMDAiLz4KICAgIDxwYXRoIGQ9Ik0gMjgwLDEwMCBRIDI5MCw5MCAzMDAsMTAwIFEgMzEwLDExMCAzMjAsMTAwIi8+CiAgICA8IS0tIEJvdHRvbSBkZWNvcmF0aXZlIHN3aXJscyAtLT4KICAgIDxwYXRoIGQ9Ik0gODAsMzAwIFEgOTAsMzEwIDEwMCwzMDAgUSAxMTAsMjkwIDEyMCwzMDAiLz4KICAgIDxwYXRoIGQ9Ik0gMjgwLDMwMCBRIDI5MCwzMTAgMzAwLDMwMCBRIDMxMCwyOTAgMzIwLDMwMCIvPgogIDwvZz4KICA8IS0tIFNtYWxsIGRlY29yYXRpdmUgZG90cyAtLT4KICA8Y2lyY2xlIGN4PSIxMjAiIGN5PSIxNDAiIHI9IjMiIGZpbGw9IiNkNGI4YTEiLz4KICA8Y2lyY2xlIGN4PSIyODAiIGN5PSIxNDAiIHI9IjMiIGZpbGw9IiNkNGI4YTEiLz4KICA8Y2lyY2xlIGN4PSIxMjAiIGN5PSIyNjAiIHI9IjMiIGZpbGw9IiNkNGI4YTEiLz4KICA8Y2lyY2xlIGN4PSIyODAiIGN5PSIyNjAiIHI9IjMiIGZpbGw9IiNkNGI4YTEiLz4KICA8IS0tIENyZWFtIGJvcmRlciBkZXRhaWwgLS0+CiAgPGNpcmNsZSBjeD0iMjAwIiBjeT0iMjAwIiByPSIxODUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2YwZThkOCIgc3Ryb2tlLXdpZHRoPSIxIi8+Cjwvc3ZnPg=='} 
-                  alt="Cake preview"
-                  className="w-full h-full object-cover rounded-full shadow-lg"
-                  draggable={false}
-                />
-                
-                {/* Uploaded image overlay - draggable and resizable */}
-                {uploadedImage && (
-                  <div 
-                    className="absolute rounded-lg overflow-hidden border-2 border-white shadow-lg cursor-move hover:border-blue-400 transition-colors"
-                    style={{
-                      left: `${imagePosition.x}%`,
-                      top: `${imagePosition.y}%`,
-                      width: `${imageSize}%`,
-                      height: `${imageSize}%`,
-                      transform: 'translate(-50%, -50%)',
-                      zIndex: isDragging === 'image' ? 20 : 10
-                    }}
-                    onMouseDown={(e) => handleMouseDown('image', e)}
-                  >
-                    <img 
-                      src={uploadedImage} 
-                      alt="Uploaded photo"
-                      className="w-full h-full object-cover"
-                      draggable={false}
-                    />
-                    {/* Drag indicator overlay */}
-                    <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
-                      <div className="text-white text-xs font-semibold opacity-0 hover:opacity-100 bg-black bg-opacity-50 px-2 py-1 rounded">
-                        🤏 Drag the image to adjust it
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Custom text overlay - draggable */}
-                {customText && (
-                  <div 
-                    className="absolute bg-white bg-opacity-90 px-3 py-2 rounded-lg shadow-md cursor-move hover:bg-opacity-100 hover:shadow-lg transition-all duration-200"
-                    style={{
-                      left: `${textPosition.x}%`,
-                      top: `${textPosition.y}%`,
-                      transform: 'translate(-50%, -50%)',
-                      zIndex: isDragging === 'text' ? 20 : 10
-                    }}
-                    onMouseDown={(e) => handleMouseDown('text', e)}
-                  >
-                    <p className="text-center font-semibold text-brown text-sm whitespace-nowrap">
-                      {customText}
-                    </p>
-                    {/* Drag indicator */}
-                    <div className="absolute inset-0 bg-blue-500 bg-opacity-0 hover:bg-opacity-10 rounded-lg transition-all duration-200"></div>
-                  </div>
-                )}
-                
-                {/* Placeholder for no image */}
-                {!uploadedImage && (
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-white bg-opacity-80">
-                    <div className="text-center">
-                      <Camera className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-xs text-gray-500">Your photo here</p>
-                      <button 
-                        onClick={() => {
-                          // Add a demo photo for testing
-                          const demoPhotoSvg = `data:image/svg+xml;base64,${btoa(`
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-                              <rect width="200" height="200" fill="#87CEEB"/>
-                              <circle cx="100" cy="80" r="25" fill="#FDBCB4"/>
-                              <circle cx="90" cy="75" r="3" fill="#000"/>
-                              <circle cx="110" cy="75" r="3" fill="#000"/>
-                              <path d="M85,85 Q100,95 115,85" stroke="#000" stroke-width="2" fill="none"/>
-                              <rect x="70" y="105" width="60" height="80" fill="#FF6B6B"/>
-                              <rect x="50" y="120" width="20" height="50" fill="#FDBCB4"/>
-                              <rect x="130" y="120" width="20" height="50" fill="#FDBCB4"/>
-                              <text x="100" y="190" text-anchor="middle" font-family="Arial" font-size="12" fill="#fff">Demo Photo</text>
-                            </svg>
-                          `)}`;
-                          
-                          // Create a blob and simulate file upload
-                          fetch(demoPhotoSvg)
-                            .then(res => res.blob())
-                            .then(blob => {
-                              const file = new File([blob], 'demo-photo.svg', { type: 'image/svg+xml' });
-                              const imageUrl = URL.createObjectURL(file);
-                              setUploadedImage(imageUrl);
-                              setUploadedFile(file);
-                            });
-                        }}
-                        className="mt-2 text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                      >
-                        Try Demo Photo
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Instructions overlay */}
-                {uploadedImage && (
-                  <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-lg opacity-75">
-                    💡 Drag image & text to position
-                  </div>
-                )}
-              </div>
+            {/* Left Side - Photo Preview */}
+            <div className="w-1/2 p-6 bg-gray-50">
+              <PhotoPreview
+                shape={photoPreviewShape}
+                backgroundImage={backgroundImage}
+                uploadedImage={uploadedImage}
+                onImageUpload={handleFileUpload}
+                className="h-full"
+              />
             </div>
             
             {/* Right Side - Customization Options */}

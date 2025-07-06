@@ -37,6 +37,7 @@ const productSchema = z.object({
   isBestseller: z.boolean().default(false),
   isPhotoCake: z.boolean().default(false),
   backgroundImage: z.string().optional(),
+  photoPreviewShape: z.string().default("circle"),
   tags: z.array(z.string()).default([]),
   rating: z.string().default("0"),
   reviewCount: z.number().default(0),
@@ -85,6 +86,7 @@ export default function AdminProducts() {
       isBestseller: false,
       isPhotoCake: false,
       backgroundImage: '',
+      photoPreviewShape: 'circle',
       tags: [],
       rating: "0",
       reviewCount: 0,
@@ -610,6 +612,27 @@ export default function AdminProducts() {
                   <p className="text-xs text-gray-500 mt-1">
                     This image will appear as the background, with user's uploaded photo as foreground
                   </p>
+                  
+                  {/* Photo Preview Shape Selector */}
+                  <div className="mt-4">
+                    <Label>Photo Preview Shape</Label>
+                    <Select 
+                      value={form.watch('photoPreviewShape')} 
+                      onValueChange={(value) => form.setValue('photoPreviewShape', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select preview shape" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="circle">Circle</SelectItem>
+                        <SelectItem value="heart">Heart</SelectItem>
+                        <SelectItem value="square">Square</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Users will see their uploaded photo in this shape on the preview
+                    </p>
+                  </div>
                 </div>
               )}
 

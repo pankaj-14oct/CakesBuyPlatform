@@ -625,7 +625,8 @@ export default function ProductPage() {
         onSave={handlePhotoModalSave}
         cakePreviewImage={cake.images?.[0] || '/api/placeholder/400/400'}
         backgroundImage={cake.backgroundImage}
-        initialText={customText}t={customText}
+        initialText={customText}
+        photoPreviewShape={cake.photoPreviewShape || 'circle'}
       />
     </div>
   );
