@@ -44,6 +44,8 @@ export function PhotoPreview({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [imagePosition, setImagePosition] = useState({ x: 50, y: 50 });
+  const [isImageDragging, setIsImageDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleTextMouseDown = (e: React.MouseEvent) => {
@@ -64,23 +66,59 @@ export function PhotoPreview({
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !onTextPositionChange) return;
+    if (isDragging && onTextPositionChange) {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (rect) {
+        const x = e.clientX - rect.left - dragOffset.x;
+        const y = e.clientY - rect.top - dragOffset.y;
+        
+        // Convert to percentage
+        const newX = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        const newY = Math.max(0, Math.min(100, (y / rect.height) * 100));
+        
+        onTextPositionChange({ x: newX, y: newY });
+      }
+    }
+    
+    if (isImageDragging) {
+      handleImageMove(e);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setIsImageDragging(false);
+  };
+
+  const handleImageMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsImageDragging(true);
+    
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) {
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      setDragOffset({
+        x: x - (imagePosition.x * rect.width / 100),
+        y: y - (imagePosition.y * rect.height / 100)
+      });
+    }
+  };
+
+  const handleImageMove = (e: React.MouseEvent) => {
+    if (!isImageDragging) return;
     
     const rect = containerRef.current?.getBoundingClientRect();
     if (rect) {
       const x = e.clientX - rect.left - dragOffset.x;
       const y = e.clientY - rect.top - dragOffset.y;
       
-      // Convert to percentage
-      const newX = Math.max(0, Math.min(100, (x / rect.width) * 100));
-      const newY = Math.max(0, Math.min(100, (y / rect.height) * 100));
+      // Convert to percentage and constrain within bounds
+      const newX = Math.max(10, Math.min(90, (x / rect.width) * 100));
+      const newY = Math.max(10, Math.min(90, (y / rect.height) * 100));
       
-      onTextPositionChange({ x: newX, y: newY });
+      setImagePosition({ x: newX, y: newY });
     }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
   };
 
   const getShapeClasses = () => {
@@ -304,18 +342,22 @@ export function PhotoPreview({
                 borderRadius: shape === 'square' ? '16px' : '0'
               }}
             >
-              {/* Image with zoom functionality - keeps circle fixed, zooms image within */}
+              {/* Draggable Image with zoom functionality */}
               <img 
                 src={uploadedImage} 
                 alt="Uploaded photo" 
-                className="absolute top-1/2 left-1/2 object-cover"
+                className="absolute object-cover cursor-move select-none"
                 style={{
                   width: `${imageSize}%`,
                   height: `${imageSize}%`,
+                  left: `${imagePosition.x}%`,
+                  top: `${imagePosition.y}%`,
                   transform: 'translate(-50%, -50%)',
                   minWidth: '100%',
                   minHeight: '100%'
                 }}
+                onMouseDown={handleImageMouseDown}
+                draggable={false}
               />
               
               {/* Draggable text overlay */}
@@ -405,6 +447,11 @@ export function PhotoPreview({
           <p className="text-sm text-gray-600">
             Your uploaded photo will appear in {shape} shape
           </p>
+          {uploadedImage && (
+            <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded-lg">
+              💡 <strong>Drag the image</strong> to position it within the {shape} shape
+            </div>
+          )}
           
           {/* Main Preview */}
           {renderPreviewWithOverlay()}
@@ -414,7 +461,24 @@ export function PhotoPreview({
 
           
           {uploadedImage && (
-            <div className="space-y-2">
+            <div className="space-y-4">
+              {/* Image Size Control */}
+              {onImageSizeChange && (
+                <div className="px-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Image Size: {imageSize}%
+                  </label>
+                  <Slider
+                    value={[imageSize]}
+                    onValueChange={(value) => onImageSizeChange(value[0])}
+                    min={50}
+                    max={150}
+                    step={5}
+                    className="w-full"
+                  />
+                </div>
+              )}
+              
               <Button 
                 variant="outline" 
                 onClick={() => {

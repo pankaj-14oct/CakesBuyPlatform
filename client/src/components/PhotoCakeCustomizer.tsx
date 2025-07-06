@@ -15,6 +15,8 @@ interface PhotoCakeCustomizerProps {
   uploadedImage?: string;
   customText?: string;
   isPhotoCake?: boolean;
+  onImagePositionChange?: (position: { x: number; y: number }) => void;
+  imagePosition?: { x: number; y: number };
 }
 
 export default function PhotoCakeCustomizer({
@@ -22,7 +24,9 @@ export default function PhotoCakeCustomizer({
   onTextChange,
   uploadedImage,
   customText = '',
-  isPhotoCake = false
+  isPhotoCake = false,
+  onImagePositionChange,
+  imagePosition = { x: 50, y: 50 }
 }: PhotoCakeCustomizerProps) {
   const [dragActive, setDragActive] = useState(false);
   const [showCustomizer, setShowCustomizer] = useState(true);
@@ -110,6 +114,8 @@ export default function PhotoCakeCustomizer({
               uploadedImage={uploadedImage}
               shape="heart"
               onRemove={removeImage}
+              onImagePositionChange={onImagePositionChange}
+              imagePosition={imagePosition}
             />
           ) : (
             <div
