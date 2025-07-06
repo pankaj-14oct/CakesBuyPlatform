@@ -27,36 +27,7 @@ export function PhotoPreview({
   className = "",
   showDownload = false
 }: PhotoPreviewProps) {
-  const [isDragging, setIsDragging] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && onImageUpload) {
-      onImageUpload(file);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith('image/') && onImageUpload) {
-      onImageUpload(file);
-    }
-  };
 
   const getShapeClasses = () => {
     switch (shape) {
@@ -308,37 +279,7 @@ export function PhotoPreview({
             </div>
           )}
           
-          {/* Upload Section */}
-          <div 
-            className={`border-2 border-dashed rounded-lg p-4 transition-colors ${
-              isDragging ? 'border-blue-400 bg-blue-50' : 'border-gray-300'
-            }`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-            <div className="text-center space-y-2">
-              <Upload className="w-8 h-8 mx-auto text-gray-400" />
-              <p className="text-sm text-gray-600">
-                Drag & drop your photo here or click to select
-              </p>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => fileInputRef.current?.click()}
-                className="mt-2"
-              >
-                Choose Photo
-              </Button>
-            </div>
-          </div>
+
           
           {uploadedImage && (
             <div className="space-y-2">
