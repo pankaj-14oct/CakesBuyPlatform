@@ -1,6 +1,6 @@
 import {
   users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews, eventReminders, otpVerifications,
-  loyaltyTransactions, loyaltyRewards, userRewards, invoices, walletTransactions, adminConfigs,
+  loyaltyTransactions, loyaltyRewards, userRewards, invoices, walletTransactions, adminConfigs, deliveryBoys,
   type User, type InsertUser, type Category, type InsertCategory,
   type Cake, type InsertCake, type Addon, type InsertAddon,
   type Order, type InsertOrder, type DeliveryArea, type InsertDeliveryArea,
@@ -8,7 +8,8 @@ import {
   type EventReminder, type InsertEventReminder, type OtpVerification, type InsertOtpVerification,
   type LoyaltyTransaction, type InsertLoyaltyTransaction, type LoyaltyReward, type InsertLoyaltyReward,
   type UserReward, type InsertUserReward, type Invoice, type InsertInvoice,
-  type WalletTransaction, type InsertWalletTransaction, type AdminConfig, type InsertAdminConfig
+  type WalletTransaction, type InsertWalletTransaction, type AdminConfig, type InsertAdminConfig,
+  type DeliveryBoy, type InsertDeliveryBoy
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, and, desc, isNotNull, or, gte, lte } from "drizzle-orm";
@@ -135,6 +136,19 @@ export interface IStorage {
   updateAdminConfig(key: string, value: string, updatedBy?: number): Promise<void>;
   deleteAdminConfig(key: string): Promise<void>;
 
+  // Delivery Boys management
+  createDeliveryBoy(deliveryBoy: InsertDeliveryBoy): Promise<DeliveryBoy>;
+  getDeliveryBoy(id: number): Promise<DeliveryBoy | undefined>;
+  getDeliveryBoyByPhone(phone: string): Promise<DeliveryBoy | undefined>;
+  getAllDeliveryBoys(): Promise<DeliveryBoy[]>;
+  getActiveDeliveryBoys(): Promise<DeliveryBoy[]>;
+  updateDeliveryBoy(id: number, updates: Partial<DeliveryBoy>): Promise<void>;
+  deleteDeliveryBoy(id: number): Promise<void>;
+  
+  // Order assignment to delivery boys
+  assignOrderToDeliveryBoy(orderId: number, deliveryBoyId: number): Promise<void>;
+  getDeliveryBoyOrders(deliveryBoyId: number, status?: string): Promise<Order[]>;
+  updateOrderAssignment(orderId: number, status: string, deliveryBoyId?: number): Promise<void>;
 
 }
 
@@ -869,6 +883,89 @@ export class DatabaseStorage implements IStorage {
     await db.delete(adminConfigs).where(eq(adminConfigs.key, key));
   }
 
+  // Delivery Boys Management
+  async createDeliveryBoy(deliveryBoy: InsertDeliveryBoy): Promise<DeliveryBoy> {
+    const deliveryBoyData = {
+      ...deliveryBoy,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    const [newDeliveryBoy] = await db.insert(deliveryBoys).values(deliveryBoyData).returning();
+    return newDeliveryBoy;
+  }
+
+  async getDeliveryBoy(id: number): Promise<DeliveryBoy | undefined> {
+    const [deliveryBoy] = await db.select().from(deliveryBoys).where(eq(deliveryBoys.id, id));
+    return deliveryBoy || undefined;
+  }
+
+  async getDeliveryBoyByPhone(phone: string): Promise<DeliveryBoy | undefined> {
+    const [deliveryBoy] = await db.select().from(deliveryBoys).where(eq(deliveryBoys.phone, phone));
+    return deliveryBoy || undefined;
+  }
+
+  async getAllDeliveryBoys(): Promise<DeliveryBoy[]> {
+    return db.select().from(deliveryBoys).orderBy(deliveryBoys.name);
+  }
+
+  async getActiveDeliveryBoys(): Promise<DeliveryBoy[]> {
+    return db.select().from(deliveryBoys)
+      .where(eq(deliveryBoys.isActive, true))
+      .orderBy(deliveryBoys.name);
+  }
+
+  async updateDeliveryBoy(id: number, updates: Partial<DeliveryBoy>): Promise<void> {
+    await db.update(deliveryBoys)
+      .set({
+        ...updates,
+        updatedAt: new Date()
+      })
+      .where(eq(deliveryBoys.id, id));
+  }
+
+  async deleteDeliveryBoy(id: number): Promise<void> {
+    await db.delete(deliveryBoys).where(eq(deliveryBoys.id, id));
+  }
+
+  // Order assignment to delivery boys
+  async assignOrderToDeliveryBoy(orderId: number, deliveryBoyId: number): Promise<void> {
+    await db.update(orders)
+      .set({
+        deliveryBoyId,
+        assignedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(orders.id, orderId));
+  }
+
+  async getDeliveryBoyOrders(deliveryBoyId: number, status?: string): Promise<Order[]> {
+    if (status) {
+      return db.select().from(orders)
+        .where(and(eq(orders.deliveryBoyId, deliveryBoyId), eq(orders.status, status)))
+        .orderBy(desc(orders.createdAt));
+    }
+    
+    return db.select().from(orders)
+      .where(eq(orders.deliveryBoyId, deliveryBoyId))
+      .orderBy(desc(orders.createdAt));
+  }
+
+  async updateOrderAssignment(orderId: number, status: string, deliveryBoyId?: number): Promise<void> {
+    const updateData: any = {
+      status,
+      updatedAt: new Date()
+    };
+
+    if (status === 'out_for_delivery' && deliveryBoyId) {
+      updateData.pickedUpAt = new Date();
+    } else if (status === 'delivered') {
+      updateData.deliveredAt = new Date();
+    }
+
+    await db.update(orders)
+      .set(updateData)
+      .where(eq(orders.id, orderId));
+  }
 
 }
 

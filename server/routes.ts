@@ -15,6 +15,7 @@ import {
   insertEventReminderSchema,
   insertLoyaltyRewardSchema,
   insertInvoiceSchema,
+  insertDeliveryBoySchema,
   loginSchema,
   registerSchema,
   addressSchema,
@@ -24,15 +25,20 @@ import {
   verifyOtpSchema,
   otpRegisterSchema,
   forgotPasswordSchema,
-  resetPasswordSchema
+  resetPasswordSchema,
+  deliveryBoyLoginSchema,
+  deliveryBoyRegisterSchema
 } from "@shared/schema";
 import { 
   generateToken, 
+  generateDeliveryBoyToken,
   hashPassword, 
   comparePasswords, 
   authenticateToken, 
+  authenticateDeliveryBoy,
   optionalAuth, 
-  type AuthRequest 
+  type AuthRequest,
+  type DeliveryBoyAuthRequest
 } from "./auth";
 import { sendReminderEmail, type ReminderEmailData, sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, type OrderEmailData, sendWelcomeEmail, type WelcomeEmailData } from "./email-service";
 import { createInvoiceForOrder, updateInvoiceStatus, getInvoiceByOrderId, getInvoiceByNumber, getUserInvoices, getInvoiceWithOrder, getInvoiceDisplayData } from "./invoice-service";
@@ -2001,6 +2007,253 @@ CakesBuy
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to create bulk reminders" });
+    }
+  });
+
+  // ============== DELIVERY SYSTEM ROUTES ==============
+
+  // Delivery Boy Authentication Routes
+  app.post("/api/delivery/register", async (req, res) => {
+    try {
+      const validatedData = deliveryBoyRegisterSchema.parse(req.body);
+      
+      // Check if delivery boy already exists
+      const existingDeliveryBoy = await storage.getDeliveryBoyByPhone(validatedData.phone);
+      if (existingDeliveryBoy) {
+        return res.status(400).json({ message: "Phone number already registered" });
+      }
+
+      // Hash password and create delivery boy
+      const hashedPassword = await hashPassword(validatedData.password);
+      const deliveryBoy = await storage.createDeliveryBoy({
+        ...validatedData,
+        password: hashedPassword
+      });
+
+      res.status(201).json({
+        message: "Delivery boy registered successfully",
+        deliveryBoy: { id: deliveryBoy.id, name: deliveryBoy.name, phone: deliveryBoy.phone }
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Validation failed", 
+          errors: error.errors 
+        });
+      }
+      res.status(500).json({ message: "Registration failed" });
+    }
+  });
+
+  app.post("/api/delivery/login", async (req, res) => {
+    try {
+      const validatedData = deliveryBoyLoginSchema.parse(req.body);
+      
+      const deliveryBoy = await storage.getDeliveryBoyByPhone(validatedData.phone);
+      if (!deliveryBoy) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      if (!deliveryBoy.isActive) {
+        return res.status(401).json({ message: "Account is disabled. Contact admin." });
+      }
+
+      const isPasswordValid = await comparePasswords(validatedData.password, deliveryBoy.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      const token = generateDeliveryBoyToken(deliveryBoy.id, deliveryBoy.phone, deliveryBoy.name);
+      
+      res.json({
+        message: "Login successful",
+        token,
+        deliveryBoy: {
+          id: deliveryBoy.id,
+          name: deliveryBoy.name,
+          phone: deliveryBoy.phone,
+          vehicleType: deliveryBoy.vehicleType,
+          rating: deliveryBoy.rating
+        }
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Validation failed", 
+          errors: error.errors 
+        });
+      }
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Admin Delivery Boy Management Routes
+  app.get("/api/admin/delivery-boys", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const deliveryBoys = await storage.getAllDeliveryBoys();
+      // Remove password from response
+      const safeDeliveryBoys = deliveryBoys.map(db => {
+        const { password, ...safe } = db;
+        return safe;
+      });
+      res.json(safeDeliveryBoys);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch delivery boys" });
+    }
+  });
+
+  app.post("/api/admin/delivery-boys", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const validatedData = deliveryBoyRegisterSchema.parse(req.body);
+      
+      // Check if delivery boy already exists
+      const existingDeliveryBoy = await storage.getDeliveryBoyByPhone(validatedData.phone);
+      if (existingDeliveryBoy) {
+        return res.status(400).json({ message: "Phone number already registered" });
+      }
+
+      // Hash password and create delivery boy
+      const hashedPassword = await hashPassword(validatedData.password);
+      const deliveryBoy = await storage.createDeliveryBoy({
+        ...validatedData,
+        password: hashedPassword
+      });
+
+      const { password, ...safeDeliveryBoy } = deliveryBoy;
+      res.status(201).json({
+        message: "Delivery boy created successfully",
+        deliveryBoy: safeDeliveryBoy
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Validation failed", 
+          errors: error.errors 
+        });
+      }
+      res.status(500).json({ message: "Failed to create delivery boy" });
+    }
+  });
+
+  app.put("/api/admin/delivery-boys/:id", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      
+      // Hash password if it's being updated
+      if (updates.password) {
+        updates.password = await hashPassword(updates.password);
+      }
+
+      await storage.updateDeliveryBoy(id, updates);
+      res.json({ message: "Delivery boy updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update delivery boy" });
+    }
+  });
+
+  app.delete("/api/admin/delivery-boys/:id", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteDeliveryBoy(id);
+      res.json({ message: "Delivery boy deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete delivery boy" });
+    }
+  });
+
+  // Order Assignment Routes
+  app.post("/api/admin/orders/:orderId/assign", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const { deliveryBoyId } = req.body;
+
+      if (!deliveryBoyId) {
+        return res.status(400).json({ message: "Delivery boy ID is required" });
+      }
+
+      await storage.assignOrderToDeliveryBoy(orderId, deliveryBoyId);
+      res.json({ message: "Order assigned successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to assign order" });
+    }
+  });
+
+  app.get("/api/admin/delivery-boys/:id/orders", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const status = req.query.status as string;
+      
+      const orders = await storage.getDeliveryBoyOrders(id, status);
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch delivery boy orders" });
+    }
+  });
+
+  // Delivery Boy App Routes
+  app.get("/api/delivery/profile", authenticateDeliveryBoy, async (req: DeliveryBoyAuthRequest, res) => {
+    try {
+      if (!req.deliveryBoy) {
+        return res.status(401).json({ message: "Delivery boy not authenticated" });
+      }
+
+      const deliveryBoy = await storage.getDeliveryBoy(req.deliveryBoy.id);
+      if (!deliveryBoy) {
+        return res.status(404).json({ message: "Delivery boy not found" });
+      }
+
+      const { password, ...safeDeliveryBoy } = deliveryBoy;
+      res.json(safeDeliveryBoy);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch profile" });
+    }
+  });
+
+  app.get("/api/delivery/orders", authenticateDeliveryBoy, async (req: DeliveryBoyAuthRequest, res) => {
+    try {
+      if (!req.deliveryBoy) {
+        return res.status(401).json({ message: "Delivery boy not authenticated" });
+      }
+
+      const status = req.query.status as string;
+      const orders = await storage.getDeliveryBoyOrders(req.deliveryBoy.id, status);
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  app.patch("/api/delivery/orders/:orderId/status", authenticateDeliveryBoy, async (req: DeliveryBoyAuthRequest, res) => {
+    try {
+      if (!req.deliveryBoy) {
+        return res.status(401).json({ message: "Delivery boy not authenticated" });
+      }
+
+      const orderId = parseInt(req.params.orderId);
+      const { status } = req.body;
+
+      // Validate that the order is assigned to this delivery boy
+      const order = await storage.getOrder(orderId);
+      if (!order || order.deliveryBoyId !== req.deliveryBoy.id) {
+        return res.status(403).json({ message: "Order not assigned to you" });
+      }
+
+      await storage.updateOrderAssignment(orderId, status, req.deliveryBoy.id);
+      
+      // Update delivery boy stats if order is delivered
+      if (status === 'delivered') {
+        const deliveryBoy = await storage.getDeliveryBoy(req.deliveryBoy.id);
+        if (deliveryBoy) {
+          await storage.updateDeliveryBoy(req.deliveryBoy.id, {
+            totalDeliveries: (deliveryBoy.totalDeliveries || 0) + 1
+          });
+        }
+      }
+
+      res.json({ message: "Order status updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update order status" });
     }
   });
 

@@ -124,6 +124,10 @@ export const orders = pgTable("orders", {
   senderName: text("sender_name"), // name of person sending the cake
   specialInstructions: text("special_instructions"),
   promoCode: text("promo_code"),
+  deliveryBoyId: integer("delivery_boy_id").references(() => deliveryBoys.id), // assigned delivery boy
+  assignedAt: timestamp("assigned_at"), // when delivery boy was assigned
+  pickedUpAt: timestamp("picked_up_at"), // when delivery boy picked up the order
+  deliveredAt: timestamp("delivered_at"), // when order was delivered
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -293,6 +297,25 @@ export const walletTransactions = pgTable("wallet_transactions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Delivery Boys
+export const deliveryBoys = pgTable("delivery_boys", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  phone: text("phone").notNull().unique(),
+  email: text("email"),
+  password: text("password").notNull(),
+  vehicleType: text("vehicle_type").notNull(), // 'bike', 'scooter', 'car', 'bicycle'
+  vehicleNumber: text("vehicle_number").notNull(),
+  licenseNumber: text("license_number"),
+  address: text("address").notNull(),
+  pincode: text("pincode").notNull(),
+  isActive: boolean("is_active").default(true),
+  totalDeliveries: integer("total_deliveries").default(0),
+  rating: decimal("rating", { precision: 3, scale: 2 }).default("5.00"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Admin Configuration
 export const adminConfigs = pgTable("admin_configs", {
   id: serial("id").primaryKey(),
@@ -321,6 +344,7 @@ export const insertPromoCodeSchema = createInsertSchema(promoCodes).omit({ id: t
 export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, createdAt: true });
 export const insertEventReminderSchema = createInsertSchema(eventReminders).omit({ id: true, createdAt: true });
 export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).omit({ id: true, createdAt: true });
+export const insertDeliveryBoySchema = createInsertSchema(deliveryBoys).omit({ id: true, createdAt: true, updatedAt: true });
 
 // Loyalty Program insert schemas
 export const insertLoyaltyTransactionSchema = createInsertSchema(loyaltyTransactions).omit({ id: true, createdAt: true });
@@ -382,6 +406,28 @@ export const resetPasswordSchema = z.object({
   newPassword: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string()
 }).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"]
+});
+
+// Delivery Boy schemas
+export const deliveryBoyLoginSchema = z.object({
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
+  password: z.string().min(6, 'Password must be at least 6 characters')
+});
+
+export const deliveryBoyRegisterSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
+  email: z.string().email('Invalid email address').optional(),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string(),
+  vehicleType: z.enum(['bike', 'scooter', 'car', 'bicycle']),
+  vehicleNumber: z.string().min(1, 'Vehicle number is required'),
+  licenseNumber: z.string().optional(),
+  address: z.string().min(10, 'Complete address is required'),
+  pincode: z.string().regex(/^[1-9][0-9]{5}$/, 'Enter a valid 6-digit pincode')
+}).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"]
 });
@@ -454,5 +500,7 @@ export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 // Wallet and Admin Config types
 export type WalletTransaction = typeof walletTransactions.$inferSelect;
 export type InsertWalletTransaction = z.infer<typeof insertWalletTransactionSchema>;
+export type DeliveryBoy = typeof deliveryBoys.$inferSelect;
+export type InsertDeliveryBoy = z.infer<typeof insertDeliveryBoySchema>;
 export type AdminConfig = typeof adminConfigs.$inferSelect;
 export type InsertAdminConfig = z.infer<typeof insertAdminConfigSchema>;

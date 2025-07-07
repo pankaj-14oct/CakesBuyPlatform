@@ -11,11 +11,24 @@ export interface AuthRequest extends Request {
     id: number;
     phone: string;
     email: string;
+    role?: string;
+  };
+}
+
+export interface DeliveryBoyAuthRequest extends Request {
+  deliveryBoy?: {
+    id: number;
+    phone: string;
+    name: string;
   };
 }
 
 export const generateToken = (userId: number, phone: string, email: string): string => {
   return jwt.sign({ userId, phone, email }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+};
+
+export const generateDeliveryBoyToken = (deliveryBoyId: number, phone: string, name: string): string => {
+  return jwt.sign({ deliveryBoyId, phone, name, type: 'delivery_boy' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
 
 export const hashPassword = async (password: string): Promise<string> => {
@@ -79,4 +92,37 @@ export const optionalAuth = async (req: AuthRequest, res: Response, next: NextFu
   }
   
   next();
+};
+
+export const authenticateDeliveryBoy = async (req: DeliveryBoyAuthRequest, res: Response, next: NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).json({ message: 'Access token required' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    
+    if (decoded.type !== 'delivery_boy') {
+      return res.status(401).json({ message: 'Invalid token type' });
+    }
+    
+    const deliveryBoy = await storage.getDeliveryBoy(decoded.deliveryBoyId);
+    
+    if (!deliveryBoy || !deliveryBoy.isActive) {
+      return res.status(401).json({ message: 'Invalid token or account disabled' });
+    }
+
+    req.deliveryBoy = {
+      id: deliveryBoy.id,
+      phone: deliveryBoy.phone,
+      name: deliveryBoy.name
+    };
+    
+    next();
+  } catch (error) {
+    return res.status(403).json({ message: 'Invalid or expired token' });
+  }
 };
