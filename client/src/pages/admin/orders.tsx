@@ -22,7 +22,9 @@ export default function AdminOrders() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [reassignDialogOpen, setReassignDialogOpen] = useState(false);
   const [orderToAssign, setOrderToAssign] = useState<Order | null>(null);
+  const [orderToReassign, setOrderToReassign] = useState<Order | null>(null);
   const [deliveryPrice, setDeliveryPrice] = useState<string>('');
   const [selectedDeliveryBoyId, setSelectedDeliveryBoyId] = useState<string>('');
   const queryClient = useQueryClient();
@@ -92,6 +94,13 @@ export default function AdminOrders() {
     setAssignDialogOpen(true);
   };
 
+  const handleReassignDeliveryBoy = (order: Order) => {
+    setOrderToReassign(order);
+    setDeliveryPrice(order.deliveryFee || '');
+    setSelectedDeliveryBoyId('');
+    setReassignDialogOpen(true);
+  };
+
   const handleAssignmentSubmit = () => {
     if (orderToAssign && selectedDeliveryBoyId) {
       assignDeliveryBoyMutation.mutate({ 
@@ -99,6 +108,18 @@ export default function AdminOrders() {
         deliveryBoyId: parseInt(selectedDeliveryBoyId),
         deliveryPrice: deliveryPrice
       });
+    }
+  };
+
+  const handleReassignmentSubmit = () => {
+    if (orderToReassign && selectedDeliveryBoyId) {
+      assignDeliveryBoyMutation.mutate({ 
+        orderId: orderToReassign.id, 
+        deliveryBoyId: parseInt(selectedDeliveryBoyId),
+        deliveryPrice: deliveryPrice
+      });
+      setReassignDialogOpen(false);
+      setOrderToReassign(null);
     }
   };
 
@@ -273,9 +294,18 @@ export default function AdminOrders() {
                     <TableCell>
                       <div>
                         {order.deliveryBoyId ? (
-                          <div>
+                          <div className="space-y-1">
                             <p className="text-sm text-green-600 font-medium">Assigned</p>
                             <p className="text-xs text-charcoal opacity-60">ID: {order.deliveryBoyId}</p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs h-6"
+                              onClick={() => handleReassignDeliveryBoy(order)}
+                            >
+                              <UserPlus className="h-3 w-3 mr-1" />
+                              Change
+                            </Button>
                           </div>
                         ) : (
                           <Button
@@ -564,6 +594,93 @@ export default function AdminOrders() {
                     className="bg-caramel hover:bg-caramel/80"
                   >
                     {assignDeliveryBoyMutation.isPending ? 'Assigning...' : 'Assign'}
+                  </Button>
+                </div>
+              </div>
+              
+              {deliveryBoys.filter(db => db.isActive).length === 0 && (
+                <p className="text-sm text-red-600">
+                  No active delivery boys available. Please activate delivery boys first.
+                </p>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delivery Boy Reassignment Dialog */}
+      <Dialog open={reassignDialogOpen} onOpenChange={setReassignDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Change Delivery Boy</DialogTitle>
+          </DialogHeader>
+          
+          {orderToReassign && (
+            <div className="space-y-4">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium">Order: {orderToReassign.orderNumber}</h4>
+                <p className="text-sm text-gray-600">
+                  Customer: {orderToReassign.deliveryAddress.name} ({orderToReassign.deliveryAddress.phone})
+                </p>
+                <p className="text-sm text-gray-600">
+                  Address: {orderToReassign.deliveryAddress.address}, {orderToReassign.deliveryAddress.city}
+                </p>
+                <p className="text-sm text-orange-600 font-medium">
+                  Currently assigned to: Delivery Boy ID {orderToReassign.deliveryBoyId}
+                </p>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium">Delivery Price (₹)</Label>
+                  <Input
+                    type="number"
+                    placeholder="Enter delivery price"
+                    value={deliveryPrice}
+                    onChange={(e) => setDeliveryPrice(e.target.value)}
+                    className="mt-1"
+                    min="0"
+                    step="0.01"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Current: ₹{orderToReassign.deliveryFee || '0'}
+                  </p>
+                </div>
+                
+                <div>
+                  <Label className="text-sm font-medium">Select New Delivery Boy</Label>
+                  <Select
+                    value={selectedDeliveryBoyId}
+                    onValueChange={setSelectedDeliveryBoyId}
+                    disabled={assignDeliveryBoyMutation.isPending}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Choose a delivery boy" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {deliveryBoys.filter(db => db.isActive).map((deliveryBoy) => (
+                        <SelectItem key={deliveryBoy.id} value={deliveryBoy.id.toString()}>
+                          {deliveryBoy.name} - {deliveryBoy.vehicleType} ({deliveryBoy.phone})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setReassignDialogOpen(false)}
+                    disabled={assignDeliveryBoyMutation.isPending}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleReassignmentSubmit}
+                    disabled={assignDeliveryBoyMutation.isPending || !selectedDeliveryBoyId}
+                    className="bg-caramel hover:bg-caramel/80"
+                  >
+                    {assignDeliveryBoyMutation.isPending ? 'Reassigning...' : 'Reassign'}
                   </Button>
                 </div>
               </div>

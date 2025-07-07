@@ -5,6 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { 
@@ -58,6 +62,9 @@ interface Order {
 
 export default function DeliveryDashboard() {
   const [, setLocation] = useLocation();
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [orderToReject, setOrderToReject] = useState<number | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [deliveryBoy, setDeliveryBoy] = useState<DeliveryBoy | null>(null);
@@ -119,6 +126,40 @@ export default function DeliveryDashboard() {
 
   const handleStatusUpdate = (orderId: number, status: string) => {
     updateStatusMutation.mutate({ orderId, status });
+  };
+
+  const rejectOrderMutation = useMutation({
+    mutationFn: async ({ orderId, reason }: { orderId: number; reason: string }) => {
+      return apiRequest(`/api/delivery/orders/${orderId}/reject`, 'POST', { reason });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/delivery/orders'] });
+      setRejectDialogOpen(false);
+      setOrderToReject(null);
+      setRejectionReason('');
+      toast({
+        title: "Success",
+        description: "Order rejected and will be reassigned",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reject order",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleRejectOrder = (orderId: number) => {
+    setOrderToReject(orderId);
+    setRejectDialogOpen(true);
+  };
+
+  const handleRejectSubmit = () => {
+    if (orderToReject && rejectionReason.trim()) {
+      rejectOrderMutation.mutate({ orderId: orderToReject, reason: rejectionReason });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -382,15 +423,27 @@ export default function DeliveryDashboard() {
                               {/* Action Buttons */}
                               <div className="flex gap-2 flex-wrap">
                                 {(order.status === 'confirmed' || order.status === 'preparing') && (
-                                  <Button
-                                    size="sm"
-                                    onClick={() => handleStatusUpdate(order.id, 'out_for_delivery')}
-                                    disabled={updateStatusMutation.isPending}
-                                    className="bg-orange-600 hover:bg-orange-700 text-white"
-                                  >
-                                    <Navigation className="h-4 w-4 mr-1" />
-                                    Pick Up & Start Delivery
-                                  </Button>
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      onClick={() => handleStatusUpdate(order.id, 'out_for_delivery')}
+                                      disabled={updateStatusMutation.isPending}
+                                      className="bg-orange-600 hover:bg-orange-700 text-white"
+                                    >
+                                      <Navigation className="h-4 w-4 mr-1" />
+                                      Pick Up & Start Delivery
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleRejectOrder(order.id)}
+                                      disabled={updateStatusMutation.isPending}
+                                      className="border-red-300 text-red-600 hover:bg-red-50"
+                                    >
+                                      <XCircle className="h-4 w-4 mr-1" />
+                                      Reject Order
+                                    </Button>
+                                  </>
                                 )}
                                 
                                 {order.status === 'out_for_delivery' && (
@@ -474,6 +527,53 @@ export default function DeliveryDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Reject Order Dialog */}
+      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reject Order</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Please provide a reason for rejecting this order. The order will be unassigned and made available for reassignment.
+            </p>
+            
+            <div>
+              <Label htmlFor="rejection-reason">Reason for Rejection</Label>
+              <Textarea
+                id="rejection-reason"
+                placeholder="e.g., Vehicle breakdown, personal emergency, unable to deliver to location..."
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                className="mt-1"
+                rows={3}
+              />
+            </div>
+            
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setRejectDialogOpen(false);
+                  setRejectionReason('');
+                }}
+                disabled={rejectOrderMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleRejectSubmit}
+                disabled={rejectOrderMutation.isPending || !rejectionReason.trim()}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                {rejectOrderMutation.isPending ? 'Rejecting...' : 'Reject Order'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -2193,6 +2193,38 @@ CakesBuy
     }
   });
 
+  // Delivery boy rejection route
+  app.post("/api/delivery/orders/:orderId/reject", authenticateDeliveryBoy, async (req: DeliveryBoyAuthRequest, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const { reason } = req.body;
+
+      if (!req.deliveryBoy) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      // Check if order is assigned to this delivery boy
+      const order = await storage.getOrder(orderId);
+      if (!order || order.deliveryBoyId !== req.deliveryBoy.id) {
+        return res.status(403).json({ message: "Order not assigned to you" });
+      }
+
+      // Unassign the delivery boy and add rejection reason to special instructions
+      const currentInstructions = order.specialInstructions || '';
+      const rejectionNote = `\n[REJECTED by ${req.deliveryBoy.name}: ${reason || 'No reason provided'}]`;
+      
+      await storage.updateOrder(orderId, {
+        deliveryBoyId: null,
+        assignedAt: null,
+        specialInstructions: currentInstructions + rejectionNote
+      });
+
+      res.json({ message: "Order rejected successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to reject order" });
+    }
+  });
+
   app.get("/api/admin/delivery-boys/:id/orders", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const id = parseInt(req.params.id);
