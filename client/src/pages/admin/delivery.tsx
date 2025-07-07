@@ -82,10 +82,7 @@ export default function AdminDelivery() {
   // Create delivery boy mutation
   const createMutation = useMutation({
     mutationFn: async (data: DeliveryBoyFormData) => {
-      return apiRequest('/api/admin/delivery-boys', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      return apiRequest('/api/admin/delivery-boys', 'POST', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/delivery-boys'] });
@@ -108,10 +105,7 @@ export default function AdminDelivery() {
   // Update delivery boy mutation
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<DeliveryBoyFormData> }) => {
-      return apiRequest(`/api/admin/delivery-boys/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      });
+      return apiRequest(`/api/admin/delivery-boys/${id}`, 'PUT', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/delivery-boys'] });
@@ -133,9 +127,7 @@ export default function AdminDelivery() {
   // Delete delivery boy mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/admin/delivery-boys/${id}`, {
-        method: 'DELETE',
-      });
+      return apiRequest(`/api/admin/delivery-boys/${id}`, 'DELETE');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/delivery-boys'] });
@@ -156,10 +148,7 @@ export default function AdminDelivery() {
   // Order assignment mutation
   const assignOrderMutation = useMutation({
     mutationFn: async ({ orderId, deliveryBoyId }: { orderId: number; deliveryBoyId: number }) => {
-      return apiRequest(`/api/admin/orders/${orderId}/assign`, {
-        method: 'POST',
-        body: JSON.stringify({ deliveryBoyId }),
-      });
+      return apiRequest(`/api/admin/orders/${orderId}/assign`, 'POST', { deliveryBoyId });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
