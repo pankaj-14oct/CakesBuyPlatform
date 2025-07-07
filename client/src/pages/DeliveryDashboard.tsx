@@ -28,6 +28,7 @@ import {
   BellRing
 } from "lucide-react";
 import { useDeliveryNotifications } from "@/hooks/useDeliveryNotifications";
+import { testNotificationSound } from "@/utils/testSound";
 
 interface DeliveryBoy {
   id: number;
@@ -226,6 +227,24 @@ export default function DeliveryDashboard() {
                     </>
                   )}
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    const success = await testNotificationSound();
+                    toast({
+                      title: success ? "🔔 Sound Test" : "❌ Sound Failed",
+                      description: success ? "If you heard a beep, notifications are working!" : "Check browser audio permissions",
+                      variant: success ? "default" : "destructive",
+                      duration: 3000,
+                    });
+                  }}
+                  className="text-xs"
+                >
+                  <Bell className="h-3 w-3 mr-1" />
+                  Test Bell
+                </Button>
+                
                 {unreadCount > 0 && (
                   <Button
                     variant="secondary"
@@ -477,6 +496,7 @@ export default function DeliveryDashboard() {
 
                               {/* Action Buttons */}
                               <div className="flex gap-2 flex-wrap">
+                                {/* New Orders - Ready for Pickup */}
                                 {(order.status === 'confirmed' || order.status === 'preparing') && (
                                   <>
                                     <Button
@@ -501,15 +521,42 @@ export default function DeliveryDashboard() {
                                   </>
                                 )}
                                 
+                                {/* Out for Delivery - Multiple Status Options */}
                                 {order.status === 'out_for_delivery' && (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      onClick={() => handleStatusUpdate(order.id, 'delivered')}
+                                      disabled={updateStatusMutation.isPending}
+                                      className="bg-green-600 hover:bg-green-700 text-white"
+                                    >
+                                      <CheckCircle className="h-4 w-4 mr-1" />
+                                      Mark Delivered
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleStatusUpdate(order.id, 'confirmed')}
+                                      disabled={updateStatusMutation.isPending}
+                                      className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                                    >
+                                      <Package className="h-4 w-4 mr-1" />
+                                      Return to Store
+                                    </Button>
+                                  </>
+                                )}
+                                
+                                {/* Delivered Orders - Option to Mark as Issues */}
+                                {order.status === 'delivered' && (
                                   <Button
                                     size="sm"
-                                    onClick={() => handleStatusUpdate(order.id, 'delivered')}
+                                    variant="outline"
+                                    onClick={() => handleStatusUpdate(order.id, 'out_for_delivery')}
                                     disabled={updateStatusMutation.isPending}
-                                    className="bg-green-600 hover:bg-green-700 text-white"
+                                    className="border-orange-300 text-orange-600 hover:bg-orange-50"
                                   >
-                                    <CheckCircle className="h-4 w-4 mr-1" />
-                                    Mark Delivered
+                                    <Navigation className="h-4 w-4 mr-1" />
+                                    Mark as Out for Delivery
                                   </Button>
                                 )}
 

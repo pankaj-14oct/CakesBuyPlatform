@@ -57,7 +57,7 @@ export function useDeliveryNotifications(token?: string) {
               }
 
               // Play enhanced alarm notification sound
-              playNotificationSound();
+              setTimeout(() => playNotificationSound(), 100); // Small delay to ensure audio context is ready
               
               // Flash the page title to get attention
               const originalTitle = document.title;
@@ -110,13 +110,18 @@ export function useDeliveryNotifications(token?: string) {
     };
   }, [token, toast]);
 
-  const playNotificationSound = () => {
+  const playNotificationSound = async () => {
     try {
-      // Create an enhanced alarm-style notification sound
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      // Resume audio context if suspended (required by modern browsers)
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      const audioContext = new AudioContext();
+      
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
       
       // Create multiple tones for a more attention-grabbing alarm
-      const playTone = (frequency: number, startTime: number, duration: number, volume: number = 0.3) => {
+      const playTone = (frequency: number, startTime: number, duration: number, volume: number = 0.5) => {
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
         
@@ -124,11 +129,11 @@ export function useDeliveryNotifications(token?: string) {
         gainNode.connect(audioContext.destination);
         
         oscillator.frequency.value = frequency;
-        oscillator.type = 'triangle'; // Triangle wave for a more pleasant alarm sound
+        oscillator.type = 'sine'; // Sine wave for clearer sound
         
         gainNode.gain.setValueAtTime(0, startTime);
-        gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.01);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+        gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration - 0.05);
         
         oscillator.start(startTime);
         oscillator.stop(startTime + duration);
@@ -136,43 +141,55 @@ export function useDeliveryNotifications(token?: string) {
       
       const currentTime = audioContext.currentTime;
       
-      // Play a sequence of alarm tones (like a bell or chime)
-      playTone(800, currentTime, 0.2, 0.4);        // High tone
-      playTone(600, currentTime + 0.15, 0.2, 0.3); // Medium tone
-      playTone(800, currentTime + 0.3, 0.2, 0.4);  // High tone again
-      playTone(600, currentTime + 0.45, 0.3, 0.3); // Medium tone longer
-      
-      // Optional: Add a second alarm sequence after a brief pause
-      setTimeout(() => {
-        try {
-          const time = audioContext.currentTime;
-          playTone(1000, time, 0.15, 0.35);
-          playTone(750, time + 0.1, 0.15, 0.3);
-          playTone(1000, time + 0.2, 0.2, 0.35);
-        } catch (e) {
-          console.log('Could not play second alarm sequence:', e);
-        }
-      }, 800);
+      // Play a sequence of alarm tones (like a doorbell)
+      playTone(800, currentTime + 0.1, 0.3, 0.6);    // First ding
+      playTone(600, currentTime + 0.5, 0.4, 0.6);    // Second dong
+      playTone(800, currentTime + 1.0, 0.3, 0.5);    // Third ding
       
     } catch (error) {
-      console.log('Could not play notification sound:', error);
+      console.log('Web Audio API failed, trying HTML5 Audio:', error);
       
-      // Fallback: Try to use a system beep or alert
+      // Enhanced fallback with multiple sounds
       try {
-        // Create a simpler sound as fallback
-        const audio = new Audio();
-        audio.volume = 0.5;
-        // Generate a data URL for a simple beep sound
-        const audioData = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMhBSuJw/LPeysKIXHD8N2QSQAZS57k7a5UGR9tgNMr';
-        audio.src = audioData;
-        audio.play().catch(() => {
-          // If all else fails, at least vibrate on mobile
-          if ('vibrate' in navigator) {
-            navigator.vibrate([200, 100, 200, 100, 200]);
-          }
-        });
+        // Create multiple beep sounds
+        const playBeep = (frequency: number, duration: number, delay: number = 0) => {
+          setTimeout(() => {
+            const audio = new Audio();
+            audio.volume = 0.7;
+            
+            // Create a simple sine wave beep
+            const audioData = `data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMhBSuJw/LPeysKIXHD8N2QSQAZS57k7a5UGR9tgNMr`;
+            audio.src = audioData;
+            audio.play().catch(() => {
+              // Final fallback: system alert sound
+              try {
+                const audio2 = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMhBSuJw/LPeysKIXHD8N2QSQAZS57k7a5UGR9tgNMr');
+                audio2.volume = 1.0;
+                audio2.play();
+              } catch (e) {
+                console.log('All audio fallbacks failed, using vibration');
+              }
+            });
+          }, delay);
+        };
+        
+        // Play multiple beeps with different timing
+        playBeep(800, 300, 0);
+        playBeep(600, 400, 400);
+        playBeep(800, 300, 900);
+        
+        // Vibrate on mobile devices
+        if ('vibrate' in navigator) {
+          navigator.vibrate([300, 100, 400, 100, 300]);
+        }
+        
       } catch (fallbackError) {
-        console.log('Fallback sound also failed:', fallbackError);
+        console.log('All sound fallbacks failed:', fallbackError);
+        
+        // Last resort: just vibrate if possible
+        if ('vibrate' in navigator) {
+          navigator.vibrate([500, 200, 500, 200, 500]);
+        }
       }
     }
   };
