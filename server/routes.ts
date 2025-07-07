@@ -2175,10 +2175,15 @@ CakesBuy
   app.post("/api/admin/orders/:orderId/assign", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const orderId = parseInt(req.params.orderId);
-      const { deliveryBoyId } = req.body;
+      const { deliveryBoyId, deliveryPrice } = req.body;
 
       if (!deliveryBoyId) {
         return res.status(400).json({ message: "Delivery boy ID is required" });
+      }
+
+      // Update delivery fee if provided
+      if (deliveryPrice !== undefined) {
+        await storage.updateOrder(orderId, { deliveryFee: deliveryPrice.toString() });
       }
 
       await storage.assignOrderToDeliveryBoy(orderId, deliveryBoyId);

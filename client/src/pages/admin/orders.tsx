@@ -11,6 +11,8 @@ import {
   ShoppingCart, Eye, Package, Truck, CheckCircle, 
   Clock, XCircle, MapPin, Phone, Calendar, UserPlus 
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Order, DeliveryBoy } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -21,6 +23,8 @@ export default function AdminOrders() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [orderToAssign, setOrderToAssign] = useState<Order | null>(null);
+  const [deliveryPrice, setDeliveryPrice] = useState<string>('');
+  const [selectedDeliveryBoyId, setSelectedDeliveryBoyId] = useState<string>('');
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -56,8 +60,12 @@ export default function AdminOrders() {
   });
 
   const assignDeliveryBoyMutation = useMutation({
-    mutationFn: async ({ orderId, deliveryBoyId }: { orderId: number; deliveryBoyId: number }) => {
-      const response = await apiRequest(`/api/admin/orders/${orderId}/assign`, 'POST', { deliveryBoyId });
+    mutationFn: async ({ orderId, deliveryBoyId, deliveryPrice }: { orderId: number; deliveryBoyId: number; deliveryPrice?: string }) => {
+      const payload: any = { deliveryBoyId };
+      if (deliveryPrice) {
+        payload.deliveryPrice = parseFloat(deliveryPrice);
+      }
+      const response = await apiRequest(`/api/admin/orders/${orderId}/assign`, 'POST', payload);
       return response.json();
     },
     onSuccess: () => {
@@ -65,6 +73,8 @@ export default function AdminOrders() {
       toast({ title: "Delivery boy assigned successfully!" });
       setAssignDialogOpen(false);
       setOrderToAssign(null);
+      setDeliveryPrice('');
+      setSelectedDeliveryBoyId('');
     },
     onError: () => {
       toast({ title: "Failed to assign delivery boy", variant: "destructive" });
@@ -77,14 +87,17 @@ export default function AdminOrders() {
 
   const handleAssignDeliveryBoy = (order: Order) => {
     setOrderToAssign(order);
+    setDeliveryPrice(order.deliveryFee || '');
+    setSelectedDeliveryBoyId('');
     setAssignDialogOpen(true);
   };
 
-  const handleAssignmentSubmit = (deliveryBoyId: string) => {
-    if (orderToAssign && deliveryBoyId) {
+  const handleAssignmentSubmit = () => {
+    if (orderToAssign && selectedDeliveryBoyId) {
       assignDeliveryBoyMutation.mutate({ 
         orderId: orderToAssign.id, 
-        deliveryBoyId: parseInt(deliveryBoyId) 
+        deliveryBoyId: parseInt(selectedDeliveryBoyId),
+        deliveryPrice: deliveryPrice
       });
     }
   };
@@ -500,23 +513,59 @@ export default function AdminOrders() {
                 </p>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium mb-2">Select Delivery Boy</label>
-                <Select
-                  onValueChange={handleAssignmentSubmit}
-                  disabled={assignDeliveryBoyMutation.isPending}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose a delivery boy" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {deliveryBoys.filter(db => db.isActive).map((deliveryBoy) => (
-                      <SelectItem key={deliveryBoy.id} value={deliveryBoy.id.toString()}>
-                        {deliveryBoy.name} - {deliveryBoy.phone} ({deliveryBoy.vehicleType})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium">Delivery Price (₹)</Label>
+                  <Input
+                    type="number"
+                    placeholder="Enter delivery price"
+                    value={deliveryPrice}
+                    onChange={(e) => setDeliveryPrice(e.target.value)}
+                    className="mt-1"
+                    min="0"
+                    step="0.01"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Current: ₹{orderToAssign.deliveryFee || '0'}
+                  </p>
+                </div>
+                
+                <div>
+                  <Label className="text-sm font-medium">Select Delivery Boy</Label>
+                  <Select
+                    value={selectedDeliveryBoyId}
+                    onValueChange={setSelectedDeliveryBoyId}
+                    disabled={assignDeliveryBoyMutation.isPending}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Choose a delivery boy" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {deliveryBoys.filter(db => db.isActive).map((deliveryBoy) => (
+                        <SelectItem key={deliveryBoy.id} value={deliveryBoy.id.toString()}>
+                          {deliveryBoy.name} - {deliveryBoy.vehicleType} ({deliveryBoy.phone})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setAssignDialogOpen(false)}
+                    disabled={assignDeliveryBoyMutation.isPending}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleAssignmentSubmit}
+                    disabled={assignDeliveryBoyMutation.isPending || !selectedDeliveryBoyId}
+                    className="bg-caramel hover:bg-caramel/80"
+                  >
+                    {assignDeliveryBoyMutation.isPending ? 'Assigning...' : 'Assign'}
+                  </Button>
+                </div>
               </div>
               
               {deliveryBoys.filter(db => db.isActive).length === 0 && (
