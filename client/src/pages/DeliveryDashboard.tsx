@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { 
@@ -25,7 +26,13 @@ import {
   XCircle,
   Wallet,
   Bell,
-  BellRing
+  BellRing,
+  BarChart3,
+  History,
+  TrendingUp,
+  Calendar,
+  Award,
+  Target
 } from "lucide-react";
 import { useDeliveryNotifications } from "@/hooks/useDeliveryNotifications";
 import { testNotificationSound } from "@/utils/testSound";
@@ -65,11 +72,25 @@ interface Order {
   }>;
 }
 
+interface DeliveryStats {
+  totalOrders: number;
+  deliveredOrders: number;
+  totalEarnings: string;
+  averageRating: number;
+  monthlyDeliveries: number;
+  monthlyEarnings: string;
+  weeklyDeliveries: number;
+  successRate: string;
+  avgDeliveryTime: string;
+  onTimeDeliveryRate: string;
+}
+
 export default function DeliveryDashboard() {
   const [, setLocation] = useLocation();
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [orderToReject, setOrderToReject] = useState<number | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [deliveryBoy, setDeliveryBoy] = useState<DeliveryBoy | null>(null);
@@ -104,6 +125,18 @@ export default function DeliveryDashboard() {
   const { data: profile } = useQuery({
     queryKey: ['/api/delivery/profile'],
     enabled: !!deliveryBoy
+  });
+
+  // Fetch delivery stats
+  const { data: stats } = useQuery<DeliveryStats>({
+    queryKey: ['/api/delivery/stats'],
+    enabled: !!deliveryBoy
+  });
+
+  // Fetch order history
+  const { data: orderHistory } = useQuery<{orders: Order[], pagination: any}>({
+    queryKey: ['/api/delivery/order-history'],
+    enabled: !!deliveryBoy && activeTab === 'history'
   });
 
   // Initialize audio context on first user interaction to enable sound notifications
@@ -291,8 +324,27 @@ export default function DeliveryDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+        {/* Navigation Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="dashboard">
+              <Truck className="h-4 w-4 mr-2" />
+              Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="stats">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Statistics
+            </TabsTrigger>
+            <TabsTrigger value="history">
+              <History className="h-4 w-4 mr-2" />
+              Order History
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Dashboard Tab */}
+          <TabsContent value="dashboard" className="space-y-6">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <Card>
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-blue-600">{orders.length}</div>
@@ -652,6 +704,235 @@ export default function DeliveryDashboard() {
             </Card>
           </div>
         </div>
+          </TabsContent>
+
+          {/* Statistics Tab */}
+          <TabsContent value="stats" className="space-y-6">
+            {stats && (
+              <>
+                {/* Performance Overview */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Total Deliveries</p>
+                          <p className="text-2xl font-bold text-blue-600">{stats.deliveredOrders}</p>
+                        </div>
+                        <Package className="h-8 w-8 text-blue-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Total Earnings</p>
+                          <p className="text-2xl font-bold text-green-600">₹{stats.totalEarnings}</p>
+                        </div>
+                        <Wallet className="h-8 w-8 text-green-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Average Rating</p>
+                          <p className="text-2xl font-bold text-yellow-600">{stats.averageRating}</p>
+                        </div>
+                        <Star className="h-8 w-8 text-yellow-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Success Rate</p>
+                          <p className="text-2xl font-bold text-purple-600">{stats.successRate}%</p>
+                        </div>
+                        <Target className="h-8 w-8 text-purple-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Monthly & Weekly Stats */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <Calendar className="h-5 w-5 mr-2" />
+                        This Month
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Deliveries</span>
+                        <span className="font-semibold text-lg">{stats.monthlyDeliveries}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Earnings</span>
+                        <span className="font-semibold text-lg text-green-600">₹{stats.monthlyEarnings}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <TrendingUp className="h-5 w-5 mr-2" />
+                        Performance Metrics
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">This Week Deliveries</span>
+                        <span className="font-semibold text-lg">{stats.weeklyDeliveries}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Avg Delivery Time</span>
+                        <span className="font-semibold text-lg">{stats.avgDeliveryTime}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">On-Time Rate</span>
+                        <span className="font-semibold text-lg text-green-600">{stats.onTimeDeliveryRate}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Achievement Badges */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Award className="h-5 w-5 mr-2" />
+                      Achievements
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {stats.deliveredOrders >= 10 && (
+                        <div className="text-center p-4 bg-blue-50 rounded-lg">
+                          <Package className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                          <p className="text-sm font-medium">10+ Deliveries</p>
+                        </div>
+                      )}
+                      {parseFloat(stats.successRate) >= 90 && (
+                        <div className="text-center p-4 bg-green-50 rounded-lg">
+                          <Target className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                          <p className="text-sm font-medium">High Success Rate</p>
+                        </div>
+                      )}
+                      {stats.averageRating >= 4.5 && (
+                        <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                          <Star className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
+                          <p className="text-sm font-medium">Top Rated</p>
+                        </div>
+                      )}
+                      {stats.monthlyDeliveries >= 15 && (
+                        <div className="text-center p-4 bg-purple-50 rounded-lg">
+                          <TrendingUp className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                          <p className="text-sm font-medium">Monthly Hero</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+          </TabsContent>
+
+          {/* Order History Tab */}
+          <TabsContent value="history" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <History className="h-5 w-5 mr-2" />
+                  Order History
+                </CardTitle>
+                <CardDescription>
+                  View all your completed and past deliveries
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {orderHistory?.orders.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">No delivery history found</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {orderHistory?.orders.map((order) => (
+                      <Card key={order.id} className="border-l-4 border-l-gray-200">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start">
+                            <div className="space-y-2">
+                              <div className="flex items-center space-x-2">
+                                <Badge className={getStatusColor(order.status)}>
+                                  {order.status.replace('_', ' ').toUpperCase()}
+                                </Badge>
+                                <span className="font-medium">#{order.orderNumber}</span>
+                              </div>
+                              
+                              <div className="text-sm text-gray-600">
+                                <p className="font-medium">
+                                  {typeof order.deliveryAddress === 'string' 
+                                    ? order.deliveryAddress 
+                                    : order.deliveryAddress.name}
+                                </p>
+                                <p>
+                                  {typeof order.deliveryAddress === 'string' 
+                                    ? '' 
+                                    : `${order.deliveryAddress.address}, ${order.deliveryAddress.city} - ${order.deliveryAddress.pincode}`}
+                                </p>
+                              </div>
+                              
+                              <div className="flex items-center space-x-4 text-sm text-gray-500">
+                                <span className="flex items-center">
+                                  <Calendar className="h-4 w-4 mr-1" />
+                                  {new Date(order.deliveryDate).toLocaleDateString()}
+                                </span>
+                                <span className="flex items-center">
+                                  <Clock className="h-4 w-4 mr-1" />
+                                  {formatDeliverySlot(order.deliveryTime)}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div className="text-right">
+                              <p className="font-semibold text-lg">₹{order.total}</p>
+                              <p className="text-sm text-green-600">
+                                Delivery Fee: ₹{order.deliveryFee}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          {/* Order Items */}
+                          <div className="mt-3 pt-3 border-t">
+                            <p className="text-sm font-medium text-gray-700 mb-2">Items:</p>
+                            <div className="space-y-1">
+                              {order.items.map((item, index) => (
+                                <div key={index} className="text-sm text-gray-600">
+                                  {item.quantity}x {item.name} ({item.weight})
+                                  {item.flavor && ` - ${item.flavor}`}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Reject Order Dialog */}
