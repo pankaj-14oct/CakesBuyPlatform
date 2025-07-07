@@ -43,20 +43,33 @@ export function useDeliveryNotifications(token?: string) {
               toast({
                 title: "🚚 New Order Assigned!",
                 description: `Order ${notification.orderNumber} has been assigned to you`,
-                duration: 10000,
+                duration: 15000, // Longer duration for important notifications
               });
 
               // Show browser notification if permission granted
               if (Notification.permission === 'granted') {
-                new Notification('New Delivery Order', {
-                  body: `Order ${notification.orderNumber} has been assigned to you`,
+                new Notification('🔔 New Delivery Order Assigned', {
+                  body: `Order ${notification.orderNumber} has been assigned to you. Check your dashboard for details.`,
                   icon: '/favicon.ico',
                   tag: `order-${notification.orderId}`,
+                  requireInteraction: true, // Keep notification visible until user interacts
                 });
               }
 
-              // Play notification sound
+              // Play enhanced alarm notification sound
               playNotificationSound();
+              
+              // Flash the page title to get attention
+              const originalTitle = document.title;
+              let flashCount = 0;
+              const flashInterval = setInterval(() => {
+                document.title = flashCount % 2 === 0 ? '🔔 NEW ORDER!' : originalTitle;
+                flashCount++;
+                if (flashCount >= 10) { // Flash 5 times
+                  clearInterval(flashInterval);
+                  document.title = originalTitle;
+                }
+              }, 500);
             }
           } catch (error) {
             console.error('Failed to parse WebSocket message:', error);
@@ -99,24 +112,68 @@ export function useDeliveryNotifications(token?: string) {
 
   const playNotificationSound = () => {
     try {
-      // Create a simple beep sound using Web Audio API
+      // Create an enhanced alarm-style notification sound
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
       
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+      // Create multiple tones for a more attention-grabbing alarm
+      const playTone = (frequency: number, startTime: number, duration: number, volume: number = 0.3) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = frequency;
+        oscillator.type = 'triangle'; // Triangle wave for a more pleasant alarm sound
+        
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+        
+        oscillator.start(startTime);
+        oscillator.stop(startTime + duration);
+      };
       
-      oscillator.frequency.value = 800;
-      oscillator.type = 'sine';
+      const currentTime = audioContext.currentTime;
       
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      // Play a sequence of alarm tones (like a bell or chime)
+      playTone(800, currentTime, 0.2, 0.4);        // High tone
+      playTone(600, currentTime + 0.15, 0.2, 0.3); // Medium tone
+      playTone(800, currentTime + 0.3, 0.2, 0.4);  // High tone again
+      playTone(600, currentTime + 0.45, 0.3, 0.3); // Medium tone longer
       
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.5);
+      // Optional: Add a second alarm sequence after a brief pause
+      setTimeout(() => {
+        try {
+          const time = audioContext.currentTime;
+          playTone(1000, time, 0.15, 0.35);
+          playTone(750, time + 0.1, 0.15, 0.3);
+          playTone(1000, time + 0.2, 0.2, 0.35);
+        } catch (e) {
+          console.log('Could not play second alarm sequence:', e);
+        }
+      }, 800);
+      
     } catch (error) {
       console.log('Could not play notification sound:', error);
+      
+      // Fallback: Try to use a system beep or alert
+      try {
+        // Create a simpler sound as fallback
+        const audio = new Audio();
+        audio.volume = 0.5;
+        // Generate a data URL for a simple beep sound
+        const audioData = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMhBSuJw/LPeysKIXHD8N2QSQAZS57k7a5UGR9tgNMr';
+        audio.src = audioData;
+        audio.play().catch(() => {
+          // If all else fails, at least vibrate on mobile
+          if ('vibrate' in navigator) {
+            navigator.vibrate([200, 100, 200, 100, 200]);
+          }
+        });
+      } catch (fallbackError) {
+        console.log('Fallback sound also failed:', fallbackError);
+      }
     }
   };
 
