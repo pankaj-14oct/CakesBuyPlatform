@@ -432,6 +432,16 @@ export const deliveryBoyRegisterSchema = z.object({
   path: ["confirmPassword"]
 });
 
+// Simplified schema for admin to register delivery boys
+export const adminDeliveryBoyRegisterSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  vehicleType: z.enum(['bike', 'scooter', 'car']),
+  licenseNumber: z.string().min(1, 'License number is required'),
+  area: z.string().min(1, 'Service area is required')
+});
+
 // Occasion reminder schema
 export const occasionReminderSchema = z.object({
   title: z.string().min(1, "Reminder title is required"),

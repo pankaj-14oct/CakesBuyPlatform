@@ -16,9 +16,12 @@ import {
   insertLoyaltyRewardSchema,
   insertInvoiceSchema,
   insertDeliveryBoySchema,
+  adminDeliveryBoyRegisterSchema,
   loginSchema,
   registerSchema,
   addressSchema,
+  deliveryBoyRegisterSchema,
+  deliveryBoyLoginSchema,
   createAddressSchema,
   profileUpdateSchema,
   sendOtpSchema,
@@ -2104,7 +2107,7 @@ CakesBuy
 
   app.post("/api/admin/delivery-boys", requireAdmin, async (req: AuthRequest, res) => {
     try {
-      const validatedData = deliveryBoyRegisterSchema.parse(req.body);
+      const validatedData = adminDeliveryBoyRegisterSchema.parse(req.body);
       
       // Check if delivery boy already exists
       const existingDeliveryBoy = await storage.getDeliveryBoyByPhone(validatedData.phone);
@@ -2115,8 +2118,14 @@ CakesBuy
       // Hash password and create delivery boy
       const hashedPassword = await hashPassword(validatedData.password);
       const deliveryBoy = await storage.createDeliveryBoy({
-        ...validatedData,
-        password: hashedPassword
+        name: validatedData.name,
+        phone: validatedData.phone,
+        password: hashedPassword,
+        vehicleType: validatedData.vehicleType,
+        vehicleNumber: validatedData.licenseNumber, // Use license number as vehicle number for now
+        licenseNumber: validatedData.licenseNumber,
+        address: validatedData.area, // Use area as address for admin-created delivery boys
+        pincode: "122001" // Default pincode for Gurgaon
       });
 
       const { password, ...safeDeliveryBoy } = deliveryBoy;
