@@ -30,17 +30,26 @@ interface DeliveryBoy {
 interface Order {
   id: number;
   orderNumber: string;
-  customerName: string;
-  customerPhone: string;
-  deliveryAddress: string;
-  totalAmount: string;
+  deliveryAddress: {
+    name: string;
+    phone: string;
+    address: string;
+    city: string;
+    pincode: string;
+    landmark?: string;
+  };
+  total: string | number;
   status: string;
   deliveryDate: string;
-  deliverySlot: string;
+  deliveryTime: string;
+  deliveryOccasion?: string;
+  specialInstructions?: string;
+  paymentMethod?: string;
   items: Array<{
     name: string;
     quantity: number;
     weight: string;
+    flavor?: string;
   }>;
 }
 
@@ -261,7 +270,7 @@ export default function DeliveryDashboard() {
                             <div>
                               <h3 className="font-semibold text-lg">#{order.orderNumber}</h3>
                               <div className="text-sm space-y-1">
-                                <p className="text-green-600 font-medium">₹{order.totalAmount}</p>
+                                <p className="text-green-600 font-medium">₹{order.total}</p>
                                 <p className="text-gray-600">Payment: {order.paymentMethod?.toUpperCase() || 'COD'}</p>
                               </div>
                             </div>
@@ -276,11 +285,11 @@ export default function DeliveryDashboard() {
                               <div className="space-y-1 text-sm">
                                 <p className="flex items-center">
                                   <span className="text-gray-600 mr-2">Name:</span>
-                                  {order.customerName}
+                                  {order.deliveryAddress.name}
                                 </p>
                                 <p className="flex items-center">
                                   <Phone className="h-3 w-3 mr-2 text-gray-400" />
-                                  {order.customerPhone}
+                                  {order.deliveryAddress.phone}
                                 </p>
                                 <p className="flex items-start">
                                   <MapPin className="h-3 w-3 mr-2 text-gray-400 mt-0.5" />
@@ -311,7 +320,7 @@ export default function DeliveryDashboard() {
                                 <p className="flex items-center">
                                   <Clock className="h-3 w-3 mr-2 text-gray-400" />
                                   <span className="font-medium text-orange-600">
-                                    {formatDeliverySlot(order.deliverySlot)}
+                                    {formatDeliverySlot(order.deliveryTime)}
                                   </span>
                                 </p>
                                 {order.deliveryOccasion && (
@@ -393,7 +402,7 @@ export default function DeliveryDashboard() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => window.open(`tel:${order.customerPhone}`, '_self')}
+                                onClick={() => window.open(`tel:${order.deliveryAddress.phone}`, '_self')}
                               >
                                 <Phone className="h-4 w-4 mr-1" />
                                 Call Customer
