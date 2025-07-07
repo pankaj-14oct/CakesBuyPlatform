@@ -23,8 +23,11 @@ import {
   CheckCircle,
   Navigation,
   XCircle,
-  Wallet
+  Wallet,
+  Bell,
+  BellRing
 } from "lucide-react";
+import { useDeliveryNotifications } from "@/hooks/useDeliveryNotifications";
 
 interface DeliveryBoy {
   id: number;
@@ -85,6 +88,10 @@ export default function DeliveryDashboard() {
       setLocation('/delivery/login');
     }
   }, [setLocation]);
+
+  // Initialize notification system
+  const deliveryToken = localStorage.getItem('delivery_token');
+  const { isConnected, notifications, unreadCount, markAllAsRead } = useDeliveryNotifications(deliveryToken || undefined);
 
   // Fetch assigned orders
   const { data: orders = [], isLoading } = useQuery<Order[]>({
@@ -203,10 +210,39 @@ export default function DeliveryDashboard() {
               </div>
             </div>
             
-            <Button variant="secondary" onClick={handleLogout} className="bg-white text-caramel hover:bg-gray-100">
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
+            <div className="flex items-center space-x-3">
+              {/* Notification Status */}
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1 bg-white/10 px-2 py-1 rounded">
+                  {isConnected ? (
+                    <>
+                      <BellRing className="h-4 w-4 text-green-300" />
+                      <span className="text-xs">Connected</span>
+                    </>
+                  ) : (
+                    <>
+                      <Bell className="h-4 w-4 text-yellow-300" />
+                      <span className="text-xs">Offline</span>
+                    </>
+                  )}
+                </div>
+                {unreadCount > 0 && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={markAllAsRead}
+                    className="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1"
+                  >
+                    {unreadCount} New
+                  </Button>
+                )}
+              </div>
+              
+              <Button variant="secondary" onClick={handleLogout} className="bg-white text-caramel hover:bg-gray-100">
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>

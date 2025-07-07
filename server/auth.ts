@@ -126,3 +126,22 @@ export const authenticateDeliveryBoy = async (req: DeliveryBoyAuthRequest, res: 
     return res.status(403).json({ message: 'Invalid or expired token' });
   }
 };
+/**
+ * Authenticate delivery boy token and return delivery boy info (for WebSocket)
+ */
+export const authenticateDeliveryBoyToken = (token: string) => {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    if (decoded.type !== "delivery_boy") {
+      return null;
+    }
+
+    return {
+      id: decoded.deliveryBoyId,
+      phone: decoded.phone,
+      name: decoded.name
+    };
+  } catch (error) {
+    return null;
+  }
+};

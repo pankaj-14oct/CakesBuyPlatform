@@ -46,6 +46,7 @@ import {
 import { sendReminderEmail, type ReminderEmailData, sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, type OrderEmailData, sendWelcomeEmail, type WelcomeEmailData } from "./email-service";
 import { createInvoiceForOrder, updateInvoiceStatus, getInvoiceByOrderId, getInvoiceByNumber, getUserInvoices, getInvoiceWithOrder, getInvoiceDisplayData } from "./invoice-service";
 import { processPhotoCakeItems } from "./photo-cake-service";
+import { notifyOrderAssignment } from "./notification-service.js";
 import type { User } from "@shared/schema";
 
 // Helper function to create event reminders
@@ -114,7 +115,7 @@ const upload = multer({
   }
 });
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(app: Express, httpServer?: any): Promise<Server> {
   
   // Single file upload endpoint
   app.post("/api/upload", upload.single('image'), (req, res) => {
@@ -2186,9 +2187,25 @@ CakesBuy
         await storage.updateOrder(orderId, { deliveryFee: deliveryPrice.toString() });
       }
 
+      // Assign order to delivery boy
       await storage.assignOrderToDeliveryBoy(orderId, deliveryBoyId);
+      
+      // Get order and delivery boy details for notification
+      const order = await storage.getOrder(orderId);
+      const deliveryBoy = await storage.getDeliveryBoy(deliveryBoyId);
+      
+      if (order && deliveryBoy) {
+        // Send notification to delivery boy
+        const notificationResult = await notifyOrderAssignment(deliveryBoy, order);
+        console.log(`Order ${order.orderNumber} assigned to ${deliveryBoy.name}:`, {
+          realTimeNotification: notificationResult.realTime ? 'sent' : 'failed',
+          emailNotification: notificationResult.email ? 'sent' : 'failed'
+        });
+      }
+      
       res.json({ message: "Order assigned successfully" });
     } catch (error) {
+      console.error('Order assignment error:', error);
       res.status(500).json({ message: "Failed to assign order" });
     }
   });
@@ -2306,6 +2323,6 @@ CakesBuy
     }
   });
 
-  const httpServer = createServer(app);
-  return httpServer;
+  const server = httpServer || createServer(app);
+  return server;
 }

@@ -1,7 +1,11 @@
 import express, { type Request, Response, NextFunction } from "express";
+import { createServer } from "http";
+import { WebSocketServer } from "ws";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./seed";
+import { registerDeliveryBoyConnection } from "./notification-service.js";
+import { authenticateDeliveryBoyToken } from "./auth.js";
 
 const app = express();
 app.use(express.json());
@@ -43,7 +47,49 @@ app.use((req, res, next) => {
     await seedDatabase().catch(console.error);
   }
 
-  const server = await registerRoutes(app);
+  // Create HTTP server
+  const httpServer = createServer(app);
+  
+  // Setup WebSocket server for delivery boy notifications
+  const wss = new WebSocketServer({ 
+    server: httpServer, 
+    path: '/ws/delivery' 
+  });
+
+  wss.on('connection', (ws, req) => {
+    log('WebSocket connection established');
+    
+    // Authenticate delivery boy from query parameters or headers
+    const url = new URL(req.url!, `http://${req.headers.host}`);
+    const token = url.searchParams.get('token') || req.headers.authorization?.replace('Bearer ', '');
+    
+    if (!token) {
+      ws.close(1008, 'Authentication required');
+      return;
+    }
+
+    try {
+      const deliveryBoy = authenticateDeliveryBoyToken(token);
+      if (deliveryBoy) {
+        registerDeliveryBoyConnection(deliveryBoy.id, ws);
+        log(`Delivery boy ${deliveryBoy.name} (ID: ${deliveryBoy.id}) connected via WebSocket`);
+        
+        // Send welcome message
+        ws.send(JSON.stringify({
+          type: 'connected',
+          message: 'Successfully connected to delivery notifications',
+          timestamp: new Date().toISOString()
+        }));
+      } else {
+        ws.close(1008, 'Invalid authentication token');
+      }
+    } catch (error) {
+      log('WebSocket authentication failed:', error);
+      ws.close(1008, 'Authentication failed');
+    }
+  });
+
+  const server = await registerRoutes(app, httpServer);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -66,11 +112,12 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = 5000;
-  server.listen({
+  httpServer.listen({
     port,
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    log(`WebSocket server available at ws://localhost:${port}/ws/delivery`);
   });
 })();
