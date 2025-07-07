@@ -274,9 +274,9 @@ export default function DeliveryDashboard() {
                     variant="secondary"
                     size="sm"
                     onClick={markAllAsRead}
-                    className="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1"
+                    className="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 animate-pulse shadow-lg ring-2 ring-red-400 ring-opacity-50"
                   >
-                    {unreadCount} New
+                    🔔 {unreadCount} New Order{unreadCount > 1 ? 's' : ''}
                   </Button>
                 )}
               </div>

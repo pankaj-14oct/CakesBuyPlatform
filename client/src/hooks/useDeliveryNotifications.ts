@@ -41,23 +41,27 @@ export function useDeliveryNotifications(token?: string) {
             // Show toast for new order assignments
             if (notification.type === 'order_assigned') {
               toast({
-                title: "🚚 New Order Assigned!",
-                description: `Order ${notification.orderNumber} has been assigned to you`,
-                duration: 15000, // Longer duration for important notifications
+                title: "🚨 URGENT: New Order Assigned!",
+                description: `Order ${notification.orderNumber} has been assigned to you. ACTION REQUIRED!`,
+                duration: 20000, // Extended duration for critical notifications
+                variant: "destructive", // Red styling for urgency
               });
 
               // Show browser notification if permission granted
               if (Notification.permission === 'granted') {
-                new Notification('🔔 New Delivery Order Assigned', {
-                  body: `Order ${notification.orderNumber} has been assigned to you. Check your dashboard for details.`,
+                new Notification('🚨 URGENT: New Delivery Order Assigned', {
+                  body: `Order ${notification.orderNumber} has been assigned to you. IMMEDIATE ACTION REQUIRED! Check your dashboard now.`,
                   icon: '/favicon.ico',
                   tag: `order-${notification.orderId}`,
                   requireInteraction: true, // Keep notification visible until user interacts
+                  silent: false, // Ensure it makes system sound
                 });
               }
 
-              // Play enhanced alarm notification sound
+              // Play enhanced alarm notification sound multiple times
               setTimeout(() => playNotificationSound(), 100); // Small delay to ensure audio context is ready
+              setTimeout(() => playNotificationSound(), 3000); // Repeat after 3 seconds
+              setTimeout(() => playNotificationSound(), 6000); // Repeat after 6 seconds
               
               // Flash the page title to get attention
               const originalTitle = document.title;
@@ -65,11 +69,11 @@ export function useDeliveryNotifications(token?: string) {
               const flashInterval = setInterval(() => {
                 document.title = flashCount % 2 === 0 ? '🔔 NEW ORDER!' : originalTitle;
                 flashCount++;
-                if (flashCount >= 10) { // Flash 5 times
+                if (flashCount >= 16) { // Flash 8 times for more attention
                   clearInterval(flashInterval);
                   document.title = originalTitle;
                 }
-              }, 500);
+              }, 400); // Faster flashing for more urgency
             }
           } catch (error) {
             console.error('Failed to parse WebSocket message:', error);
@@ -126,15 +130,15 @@ export function useDeliveryNotifications(token?: string) {
         audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMhBSuJw/LPeysKIXHD8N2QSQAZS57k7a5UGR9tgNMr';
         await audio.play();
         
-        // Vibrate on mobile
+        // Intense vibration on mobile
         if ('vibrate' in navigator) {
-          navigator.vibrate([300, 100, 300, 100, 300]);
+          navigator.vibrate([500, 100, 500, 100, 500, 100, 500]);
         }
         
       } catch (fallbackError) {
         console.log('All audio failed, vibration only:', fallbackError);
         if ('vibrate' in navigator) {
-          navigator.vibrate([500, 200, 500, 200, 500]);
+          navigator.vibrate([600, 150, 600, 150, 600, 150, 600]);
         }
       }
     }

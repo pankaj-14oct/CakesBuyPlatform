@@ -22,7 +22,7 @@ export const testNotificationSound = async (): Promise<boolean> => {
       oscillator.type = 'square'; // Square wave for sharper, more attention-grabbing sound
       
       gainNode.gain.setValueAtTime(0, startTime);
-      gainNode.gain.linearRampToValueAtTime(0.8, startTime + 0.05); // Loud volume
+      gainNode.gain.linearRampToValueAtTime(1.0, startTime + 0.05); // Maximum volume
       gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
       
       oscillator.start(startTime);
@@ -31,10 +31,12 @@ export const testNotificationSound = async (): Promise<boolean> => {
     
     const now = audioContext.currentTime;
     
-    // Create urgent alarm pattern: BEEP-BEEP-BEEP
-    createAlarmTone(1000, now + 0.1, 0.3);  // High beep
-    createAlarmTone(800, now + 0.5, 0.3);   // Medium beep
-    createAlarmTone(1000, now + 0.9, 0.4);  // High beep (longer)
+    // Create urgent alarm pattern: Extended loud beeping sequence
+    createAlarmTone(1200, now + 0.1, 0.4);  // Very high beep
+    createAlarmTone(900, now + 0.6, 0.4);   // High beep
+    createAlarmTone(1200, now + 1.1, 0.4);  // Very high beep
+    createAlarmTone(900, now + 1.6, 0.4);   // High beep
+    createAlarmTone(1200, now + 2.1, 0.5);  // Very high beep (longer)
     
     return true;
     
@@ -77,9 +79,9 @@ export const testNotificationSound = async (): Promise<boolean> => {
           writeString(36, 'data');
           view.setUint32(40, samples * 2, true);
           
-          // Generate beep data
+          // Generate beep data with maximum amplitude
           for (let i = 0; i < samples; i++) {
-            const sample = Math.sin(frequency * 2 * Math.PI * i / sampleRate) * 0.8;
+            const sample = Math.sin(frequency * 2 * Math.PI * i / sampleRate) * 1.0;
             view.setInt16(44 + i * 2, sample * 32767, true);
           }
           
@@ -96,10 +98,12 @@ export const testNotificationSound = async (): Promise<boolean> => {
         });
       };
       
-      // Play multiple beeps
+      // Play multiple beeps in rapid succession
       await playAudioBeep();
-      setTimeout(() => playAudioBeep(), 400);
-      setTimeout(() => playAudioBeep(), 800);
+      setTimeout(() => playAudioBeep(), 300);
+      setTimeout(() => playAudioBeep(), 600);
+      setTimeout(() => playAudioBeep(), 900);
+      setTimeout(() => playAudioBeep(), 1200);
       
       return true;
       
@@ -125,9 +129,9 @@ export const testNotificationSound = async (): Promise<boolean> => {
       } catch (finalError) {
         console.error('All audio methods failed:', finalError);
         
-        // Last resort: vibration
+        // Last resort: intense vibration
         if ('vibrate' in navigator) {
-          navigator.vibrate([500, 200, 500, 200, 500]);
+          navigator.vibrate([700, 150, 700, 150, 700, 150, 700]);
         }
         
         return false;
