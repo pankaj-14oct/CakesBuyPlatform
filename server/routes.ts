@@ -2304,16 +2304,49 @@ CakesBuy
 
       await storage.updateOrderAssignment(orderId, status, req.deliveryBoy.id);
       
-      // Update delivery boy stats if order is delivered
+      // Handle payment and delivery completion when order is delivered
       if (status === 'delivered') {
         const deliveryBoy = await storage.getDeliveryBoy(req.deliveryBoy.id);
         const order = await storage.getOrder(orderId);
         if (deliveryBoy && order) {
           const deliveryEarning = parseFloat(order.deliveryFee || '0');
+          
+          // Update delivery boy stats
           await storage.updateDeliveryBoy(req.deliveryBoy.id, {
             totalDeliveries: (deliveryBoy.totalDeliveries || 0) + 1,
             totalEarnings: ((parseFloat(deliveryBoy.totalEarnings || '0')) + deliveryEarning).toString()
           });
+          
+          // Process payment for COD orders
+          if (order.paymentMethod === 'cod' && order.paymentStatus === 'pending') {
+            // Mark payment as completed for COD orders upon delivery
+            await storage.updateOrder(orderId, {
+              paymentStatus: 'completed',
+              updatedAt: new Date()
+            });
+            
+            // Add loyalty points for the order (1 point per ₹10 spent)
+            const loyaltyPoints = Math.floor(order.total / 10);
+            if (order.userId && loyaltyPoints > 0) {
+              const user = await storage.getUser(order.userId);
+              if (user) {
+                await storage.updateUser(order.userId, {
+                  loyaltyPoints: (user.loyaltyPoints || 0) + loyaltyPoints
+                });
+                
+                // Check for tier upgrade
+                const newPoints = (user.loyaltyPoints || 0) + loyaltyPoints;
+                let newTier = user.loyaltyTier || 'Bronze';
+                if (newPoints >= 10000) newTier = 'Platinum';
+                else if (newPoints >= 5000) newTier = 'Gold';
+                else if (newPoints >= 1000) newTier = 'Silver';
+                
+                if (newTier !== user.loyaltyTier) {
+                  await storage.updateUser(order.userId, { loyaltyTier: newTier });
+                }
+              }
+            }
+          }
         }
       }
 

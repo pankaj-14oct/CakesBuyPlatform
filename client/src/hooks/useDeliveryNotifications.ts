@@ -112,81 +112,27 @@ export function useDeliveryNotifications(token?: string) {
 
   const playNotificationSound = async () => {
     try {
-      // Resume audio context if suspended (required by modern browsers)
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-      const audioContext = new AudioContext();
-      
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-      }
-      
-      // Create multiple tones for a more attention-grabbing alarm
-      const playTone = (frequency: number, startTime: number, duration: number, volume: number = 0.5) => {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.value = frequency;
-        oscillator.type = 'sine'; // Sine wave for clearer sound
-        
-        gainNode.gain.setValueAtTime(0, startTime);
-        gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.05);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration - 0.05);
-        
-        oscillator.start(startTime);
-        oscillator.stop(startTime + duration);
-      };
-      
-      const currentTime = audioContext.currentTime;
-      
-      // Play a sequence of alarm tones (like a doorbell)
-      playTone(800, currentTime + 0.1, 0.3, 0.6);    // First ding
-      playTone(600, currentTime + 0.5, 0.4, 0.6);    // Second dong
-      playTone(800, currentTime + 1.0, 0.3, 0.5);    // Third ding
+      // Use the enhanced sound system from testSound utility
+      const { testNotificationSound } = await import('@/utils/testSound');
+      await testNotificationSound();
       
     } catch (error) {
-      console.log('Web Audio API failed, trying HTML5 Audio:', error);
+      console.log('Enhanced sound system failed, using simple fallback:', error);
       
-      // Enhanced fallback with multiple sounds
+      // Simple fallback
       try {
-        // Create multiple beep sounds
-        const playBeep = (frequency: number, duration: number, delay: number = 0) => {
-          setTimeout(() => {
-            const audio = new Audio();
-            audio.volume = 0.7;
-            
-            // Create a simple sine wave beep
-            const audioData = `data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMhBSuJw/LPeysKIXHD8N2QSQAZS57k7a5UGR9tgNMr`;
-            audio.src = audioData;
-            audio.play().catch(() => {
-              // Final fallback: system alert sound
-              try {
-                const audio2 = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMhBSuJw/LPeysKIXHD8N2QSQAZS57k7a5UGR9tgNMr');
-                audio2.volume = 1.0;
-                audio2.play();
-              } catch (e) {
-                console.log('All audio fallbacks failed, using vibration');
-              }
-            });
-          }, delay);
-        };
+        const audio = new Audio();
+        audio.volume = 1.0;
+        audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMhBSuJw/LPeysKIXHD8N2QSQAZS57k7a5UGR9tgNMr';
+        await audio.play();
         
-        // Play multiple beeps with different timing
-        playBeep(800, 300, 0);
-        playBeep(600, 400, 400);
-        playBeep(800, 300, 900);
-        
-        // Vibrate on mobile devices
+        // Vibrate on mobile
         if ('vibrate' in navigator) {
-          navigator.vibrate([300, 100, 400, 100, 300]);
+          navigator.vibrate([300, 100, 300, 100, 300]);
         }
         
       } catch (fallbackError) {
-        console.log('All sound fallbacks failed:', fallbackError);
-        
-        // Last resort: just vibrate if possible
+        console.log('All audio failed, vibration only:', fallbackError);
         if ('vibrate' in navigator) {
           navigator.vibrate([500, 200, 500, 200, 500]);
         }

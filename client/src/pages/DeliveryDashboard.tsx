@@ -106,6 +106,30 @@ export default function DeliveryDashboard() {
     enabled: !!deliveryBoy
   });
 
+  // Initialize audio context on first user interaction to enable sound notifications
+  useEffect(() => {
+    const initializeAudio = async () => {
+      try {
+        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContext) {
+          const audioContext = new AudioContext();
+          if (audioContext.state === 'suspended') {
+            const unlockAudio = async () => {
+              await audioContext.resume();
+              console.log('Audio context unlocked for notifications');
+            };
+            document.addEventListener('click', unlockAudio, { once: true });
+            document.addEventListener('touchstart', unlockAudio, { once: true });
+          }
+        }
+      } catch (error) {
+        console.log('Audio context initialization failed:', error);
+      }
+    };
+    
+    initializeAudio();
+  }, []);
+
   // Update order status mutation
   const updateStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {

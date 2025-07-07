@@ -1,42 +1,137 @@
-// Simple sound testing utility
+// Enhanced notification sound system
 export const testNotificationSound = async (): Promise<boolean> => {
   try {
+    // First try: Web Audio API with loud alarm sound
     const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
     const audioContext = new AudioContext();
     
-    // Resume audio context if suspended (required by modern browsers)
+    // User interaction is required to unlock audio context
     if (audioContext.state === 'suspended') {
       await audioContext.resume();
     }
     
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+    // Create loud alarm sound sequence
+    const createAlarmTone = (frequency: number, startTime: number, duration: number) => {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = frequency;
+      oscillator.type = 'square'; // Square wave for sharper, more attention-grabbing sound
+      
+      gainNode.gain.setValueAtTime(0, startTime);
+      gainNode.gain.linearRampToValueAtTime(0.8, startTime + 0.05); // Loud volume
+      gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+      
+      oscillator.start(startTime);
+      oscillator.stop(startTime + duration);
+    };
     
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+    const now = audioContext.currentTime;
     
-    oscillator.frequency.value = 800;
-    oscillator.type = 'sine';
-    
-    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0.6, audioContext.currentTime + 0.1);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.8);
+    // Create urgent alarm pattern: BEEP-BEEP-BEEP
+    createAlarmTone(1000, now + 0.1, 0.3);  // High beep
+    createAlarmTone(800, now + 0.5, 0.3);   // Medium beep
+    createAlarmTone(1000, now + 0.9, 0.4);  // High beep (longer)
     
     return true;
-  } catch (error) {
-    console.error('Sound test failed:', error);
     
-    // Fallback: try system beep
+  } catch (error) {
+    console.error('Web Audio API failed:', error);
+    
+    // Fallback 1: HTML5 Audio with multiple sounds
     try {
-      const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMhBSuJw/LPeysKIXHD8N2QSQAZS57k7a5UGR9tgNMr');
-      audio.volume = 0.7;
-      audio.play();
+      const playAudioBeep = () => {
+        return new Promise((resolve) => {
+          const audio = new Audio();
+          audio.volume = 1.0; // Maximum volume
+          
+          // Generate a more complex beep sound
+          const sampleRate = 8000;
+          const duration = 0.5;
+          const frequency = 900;
+          const samples = sampleRate * duration;
+          const buffer = new ArrayBuffer(44 + samples * 2);
+          const view = new DataView(buffer);
+          
+          // WAV header
+          const writeString = (offset: number, string: string) => {
+            for (let i = 0; i < string.length; i++) {
+              view.setUint8(offset + i, string.charCodeAt(i));
+            }
+          };
+          
+          writeString(0, 'RIFF');
+          view.setUint32(4, 36 + samples * 2, true);
+          writeString(8, 'WAVE');
+          writeString(12, 'fmt ');
+          view.setUint32(16, 16, true);
+          view.setUint16(20, 1, true);
+          view.setUint16(22, 1, true);
+          view.setUint32(24, sampleRate, true);
+          view.setUint32(28, sampleRate * 2, true);
+          view.setUint16(32, 2, true);
+          view.setUint16(34, 16, true);
+          writeString(36, 'data');
+          view.setUint32(40, samples * 2, true);
+          
+          // Generate beep data
+          for (let i = 0; i < samples; i++) {
+            const sample = Math.sin(frequency * 2 * Math.PI * i / sampleRate) * 0.8;
+            view.setInt16(44 + i * 2, sample * 32767, true);
+          }
+          
+          const blob = new Blob([buffer], { type: 'audio/wav' });
+          audio.src = URL.createObjectURL(blob);
+          
+          audio.onended = () => {
+            URL.revokeObjectURL(audio.src);
+            resolve(true);
+          };
+          
+          audio.onerror = () => resolve(false);
+          audio.play().catch(() => resolve(false));
+        });
+      };
+      
+      // Play multiple beeps
+      await playAudioBeep();
+      setTimeout(() => playAudioBeep(), 400);
+      setTimeout(() => playAudioBeep(), 800);
+      
       return true;
-    } catch (fallbackError) {
-      return false;
+      
+    } catch (audioError) {
+      console.error('HTML5 Audio also failed:', audioError);
+      
+      // Fallback 2: System notification sound
+      try {
+        // Try to play system notification sound
+        const audio = new Audio();
+        audio.volume = 1.0;
+        audio.src = 'data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAAC4AAABDb3B5cmlnaHQgUmVhbFNvdW5kAP/7kGQAAP4AAGkAAAAgAAA0gAABAAAGkAAAAIAAANIAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+5BkA4D+AAAaQAAAACAAADSAAAAEAAA0gAAABAAA0gAABAAAuKqquqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr/84KCAAAAAAD/84K';
+        
+        audio.play().catch(() => {
+          // Final fallback: vibration only
+          if ('vibrate' in navigator) {
+            navigator.vibrate([300, 100, 300, 100, 300]);
+          }
+        });
+        
+        return true;
+        
+      } catch (finalError) {
+        console.error('All audio methods failed:', finalError);
+        
+        // Last resort: vibration
+        if ('vibrate' in navigator) {
+          navigator.vibrate([500, 200, 500, 200, 500]);
+        }
+        
+        return false;
+      }
     }
   }
 };
