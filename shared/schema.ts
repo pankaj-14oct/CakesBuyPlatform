@@ -311,6 +311,7 @@ export const deliveryBoys = pgTable("delivery_boys", {
   pincode: text("pincode").notNull(),
   isActive: boolean("is_active").default(true),
   totalDeliveries: integer("total_deliveries").default(0),
+  totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0"),
   rating: decimal("rating", { precision: 3, scale: 2 }).default("5.00"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

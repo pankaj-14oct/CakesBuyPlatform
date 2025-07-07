@@ -17,7 +17,8 @@ import {
   LogOut,
   CheckCircle,
   Navigation,
-  XCircle
+  XCircle,
+  Wallet
 } from "lucide-react";
 
 interface DeliveryBoy {
@@ -40,6 +41,7 @@ interface Order {
     landmark?: string;
   };
   total: string | number;
+  deliveryFee: string | number;
   status: string;
   deliveryDate: string;
   deliveryTime: string;
@@ -155,6 +157,7 @@ export default function DeliveryDashboard() {
               <div>
                 <h1 className="text-xl font-semibold">Delivery Dashboard</h1>
                 <p className="text-sm opacity-90">Welcome, {deliveryBoy.name}</p>
+                <p className="text-xs opacity-75">Total Earnings: ₹{profile?.totalEarnings || '0'}</p>
               </div>
             </div>
             
@@ -168,7 +171,7 @@ export default function DeliveryDashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           <Card>
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-blue-600">{orders.length}</div>
@@ -197,6 +200,12 @@ export default function DeliveryDashboard() {
                 {orders.filter(o => o.status === 'confirmed' || o.status === 'preparing').length}
               </div>
               <div className="text-sm text-gray-600">Ready for Pickup</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-green-600">₹{profile?.totalEarnings || '0'}</div>
+              <div className="text-sm text-gray-600">Total Earnings</div>
             </CardContent>
           </Card>
         </div>
@@ -237,6 +246,13 @@ export default function DeliveryDashboard() {
                     <span className="text-sm text-gray-600">Total Deliveries</span>
                     <span className="text-sm font-medium">{profile?.totalDeliveries || 0}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Total Earnings</span>
+                    <div className="flex items-center">
+                      <Wallet className="h-4 w-4 text-green-600 mr-1" />
+                      <span className="text-sm font-medium text-green-600">₹{profile?.totalEarnings || '0'}</span>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -271,7 +287,8 @@ export default function DeliveryDashboard() {
                             <div>
                               <h3 className="font-semibold text-lg">#{order.orderNumber}</h3>
                               <div className="text-sm space-y-1">
-                                <p className="text-green-600 font-medium">₹{order.total}</p>
+                                <p className="text-green-600 font-medium">Order Total: ₹{order.total}</p>
+                                <p className="text-blue-600 font-medium">Delivery Fee: ₹{order.deliveryFee || '0'}</p>
                                 <p className="text-gray-600">Payment: {order.paymentMethod?.toUpperCase() || 'COD'}</p>
                               </div>
                             </div>

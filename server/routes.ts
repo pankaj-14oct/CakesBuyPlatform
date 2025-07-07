@@ -2258,9 +2258,12 @@ CakesBuy
       // Update delivery boy stats if order is delivered
       if (status === 'delivered') {
         const deliveryBoy = await storage.getDeliveryBoy(req.deliveryBoy.id);
-        if (deliveryBoy) {
+        const order = await storage.getOrder(orderId);
+        if (deliveryBoy && order) {
+          const deliveryEarning = parseFloat(order.deliveryFee || '0');
           await storage.updateDeliveryBoy(req.deliveryBoy.id, {
-            totalDeliveries: (deliveryBoy.totalDeliveries || 0) + 1
+            totalDeliveries: (deliveryBoy.totalDeliveries || 0) + 1,
+            totalEarnings: ((parseFloat(deliveryBoy.totalEarnings || '0')) + deliveryEarning).toString()
           });
         }
       }
