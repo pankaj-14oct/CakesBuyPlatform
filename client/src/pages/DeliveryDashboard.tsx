@@ -136,21 +136,19 @@ export default function DeliveryDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      {/* Simple Header */}
+      <div className="bg-caramel text-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
-              <div className="bg-caramel p-2 rounded-full">
-                <Truck className="h-6 w-6 text-white" />
-              </div>
+              <Truck className="h-6 w-6" />
               <div>
-                <h1 className="text-xl font-semibold text-charcoal">CakesBuy Delivery</h1>
-                <p className="text-sm text-gray-600">Welcome, {deliveryBoy.name}</p>
+                <h1 className="text-xl font-semibold">Delivery Dashboard</h1>
+                <p className="text-sm opacity-90">Welcome, {deliveryBoy.name}</p>
               </div>
             </div>
             
-            <Button variant="outline" onClick={handleLogout}>
+            <Button variant="secondary" onClick={handleLogout} className="bg-white text-caramel hover:bg-gray-100">
               <LogOut className="h-4 w-4 mr-2" />
               Logout
             </Button>

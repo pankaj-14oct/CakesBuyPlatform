@@ -142,6 +142,10 @@ export default function DeliveryLogin() {
 
           <div className="mt-6 text-center text-sm text-charcoal opacity-70">
             <p>Don't have access? Contact your admin for registration.</p>
+            <p className="mt-2">
+              <span className="text-caramel font-medium">For customers:</span>{' '}
+              <a href="/" className="text-caramel hover:underline">Visit CakesBuy.com</a>
+            </p>
           </div>
         </CardContent>
       </Card>
