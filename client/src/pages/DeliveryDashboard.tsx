@@ -169,7 +169,11 @@ export default function DeliveryDashboard() {
       return apiRequest(`/api/delivery/orders/${orderId}/status`, 'PATCH', { status });
     },
     onSuccess: () => {
+      // Invalidate both orders and stats to refresh earnings
       queryClient.invalidateQueries({ queryKey: ['/api/delivery/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/delivery/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/delivery/profile'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/delivery/order-history'] });
       toast({
         title: 'Status Updated',
         description: 'Order status updated successfully'
@@ -199,7 +203,11 @@ export default function DeliveryDashboard() {
       return apiRequest(`/api/delivery/orders/${orderId}/reject`, 'POST', { reason });
     },
     onSuccess: () => {
+      // Invalidate all relevant queries when order is rejected
       queryClient.invalidateQueries({ queryKey: ['/api/delivery/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/delivery/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/delivery/profile'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/delivery/order-history'] });
       setRejectDialogOpen(false);
       setOrderToReject(null);
       setRejectionReason('');
@@ -377,7 +385,7 @@ export default function DeliveryDashboard() {
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">₹{profile?.totalEarnings || '0'}</div>
+              <div className="text-2xl font-bold text-green-600">₹{stats?.totalEarnings || '0'}</div>
               <div className="text-sm text-gray-600">Total Earnings</div>
             </CardContent>
           </Card>
@@ -417,13 +425,13 @@ export default function DeliveryDashboard() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Total Deliveries</span>
-                    <span className="text-sm font-medium">{profile?.totalDeliveries || 0}</span>
+                    <span className="text-sm font-medium">{stats?.deliveredOrders || 0}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Total Earnings</span>
                     <div className="flex items-center">
                       <Wallet className="h-4 w-4 text-green-600 mr-1" />
-                      <span className="text-sm font-medium text-green-600">₹{profile?.totalEarnings || '0'}</span>
+                      <span className="text-sm font-medium text-green-600">₹{stats?.totalEarnings || '0'}</span>
                     </div>
                   </div>
                 </div>
