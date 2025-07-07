@@ -16,7 +16,8 @@ import {
   Star,
   LogOut,
   CheckCircle,
-  Navigation
+  Navigation,
+  XCircle
 } from "lucide-react";
 
 interface DeliveryBoy {
@@ -350,15 +351,25 @@ export default function DeliveryDashboard() {
 
                           <div className="space-y-3">
                             {/* Status Update Actions */}
-                            <div className="bg-gray-50 p-3 rounded-lg">
-                              <h5 className="font-medium text-sm mb-2">Update Status:</h5>
+                            <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                              <h5 className="font-medium text-sm mb-3 text-blue-800">Order Status Management:</h5>
+                              
+                              {/* Current Status Display */}
+                              <div className="mb-3">
+                                <span className="text-xs text-gray-600">Current Status:</span>
+                                <Badge className={`ml-2 ${getStatusColor(order.status)}`}>
+                                  {order.status.replace('_', ' ').toUpperCase()}
+                                </Badge>
+                              </div>
+
+                              {/* Action Buttons */}
                               <div className="flex gap-2 flex-wrap">
                                 {order.status === 'confirmed' && (
                                   <Button
                                     size="sm"
                                     onClick={() => handleStatusUpdate(order.id, 'preparing')}
                                     disabled={updateStatusMutation.isPending}
-                                    className="bg-purple-600 hover:bg-purple-700"
+                                    className="bg-purple-600 hover:bg-purple-700 text-white"
                                   >
                                     <Package className="h-4 w-4 mr-1" />
                                     Start Preparing
@@ -370,7 +381,7 @@ export default function DeliveryDashboard() {
                                     size="sm"
                                     onClick={() => handleStatusUpdate(order.id, 'out_for_delivery')}
                                     disabled={updateStatusMutation.isPending}
-                                    className="bg-orange-600 hover:bg-orange-700"
+                                    className="bg-orange-600 hover:bg-orange-700 text-white"
                                   >
                                     <Navigation className="h-4 w-4 mr-1" />
                                     Start Delivery
@@ -382,19 +393,62 @@ export default function DeliveryDashboard() {
                                     size="sm"
                                     onClick={() => handleStatusUpdate(order.id, 'delivered')}
                                     disabled={updateStatusMutation.isPending}
-                                    className="bg-green-600 hover:bg-green-700"
+                                    className="bg-green-600 hover:bg-green-700 text-white"
                                   >
                                     <CheckCircle className="h-4 w-4 mr-1" />
                                     Mark Delivered
                                   </Button>
                                 )}
 
+                                {/* Additional Status Options */}
+                                {order.status !== 'delivered' && order.status !== 'cancelled' && (
+                                  <>
+                                    {order.status !== 'confirmed' && (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleStatusUpdate(order.id, 'confirmed')}
+                                        disabled={updateStatusMutation.isPending}
+                                        className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                                      >
+                                        Mark Confirmed
+                                      </Button>
+                                    )}
+                                    
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleStatusUpdate(order.id, 'cancelled')}
+                                      disabled={updateStatusMutation.isPending}
+                                      className="border-red-300 text-red-600 hover:bg-red-50"
+                                    >
+                                      <XCircle className="h-4 w-4 mr-1" />
+                                      Cancel Order
+                                    </Button>
+                                  </>
+                                )}
+
                                 {order.status === 'delivered' && (
-                                  <div className="text-green-600 font-medium text-sm">
-                                    ✅ Order Completed
+                                  <div className="text-green-600 font-medium text-sm flex items-center">
+                                    <CheckCircle className="h-4 w-4 mr-1" />
+                                    Order Completed Successfully
+                                  </div>
+                                )}
+
+                                {order.status === 'cancelled' && (
+                                  <div className="text-red-600 font-medium text-sm flex items-center">
+                                    <XCircle className="h-4 w-4 mr-1" />
+                                    Order Cancelled
                                   </div>
                                 )}
                               </div>
+
+                              {/* Status Update Loading */}
+                              {updateStatusMutation.isPending && (
+                                <div className="mt-2 text-sm text-blue-600">
+                                  Updating status...
+                                </div>
+                              )}
                             </div>
 
                             {/* Contact Actions */}
