@@ -35,13 +35,14 @@ import AdminSettings from "@/pages/admin/settings";
 import AdminAddons from "@/pages/admin/addons";
 import AdminInvoices from "@/pages/admin/invoices";
 import AdminWallet from "@/pages/admin/wallet";
+import AdminDelivery from "@/pages/admin/delivery";
 import AdminReminders from "@/pages/AdminReminders";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminProtected from "@/components/AdminProtected";
 import NotFound from "@/pages/not-found";
 
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, ShoppingCart, Tags, Percent, Settings, Plus, Mail, Users, FileText, Wallet } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Tags, Percent, Settings, Plus, Mail, Users, FileText, Wallet, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -69,8 +70,8 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
     { path: "/admin/coupons", label: "Coupons", icon: Percent },
     { path: "/admin/invoices", label: "Invoices", icon: FileText },
     { path: "/admin/wallet", label: "Wallet Management", icon: Wallet },
+    { path: "/admin/delivery", label: "Delivery Management", icon: Truck },
     { path: "/admin/reminders", label: "Email Reminders", icon: Mail },
-
     { path: "/admin/settings", label: "Settings", icon: Settings },
   ];
 
@@ -158,6 +159,7 @@ function Router() {
             <Route path="/admin/coupons" component={AdminCoupons} />
             <Route path="/admin/invoices" component={AdminInvoices} />
             <Route path="/admin/wallet" component={AdminWallet} />
+            <Route path="/admin/delivery" component={AdminDelivery} />
             <Route path="/admin/reminders" component={AdminReminders} />
             <Route path="/admin/settings" component={AdminSettings} />
             <Route component={NotFound} />
