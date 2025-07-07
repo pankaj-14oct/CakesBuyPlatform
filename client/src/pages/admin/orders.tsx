@@ -9,9 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ShoppingCart, Eye, Package, Truck, CheckCircle, 
-  Clock, XCircle, MapPin, Phone, Calendar 
+  Clock, XCircle, MapPin, Phone, Calendar, UserPlus 
 } from 'lucide-react';
-import { Order } from '@shared/schema';
+import { Order, DeliveryBoy } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { formatPrice } from '@/lib/utils';
@@ -19,6 +19,8 @@ import { formatPrice } from '@/lib/utils';
 export default function AdminOrders() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [orderToAssign, setOrderToAssign] = useState<Order | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -32,6 +34,11 @@ export default function AdminOrders() {
       if (!response.ok) throw new Error('Failed to fetch orders');
       return response.json();
     },
+  });
+
+  // Fetch delivery boys for assignment
+  const { data: deliveryBoys = [] } = useQuery<DeliveryBoy[]>({
+    queryKey: ['/api/admin/delivery-boys'],
   });
 
   const updateOrderMutation = useMutation({
@@ -48,8 +55,38 @@ export default function AdminOrders() {
     }
   });
 
+  const assignDeliveryBoyMutation = useMutation({
+    mutationFn: async ({ orderId, deliveryBoyId }: { orderId: number; deliveryBoyId: number }) => {
+      const response = await apiRequest(`/api/admin/orders/${orderId}/assign`, 'POST', { deliveryBoyId });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
+      toast({ title: "Delivery boy assigned successfully!" });
+      setAssignDialogOpen(false);
+      setOrderToAssign(null);
+    },
+    onError: () => {
+      toast({ title: "Failed to assign delivery boy", variant: "destructive" });
+    }
+  });
+
   const handleStatusChange = (orderId: number, newStatus: string) => {
     updateOrderMutation.mutate({ id: orderId, status: newStatus });
+  };
+
+  const handleAssignDeliveryBoy = (order: Order) => {
+    setOrderToAssign(order);
+    setAssignDialogOpen(true);
+  };
+
+  const handleAssignmentSubmit = (deliveryBoyId: string) => {
+    if (orderToAssign && deliveryBoyId) {
+      assignDeliveryBoyMutation.mutate({ 
+        orderId: orderToAssign.id, 
+        deliveryBoyId: parseInt(deliveryBoyId) 
+      });
+    }
   };
 
   const statusColors = {
@@ -179,6 +216,7 @@ export default function AdminOrders() {
                   <TableHead>Amount</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Delivery</TableHead>
+                  <TableHead>Delivery Boy</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -217,6 +255,26 @@ export default function AdminOrders() {
                       <div>
                         <p className="text-sm">{new Date(order.deliveryDate).toLocaleDateString()}</p>
                         <p className="text-xs text-charcoal opacity-60">{order.deliveryTime}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        {order.deliveryBoyId ? (
+                          <div>
+                            <p className="text-sm text-green-600 font-medium">Assigned</p>
+                            <p className="text-xs text-charcoal opacity-60">ID: {order.deliveryBoyId}</p>
+                          </div>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs"
+                            onClick={() => handleAssignDeliveryBoy(order)}
+                          >
+                            <UserPlus className="h-3 w-3 mr-1" />
+                            Assign
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -311,12 +369,12 @@ export default function AdminOrders() {
                                       </div>
                                       <div className="flex justify-between">
                                         <span>Delivery Fee</span>
-                                        <span>{formatPrice(selectedOrder.deliveryFee)}</span>
+                                        <span>{formatPrice(selectedOrder.deliveryFee || 0)}</span>
                                       </div>
                                       {parseFloat(selectedOrder.discount || '0') > 0 && (
                                         <div className="flex justify-between text-green-600">
                                           <span>Discount</span>
-                                          <span>-{formatPrice(selectedOrder.discount)}</span>
+                                          <span>-{formatPrice(selectedOrder.discount || 0)}</span>
                                         </div>
                                       )}
                                       <div className="border-t pt-2">
@@ -422,6 +480,54 @@ export default function AdminOrders() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delivery Boy Assignment Dialog */}
+      <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Assign Delivery Boy</DialogTitle>
+          </DialogHeader>
+          
+          {orderToAssign && (
+            <div className="space-y-4">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium">Order: {orderToAssign.orderNumber}</h4>
+                <p className="text-sm text-gray-600">
+                  Customer: {orderToAssign.deliveryAddress.name} ({orderToAssign.deliveryAddress.phone})
+                </p>
+                <p className="text-sm text-gray-600">
+                  Address: {orderToAssign.deliveryAddress.address}, {orderToAssign.deliveryAddress.city}
+                </p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-2">Select Delivery Boy</label>
+                <Select
+                  onValueChange={handleAssignmentSubmit}
+                  disabled={assignDeliveryBoyMutation.isPending}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a delivery boy" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {deliveryBoys.filter(db => db.isActive).map((deliveryBoy) => (
+                      <SelectItem key={deliveryBoy.id} value={deliveryBoy.id.toString()}>
+                        {deliveryBoy.name} - {deliveryBoy.phone} ({deliveryBoy.vehicleType})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {deliveryBoys.filter(db => db.isActive).length === 0 && (
+                <p className="text-sm text-red-600">
+                  No active delivery boys available. Please activate delivery boys first.
+                </p>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
