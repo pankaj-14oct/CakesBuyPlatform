@@ -277,19 +277,19 @@ export default function DeliveryDashboard() {
       {/* Simple Header */}
       <div className="bg-caramel text-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 space-y-4 sm:space-y-0">
             <div className="flex items-center space-x-3">
               <Truck className="h-6 w-6" />
               <div>
-                <h1 className="text-xl font-semibold">Delivery Dashboard</h1>
+                <h1 className="text-lg sm:text-xl font-semibold">Delivery Dashboard</h1>
                 <p className="text-sm opacity-90">Welcome, {deliveryBoy.name}</p>
                 <p className="text-xs opacity-75">Total Earnings: ₹{profile?.totalEarnings || '0'}</p>
               </div>
             </div>
             
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
               {/* Notification Status */}
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
                 <div className="flex items-center space-x-1 bg-white/10 px-2 py-1 rounded">
                   {isConnected ? (
                     <>
@@ -303,7 +303,7 @@ export default function DeliveryDashboard() {
                     </>
                   )}
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-2 w-full sm:w-auto">
                   <Button
                     variant="outline"
                     size="sm"
@@ -326,7 +326,7 @@ export default function DeliveryDashboard() {
                         });
                       }
                     }}
-                    className="text-xs"
+                    className="text-xs text-white border-white/30 bg-white/10 hover:bg-white/20 hover:text-white flex-1 sm:flex-none"
                   >
                     <BellRing className="h-3 w-3 mr-1" />
                     Test
@@ -342,7 +342,7 @@ export default function DeliveryDashboard() {
                         duration: 2000,
                       });
                     }}
-                    className="text-xs"
+                    className="text-xs text-white border-white/30 bg-white/10 hover:bg-white/20 hover:text-white flex-1 sm:flex-none"
                   >
                     <XCircle className="h-3 w-3 mr-1" />
                     Stop
@@ -354,14 +354,18 @@ export default function DeliveryDashboard() {
                     variant="secondary"
                     size="sm"
                     onClick={markAllAsRead}
-                    className="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 animate-pulse shadow-lg ring-2 ring-red-400 ring-opacity-50"
+                    className="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 animate-pulse shadow-lg ring-2 ring-red-400 ring-opacity-50 w-full sm:w-auto"
                   >
                     🔔 {unreadCount} New Order{unreadCount > 1 ? 's' : ''}
                   </Button>
                 )}
               </div>
               
-              <Button variant="secondary" onClick={handleLogout} className="bg-white text-caramel hover:bg-gray-100">
+              <Button 
+                variant="secondary" 
+                onClick={handleLogout} 
+                className="bg-white text-caramel hover:bg-gray-100 w-full sm:w-auto"
+              >
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
@@ -374,63 +378,66 @@ export default function DeliveryDashboard() {
         {/* Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="dashboard">
-              <Truck className="h-4 w-4 mr-2" />
-              Dashboard
+            <TabsTrigger value="dashboard" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
+              <Truck className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Dashboard</span>
+              <span className="sm:hidden">Orders</span>
             </TabsTrigger>
-            <TabsTrigger value="stats">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Statistics
+            <TabsTrigger value="stats" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
+              <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Statistics</span>
+              <span className="sm:hidden">Stats</span>
             </TabsTrigger>
-            <TabsTrigger value="history">
-              <History className="h-4 w-4 mr-2" />
-              Order History
+            <TabsTrigger value="history" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
+              <History className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Order History</span>
+              <span className="sm:hidden">History</span>
             </TabsTrigger>
           </TabsList>
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6">
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
           <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600">{orders.length}</div>
-              <div className="text-sm text-gray-600">Total Orders</div>
+            <CardContent className="p-3 sm:p-4 text-center">
+              <div className="text-lg sm:text-2xl font-bold text-blue-600">{orders.length}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Total Orders</div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-orange-600">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <div className="text-lg sm:text-2xl font-bold text-orange-600">
                 {orders.filter(o => o.status === 'out_for_delivery').length}
               </div>
-              <div className="text-sm text-gray-600">Out for Delivery</div>
+              <div className="text-xs sm:text-sm text-gray-600">Out for Delivery</div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <div className="text-lg sm:text-2xl font-bold text-green-600">
                 {orders.filter(o => o.status === 'delivered').length}
               </div>
-              <div className="text-sm text-gray-600">Delivered</div>
+              <div className="text-xs sm:text-sm text-gray-600">Delivered</div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <div className="text-lg sm:text-2xl font-bold text-blue-600">
                 {orders.filter(o => o.status === 'confirmed' || o.status === 'preparing').length}
               </div>
-              <div className="text-sm text-gray-600">Ready for Pickup</div>
+              <div className="text-xs sm:text-sm text-gray-600">Ready for Pickup</div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">₹{stats?.totalEarnings || '0'}</div>
-              <div className="text-sm text-gray-600">Total Earnings</div>
+            <CardContent className="p-3 sm:p-4 text-center">
+              <div className="text-lg sm:text-2xl font-bold text-green-600">₹{stats?.totalEarnings || '0'}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Total Earnings</div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
           {/* Profile Summary */}
           <div className="lg:col-span-1">
             <Card>
