@@ -212,6 +212,8 @@ export const dummyData = {
     { email: "emma@example.com", phone: "9876543217", addresses: [], role: "customer" },
     { email: "alex@example.com", phone: "9876543218", addresses: [], role: "customer" },
     { email: "olivia@example.com", phone: "9876543219", addresses: [], role: "customer" },
+    { email: "ravi@example.com", phone: "9876543220", addresses: [], role: "customer" },
+    { email: "priya@example.com", phone: "9876543221", addresses: [], role: "customer" },
   ],
 
   orders: [
@@ -322,6 +324,52 @@ export const dummyData = {
       },
       deliveryDate: new Date('2024-12-31'),
       specialInstructions: "New Year special delivery"
+    },
+    {
+      orderNumber: generateOrderNumber(),
+      userId: 6,
+      items: [{ cakeId: 2, name: "Vanilla Dream Cake", quantity: 1, weight: "1kg", flavor: "Vanilla", price: 1299, addons: [] }],
+      subtotal: "1299",
+      deliveryFee: "50",
+      discount: "0",
+      total: "1349",
+      status: "confirmed",
+      paymentMethod: "online",
+      paymentStatus: "paid",
+      deliveryAddress: {
+        name: "Ravi Kumar",
+        phone: "9876543220",
+        address: "123 Sector 15, Gurgaon",
+        pincode: "122001",
+        city: "Gurgaon"
+      },
+      deliveryDate: new Date('2025-01-07'),
+      deliveryTimeSlot: "slot2",
+      specialInstructions: "Call before delivery"
+    },
+    {
+      orderNumber: generateOrderNumber(),
+      userId: 7,
+      items: [
+        { cakeId: 5, name: "Black Forest Special", quantity: 1, weight: "1.5kg", flavor: "Chocolate", price: 1899, addons: [] }
+      ],
+      subtotal: "1899",
+      deliveryFee: "0",
+      discount: "0",
+      total: "1899",
+      status: "preparing",
+      paymentMethod: "online",
+      paymentStatus: "paid",
+      deliveryAddress: {
+        name: "Priya Sharma",
+        phone: "9876543221",
+        address: "456 Golf Course Road, Gurgaon",
+        pincode: "122003",
+        city: "Gurgaon"
+      },
+      deliveryDate: new Date('2025-01-07'),
+      deliveryTimeSlot: "slot3",
+      specialInstructions: "Ring doorbell, building has security"
     }
   ]
 };
