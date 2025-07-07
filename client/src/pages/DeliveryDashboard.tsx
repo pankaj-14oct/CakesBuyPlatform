@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { 
@@ -320,10 +321,28 @@ export default function DeliveryDashboard() {
                     <p className="text-gray-600">No orders assigned to you yet</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <Accordion type="single" collapsible className="space-y-2">
                     {orders.map((order) => (
-                      <Card key={order.id} className="border border-gray-200">
-                        <CardContent className="p-4">
+                      <AccordionItem key={order.id} value={order.id.toString()} className="border border-gray-200 rounded-lg">
+                        <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                          <div className="flex justify-between items-center w-full">
+                            <div className="flex items-center space-x-4">
+                              <div className="text-left">
+                                <h3 className="font-semibold text-lg">#{order.orderNumber}</h3>
+                                <div className="text-sm space-y-1">
+                                  <p className="text-green-600 font-medium">Total: ₹{order.total} | Fee: ₹{order.deliveryFee || '0'}</p>
+                                  <p className="text-gray-600">{order.deliveryAddress.name} • {order.paymentMethod?.toUpperCase() || 'COD'}</p>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <Badge className={getStatusColor(order.status)}>
+                              {order.status.replace('_', ' ').toUpperCase()}
+                            </Badge>
+                          </div>
+                        </AccordionTrigger>
+                        
+                        <AccordionContent className="px-4 pb-4">
                           <div className="flex justify-between items-start mb-4">
                             <div>
                               <h3 className="font-semibold text-lg">#{order.orderNumber}</h3>
@@ -517,10 +536,10 @@ export default function DeliveryDashboard() {
                               </Button>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
+                        </AccordionContent>
+                      </AccordionItem>
                     ))}
-                  </div>
+                  </Accordion>
                 )}
               </CardContent>
             </Card>
