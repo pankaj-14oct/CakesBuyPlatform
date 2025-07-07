@@ -157,6 +157,40 @@ export default function DeliveryDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-blue-600">{orders.length}</div>
+              <div className="text-sm text-gray-600">Total Orders</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-orange-600">
+                {orders.filter(o => o.status === 'out_for_delivery').length}
+              </div>
+              <div className="text-sm text-gray-600">Out for Delivery</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-green-600">
+                {orders.filter(o => o.status === 'delivered').length}
+              </div>
+              <div className="text-sm text-gray-600">Delivered</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-purple-600">
+                {orders.filter(o => o.status === 'preparing').length}
+              </div>
+              <div className="text-sm text-gray-600">Preparing</div>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Profile Summary */}
           <div className="lg:col-span-1">
@@ -226,7 +260,10 @@ export default function DeliveryDashboard() {
                           <div className="flex justify-between items-start mb-4">
                             <div>
                               <h3 className="font-semibold text-lg">#{order.orderNumber}</h3>
-                              <p className="text-sm text-gray-600">₹{order.totalAmount}</p>
+                              <div className="text-sm space-y-1">
+                                <p className="text-green-600 font-medium">₹{order.totalAmount}</p>
+                                <p className="text-gray-600">Payment: {order.paymentMethod?.toUpperCase() || 'COD'}</p>
+                              </div>
                             </div>
                             <Badge className={getStatusColor(order.status)}>
                               {order.status.replace('_', ' ').toUpperCase()}
@@ -262,11 +299,31 @@ export default function DeliveryDashboard() {
                               <div className="space-y-1 text-sm">
                                 <p className="flex items-center">
                                   <Clock className="h-3 w-3 mr-2 text-gray-400" />
-                                  {new Date(order.deliveryDate).toLocaleDateString()}
+                                  <span className="font-medium text-blue-600">
+                                    {new Date(order.deliveryDate).toLocaleDateString('en-US', {
+                                      weekday: 'short',
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric'
+                                    })}
+                                  </span>
                                 </p>
-                                <p className="text-gray-600">
-                                  Time: {formatDeliverySlot(order.deliverySlot)}
+                                <p className="flex items-center">
+                                  <Clock className="h-3 w-3 mr-2 text-gray-400" />
+                                  <span className="font-medium text-orange-600">
+                                    {formatDeliverySlot(order.deliverySlot)}
+                                  </span>
                                 </p>
+                                {order.deliveryOccasion && (
+                                  <p className="text-gray-600">
+                                    Occasion: {order.deliveryOccasion}
+                                  </p>
+                                )}
+                                {order.specialInstructions && (
+                                  <p className="text-gray-600">
+                                    Instructions: {order.specialInstructions}
+                                  </p>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -282,35 +339,79 @@ export default function DeliveryDashboard() {
                             </div>
                           </div>
 
-                          <div className="flex gap-2">
-                            {order.status === 'confirmed' && (
-                              <Button
-                                size="sm"
-                                onClick={() => handleStatusUpdate(order.id, 'out_for_delivery')}
-                                disabled={updateStatusMutation.isPending}
-                                className="bg-orange-600 hover:bg-orange-700"
-                              >
-                                <Navigation className="h-4 w-4 mr-1" />
-                                Start Delivery
-                              </Button>
-                            )}
-                            
-                            {order.status === 'out_for_delivery' && (
-                              <Button
-                                size="sm"
-                                onClick={() => handleStatusUpdate(order.id, 'delivered')}
-                                disabled={updateStatusMutation.isPending}
-                                className="bg-green-600 hover:bg-green-700"
-                              >
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Mark Delivered
-                              </Button>
-                            )}
+                          <div className="space-y-3">
+                            {/* Status Update Actions */}
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                              <h5 className="font-medium text-sm mb-2">Update Status:</h5>
+                              <div className="flex gap-2 flex-wrap">
+                                {order.status === 'confirmed' && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleStatusUpdate(order.id, 'preparing')}
+                                    disabled={updateStatusMutation.isPending}
+                                    className="bg-purple-600 hover:bg-purple-700"
+                                  >
+                                    <Package className="h-4 w-4 mr-1" />
+                                    Start Preparing
+                                  </Button>
+                                )}
+                                
+                                {order.status === 'preparing' && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleStatusUpdate(order.id, 'out_for_delivery')}
+                                    disabled={updateStatusMutation.isPending}
+                                    className="bg-orange-600 hover:bg-orange-700"
+                                  >
+                                    <Navigation className="h-4 w-4 mr-1" />
+                                    Start Delivery
+                                  </Button>
+                                )}
+                                
+                                {order.status === 'out_for_delivery' && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleStatusUpdate(order.id, 'delivered')}
+                                    disabled={updateStatusMutation.isPending}
+                                    className="bg-green-600 hover:bg-green-700"
+                                  >
+                                    <CheckCircle className="h-4 w-4 mr-1" />
+                                    Mark Delivered
+                                  </Button>
+                                )}
 
-                            <Button variant="outline" size="sm">
-                              <Phone className="h-4 w-4 mr-1" />
-                              Call Customer
-                            </Button>
+                                {order.status === 'delivered' && (
+                                  <div className="text-green-600 font-medium text-sm">
+                                    ✅ Order Completed
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Contact Actions */}
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => window.open(`tel:${order.customerPhone}`, '_self')}
+                              >
+                                <Phone className="h-4 w-4 mr-1" />
+                                Call Customer
+                              </Button>
+                              
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => window.open(`https://maps.google.com/?q=${encodeURIComponent(
+                                  typeof order.deliveryAddress === 'string' 
+                                    ? order.deliveryAddress 
+                                    : `${order.deliveryAddress.address}, ${order.deliveryAddress.city} - ${order.deliveryAddress.pincode}`
+                                )}`, '_blank')}
+                              >
+                                <MapPin className="h-4 w-4 mr-1" />
+                                Navigate
+                              </Button>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
