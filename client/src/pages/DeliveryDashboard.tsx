@@ -193,10 +193,10 @@ export default function DeliveryDashboard() {
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-purple-600">
-                {orders.filter(o => o.status === 'preparing').length}
+              <div className="text-2xl font-bold text-blue-600">
+                {orders.filter(o => o.status === 'confirmed' || o.status === 'preparing').length}
               </div>
-              <div className="text-sm text-gray-600">Preparing</div>
+              <div className="text-sm text-gray-600">Ready for Pickup</div>
             </CardContent>
           </Card>
         </div>
@@ -364,19 +364,7 @@ export default function DeliveryDashboard() {
 
                               {/* Action Buttons */}
                               <div className="flex gap-2 flex-wrap">
-                                {order.status === 'confirmed' && (
-                                  <Button
-                                    size="sm"
-                                    onClick={() => handleStatusUpdate(order.id, 'preparing')}
-                                    disabled={updateStatusMutation.isPending}
-                                    className="bg-purple-600 hover:bg-purple-700 text-white"
-                                  >
-                                    <Package className="h-4 w-4 mr-1" />
-                                    Start Preparing
-                                  </Button>
-                                )}
-                                
-                                {order.status === 'preparing' && (
+                                {(order.status === 'confirmed' || order.status === 'preparing') && (
                                   <Button
                                     size="sm"
                                     onClick={() => handleStatusUpdate(order.id, 'out_for_delivery')}
@@ -384,7 +372,7 @@ export default function DeliveryDashboard() {
                                     className="bg-orange-600 hover:bg-orange-700 text-white"
                                   >
                                     <Navigation className="h-4 w-4 mr-1" />
-                                    Start Delivery
+                                    Pick Up & Start Delivery
                                   </Button>
                                 )}
                                 
@@ -400,33 +388,16 @@ export default function DeliveryDashboard() {
                                   </Button>
                                 )}
 
-                                {/* Additional Status Options */}
-                                {order.status !== 'delivered' && order.status !== 'cancelled' && (
-                                  <>
-                                    {order.status !== 'confirmed' && (
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleStatusUpdate(order.id, 'confirmed')}
-                                        disabled={updateStatusMutation.isPending}
-                                        className="border-blue-300 text-blue-600 hover:bg-blue-50"
-                                      >
-                                        Mark Confirmed
-                                      </Button>
-                                    )}
-                                    
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => handleStatusUpdate(order.id, 'cancelled')}
-                                      disabled={updateStatusMutation.isPending}
-                                      className="border-red-300 text-red-600 hover:bg-red-50"
-                                    >
-                                      <XCircle className="h-4 w-4 mr-1" />
-                                      Cancel Order
-                                    </Button>
-                                  </>
-                                )}
+                                {/* Help Text for Delivery Process */}
+                                {order.status === 'confirmed' || order.status === 'preparing' ? (
+                                  <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
+                                    📦 Order is ready for pickup. Click "Pick Up & Start Delivery" when you collect it from the store.
+                                  </div>
+                                ) : order.status === 'out_for_delivery' ? (
+                                  <div className="text-xs text-orange-600 bg-orange-50 p-2 rounded">
+                                    🚚 You're on the way! Click "Mark Delivered" when you complete the delivery.
+                                  </div>
+                                ) : null}
 
                                 {order.status === 'delivered' && (
                                   <div className="text-green-600 font-medium text-sm flex items-center">
