@@ -108,6 +108,11 @@ export default function Footer() {
                   Contact Us
                 </Link>
               </li>
+              <li>
+                <Link href="/delivery/login" className="text-gray-300 hover:text-caramel transition-colors">
+                  Delivery Partner Login
+                </Link>
+              </li>
             </ul>
           </div>
 

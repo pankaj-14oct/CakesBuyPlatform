@@ -39,6 +39,8 @@ import AdminDelivery from "@/pages/admin/delivery";
 import AdminReminders from "@/pages/AdminReminders";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminProtected from "@/components/AdminProtected";
+import DeliveryLogin from "@/pages/DeliveryLogin";
+import DeliveryDashboard from "@/pages/DeliveryDashboard";
 import NotFound from "@/pages/not-found";
 
 import { Link, useLocation } from "wouter";
@@ -132,6 +134,20 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
 
 function Router() {
   const [location] = useLocation();
+  
+  // Check if we're in delivery area
+  if (location.startsWith('/delivery')) {
+    return (
+      <>
+        <ScrollRestoration />
+        <Switch>
+          <Route path="/delivery/login" component={DeliveryLogin} />
+          <Route path="/delivery/dashboard" component={DeliveryDashboard} />
+          <Route component={NotFound} />
+        </Switch>
+      </>
+    );
+  }
   
   // Check if we're in admin area
   if (location.startsWith('/admin')) {

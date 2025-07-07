@@ -13,10 +13,19 @@ export async function apiRequest(
   data?: unknown | undefined,
   headers?: Record<string, string>
 ): Promise<Response> {
-  // Check for admin token first for admin routes, then regular auth token
+  // Check for admin token first for admin routes, delivery token for delivery routes, then regular auth token
   const adminToken = localStorage.getItem('admin_token');
   const authToken = localStorage.getItem('auth_token');
-  const token = url.includes('/admin') ? (adminToken || authToken) : (authToken || adminToken);
+  const deliveryToken = localStorage.getItem('delivery_token');
+  
+  let token;
+  if (url.includes('/admin')) {
+    token = adminToken || authToken;
+  } else if (url.includes('/delivery')) {
+    token = deliveryToken;
+  } else {
+    token = authToken || adminToken;
+  }
   
   const defaultHeaders: Record<string, string> = {};
   if (data) {
@@ -47,11 +56,20 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    // Check for admin token first for admin routes, then regular auth token
+    // Check for admin token first for admin routes, delivery token for delivery routes, then regular auth token
     const adminToken = localStorage.getItem('admin_token');
     const authToken = localStorage.getItem('auth_token');
+    const deliveryToken = localStorage.getItem('delivery_token');
     const url = queryKey[0] as string;
-    const token = url.includes('/admin') ? (adminToken || authToken) : (authToken || adminToken);
+    
+    let token;
+    if (url.includes('/admin')) {
+      token = adminToken || authToken;
+    } else if (url.includes('/delivery')) {
+      token = deliveryToken;
+    } else {
+      token = authToken || adminToken;
+    }
     const headers: Record<string, string> = {};
     
     if (token) {
