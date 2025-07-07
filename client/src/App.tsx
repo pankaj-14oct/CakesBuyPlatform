@@ -218,13 +218,14 @@ function Router() {
 function App() {
   const [location] = useLocation();
   const isAdminArea = location.startsWith('/admin');
+  const isDeliveryArea = location.startsWith('/delivery');
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
           <CartProvider>
-            {isAdminArea ? (
+            {isAdminArea || isDeliveryArea ? (
               <Router />
             ) : (
               <div className="min-h-screen flex flex-col">
