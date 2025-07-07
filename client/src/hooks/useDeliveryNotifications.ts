@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useToast } from './use-toast';
+import { notificationManager } from '@/utils/notificationManager';
 
 interface NotificationData {
   type: 'order_assigned' | 'order_updated' | 'order_cancelled' | 'connected';
@@ -43,37 +44,22 @@ export function useDeliveryNotifications(token?: string) {
               toast({
                 title: "🚨 URGENT: New Order Assigned!",
                 description: `Order ${notification.orderNumber} has been assigned to you. ACTION REQUIRED!`,
-                duration: 20000, // Extended duration for critical notifications
-                variant: "destructive", // Red styling for urgency
+                duration: 20000,
+                variant: "destructive",
               });
 
-              // Show browser notification if permission granted
-              if (Notification.permission === 'granted') {
-                new Notification('🚨 URGENT: New Delivery Order Assigned', {
-                  body: `Order ${notification.orderNumber} has been assigned to you. IMMEDIATE ACTION REQUIRED! Check your dashboard now.`,
-                  icon: '/favicon.ico',
-                  tag: `order-${notification.orderId}`,
-                  requireInteraction: true, // Keep notification visible until user interacts
-                  silent: false, // Ensure it makes system sound
-                });
-              }
+              // Use enhanced notification manager with ringtone-style alerts
+              notificationManager.showOrderNotification({
+                orderNumber: notification.orderNumber || 'Unknown',
+                customerName: 'Customer', // Extract from notification if available
+                amount: 0, // Extract from notification if available
+                address: 'Delivery Address' // Extract from notification if available
+              });
 
-              // Play enhanced alarm notification sound multiple times
-              setTimeout(() => playNotificationSound(), 100); // Small delay to ensure audio context is ready
-              setTimeout(() => playNotificationSound(), 3000); // Repeat after 3 seconds
-              setTimeout(() => playNotificationSound(), 6000); // Repeat after 6 seconds
-              
-              // Flash the page title to get attention
-              const originalTitle = document.title;
-              let flashCount = 0;
-              const flashInterval = setInterval(() => {
-                document.title = flashCount % 2 === 0 ? '🔔 NEW ORDER!' : originalTitle;
-                flashCount++;
-                if (flashCount >= 16) { // Flash 8 times for more attention
-                  clearInterval(flashInterval);
-                  document.title = originalTitle;
-                }
-              }, 400); // Faster flashing for more urgency
+              // Legacy fallback for backward compatibility
+              setTimeout(() => playNotificationSound(), 100);
+              setTimeout(() => playNotificationSound(), 3000);
+              setTimeout(() => playNotificationSound(), 6000);
             }
           } catch (error) {
             console.error('Failed to parse WebSocket message:', error);

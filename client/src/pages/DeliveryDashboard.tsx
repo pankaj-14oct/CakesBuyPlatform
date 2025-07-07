@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { useDeliveryNotifications } from "@/hooks/useDeliveryNotifications";
 import { testNotificationSound } from "@/utils/testSound";
+import { notificationManager } from "@/utils/notificationManager";
 
 interface DeliveryBoy {
   id: number;
@@ -139,7 +140,7 @@ export default function DeliveryDashboard() {
     enabled: !!deliveryBoy && activeTab === 'history'
   });
 
-  // Initialize audio context on first user interaction to enable sound notifications
+  // Initialize audio context and notification system
   useEffect(() => {
     const initializeAudio = async () => {
       try {
@@ -160,7 +161,17 @@ export default function DeliveryDashboard() {
       }
     };
     
+    const initNotifications = async () => {
+      try {
+        await notificationManager.requestPermission();
+        console.log('Notification manager initialized');
+      } catch (error) {
+        console.log('Notification manager initialization failed:', error);
+      }
+    };
+    
     initializeAudio();
+    initNotifications();
   }, []);
 
   // Update order status mutation
@@ -292,23 +303,51 @@ export default function DeliveryDashboard() {
                     </>
                   )}
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={async () => {
-                    const success = await testNotificationSound();
-                    toast({
-                      title: success ? "🔔 Sound Test" : "❌ Sound Failed",
-                      description: success ? "If you heard a beep, notifications are working!" : "Check browser audio permissions",
-                      variant: success ? "default" : "destructive",
-                      duration: 3000,
-                    });
-                  }}
-                  className="text-xs"
-                >
-                  <Bell className="h-3 w-3 mr-1" />
-                  Test Bell
-                </Button>
+                <div className="flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        const success = await notificationManager.testNotification();
+                        toast({
+                          title: success ? "🔔 Ringtone Test" : "❌ Test Failed",
+                          description: success ? "You should hear a mobile ringtone and see a notification!" : "Check browser permissions",
+                          variant: success ? "default" : "destructive",
+                          duration: 5000,
+                        });
+                      } catch (error) {
+                        console.error('Test failed:', error);
+                        toast({
+                          title: "❌ Test Failed",
+                          description: "Could not test notification system",
+                          variant: "destructive",
+                          duration: 3000,
+                        });
+                      }
+                    }}
+                    className="text-xs"
+                  >
+                    <BellRing className="h-3 w-3 mr-1" />
+                    Test
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      notificationManager.stopRingtone();
+                      toast({
+                        title: "🔇 Stopped",
+                        description: "Notification sounds stopped",
+                        duration: 2000,
+                      });
+                    }}
+                    className="text-xs"
+                  >
+                    <XCircle className="h-3 w-3 mr-1" />
+                    Stop
+                  </Button>
+                </div>
                 
                 {unreadCount > 0 && (
                   <Button
