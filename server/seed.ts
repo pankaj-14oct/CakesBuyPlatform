@@ -154,6 +154,118 @@ const seedData = {
       validFrom: new Date(),
       validUntil: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)
     }
+  ],
+
+  orders: [
+    {
+      orderNumber: "ORD-2024-001",
+      userId: 1,
+      items: [{ cakeId: 1, name: "Chocolate Fantasy Cake", quantity: 1, weight: "1kg", flavor: "Chocolate", price: 1599, addons: [] }],
+      subtotal: "1599",
+      deliveryFee: "0",
+      discount: "0",
+      total: "1599",
+      status: "delivered",
+      paymentMethod: "online",
+      paymentStatus: "paid",
+      deliveryAddress: {
+        name: "John Doe",
+        phone: "9876543210",
+        address: "123 MG Road, Gurgaon",
+        pincode: "122001",
+        city: "Gurgaon"
+      },
+      deliveryDate: new Date('2024-12-25'),
+      specialInstructions: "Ring the doorbell twice"
+    },
+    {
+      orderNumber: "ORD-2024-002",
+      userId: 1,
+      items: [{ cakeId: 2, name: "Vanilla Dream Cake", quantity: 1, weight: "1kg", flavor: "Vanilla", price: 1399, addons: [] }],
+      subtotal: "1399",
+      deliveryFee: "50",
+      discount: "0",
+      total: "1449",
+      status: "confirmed",
+      paymentMethod: "online",
+      paymentStatus: "paid",
+      deliveryAddress: {
+        name: "Jane Smith",
+        phone: "9876543211",
+        address: "456 Sector 14, Gurgaon",
+        pincode: "122001",
+        city: "Gurgaon"
+      },
+      deliveryDate: new Date('2025-01-08'),
+      deliveryTimeSlot: "slot1",
+      specialInstructions: "Call before delivery"
+    },
+    {
+      orderNumber: "ORD-2024-003",
+      userId: 1,
+      items: [{ cakeId: 3, name: "Red Velvet Romance", quantity: 1, weight: "1.5kg", flavor: "Red Velvet", price: 1799, addons: [] }],
+      subtotal: "1799",
+      deliveryFee: "0",
+      discount: "0",
+      total: "1799",
+      status: "preparing",
+      paymentMethod: "online",
+      paymentStatus: "paid",
+      deliveryAddress: {
+        name: "Mike Johnson",
+        phone: "9876543212",
+        address: "789 DLF Phase 1, Gurgaon",
+        pincode: "122002",
+        city: "Gurgaon"
+      },
+      deliveryDate: new Date('2025-01-08'),
+      deliveryTimeSlot: "slot2",
+      specialInstructions: "Anniversary cake - handle with care"
+    },
+    {
+      orderNumber: "ORD-2024-004",
+      userId: 1,
+      items: [{ cakeId: 1, name: "Chocolate Fantasy Cake", quantity: 1, weight: "0.5kg", flavor: "Chocolate", price: 899, addons: [] }],
+      subtotal: "899",
+      deliveryFee: "50",
+      discount: "0",
+      total: "949",
+      status: "out_for_delivery",
+      paymentMethod: "cod",
+      paymentStatus: "pending",
+      deliveryAddress: {
+        name: "Sarah Wilson",
+        phone: "9876543213",
+        address: "321 Cyber City, Gurgaon",
+        pincode: "122002",
+        city: "Gurgaon"
+      },
+      deliveryDate: new Date('2025-01-07'),
+      deliveryTimeSlot: "slot3",
+      specialInstructions: "COD order - collect payment"
+    },
+    {
+      orderNumber: "ORD-2024-005",
+      userId: 1,
+      items: [{ cakeId: 2, name: "Vanilla Dream Cake", quantity: 1, weight: "1.5kg", flavor: "Vanilla", price: 1999, addons: [] }],
+      subtotal: "1999",
+      deliveryFee: "0",
+      discount: "0",
+      total: "1999",
+      status: "pending",
+      paymentMethod: "online",
+      paymentStatus: "paid",
+      deliveryAddress: {
+        name: "David Brown",
+        phone: "9876543214",
+        address: "654 Golf Course Road, Gurgaon",
+        pincode: "122003",
+        city: "Gurgaon"
+      },
+      deliveryDate: new Date('2025-01-09'),
+      deliveryTimeSlot: "slot4",
+      specialInstructions: "Birthday surprise - deliver quietly"
+    }
   ]
 };
 
@@ -204,6 +316,12 @@ export async function seedDatabase() {
     console.log("🎫 Seeding promo codes...");
     for (const promo of seedData.promoCodes) {
       await db.insert(promoCodes).values(promo).onConflictDoNothing();
+    }
+
+    // Seed orders
+    console.log("📦 Seeding orders...");
+    for (const order of seedData.orders) {
+      await db.insert(orders).values(order).onConflictDoNothing();
     }
 
     console.log("✅ Database seeding completed successfully!");
