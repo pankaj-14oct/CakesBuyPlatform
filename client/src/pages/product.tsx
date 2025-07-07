@@ -38,6 +38,7 @@ export default function ProductPage() {
   const [textColor, setTextColor] = useState('#DC2626');
   const [fontSize, setFontSize] = useState(100);
   const [fontFamily, setFontFamily] = useState('Arial');
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const { dispatch } = useCart();
   const { toast } = useToast();
 
@@ -233,41 +234,67 @@ export default function ProductPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Product Images */}
-          <div className="space-y-4">
-            <div className="relative">
-              <img 
-                src={cake.images?.[0] || '/placeholder-cake.jpg'} 
-                alt={cake.name}
-                className="w-full rounded-2xl shadow-lg"
-              />
-              
-              {/* Badges */}
-              <div className="absolute top-4 left-4 flex flex-col gap-2">
-                {cake.deliveryOptions?.sameDay && (
-                  <Badge className="bg-mint text-white">
-                    <Truck className="mr-1 h-3 w-3" />
-                    Same Day
-                  </Badge>
-                )}
-                {cake.isBestseller && (
-                  <Badge className="bg-pink text-white">Bestseller</Badge>
-                )}
-                {cake.isEggless && (
-                  <Badge className="bg-green-500 text-white">Eggless</Badge>
-                )}
+          <div className="flex gap-4">
+            {/* Thumbnail Images (Left Side) */}
+            {cake.images && cake.images.length > 1 && (
+              <div className="flex flex-col gap-3 w-24">
+                {cake.images.map((image, index) => (
+                  <div
+                    key={index}
+                    className={`relative cursor-pointer rounded-lg overflow-hidden ${
+                      selectedImageIndex === index 
+                        ? 'ring-2 ring-caramel ring-offset-2' 
+                        : 'hover:opacity-80'
+                    }`}
+                    onClick={() => setSelectedImageIndex(index)}
+                  >
+                    <img 
+                      src={image} 
+                      alt={`${cake.name} view ${index + 1}`}
+                      className="w-full h-20 object-cover"
+                    />
+                  </div>
+                ))}
               </div>
+            )}
+            
+            {/* Main Image (Right Side) */}
+            <div className="flex-1">
+              <div className="relative">
+                <img 
+                  src={cake.images?.[selectedImageIndex] || cake.images?.[0] || '/placeholder-cake.jpg'} 
+                  alt={cake.name}
+                  className="w-full rounded-2xl shadow-lg"
+                />
+                
+                {/* Badges */}
+                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                  {cake.deliveryOptions?.sameDay && (
+                    <Badge className="bg-mint text-white">
+                      <Truck className="mr-1 h-3 w-3" />
+                      Same Day
+                    </Badge>
+                  )}
+                  {cake.isBestseller && (
+                    <Badge className="bg-pink text-white">Bestseller</Badge>
+                  )}
+                  {cake.isEggless && (
+                    <Badge className="bg-green-500 text-white">Eggless</Badge>
+                  )}
+                </div>
 
-              {/* Like Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsLiked(!isLiked)}
-                className={`absolute top-4 right-4 bg-white bg-opacity-90 ${
-                  isLiked ? 'text-red-500' : 'text-caramel'
-                }`}
-              >
-                <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
-              </Button>
+                {/* Like Button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsLiked(!isLiked)}
+                  className={`absolute top-4 right-4 bg-white bg-opacity-90 ${
+                    isLiked ? 'text-red-500' : 'text-caramel'
+                  }`}
+                >
+                  <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
+                </Button>
+              </div>
             </div>
           </div>
 
