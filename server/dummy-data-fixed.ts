@@ -370,6 +370,72 @@ export const dummyData = {
       deliveryDate: new Date('2025-01-07'),
       deliveryTimeSlot: "slot3",
       specialInstructions: "Ring doorbell, building has security"
+    },
+    {
+      orderNumber: generateOrderNumber(),
+      userId: 8,
+      items: [{ cakeId: 1, name: "Chocolate Fantasy Cake", quantity: 1, weight: "1kg", flavor: "Chocolate", price: 1599, addons: [] }],
+      subtotal: "1599",
+      deliveryFee: "0",
+      discount: "0",
+      total: "1599",
+      status: "confirmed",
+      paymentMethod: "online",
+      paymentStatus: "paid",
+      deliveryAddress: {
+        name: "Emma Wilson",
+        phone: "9876543217",
+        address: "789 Sector 22, Gurgaon",
+        pincode: "122001",
+        city: "Gurgaon"
+      },
+      deliveryDate: new Date('2025-01-08'),
+      deliveryTimeSlot: "slot1",
+      specialInstructions: "Birthday cake - handle with care"
+    },
+    {
+      orderNumber: generateOrderNumber(),
+      userId: 9,
+      items: [{ cakeId: 7, name: "Fruit Cake Delight", quantity: 1, weight: "1.5kg", flavor: "Fruit", price: 1699, addons: [] }],
+      subtotal: "1699",
+      deliveryFee: "50",
+      discount: "0",
+      total: "1749",
+      status: "preparing",
+      paymentMethod: "online",
+      paymentStatus: "paid",
+      deliveryAddress: {
+        name: "Alex Johnson",
+        phone: "9876543218",
+        address: "456 Sector 28, Gurgaon",
+        pincode: "122002",
+        city: "Gurgaon"
+      },
+      deliveryDate: new Date('2025-01-08'),
+      deliveryTimeSlot: "slot2",
+      specialInstructions: "Anniversary cake - please deliver on time"
+    },
+    {
+      orderNumber: generateOrderNumber(),
+      userId: 10,
+      items: [{ cakeId: 4, name: "Strawberry Delight", quantity: 1, weight: "1kg", flavor: "Strawberry", price: 1699, addons: [] }],
+      subtotal: "1699",
+      deliveryFee: "0",
+      discount: "0",
+      total: "1699",
+      status: "out_for_delivery",
+      paymentMethod: "cod",
+      paymentStatus: "pending",
+      deliveryAddress: {
+        name: "Olivia Davis",
+        phone: "9876543219",
+        address: "321 DLF Phase 2, Gurgaon",
+        pincode: "122002",
+        city: "Gurgaon"
+      },
+      deliveryDate: new Date('2025-01-07'),
+      deliveryTimeSlot: "slot4",
+      specialInstructions: "COD order - collect payment on delivery"
     }
   ]
 };
