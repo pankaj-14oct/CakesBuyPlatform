@@ -247,7 +247,12 @@ export default function DeliveryDashboard() {
                                 </p>
                                 <p className="flex items-start">
                                   <MapPin className="h-3 w-3 mr-2 text-gray-400 mt-0.5" />
-                                  <span className="text-gray-600">{order.deliveryAddress}</span>
+                                  <span className="text-gray-600">
+                                    {typeof order.deliveryAddress === 'string' 
+                                      ? order.deliveryAddress 
+                                      : `${order.deliveryAddress.address}, ${order.deliveryAddress.city} - ${order.deliveryAddress.pincode}`
+                                    }
+                                  </span>
                                 </p>
                               </div>
                             </div>
