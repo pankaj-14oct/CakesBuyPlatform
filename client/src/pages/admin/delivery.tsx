@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Select,
   SelectContent,
@@ -32,7 +33,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { 
   Truck, Plus, Edit, Trash2, User, Star, 
-  Phone, MapPin, CheckCircle, XCircle
+  Phone, MapPin, CheckCircle, XCircle, 
+  BarChart3, Clock, Wallet, TrendingUp,
+  Package, Calendar
 } from 'lucide-react';
 import { DeliveryBoy, Order } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
@@ -54,6 +57,7 @@ type DeliveryBoyFormData = z.infer<typeof deliveryBoySchema>;
 export default function AdminDelivery() {
   const [selectedDeliveryBoy, setSelectedDeliveryBoy] = useState<DeliveryBoy | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedForTracking, setSelectedForTracking] = useState<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -65,6 +69,12 @@ export default function AdminDelivery() {
   // Fetch orders for assignment
   const { data: orders = [] } = useQuery<Order[]>({
     queryKey: ['/api/admin/orders'],
+  });
+
+  // Fetch specific delivery boy orders for tracking
+  const { data: trackingOrders = [] } = useQuery<Order[]>({
+    queryKey: ['/api/admin/delivery-boys', selectedForTracking, 'orders'],
+    enabled: !!selectedForTracking,
   });
 
   const form = useForm<DeliveryBoyFormData>({
@@ -206,12 +216,26 @@ export default function AdminDelivery() {
     return <div className="flex items-center justify-center h-64">Loading...</div>;
   }
 
+  const getDeliveryBoyStats = (deliveryBoyId: number) => {
+    const deliveryBoyOrders = orders.filter(order => order.deliveryBoyId === deliveryBoyId);
+    const delivered = deliveryBoyOrders.filter(order => order.status === 'delivered');
+    const totalEarnings = delivered.reduce((sum, order) => sum + Number(order.deliveryFee || 0), 0);
+    
+    return {
+      totalOrders: deliveryBoyOrders.length,
+      delivered: delivered.length,
+      pending: deliveryBoyOrders.filter(order => order.status !== 'delivered' && order.status !== 'cancelled').length,
+      earnings: totalEarnings,
+      successRate: deliveryBoyOrders.length > 0 ? ((delivered.length / deliveryBoyOrders.length) * 100).toFixed(1) : '0'
+    };
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-charcoal mb-2">Delivery Management</h1>
-          <p className="text-charcoal opacity-70">Manage delivery boys and order assignments</p>
+          <p className="text-charcoal opacity-70">Manage delivery boys, track performance and view reports</p>
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -354,57 +378,254 @@ export default function AdminDelivery() {
         </Dialog>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Delivery Boys</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{deliveryBoys.length}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Delivery Boys</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {deliveryBoys.filter(db => db.isActive).length}
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Unassigned Orders</CardTitle>
-            <Truck className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{unassignedOrders.length}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Rating</CardTitle>
-            <Star className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {deliveryBoys.length > 0 
-                ? (deliveryBoys.reduce((acc, db) => acc + (db.rating || 0), 0) / deliveryBoys.length).toFixed(1)
-                : '0.0'}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Main Content with Tabs */}
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="tracking">Live Tracking</TabsTrigger>
+          <TabsTrigger value="reports">Performance Reports</TabsTrigger>
+          <TabsTrigger value="management">Management</TabsTrigger>
+        </TabsList>
 
-      {/* Delivery Boys List */}
-      <Card>
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="space-y-6">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Delivery Boys</p>
+                    <p className="text-2xl font-bold text-blue-600">{deliveryBoys.length}</p>
+                  </div>
+                  <User className="h-8 w-8 text-blue-600" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Active Delivery Boys</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {deliveryBoys.filter(db => db.isActive).length}
+                    </p>
+                  </div>
+                  <CheckCircle className="h-8 w-8 text-green-600" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Orders in Progress</p>
+                    <p className="text-2xl font-bold text-orange-600">
+                      {orders.filter(order => order.deliveryBoyId && order.status !== 'delivered' && order.status !== 'cancelled').length}
+                    </p>
+                  </div>
+                  <Package className="h-8 w-8 text-orange-600" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Unassigned Orders</p>
+                    <p className="text-2xl font-bold text-red-600">{unassignedOrders.length}</p>
+                  </div>
+                  <Clock className="h-8 w-8 text-red-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Quick Performance Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {deliveryBoys.map((deliveryBoy) => {
+              const stats = getDeliveryBoyStats(deliveryBoy.id);
+              return (
+                <Card key={deliveryBoy.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="bg-caramel text-white rounded-full w-10 h-10 flex items-center justify-center">
+                          <span className="text-sm font-bold">
+                            {deliveryBoy.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg">{deliveryBoy.name}</CardTitle>
+                          <p className="text-sm text-gray-600">{deliveryBoy.vehicleType}</p>
+                        </div>
+                      </div>
+                      <Badge className={deliveryBoy.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                        {deliveryBoy.isActive ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-600">Total Orders</p>
+                        <p className="font-semibold">{stats.totalOrders}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Delivered</p>
+                        <p className="font-semibold text-green-600">{stats.delivered}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Earnings</p>
+                        <p className="font-semibold text-blue-600">₹{stats.earnings}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Success Rate</p>
+                        <p className="font-semibold">{stats.successRate}%</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-4"
+                      onClick={() => setSelectedForTracking(deliveryBoy.id)}
+                    >
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      View Details
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </TabsContent>
+
+        {/* Live Tracking Tab */}
+        <TabsContent value="tracking" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <MapPin className="h-5 w-5 mr-2" />
+                Live Order Tracking
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {orders.filter(order => order.deliveryBoyId && order.status !== 'delivered' && order.status !== 'cancelled').map((order) => {
+                  const deliveryBoy = deliveryBoys.find(db => db.id === order.deliveryBoyId);
+                  return (
+                    <div key={order.id} className="border rounded-lg p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Badge className="bg-blue-100 text-blue-800">
+                              {order.status.replace('_', ' ').toUpperCase()}
+                            </Badge>
+                            <span className="font-medium">#{order.orderNumber}</span>
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            Assigned to: <span className="font-medium">{deliveryBoy?.name}</span>
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Customer: {typeof order.deliveryAddress === 'string' 
+                              ? order.deliveryAddress 
+                              : order.deliveryAddress.name}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold">₹{order.total}</p>
+                          <p className="text-sm text-gray-600">
+                            {new Date(order.deliveryDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Performance Reports Tab */}
+        <TabsContent value="reports" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <TrendingUp className="h-5 w-5 mr-2" />
+                  Top Performers
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {deliveryBoys
+                    .map(db => ({ ...db, stats: getDeliveryBoyStats(db.id) }))
+                    .sort((a, b) => b.stats.delivered - a.stats.delivered)
+                    .slice(0, 5)
+                    .map((deliveryBoy, index) => (
+                      <div key={deliveryBoy.id} className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                            {index + 1}
+                          </div>
+                          <div>
+                            <p className="font-medium">{deliveryBoy.name}</p>
+                            <p className="text-sm text-gray-600">{deliveryBoy.stats.delivered} deliveries</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-green-600">₹{deliveryBoy.stats.earnings}</p>
+                          <p className="text-sm text-gray-600">{deliveryBoy.stats.successRate}% success</p>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Calendar className="h-5 w-5 mr-2" />
+                  Daily Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Today's Deliveries</span>
+                    <span className="font-semibold">
+                      {orders.filter(order => order.status === 'delivered' && 
+                        new Date(order.deliveryDate).toDateString() === new Date().toDateString()).length}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Pending Deliveries</span>
+                    <span className="font-semibold text-orange-600">
+                      {orders.filter(order => order.deliveryBoyId && order.status !== 'delivered' && order.status !== 'cancelled').length}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Total Earnings Today</span>
+                    <span className="font-semibold text-green-600">
+                      ₹{orders.filter(order => order.status === 'delivered' && 
+                        new Date(order.deliveryDate).toDateString() === new Date().toDateString())
+                        .reduce((sum, order) => sum + Number(order.deliveryFee || 0), 0)}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Management Tab - Original Delivery Boys List */}
+        <TabsContent value="management" className="space-y-6">
+          <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Truck className="h-5 w-5" />
@@ -540,6 +761,8 @@ export default function AdminDelivery() {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
