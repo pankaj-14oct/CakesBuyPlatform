@@ -2255,9 +2255,8 @@ CakesBuy
         phone: validatedData.phone,
         password: hashedPassword,
         vehicleType: validatedData.vehicleType,
-        vehicleNumber: validatedData.licenseNumber, // Use license number as vehicle number for now
-        licenseNumber: validatedData.licenseNumber,
-        address: validatedData.area, // Use area as address for admin-created delivery boys
+        vehicleNumber: `${validatedData.vehicleType.toUpperCase()}-${Date.now()}`, // Generate a unique vehicle number
+        address: "Gurgaon, Haryana", // Default address for admin-created delivery boys
         pincode: "122001" // Default pincode for Gurgaon
       });
 

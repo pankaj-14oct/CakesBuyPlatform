@@ -306,7 +306,6 @@ export const deliveryBoys = pgTable("delivery_boys", {
   password: text("password").notNull(),
   vehicleType: text("vehicle_type").notNull(), // 'bike', 'scooter', 'car', 'bicycle'
   vehicleNumber: text("vehicle_number").notNull(),
-  licenseNumber: text("license_number"),
   address: text("address").notNull(),
   pincode: text("pincode").notNull(),
   isActive: boolean("is_active").default(true),
@@ -439,8 +438,6 @@ export const adminDeliveryBoyRegisterSchema = z.object({
   phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   vehicleType: z.enum(['bike', 'scooter', 'car']),
-  licenseNumber: z.string().min(1, 'License number is required'),
-  area: z.string().min(1, 'Service area is required')
 });
 
 // Occasion reminder schema

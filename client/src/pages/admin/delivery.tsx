@@ -48,8 +48,6 @@ const deliveryBoySchema = z.object({
   vehicleType: z.enum(['bike', 'scooter', 'car'], {
     required_error: 'Please select a vehicle type',
   }),
-  licenseNumber: z.string().min(1, 'License number is required'),
-  area: z.string().min(1, 'Area is required'),
 });
 
 type DeliveryBoyFormData = z.infer<typeof deliveryBoySchema>;
@@ -84,8 +82,6 @@ export default function AdminDelivery() {
       phone: '',
       password: '',
       vehicleType: 'bike',
-      licenseNumber: '',
-      area: '',
     },
   });
 
@@ -191,8 +187,6 @@ export default function AdminDelivery() {
       phone: deliveryBoy.phone,
       password: '', // Don't populate password
       vehicleType: deliveryBoy.vehicleType as 'bike' | 'scooter' | 'car',
-      licenseNumber: deliveryBoy.licenseNumber || '',
-      area: deliveryBoy.area || '',
     });
     setIsDialogOpen(true);
   };
@@ -327,33 +321,7 @@ export default function AdminDelivery() {
                   )}
                 />
                 
-                <FormField
-                  control={form.control}
-                  name="licenseNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>License Number</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter license number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="area"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Service Area</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter service area" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+
                 
                 <div className="flex gap-2 pt-4">
                   <Button 
