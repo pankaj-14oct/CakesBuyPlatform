@@ -1122,7 +1122,7 @@ export default function DeliveryDashboard() {
                 {/* Push Notifications */}
                 <div className="space-y-3">
                   <h3 className="font-semibold text-lg">Background Notifications</h3>
-                  <PushNotificationManager deliveryBoyToken={deliveryBoyToken || ""} />
+                  <PushNotificationManager deliveryBoyToken={deliveryToken || ""} />
                 </div>
 
                 {/* PWA Installation */}
