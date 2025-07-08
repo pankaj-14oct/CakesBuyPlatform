@@ -1,0 +1,52 @@
+{
+  "name": "CakesBuy Delivery",
+  "short_name": "CakesBuy Delivery",
+  "description": "Delivery partner app for CakesBuy - Manage orders and deliveries",
+  "start_url": "/delivery/dashboard",
+  "display": "standalone",
+  "background_color": "#8B4513",
+  "theme_color": "#8B4513",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/delivery-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/delivery-icon-512.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "View Orders",
+      "short_name": "Orders",
+      "description": "View assigned delivery orders",
+      "url": "/delivery/dashboard?tab=orders",
+      "icons": [
+        {
+          "src": "/delivery-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Statistics",
+      "short_name": "Stats", 
+      "description": "View delivery statistics",
+      "url": "/delivery/dashboard?tab=stats",
+      "icons": [
+        {
+          "src": "/delivery-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

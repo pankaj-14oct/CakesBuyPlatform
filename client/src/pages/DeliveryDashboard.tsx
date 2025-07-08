@@ -32,11 +32,14 @@ import {
   TrendingUp,
   Calendar,
   Award,
-  Target
+  Target,
+  Download,
+  Smartphone
 } from "lucide-react";
 import { useDeliveryNotifications } from "@/hooks/useDeliveryNotifications";
 import { testNotificationSound } from "@/utils/testSound";
 import { notificationManager } from "@/utils/notificationManager";
+import { pwaInstaller, pushNotificationManager } from "@/utils/pwaInstall";
 
 interface DeliveryBoy {
   id: number;
@@ -92,6 +95,8 @@ export default function DeliveryDashboard() {
   const [orderToReject, setOrderToReject] = useState<number | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [showPWAInstall, setShowPWAInstall] = useState(false);
+  const [pwaInstallStatus, setPwaInstallStatus] = useState<string>('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [deliveryBoy, setDeliveryBoy] = useState<DeliveryBoy | null>(null);
@@ -110,7 +115,25 @@ export default function DeliveryDashboard() {
     } catch {
       setLocation('/delivery/login');
     }
+
+    // Initialize PWA and push notifications
+    initializePWA();
   }, [setLocation]);
+
+  const initializePWA = async () => {
+    // Check if PWA can be installed
+    setTimeout(() => {
+      if (pwaInstaller.canInstall() && !pwaInstaller.isAppInstalled()) {
+        setShowPWAInstall(true);
+      }
+    }, 5000); // Show after 5 seconds
+
+    // Initialize push notifications
+    const pushResult = await pushNotificationManager.initialize();
+    if (pushResult.success) {
+      console.log('Push notifications initialized');
+    }
+  };
 
   // Initialize notification system
   const deliveryToken = localStorage.getItem('delivery_token');
@@ -205,6 +228,57 @@ export default function DeliveryDashboard() {
     setLocation('/delivery/login');
   };
 
+  const handleInstallPWA = async () => {
+    const result = await pwaInstaller.showInstallPrompt();
+    if (result.success) {
+      setShowPWAInstall(false);
+      toast({
+        title: "App Installed!",
+        description: "CakesBuy Delivery has been installed successfully. You can now access it from your home screen.",
+        duration: 5000,
+      });
+    } else {
+      toast({
+        title: "Installation Failed",
+        description: result.error || "Failed to install the app",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEnablePushNotifications = async () => {
+    const result = await pushNotificationManager.subscribeToPushNotifications();
+    if (result.success) {
+      toast({
+        title: "Notifications Enabled!",
+        description: "You'll now receive push notifications for new orders even when the app is closed.",
+        duration: 5000,
+      });
+    } else {
+      toast({
+        title: "Notification Setup Failed",
+        description: result.error || "Failed to enable push notifications",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const sendTestPushNotification = async () => {
+    const result = await pushNotificationManager.sendTestNotification();
+    if (result.success) {
+      toast({
+        title: "Test Notification Sent",
+        description: "Check your device for the test notification",
+      });
+    } else {
+      toast({
+        title: "Test Failed",
+        description: result.error || "Failed to send test notification",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleStatusUpdate = (orderId: number, status: string) => {
     updateStatusMutation.mutate({ orderId, status });
   };
@@ -274,6 +348,40 @@ export default function DeliveryDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* PWA Install Banner */}
+      {showPWAInstall && (
+        <div className="bg-caramel text-white p-3 relative">
+          <div className="flex items-center justify-between max-w-7xl mx-auto px-4">
+            <div className="flex items-center space-x-3">
+              <Smartphone className="h-5 w-5" />
+              <div>
+                <p className="text-sm font-medium">Install CakesBuy Delivery App</p>
+                <p className="text-xs opacity-90">Get instant notifications and offline access</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={handleInstallPWA}
+                className="text-caramel bg-white hover:bg-gray-100"
+              >
+                <Download className="h-4 w-4 mr-1" />
+                Install
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setShowPWAInstall(false)}
+                className="text-white hover:bg-white/20"
+              >
+                ×
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Simple Header */}
       <div className="bg-caramel text-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -381,7 +489,7 @@ export default function DeliveryDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="dashboard" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
               <Truck className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -396,6 +504,11 @@ export default function DeliveryDashboard() {
               <History className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Order History</span>
               <span className="sm:hidden">History</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
+              <Smartphone className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">App Settings</span>
+              <span className="sm:hidden">Settings</span>
             </TabsTrigger>
           </TabsList>
 
@@ -987,6 +1100,153 @@ export default function DeliveryDashboard() {
                     ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Smartphone className="h-5 w-5" />
+                  <span>Mobile App Settings</span>
+                </CardTitle>
+                <CardDescription>
+                  Configure your delivery app for the best mobile experience
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                
+                {/* PWA Installation */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-lg">Install Mobile App</h3>
+                  <p className="text-sm text-gray-600">
+                    Install CakesBuy Delivery as a mobile app for better performance and offline access.
+                  </p>
+                  
+                  <div className="flex flex-col space-y-2">
+                    {pwaInstaller.isAppInstalled() ? (
+                      <div className="flex items-center space-x-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <span className="text-sm font-medium text-green-800">App is installed!</span>
+                      </div>
+                    ) : pwaInstaller.canInstall() ? (
+                      <Button onClick={handleInstallPWA} className="w-full sm:w-auto">
+                        <Download className="h-4 w-4 mr-2" />
+                        Install App
+                      </Button>
+                    ) : (
+                      <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-sm font-medium text-blue-800 mb-2">Manual Installation</p>
+                        <p className="text-xs text-blue-700">
+                          {pwaInstaller.getInstallInstructions()}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Push Notifications */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-lg">Push Notifications</h3>
+                  <p className="text-sm text-gray-600">
+                    Enable push notifications to receive order alerts even when the app is closed.
+                  </p>
+                  
+                  <div className="space-y-2">
+                    <Button
+                      onClick={handleEnablePushNotifications}
+                      variant="outline"
+                      className="w-full sm:w-auto"
+                    >
+                      <Bell className="h-4 w-4 mr-2" />
+                      Enable Push Notifications
+                    </Button>
+                    
+                    <Button
+                      onClick={sendTestPushNotification}
+                      variant="outline"
+                      className="w-full sm:w-auto"
+                    >
+                      <BellRing className="h-4 w-4 mr-2" />
+                      Test Push Notification
+                    </Button>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* App Features */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-lg">App Features</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <Bell className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <p className="text-sm font-medium">Real-time Notifications</p>
+                        <p className="text-xs text-gray-600">Get instant alerts for new orders</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <Navigation className="h-5 w-5 text-green-600" />
+                      <div>
+                        <p className="text-sm font-medium">Offline Access</p>
+                        <p className="text-xs text-gray-600">View orders even without internet</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <Star className="h-5 w-5 text-yellow-600" />
+                      <div>
+                        <p className="text-sm font-medium">Performance Tracking</p>
+                        <p className="text-xs text-gray-600">Monitor your delivery statistics</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <Smartphone className="h-5 w-5 text-purple-600" />
+                      <div>
+                        <p className="text-sm font-medium">Native App Feel</p>
+                        <p className="text-xs text-gray-600">Works like a native mobile app</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Troubleshooting */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-lg">Troubleshooting</h3>
+                  <div className="space-y-2">
+                    <details className="p-3 bg-gray-50 rounded-lg">
+                      <summary className="text-sm font-medium cursor-pointer">
+                        Not receiving notifications?
+                      </summary>
+                      <div className="mt-2 text-xs text-gray-600">
+                        <p>1. Check if notifications are enabled in your browser/device settings</p>
+                        <p>2. Make sure the app is installed as a PWA</p>
+                        <p>3. Try the "Test Push Notification" button above</p>
+                      </div>
+                    </details>
+                    
+                    <details className="p-3 bg-gray-50 rounded-lg">
+                      <summary className="text-sm font-medium cursor-pointer">
+                        App not working offline?
+                      </summary>
+                      <div className="mt-2 text-xs text-gray-600">
+                        <p>1. Make sure the app is installed as a PWA</p>
+                        <p>2. Try refreshing the page while online</p>
+                        <p>3. Check if your browser supports PWA features</p>
+                      </div>
+                    </details>
+                  </div>
+                </div>
+
               </CardContent>
             </Card>
           </TabsContent>
