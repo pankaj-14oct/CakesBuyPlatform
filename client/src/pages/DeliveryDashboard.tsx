@@ -148,32 +148,67 @@ export default function DeliveryDashboard() {
     if (!deliveryToken) return;
 
     try {
-      // Request permission first
-      const permission = await Notification.requestPermission();
+      // Request permission first - be more persistent
+      let permission = Notification.permission;
+      if (permission === 'default') {
+        permission = await Notification.requestPermission();
+      }
+      
       if (permission !== 'granted') {
-        console.log('Push notification permission not granted');
+        console.log('❌ Push notification permission not granted:', permission);
+        toast({
+          title: "Notification Permission Required",
+          description: "Please enable notifications in your browser settings to receive order alerts when app is closed",
+          variant: "destructive",
+          duration: 10000
+        });
         return;
       }
 
+      console.log('✅ Notification permission granted');
+
       // Get VAPID public key
       const vapidResponse = await fetch('/api/delivery/push/vapid-key');
+      if (!vapidResponse.ok) {
+        throw new Error('Failed to get VAPID key');
+      }
       const { publicKey } = await vapidResponse.json();
+      console.log('✅ VAPID key retrieved');
 
       // Get service worker registration
       const registration = await navigator.serviceWorker.ready;
+      console.log('✅ Service worker ready');
 
       // Check if already subscribed
       const existingSubscription = await registration.pushManager.getSubscription();
       if (existingSubscription) {
-        console.log('Already subscribed to push notifications');
+        console.log('✅ Already subscribed to push notifications');
+        
+        // Verify subscription is saved on backend
+        const verifyResponse = await fetch('/api/delivery/push/subscribe', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${deliveryToken}`
+          },
+          body: JSON.stringify({ subscription: existingSubscription })
+        });
+        
+        if (verifyResponse.ok) {
+          console.log('✅ Push subscription verified on backend');
+        }
         return;
       }
+
+      console.log('🔄 Subscribing to push notifications...');
 
       // Subscribe to push notifications
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicKey)
       });
+
+      console.log('✅ Push subscription created:', subscription.endpoint);
 
       // Save subscription to backend
       const response = await fetch('/api/delivery/push/subscribe', {
@@ -186,10 +221,23 @@ export default function DeliveryDashboard() {
       });
 
       if (response.ok) {
-        console.log('✅ Auto-subscribed to push notifications successfully');
+        console.log('✅ Push subscription saved to backend successfully');
+        toast({
+          title: "Background Notifications Enabled",
+          description: "You'll now receive order alerts even when the app is closed",
+        });
+      } else {
+        const errorText = await response.text();
+        console.error('❌ Failed to save subscription to backend:', errorText);
+        throw new Error('Failed to save subscription');
       }
     } catch (error) {
-      console.error('Error auto-subscribing to push notifications:', error);
+      console.error('❌ Error auto-subscribing to push notifications:', error);
+      toast({
+        title: "Push Notification Setup Failed",
+        description: "Unable to enable background notifications. Please try manually in Settings.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -207,6 +255,48 @@ export default function DeliveryDashboard() {
       outputArray[i] = rawData.charCodeAt(i);
     }
     return outputArray;
+  };
+
+  // Test push notification function
+  const testPushNotification = async () => {
+    const deliveryToken = localStorage.getItem('delivery_token');
+    if (!deliveryToken || !deliveryBoy) return;
+
+    try {
+      const response = await fetch('/api/delivery/test-push', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${deliveryToken}`
+        },
+        body: JSON.stringify({
+          title: '🧪 Test Notification',
+          body: 'This is a test push notification to verify the system works when app is closed!',
+          data: { test: true }
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Test Notification Sent",
+          description: "Check if you received the push notification (close the app to test background notifications)",
+        });
+      } else {
+        const error = await response.text();
+        toast({
+          title: "Test Failed",
+          description: error,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Test push notification failed:', error);
+      toast({
+        title: "Test Failed",
+        description: "Failed to send test notification",
+        variant: "destructive"
+      });
+    }
   };
 
   // Initialize notification system
@@ -1196,6 +1286,15 @@ export default function DeliveryDashboard() {
                 <div className="space-y-3">
                   <h3 className="font-semibold text-lg">Background Notifications</h3>
                   <PushNotificationManager deliveryBoyToken={deliveryToken || ""} />
+                  
+                  {/* Test Push Notification Button */}
+                  <Button 
+                    onClick={testPushNotification}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    🧪 Test Push Notification
+                  </Button>
                 </div>
 
                 {/* PWA Installation */}

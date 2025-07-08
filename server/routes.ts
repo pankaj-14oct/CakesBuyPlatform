@@ -2229,6 +2229,33 @@ CakesBuy
     });
   });
 
+  // Test push notification endpoint
+  app.post('/api/delivery/test-push', authenticateDeliveryBoy, async (req: DeliveryBoyAuthRequest, res: Response) => {
+    try {
+      const { title, body, data } = req.body;
+      
+      if (!req.deliveryBoy) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const { sendPushNotification } = await import('./push-service.js');
+      const result = await sendPushNotification(req.deliveryBoy.id, {
+        title: title || '🧪 Test Notification',
+        body: body || 'This is a test push notification!',
+        data: data || { test: true }
+      });
+      
+      if (result.success) {
+        res.json({ message: 'Test push notification sent successfully' });
+      } else {
+        res.status(500).json({ error: result.error || 'Failed to send test notification' });
+      }
+    } catch (error) {
+      console.error('Error sending test push notification:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   app.post("/api/delivery/login", async (req, res) => {
     try {
       const validatedData = deliveryBoyLoginSchema.parse(req.body);

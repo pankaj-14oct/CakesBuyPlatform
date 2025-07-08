@@ -52,25 +52,27 @@ self.addEventListener('activate', (event) => {
 
 // Push notification event
 self.addEventListener('push', (event) => {
-  console.log('Push notification received:', event);
+  console.log('🔔 Push notification received in service worker:', event);
   
   let notificationData = {
-    title: 'CakesBuy Delivery',
-    body: 'New notification received',
-    icon: '/delivery-icon-192.png',
-    badge: '/delivery-icon-192.png',
+    title: '🚚 CakesBuy Delivery Alert',
+    body: 'New order notification received',
+    icon: '/delivery-icon-192.svg',
+    badge: '/delivery-icon-192.svg',
     tag: 'delivery-notification',
     requireInteraction: true,
-    vibrate: [200, 100, 200, 100, 200],
+    vibrate: [500, 200, 500, 200, 500, 200, 500],
+    silent: false,
+    renotify: true,
     actions: [
       {
         action: 'view',
-        title: 'View Orders',
-        icon: '/delivery-icon-192.png'
+        title: 'Open Dashboard',
+        icon: '/delivery-icon-192.svg'
       },
       {
         action: 'dismiss',
-        title: 'Dismiss'
+        title: 'Later'
       }
     ]
   };
@@ -78,45 +80,66 @@ self.addEventListener('push', (event) => {
   if (event.data) {
     try {
       const data = event.data.json();
+      console.log('📦 Push notification data:', data);
+      
       notificationData = {
         ...notificationData,
-        title: data.title || '🚚 New Order Assignment!',
-        body: data.body || 'You have a new delivery order assigned',
-        data: data
+        title: data.title || '🚨 URGENT: New Order Assignment!',
+        body: data.body || 'You have a new delivery order assigned - CHECK NOW!',
+        data: data,
+        // Make notification more urgent
+        requireInteraction: true,
+        silent: false,
+        vibrate: [800, 200, 800, 200, 800, 200, 800]
       };
     } catch (error) {
       console.error('Error parsing push data:', error);
     }
   }
 
+  console.log('📢 Showing notification with data:', notificationData);
+
   event.waitUntil(
     self.registration.showNotification(notificationData.title, notificationData)
+      .then(() => {
+        console.log('✅ Notification displayed successfully');
+      })
+      .catch((error) => {
+        console.error('❌ Failed to show notification:', error);
+      })
   );
 });
 
 // Notification click event
 self.addEventListener('notificationclick', (event) => {
-  console.log('Notification clicked:', event);
+  console.log('🖱️ Notification clicked:', event);
   
   event.notification.close();
 
   if (event.action === 'view' || !event.action) {
+    console.log('🚀 Opening delivery dashboard...');
     // Open delivery dashboard
     event.waitUntil(
-      clients.matchAll({ type: 'window' }).then((clientList) => {
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+        console.log('📱 Found', clientList.length, 'open windows');
+        
         // Check if delivery dashboard is already open
         for (const client of clientList) {
           if (client.url.includes('/delivery/dashboard') && 'focus' in client) {
+            console.log('✅ Focusing existing delivery dashboard');
             return client.focus();
           }
         }
         
         // Open new window if not found
         if (clients.openWindow) {
+          console.log('🆕 Opening new delivery dashboard window');
           return clients.openWindow('/delivery/dashboard');
         }
       })
     );
+  } else if (event.action === 'dismiss') {
+    console.log('❌ Notification dismissed');
   }
 });
 
