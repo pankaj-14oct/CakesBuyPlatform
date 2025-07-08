@@ -259,7 +259,7 @@ export default function AdminUsers() {
               <DialogTitle>Create New User</DialogTitle>
             </DialogHeader>
             <Form {...createForm}>
-              <form onSubmit={createForm.handleSubmit(handleCreateUser)} className="space-y-4">
+              <form onSubmit={createForm.handleSubmit(handleCreateUser)} className="space-y-4 pb-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={createForm.control}
@@ -335,11 +335,11 @@ export default function AdminUsers() {
                     </FormItem>
                   )}
                 />
-                <div className="flex justify-end space-x-2">
+                <div className="flex justify-end space-x-2 pt-2">
                   <Button type="button" variant="outline" onClick={() => setCreateDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" className="bg-caramel-600 hover:bg-caramel-700">
+                  <Button type="submit" className="bg-caramel-600 hover:bg-caramel-700 text-white">
                     Create User
                   </Button>
                 </div>
