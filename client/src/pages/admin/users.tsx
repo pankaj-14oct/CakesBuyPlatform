@@ -33,13 +33,9 @@ const createUserSchema = z.object({
   email: z.string().email('Invalid email address'),
   phone: z.string().min(10, 'Phone number must be at least 10 digits'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string().min(6, 'Confirm password must be at least 6 characters'),
   role: z.string().default('customer'),
   birthday: z.string().optional(),
   anniversary: z.string().optional(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
 });
 
 type CreateUserFormData = z.infer<typeof createUserSchema>;
@@ -73,7 +69,6 @@ export default function AdminUsers() {
       phone: '',
       name: '',
       password: '',
-      confirmPassword: '',
       role: 'customer',
       birthday: '',
       anniversary: '',
@@ -100,7 +95,7 @@ export default function AdminUsers() {
   // Create new user
   const handleCreateUser = async (data: CreateUserFormData) => {
     try {
-      const { confirmPassword, ...userData } = data;
+      const userData = data;
       await apiRequest('/api/admin/users', {
         method: 'POST',
         body: userData,
@@ -127,7 +122,7 @@ export default function AdminUsers() {
     if (!userToEdit) return;
     
     try {
-      const { confirmPassword, ...userData } = data;
+      const userData = data;
       await apiRequest(`/api/admin/users/${userToEdit.id}`, {
         method: 'PUT',
         body: userData,
@@ -259,7 +254,7 @@ export default function AdminUsers() {
               Add New Customer
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto p-6">
             <DialogHeader>
               <DialogTitle>Create New User</DialogTitle>
             </DialogHeader>
@@ -306,34 +301,19 @@ export default function AdminUsers() {
                     </FormItem>
                   )}
                 />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={createForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter password" type="password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={createForm.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Confirm password" type="password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={createForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter password" type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={createForm.control}
                   name="role"
