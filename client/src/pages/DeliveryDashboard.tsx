@@ -309,12 +309,16 @@ export default function DeliveryDashboard() {
                     size="sm"
                     onClick={async () => {
                       try {
-                        const success = await notificationManager.testNotification();
+                        const result = await notificationManager.testNotification();
                         toast({
-                          title: success ? "🔔 Ringtone Test" : "❌ Test Failed",
-                          description: success ? "You should hear a mobile ringtone and see a notification!" : "Check browser permissions",
-                          variant: success ? "default" : "destructive",
-                          duration: 5000,
+                          title: result.success ? "🔔 Notification Test" : "⚠️ Partial Success",
+                          description: result.success 
+                            ? (result.error 
+                                ? `Sound and vibration working! Note: ${result.error}` 
+                                : "Perfect! You should hear sound, feel vibration, and see a notification!")
+                            : result.error || "Test failed",
+                          variant: result.success ? "default" : "destructive",
+                          duration: 7000,
                         });
                       } catch (error) {
                         console.error('Test failed:', error);

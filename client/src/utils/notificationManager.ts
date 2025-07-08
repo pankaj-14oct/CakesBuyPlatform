@@ -147,23 +147,31 @@ export class NotificationManager {
     }
   }
 
-  async requestPermission(): Promise<boolean> {
+  async requestPermission(): Promise<{ granted: boolean; error?: string }> {
     if (!('Notification' in window)) {
-      console.warn('Browser notifications not supported');
-      return false;
+      return { granted: false, error: 'Browser notifications not supported in this browser' };
     }
 
     if (Notification.permission === 'granted') {
-      return true;
+      return { granted: true };
     }
 
     if (Notification.permission === 'denied') {
-      console.warn('Notification permission denied');
-      return false;
+      return { granted: false, error: 'Notification permission was previously denied. Please enable notifications in your browser settings for this website.' };
     }
 
-    const permission = await Notification.requestPermission();
-    return permission === 'granted';
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        return { granted: true };
+      } else if (permission === 'denied') {
+        return { granted: false, error: 'Notification permission denied. Please enable notifications in browser settings.' };
+      } else {
+        return { granted: false, error: 'Notification permission request was dismissed.' };
+      }
+    } catch (error) {
+      return { granted: false, error: 'Failed to request notification permission. Please check browser settings.' };
+    }
   }
 
   async showOrderNotification(orderData: {
@@ -171,40 +179,49 @@ export class NotificationManager {
     customerName: string;
     amount: number;
     address: string;
-  }) {
-    const hasPermission = await this.requestPermission();
-    
-    if (hasPermission) {
-      // Show browser notification
-      const notification = new Notification('🚚 New Order Assignment!', {
-        body: `Order #${orderData.orderNumber}\nCustomer: ${orderData.customerName}\nAmount: ₹${orderData.amount}\nAddress: ${orderData.address}`,
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
-        tag: 'order-notification',
-        requireInteraction: true,
-        vibrate: [200, 100, 200, 100, 200, 100, 200, 100, 200],
-        silent: false
-      });
+  }): Promise<{ success: boolean; error?: string }> {
+    try {
+      const permissionResult = await this.requestPermission();
+      
+      if (permissionResult.granted) {
+        // Show browser notification
+        const notification = new Notification('🚚 New Order Assignment!', {
+          body: `Order #${orderData.orderNumber}\nCustomer: ${orderData.customerName}\nAmount: ₹${orderData.amount}\nAddress: ${orderData.address}`,
+          icon: '/favicon.ico',
+          badge: '/favicon.ico',
+          tag: 'order-notification',
+          requireInteraction: true,
+          vibrate: [200, 100, 200, 100, 200, 100, 200, 100, 200],
+          silent: false
+        });
 
-      notification.onclick = () => {
-        window.focus();
-        notification.close();
+        notification.onclick = () => {
+          window.focus();
+          notification.close();
+        };
+
+        // Auto-close after 30 seconds if not clicked
+        setTimeout(() => {
+          notification.close();
+        }, 30000);
+      }
+
+      // Always play sounds and vibrations even if notifications are blocked
+      this.playPersistentRingtone();
+      this.vibrateDevice();
+      this.flashPageTitle(orderData.orderNumber);
+
+      return { 
+        success: true, 
+        error: permissionResult.granted ? undefined : permissionResult.error 
       };
-
-      // Auto-close after 30 seconds if not clicked
-      setTimeout(() => {
-        notification.close();
-      }, 30000);
+    } catch (error) {
+      console.error('Notification failed:', error);
+      return { 
+        success: false, 
+        error: 'Failed to show notification: ' + (error as Error).message 
+      };
     }
-
-    // Play persistent ringtone
-    this.playPersistentRingtone();
-
-    // Vibrate mobile device
-    this.vibrateDevice();
-
-    // Flash browser tab title
-    this.flashPageTitle(orderData.orderNumber);
   }
 
   private playPersistentRingtone() {
@@ -347,18 +364,21 @@ export class NotificationManager {
   }
 
   // Test notification method
-  async testNotification(): Promise<boolean> {
+  async testNotification(): Promise<{ success: boolean; error?: string }> {
     try {
-      await this.showOrderNotification({
+      const result = await this.showOrderNotification({
         orderNumber: 'TEST-001',
         customerName: 'Test Customer',
         amount: 500,
         address: 'Test Address, Gurgaon'
       });
-      return true;
+      return result;
     } catch (error) {
       console.error('Test notification failed:', error);
-      return false;
+      return { 
+        success: false, 
+        error: 'Test notification failed: ' + (error as Error).message 
+      };
     }
   }
 }
