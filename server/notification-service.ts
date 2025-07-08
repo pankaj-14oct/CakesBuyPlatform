@@ -202,18 +202,20 @@ export async function notifyOrderAssignment(
   // Send email notification
   const emailSuccess = await sendOrderAssignmentEmail(deliveryBoy, order, orderDetails);
 
-  // Send push notification for background alerts
+  // Send push notification for background alerts (when app is closed)
   let pushSuccess = false;
   try {
+    const { sendOrderAssignmentPush } = await import('./push-service.js');
     const pushResponse = await sendOrderAssignmentPush(deliveryBoy.id, {
       id: order.id,
       orderNumber: order.orderNumber,
       total: order.total,
-      customerName: orderDetails?.customerName || 'Customer',
-      customerPhone: orderDetails?.customerPhone || '',
-      address: orderDetails?.address || ''
+      customerName: notification.orderDetails?.customerName || 'Customer',
+      customerPhone: notification.orderDetails?.customerPhone || '',
+      address: notification.orderDetails?.address || ''
     });
     pushSuccess = pushResponse.success;
+    console.log(`Push notification ${pushSuccess ? 'sent' : 'failed'} for delivery boy ${deliveryBoy.id}`);
   } catch (error) {
     console.error('Failed to send push notification:', error);
   }

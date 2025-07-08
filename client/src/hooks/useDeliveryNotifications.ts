@@ -84,6 +84,9 @@ export function useDeliveryNotifications(token?: string) {
                 address: orderDetails.address
               });
 
+              // AUTOMATICALLY PLAY ALARM SOUND ON NEW ORDER
+              playNotificationSound();
+
               // Legacy fallback for backward compatibility
               setTimeout(() => playNotificationSound(), 100);
               setTimeout(() => playNotificationSound(), 3000);

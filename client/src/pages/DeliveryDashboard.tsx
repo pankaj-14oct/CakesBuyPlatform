@@ -129,11 +129,84 @@ export default function DeliveryDashboard() {
       }
     }, 5000); // Show after 5 seconds
 
-    // Initialize push notifications
-    const pushResult = await pushNotificationManager.initialize();
-    if (pushResult.success) {
-      console.log('Push notifications initialized');
+    // Initialize push notifications automatically
+    try {
+      const pushResult = await pushNotificationManager.initialize();
+      if (pushResult.success) {
+        console.log('Push notifications initialized automatically');
+        
+        // Auto-subscribe to push notifications
+        await autoSubscribeToPushNotifications();
+      }
+    } catch (error) {
+      console.error('Error initializing push notifications:', error);
     }
+  };
+
+  const autoSubscribeToPushNotifications = async () => {
+    const deliveryToken = localStorage.getItem('delivery_token');
+    if (!deliveryToken) return;
+
+    try {
+      // Request permission first
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        console.log('Push notification permission not granted');
+        return;
+      }
+
+      // Get VAPID public key
+      const vapidResponse = await fetch('/api/delivery/push/vapid-key');
+      const { publicKey } = await vapidResponse.json();
+
+      // Get service worker registration
+      const registration = await navigator.serviceWorker.ready;
+
+      // Check if already subscribed
+      const existingSubscription = await registration.pushManager.getSubscription();
+      if (existingSubscription) {
+        console.log('Already subscribed to push notifications');
+        return;
+      }
+
+      // Subscribe to push notifications
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey)
+      });
+
+      // Save subscription to backend
+      const response = await fetch('/api/delivery/push/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${deliveryToken}`
+        },
+        body: JSON.stringify({ subscription })
+      });
+
+      if (response.ok) {
+        console.log('✅ Auto-subscribed to push notifications successfully');
+      }
+    } catch (error) {
+      console.error('Error auto-subscribing to push notifications:', error);
+    }
+  };
+
+  // Helper function to convert VAPID key
+  const urlBase64ToUint8Array = (base64String: string): Uint8Array => {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
   };
 
   // Initialize notification system
