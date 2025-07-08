@@ -324,7 +324,7 @@ export default function AdminUsers() {
               </div>
               <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-caramel-600 hover:bg-caramel-700 text-white">
+                  <Button className="bg-amber-400 hover:bg-amber-500 text-amber-900 rounded-lg px-4 py-2 font-medium">
                     <Plus className="w-4 h-4 mr-2" />
                     Add New Customer
                   </Button>
