@@ -20,7 +20,9 @@ export function useDeliveryNotifications(token?: string) {
     if (!token) return;
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws/delivery?token=${encodeURIComponent(token)}`;
+    const host = window.location.hostname;
+    const port = window.location.port || '5000'; // Default to 5000 for development
+    const wsUrl = `${protocol}//${host}:${port}/ws/delivery?token=${encodeURIComponent(token)}`;
 
     const connect = () => {
       try {
