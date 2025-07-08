@@ -27,8 +27,15 @@ interface SafeUser extends Omit<User, 'password'> {
 }
 
 // Form schema for creating new users
-const createUserSchema = insertUserSchema.extend({
+const createUserSchema = z.object({
+  name: z.string().optional(),
+  email: z.string().email('Invalid email address'),
+  phone: z.string().min(10, 'Phone number must be at least 10 digits'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string().min(6, 'Confirm password must be at least 6 characters'),
+  role: z.string().default('customer'),
+  birthday: z.string().optional(),
+  anniversary: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -166,25 +173,25 @@ export default function AdminUsers() {
   // Calculate user stats
   const totalUsers = users.length;
   const loyaltyUsers = users.filter(user => (user.loyaltyPoints || 0) > 0).length;
-  const goldUsers = users.filter(user => user.loyaltyTier === 'Gold').length;
-  const platinumUsers = users.filter(user => user.loyaltyTier === 'Platinum').length;
+  const goldUsers = users.filter(user => user.loyaltyTier?.toLowerCase() === 'gold').length;
+  const platinumUsers = users.filter(user => user.loyaltyTier?.toLowerCase() === 'platinum').length;
 
   const getTierIcon = (tier: string) => {
-    switch (tier) {
-      case 'Bronze': return '🥉';
-      case 'Silver': return '🥈';
-      case 'Gold': return '🥇';
-      case 'Platinum': return '💎';
+    switch (tier?.toLowerCase()) {
+      case 'bronze': return '🥉';
+      case 'silver': return '🥈';
+      case 'gold': return '🥇';
+      case 'platinum': return '💎';
       default: return '👤';
     }
   };
 
   const getTierColor = (tier: string) => {
-    switch (tier) {
-      case 'Bronze': return 'bg-amber-100 text-amber-800';
-      case 'Silver': return 'bg-gray-100 text-gray-800';
-      case 'Gold': return 'bg-yellow-100 text-yellow-800';
-      case 'Platinum': return 'bg-purple-100 text-purple-800';
+    switch (tier?.toLowerCase()) {
+      case 'bronze': return 'bg-amber-100 text-amber-800';
+      case 'silver': return 'bg-gray-100 text-gray-800';
+      case 'gold': return 'bg-yellow-100 text-yellow-800';
+      case 'platinum': return 'bg-purple-100 text-purple-800';
       default: return 'bg-blue-100 text-blue-800';
     }
   };
@@ -447,8 +454,8 @@ export default function AdminUsers() {
                       {getRoleBadge(user.role || 'customer')}
                     </TableCell>
                     <TableCell>
-                      <Badge className={getTierColor(user.loyaltyTier || 'Bronze')}>
-                        {getTierIcon(user.loyaltyTier || 'Bronze')} {user.loyaltyTier || 'Bronze'}
+                      <Badge className={getTierColor(user.loyaltyTier || 'bronze')}>
+                        {getTierIcon(user.loyaltyTier || 'bronze')} {(user.loyaltyTier || 'bronze').charAt(0).toUpperCase() + (user.loyaltyTier || 'bronze').slice(1).toLowerCase()}
                       </Badge>
                     </TableCell>
                     <TableCell>{user.loyaltyPoints || 0}</TableCell>
