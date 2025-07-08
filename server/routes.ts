@@ -1974,6 +1974,106 @@ CakesBuy
     }
   });
 
+  // Create new user (Admin only)
+  app.post("/api/admin/users", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const userData = req.body;
+      
+      // Validate required fields
+      if (!userData.email || !userData.phone || !userData.password) {
+        return res.status(400).json({ message: "Email, phone, and password are required" });
+      }
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(userData.email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User with this email already exists" });
+      }
+      
+      const existingPhone = await storage.getUserByPhone(userData.phone);
+      if (existingPhone) {
+        return res.status(400).json({ message: "User with this phone number already exists" });
+      }
+      
+      // Hash password
+      const hashedPassword = await hashPassword(userData.password);
+      
+      // Create user
+      const newUser = await storage.createUser({
+        ...userData,
+        password: hashedPassword,
+        role: userData.role || 'customer',
+        addresses: []
+      });
+      
+      // Remove password from response
+      const { password, ...safeUser } = newUser;
+      
+      res.status(201).json({
+        message: "User created successfully",
+        user: safeUser
+      });
+    } catch (error: any) {
+      console.error("Failed to create user:", error);
+      res.status(500).json({ message: error.message || "Failed to create user" });
+    }
+  });
+
+  // Update user (Admin only)
+  app.put("/api/admin/users/:id", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const userData = req.body;
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      // Get existing user
+      const existingUser = await storage.getUser(userId);
+      if (!existingUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check for email conflicts (if email is being changed)
+      if (userData.email && userData.email !== existingUser.email) {
+        const emailConflict = await storage.getUserByEmail(userData.email);
+        if (emailConflict) {
+          return res.status(400).json({ message: "Email already in use by another user" });
+        }
+      }
+      
+      // Check for phone conflicts (if phone is being changed)
+      if (userData.phone && userData.phone !== existingUser.phone) {
+        const phoneConflict = await storage.getUserByPhone(userData.phone);
+        if (phoneConflict) {
+          return res.status(400).json({ message: "Phone number already in use by another user" });
+        }
+      }
+      
+      // Update user (password not included in updates for security)
+      const updatedUser = await storage.updateUser(userId, {
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        role: userData.role,
+        birthday: userData.birthday,
+        anniversary: userData.anniversary
+      });
+      
+      // Remove password from response
+      const { password, ...safeUser } = updatedUser;
+      
+      res.json({
+        message: "User updated successfully",
+        user: safeUser
+      });
+    } catch (error: any) {
+      console.error("Failed to update user:", error);
+      res.status(500).json({ message: error.message || "Failed to update user" });
+    }
+  });
+
   app.get("/api/admin/users/upcoming-events", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const users = await storage.getUsersWithUpcomingEvents();

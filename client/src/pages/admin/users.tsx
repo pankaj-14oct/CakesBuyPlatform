@@ -1,30 +1,160 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useToast } from '@/hooks/use-toast';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { 
   Users, Eye, Search, Calendar, Mail, Phone, 
-  MapPin, Star, CreditCard, Gift, Crown
+  MapPin, Star, CreditCard, Gift, Crown, Plus, Edit, Shield, User as UserIcon
 } from 'lucide-react';
-import { User } from '@shared/schema';
+import { User, insertUserSchema } from '@shared/schema';
 import { formatPrice } from '@/lib/utils';
+import { apiRequest } from '@/lib/queryClient';
 
 interface SafeUser extends Omit<User, 'password'> {
   password?: never;
 }
 
+// Form schema for creating new users
+const createUserSchema = insertUserSchema.extend({
+  confirmPassword: z.string().min(6, 'Confirm password must be at least 6 characters'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+type CreateUserFormData = z.infer<typeof createUserSchema>;
+
 export default function AdminUsers() {
   const [selectedUser, setSelectedUser] = useState<SafeUser | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [userToEdit, setUserToEdit] = useState<SafeUser | null>(null);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  // Form for creating new users
+  const createForm = useForm<CreateUserFormData>({
+    resolver: zodResolver(createUserSchema),
+    defaultValues: {
+      email: '',
+      phone: '',
+      name: '',
+      password: '',
+      confirmPassword: '',
+      role: 'customer',
+      birthday: '',
+      anniversary: '',
+    },
+  });
+
+  // Form for editing users
+  const editForm = useForm<Partial<CreateUserFormData>>({
+    resolver: zodResolver(createUserSchema.partial()),
+    defaultValues: {
+      email: '',
+      phone: '',
+      name: '',
+      role: 'customer',
+      birthday: '',
+      anniversary: '',
+    },
+  });
 
   const { data: users = [], isLoading } = useQuery<SafeUser[]>({
     queryKey: ['/api/admin/users'],
   });
+
+  // Create new user
+  const handleCreateUser = async (data: CreateUserFormData) => {
+    try {
+      const { confirmPassword, ...userData } = data;
+      await apiRequest('/api/admin/users', {
+        method: 'POST',
+        body: userData,
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      toast({
+        title: "User created successfully",
+        description: `${userData.name || userData.email} has been added to the system.`,
+      });
+      setCreateDialogOpen(false);
+      createForm.reset();
+    } catch (error) {
+      toast({
+        title: "Error creating user",
+        description: "Failed to create user. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Edit existing user
+  const handleEditUser = async (data: Partial<CreateUserFormData>) => {
+    if (!userToEdit) return;
+    
+    try {
+      const { confirmPassword, ...userData } = data;
+      await apiRequest(`/api/admin/users/${userToEdit.id}`, {
+        method: 'PUT',
+        body: userData,
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      toast({
+        title: "User updated successfully",
+        description: `${userData.name || userData.email} has been updated.`,
+      });
+      setEditDialogOpen(false);
+      setUserToEdit(null);
+      editForm.reset();
+    } catch (error) {
+      toast({
+        title: "Error updating user",
+        description: "Failed to update user. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Open edit dialog with user data
+  const openEditDialog = (user: SafeUser) => {
+    setUserToEdit(user);
+    editForm.reset({
+      email: user.email,
+      phone: user.phone,
+      name: user.name || '',
+      role: user.role || 'customer',
+      birthday: user.birthday || '',
+      anniversary: user.anniversary || '',
+    });
+    setEditDialogOpen(true);
+  };
+
+  // Get role badge styling
+  const getRoleBadge = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-200"><Shield className="w-3 h-3 mr-1" />Admin</Badge>;
+      case 'customer':
+        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200"><UserIcon className="w-3 h-3 mr-1" />Customer</Badge>;
+      default:
+        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200"><UserIcon className="w-3 h-3 mr-1" />{role}</Badge>;
+    }
+  };
 
   // Filter users based on search term
   const filteredUsers = users.filter(user => 
@@ -147,6 +277,145 @@ export default function AdminUsers() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
+              <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-caramel-600 hover:bg-caramel-700 text-white">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create User
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Create New User</DialogTitle>
+                  </DialogHeader>
+                  <Form {...createForm}>
+                    <form onSubmit={createForm.handleSubmit(handleCreateUser)} className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={createForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Full Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter full name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={createForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter email address" type="email" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={createForm.control}
+                          name="phone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Phone</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter phone number" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={createForm.control}
+                          name="role"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Role</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select user role" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="customer">Customer</SelectItem>
+                                  <SelectItem value="admin">Admin</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={createForm.control}
+                          name="password"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Password</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter password" type="password" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={createForm.control}
+                          name="confirmPassword"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Confirm Password</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Confirm password" type="password" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={createForm.control}
+                          name="birthday"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Birthday (Optional)</FormLabel>
+                              <FormControl>
+                                <Input placeholder="MM-DD" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={createForm.control}
+                          name="anniversary"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Anniversary (Optional)</FormLabel>
+                              <FormControl>
+                                <Input placeholder="MM-DD" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <Button type="button" variant="outline" onClick={() => setCreateDialogOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button type="submit" className="bg-caramel-600 hover:bg-caramel-700">
+                          Create User
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </CardHeader>
@@ -156,8 +425,10 @@ export default function AdminUsers() {
               <TableHeader>
                 <TableRow>
                   <TableHead>User ID</TableHead>
+                  <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Phone</TableHead>
+                  <TableHead>Role</TableHead>
                   <TableHead>Loyalty Tier</TableHead>
                   <TableHead>Points</TableHead>
                   <TableHead>Total Spent</TableHead>
@@ -169,8 +440,12 @@ export default function AdminUsers() {
                 {filteredUsers.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">#{user.id}</TableCell>
+                    <TableCell>{user.name || 'N/A'}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{user.phone}</TableCell>
+                    <TableCell>
+                      {getRoleBadge(user.role || 'customer')}
+                    </TableCell>
                     <TableCell>
                       <Badge className={getTierColor(user.loyaltyTier || 'Bronze')}>
                         {getTierIcon(user.loyaltyTier || 'Bronze')} {user.loyaltyTier || 'Bronze'}
@@ -186,132 +461,150 @@ export default function AdminUsers() {
                       }) : 'N/A'}
                     </TableCell>
                     <TableCell>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedUser(user)}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            View
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
-                          <DialogHeader>
-                            <DialogTitle>User Details - #{user.id}</DialogTitle>
-                          </DialogHeader>
-                          {selectedUser && (
-                            <div className="space-y-6">
-                              {/* Basic Info */}
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Email</label>
-                                  <div className="flex items-center mt-1">
-                                    <Mail className="h-4 w-4 text-gray-400 mr-2" />
-                                    <span>{selectedUser.email}</span>
+                      <div className="flex space-x-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelectedUser(user)}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>User Details - #{user.id}</DialogTitle>
+                            </DialogHeader>
+                            {selectedUser && (
+                              <div className="space-y-6">
+                                {/* Basic Info */}
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Name</label>
+                                    <div className="flex items-center mt-1">
+                                      <UserIcon className="h-4 w-4 text-gray-400 mr-2" />
+                                      <span>{selectedUser.name || 'N/A'}</span>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Role</label>
+                                    <div className="flex items-center mt-1">
+                                      {getRoleBadge(selectedUser.role || 'customer')}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Email</label>
+                                    <div className="flex items-center mt-1">
+                                      <Mail className="h-4 w-4 text-gray-400 mr-2" />
+                                      <span>{selectedUser.email}</span>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Phone</label>
+                                    <div className="flex items-center mt-1">
+                                      <Phone className="h-4 w-4 text-gray-400 mr-2" />
+                                      <span>{selectedUser.phone}</span>
+                                    </div>
                                   </div>
                                 </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Phone</label>
-                                  <div className="flex items-center mt-1">
-                                    <Phone className="h-4 w-4 text-gray-400 mr-2" />
-                                    <span>{selectedUser.phone}</span>
-                                  </div>
-                                </div>
-                              </div>
 
-                              {/* Loyalty Info */}
-                              <div className="grid grid-cols-3 gap-4">
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Loyalty Tier</label>
-                                  <div className="mt-1">
-                                    <Badge className={getTierColor(selectedUser.loyaltyTier || 'Bronze')}>
-                                      {getTierIcon(selectedUser.loyaltyTier || 'Bronze')} {selectedUser.loyaltyTier || 'Bronze'}
-                                    </Badge>
+                                {/* Loyalty Info */}
+                                <div className="grid grid-cols-3 gap-4">
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Loyalty Tier</label>
+                                    <div className="flex items-center mt-1">
+                                      <Crown className="h-4 w-4 text-gray-400 mr-2" />
+                                      <Badge className={getTierColor(selectedUser.loyaltyTier || 'Bronze')}>
+                                        {getTierIcon(selectedUser.loyaltyTier || 'Bronze')} {selectedUser.loyaltyTier || 'Bronze'}
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Loyalty Points</label>
+                                    <div className="flex items-center mt-1">
+                                      <Star className="h-4 w-4 text-gray-400 mr-2" />
+                                      <span>{selectedUser.loyaltyPoints || 0}</span>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Total Spent</label>
+                                    <div className="flex items-center mt-1">
+                                      <CreditCard className="h-4 w-4 text-gray-400 mr-2" />
+                                      <span>{formatPrice(selectedUser.totalSpent || 0)}</span>
+                                    </div>
                                   </div>
                                 </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Loyalty Points</label>
-                                  <div className="flex items-center mt-1">
-                                    <Star className="h-4 w-4 text-yellow-500 mr-2" />
-                                    <span>{selectedUser.loyaltyPoints || 0}</span>
-                                  </div>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Total Spent</label>
-                                  <div className="flex items-center mt-1">
-                                    <CreditCard className="h-4 w-4 text-green-500 mr-2" />
-                                    <span>{formatPrice(selectedUser.totalSpent || 0)}</span>
-                                  </div>
-                                </div>
-                              </div>
 
-                              {/* Special Dates */}
-                              {(selectedUser.birthday || selectedUser.anniversary) && (
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Special Dates</label>
-                                  <div className="grid grid-cols-2 gap-4 mt-2">
-                                    {selectedUser.birthday && (
-                                      <div className="flex items-center">
-                                        <Calendar className="h-4 w-4 text-pink-500 mr-2" />
-                                        <span>Birthday: {selectedUser.birthday}</span>
-                                      </div>
-                                    )}
-                                    {selectedUser.anniversary && (
-                                      <div className="flex items-center">
-                                        <Calendar className="h-4 w-4 text-red-500 mr-2" />
-                                        <span>Anniversary: {selectedUser.anniversary}</span>
-                                      </div>
-                                    )}
+                                {/* Special Dates */}
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Birthday</label>
+                                    <div className="flex items-center mt-1">
+                                      <Calendar className="h-4 w-4 text-gray-400 mr-2" />
+                                      <span>{selectedUser.birthday || 'Not set'}</span>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Anniversary</label>
+                                    <div className="flex items-center mt-1">
+                                      <Calendar className="h-4 w-4 text-gray-400 mr-2" />
+                                      <span>{selectedUser.anniversary || 'Not set'}</span>
+                                    </div>
                                   </div>
                                 </div>
-                              )}
 
-                              {/* Addresses */}
-                              {selectedUser.addresses && selectedUser.addresses.length > 0 && (
+                                {/* Addresses */}
                                 <div>
-                                  <label className="text-sm font-medium text-gray-600">Saved Addresses</label>
-                                  <div className="space-y-2 mt-2">
-                                    {selectedUser.addresses.map((address, index) => (
-                                      <div key={index} className="p-3 border rounded-lg">
-                                        <div className="flex items-center justify-between mb-2">
-                                          <div className="flex items-center">
-                                            <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                                            <span className="font-medium">{address.name}</span>
+                                  <label className="text-sm font-medium text-gray-600">Addresses</label>
+                                  <div className="mt-2 space-y-2">
+                                    {selectedUser.addresses && selectedUser.addresses.length > 0 ? (
+                                      selectedUser.addresses.map((addr, index) => (
+                                        <div key={index} className="flex items-start space-x-2 p-2 bg-gray-50 rounded">
+                                          <MapPin className="h-4 w-4 text-gray-400 mt-0.5" />
+                                          <div className="flex-1">
+                                            <div className="font-medium">{addr.name}</div>
+                                            <div className="text-sm text-gray-600">{addr.address}</div>
+                                            <div className="text-sm text-gray-500">{addr.city}, {addr.pincode}</div>
+                                            <Badge variant="outline" className="mt-1">{addr.type}</Badge>
                                           </div>
-                                          <Badge variant="outline">{address.type}</Badge>
                                         </div>
-                                        <div className="text-sm text-gray-600">
-                                          <div>{address.address}</div>
-                                          <div>{address.city} - {address.pincode}</div>
-                                          {address.landmark && <div>Landmark: {address.landmark}</div>}
-                                        </div>
-                                      </div>
-                                    ))}
+                                      ))
+                                    ) : (
+                                      <div className="text-gray-500 text-sm">No addresses added</div>
+                                    )}
                                   </div>
                                 </div>
-                              )}
 
-                              {/* Account Info */}
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Account Created</label>
-                                  <div className="mt-1">
-                                    {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleString('en-IN') : 'N/A'}
+                                {/* Account Info */}
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Account Created</label>
+                                    <div className="mt-1">
+                                      {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleString('en-IN') : 'N/A'}
+                                    </div>
                                   </div>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Last Updated</label>
-                                  <div className="mt-1">
-                                    {selectedUser.updatedAt ? new Date(selectedUser.updatedAt).toLocaleString('en-IN') : 'N/A'}
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Last Updated</label>
+                                    <div className="mt-1">
+                                      {selectedUser.updatedAt ? new Date(selectedUser.updatedAt).toLocaleString('en-IN') : 'N/A'}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          )}
-                        </DialogContent>
-                      </Dialog>
+                            )}
+                          </DialogContent>
+                        </Dialog>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openEditDialog(user)}
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -330,6 +623,115 @@ export default function AdminUsers() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit User Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit User - {userToEdit?.name || userToEdit?.email}</DialogTitle>
+          </DialogHeader>
+          <Form {...editForm}>
+            <form onSubmit={editForm.handleSubmit(handleEditUser)} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={editForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter full name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter email address" type="email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter phone number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select user role" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="customer">Customer</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="birthday"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Birthday (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="MM-DD" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="anniversary"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Anniversary (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="MM-DD" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" className="bg-caramel-600 hover:bg-caramel-700">
+                  Update User
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

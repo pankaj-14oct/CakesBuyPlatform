@@ -22,7 +22,7 @@ export interface IStorage {
   getUserByPhone(phone: string): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
-  updateUser(id: number, updates: Partial<User>): Promise<void>;
+  updateUser(id: number, updates: Partial<User>): Promise<User>;
   updateUserAddresses(id: number, addresses: any[]): Promise<void>;
 
   // Categories
@@ -185,10 +185,12 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUser(id: number, updates: Partial<User>): Promise<void> {
-    await db.update(users)
+  async updateUser(id: number, updates: Partial<User>): Promise<User> {
+    const [updatedUser] = await db.update(users)
       .set({ ...updates, updatedAt: new Date() })
-      .where(eq(users.id, id));
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
   }
 
   async updateUserAddresses(id: number, addresses: any[]): Promise<void> {
