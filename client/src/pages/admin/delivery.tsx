@@ -43,7 +43,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const deliveryBoySchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
-  phone: z.string().min(10, 'Phone number must be at least 10 digits'),
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   vehicleType: z.enum(['bike', 'scooter', 'car'], {
     required_error: 'Please select a vehicle type',
@@ -100,9 +100,24 @@ export default function AdminDelivery() {
       form.reset();
     },
     onError: (error: any) => {
+      console.error('Create delivery boy error:', error);
+      let errorMessage = 'Failed to register delivery boy';
+      
+      // Parse validation errors if they exist
+      if (error.message.includes('Validation failed')) {
+        try {
+          const errorData = JSON.parse(error.message.split(': ')[1]);
+          if (errorData.errors && errorData.errors.length > 0) {
+            errorMessage = errorData.errors.map((e: any) => e.message).join(', ');
+          }
+        } catch (e) {
+          // Fallback to generic message
+        }
+      }
+      
       toast({
         title: 'Error',
-        description: error.message || 'Failed to register delivery boy',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
