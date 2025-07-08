@@ -3,19 +3,23 @@ import { db } from './db.js';
 import { pushSubscriptions } from '../shared/schema.js';
 import { eq } from 'drizzle-orm';
 
-// Generate VAPID keys for push notifications
-// In production, these should be stored as environment variables
+// VAPID keys from environment variables
 const vapidKeys = {
-  publicKey: 'BFuBz_wugUnuFEqKTMKFNrU7DoRSxGXxf1MrMII-lXJNyHSdIROEPKvE-SRVFxmNw4KFD1hY9s61GqLnO_bu3oE',
-  privateKey: 'z39LDihwgsXn4Yqa3ma8c3bqK5cP8aTJGQpeTa_McC8'
+  publicKey: process.env.VAPID_PUBLIC_KEY || '',
+  privateKey: process.env.VAPID_PRIVATE_KEY || ''
 };
 
 // Configure web-push
-webpush.setVapidDetails(
-  'mailto:support@cakesbuy.com',
-  vapidKeys.publicKey,
-  vapidKeys.privateKey
-);
+if (vapidKeys.publicKey && vapidKeys.privateKey) {
+  webpush.setVapidDetails(
+    'mailto:support@cakesbuy.com',
+    vapidKeys.publicKey,
+    vapidKeys.privateKey
+  );
+  console.log('✅ VAPID keys configured for push notifications');
+} else {
+  console.warn('⚠️ VAPID keys not configured. Push notifications will not work.');
+}
 
 export interface PushNotificationPayload {
   title: string;
