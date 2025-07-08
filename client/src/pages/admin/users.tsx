@@ -17,7 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { 
   Users, Eye, Search, Calendar, Mail, Phone, 
-  MapPin, Star, CreditCard, Gift, Crown, Plus, Edit, Shield, User as UserIcon, MoreVertical
+  MapPin, Star, CreditCard, Gift, Crown, Plus, Edit, Shield, User as UserIcon, MoreVertical, Trash2
 } from 'lucide-react';
 import { User, insertUserSchema } from '@shared/schema';
 import { formatPrice } from '@/lib/utils';
@@ -164,6 +164,31 @@ export default function AdminUsers() {
     setEditDialogOpen(true);
   };
 
+  // Delete user
+  const handleDeleteUser = async (userId: number, userName?: string) => {
+    if (!confirm(`Are you sure you want to delete user ${userName || `#${userId}`}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      await apiRequest(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      toast({
+        title: "User deleted successfully",
+        description: `User ${userName || `#${userId}`} has been deleted.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error deleting user",
+        description: "Failed to delete user. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Get role badge styling
   const getRoleBadge = (role: string) => {
     switch (role) {
@@ -301,7 +326,7 @@ export default function AdminUsers() {
                 <DialogTrigger asChild>
                   <Button className="bg-caramel-600 hover:bg-caramel-700 text-white">
                     <Plus className="w-4 h-4 mr-2" />
-                    Create User
+                    Add New Customer
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
@@ -491,6 +516,13 @@ export default function AdminUsers() {
                             <DropdownMenuItem onClick={() => openEditDialog(user)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleDeleteUser(user.id, user.name || user.email)}
+                              className="text-red-600 focus:text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

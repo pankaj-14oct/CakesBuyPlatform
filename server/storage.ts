@@ -23,6 +23,7 @@ export interface IStorage {
   getAllUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User>;
+  deleteUser(id: number): Promise<boolean>;
   updateUserAddresses(id: number, addresses: any[]): Promise<void>;
 
   // Categories
@@ -197,6 +198,16 @@ export class DatabaseStorage implements IStorage {
     await db.update(users)
       .set({ addresses, updatedAt: new Date() })
       .where(eq(users.id, id));
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(users).where(eq(users.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      return false;
+    }
   }
 
   async getAllUsers(): Promise<User[]> {

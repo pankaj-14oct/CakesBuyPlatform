@@ -2074,6 +2074,38 @@ CakesBuy
     }
   });
 
+  // Delete user (Admin only)
+  app.delete("/api/admin/users/:id", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      // Check if user exists
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Prevent deletion of admin users
+      if (user.role === 'admin') {
+        return res.status(400).json({ message: "Cannot delete admin users" });
+      }
+
+      // Delete the user
+      const deleted = await storage.deleteUser(userId);
+      if (!deleted) {
+        return res.status(500).json({ message: "Failed to delete user" });
+      }
+
+      res.json({ message: "User deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
   app.get("/api/admin/users/upcoming-events", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const users = await storage.getUsersWithUpcomingEvents();
