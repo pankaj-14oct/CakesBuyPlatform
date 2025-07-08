@@ -96,10 +96,7 @@ export default function AdminUsers() {
   const handleCreateUser = async (data: CreateUserFormData) => {
     try {
       const userData = data;
-      await apiRequest('/api/admin/users', {
-        method: 'POST',
-        body: userData,
-      });
+      await apiRequest('/api/admin/users', 'POST', userData);
       
       queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
       toast({
@@ -109,6 +106,7 @@ export default function AdminUsers() {
       setCreateDialogOpen(false);
       createForm.reset();
     } catch (error) {
+      console.error('Create user error:', error);
       toast({
         title: "Error creating user",
         description: "Failed to create user. Please try again.",
@@ -123,10 +121,7 @@ export default function AdminUsers() {
     
     try {
       const userData = data;
-      await apiRequest(`/api/admin/users/${userToEdit.id}`, {
-        method: 'PUT',
-        body: userData,
-      });
+      await apiRequest(`/api/admin/users/${userToEdit.id}`, 'PUT', userData);
       
       queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
       toast({
@@ -166,9 +161,7 @@ export default function AdminUsers() {
     }
 
     try {
-      await apiRequest(`/api/admin/users/${userId}`, {
-        method: 'DELETE',
-      });
+      await apiRequest(`/api/admin/users/${userId}`, 'DELETE');
       
       queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
       toast({
