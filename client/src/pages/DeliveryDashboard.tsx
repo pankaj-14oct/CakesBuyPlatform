@@ -263,6 +263,30 @@ export default function DeliveryDashboard() {
     if (!deliveryToken || !deliveryBoy) return;
 
     try {
+      // Check if notifications are supported
+      if (!('Notification' in window)) {
+        toast({
+          title: "Not Supported",
+          description: "Push notifications are not supported in this browser",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Check permission
+      if (Notification.permission !== 'granted') {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          toast({
+            title: "Permission Denied",
+            description: "Please allow notifications in your browser settings",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+
+      // Send test notification
       const response = await fetch('/api/delivery/test-push', {
         method: 'POST',
         headers: {
@@ -277,10 +301,25 @@ export default function DeliveryDashboard() {
       });
 
       if (response.ok) {
+        // Also play a local notification sound
+        playNotificationSound();
+        
         toast({
           title: "Test Notification Sent",
           description: "Check if you received the push notification (close the app to test background notifications)",
         });
+        
+        // On mobile, also show a local notification as fallback
+        if (navigator.userAgent.match(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i)) {
+          setTimeout(() => {
+            new Notification('🧪 Local Test Notification', {
+              body: 'This is a local test notification for mobile devices',
+              icon: '/delivery-icon-192.png',
+              vibrate: [1000, 500, 1000],
+              requireInteraction: true
+            });
+          }, 2000);
+        }
       } else {
         const error = await response.text();
         toast({
@@ -359,6 +398,16 @@ export default function DeliveryDashboard() {
     
     initializeAudio();
     initNotifications();
+    
+    // Listen for service worker messages (for mobile sound)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data.type === 'PLAY_NOTIFICATION_SOUND') {
+          // Play sound for mobile push notifications
+          playNotificationSound();
+        }
+      });
+    }
   }, []);
 
   // Update order status mutation

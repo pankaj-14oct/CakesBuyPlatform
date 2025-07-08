@@ -57,18 +57,20 @@ self.addEventListener('push', (event) => {
   let notificationData = {
     title: '🚚 CakesBuy Delivery Alert',
     body: 'New order notification received',
-    icon: '/delivery-icon-192.svg',
-    badge: '/delivery-icon-192.svg',
+    icon: '/delivery-icon-192.png',
+    badge: '/delivery-icon-192.png',
     tag: 'delivery-notification',
     requireInteraction: true,
-    vibrate: [500, 200, 500, 200, 500, 200, 500],
+    vibrate: [800, 300, 800, 300, 800, 300, 800],
     silent: false,
     renotify: true,
+    timestamp: Date.now(),
+    dir: 'ltr',
+    lang: 'en',
     actions: [
       {
         action: 'view',
-        title: 'Open Dashboard',
-        icon: '/delivery-icon-192.svg'
+        title: 'Open Dashboard'
       },
       {
         action: 'dismiss',
@@ -87,10 +89,12 @@ self.addEventListener('push', (event) => {
         title: data.title || '🚨 URGENT: New Order Assignment!',
         body: data.body || 'You have a new delivery order assigned - CHECK NOW!',
         data: data,
-        // Make notification more urgent
+        // Make notification more urgent for mobile
         requireInteraction: true,
         silent: false,
-        vibrate: [800, 200, 800, 200, 800, 200, 800]
+        vibrate: [1000, 500, 1000, 500, 1000, 500, 1000],
+        timestamp: Date.now(),
+        renotify: true
       };
     } catch (error) {
       console.error('Error parsing push data:', error);
@@ -103,9 +107,30 @@ self.addEventListener('push', (event) => {
     self.registration.showNotification(notificationData.title, notificationData)
       .then(() => {
         console.log('✅ Notification displayed successfully');
+        
+        // For mobile: Play sound manually since silent: false might not work
+        if (self.registration.sync) {
+          // Mobile device detected, try to play sound
+          self.clients.matchAll().then(clients => {
+            clients.forEach(client => {
+              client.postMessage({
+                type: 'PLAY_NOTIFICATION_SOUND',
+                data: notificationData.data
+              });
+            });
+          });
+        }
       })
       .catch((error) => {
         console.error('❌ Failed to show notification:', error);
+        
+        // Fallback: try to show a basic notification
+        return self.registration.showNotification('🚚 CakesBuy Alert', {
+          body: 'New order notification',
+          icon: '/delivery-icon-192.png',
+          vibrate: [1000, 500, 1000],
+          requireInteraction: true
+        });
       })
   );
 });

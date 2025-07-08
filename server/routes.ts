@@ -2238,15 +2238,27 @@ CakesBuy
         return res.status(401).json({ error: 'Unauthorized' });
       }
 
+      console.log(`🧪 Sending test push notification to delivery boy ${req.deliveryBoy.id}`);
+      
       const { sendPushNotification } = await import('./push-service.js');
       const result = await sendPushNotification(req.deliveryBoy.id, {
         title: title || '🧪 Test Notification',
-        body: body || 'This is a test push notification!',
-        data: data || { test: true }
+        body: body || 'This is a test push notification to verify background alerts work!',
+        data: { 
+          test: true,
+          urgent: true,
+          timestamp: Date.now(),
+          ...data
+        }
       });
       
+      console.log(`📱 Test push notification result:`, result);
+      
       if (result.success) {
-        res.json({ message: 'Test push notification sent successfully' });
+        res.json({ 
+          message: 'Test push notification sent successfully',
+          details: result.details || 'Push notification delivered'
+        });
       } else {
         res.status(500).json({ error: result.error || 'Failed to send test notification' });
       }
