@@ -94,11 +94,14 @@ export async function sendPushNotification(deliveryBoyId: number, payload: PushN
     const notificationPayload = {
       title: payload.title || '🚚 CakesBuy Delivery',
       body: payload.body || 'New notification',
-      icon: payload.icon || '/delivery-icon-192.svg',
-      badge: payload.badge || '/delivery-icon-192.svg',
+      icon: payload.icon || '/favicon.ico',
+      badge: payload.badge || '/favicon.ico',
       tag: 'delivery-notification',
       requireInteraction: true,
-      vibrate: [200, 100, 200, 100, 200],
+      vibrate: [1000, 500, 1000, 500, 1000],
+      silent: false,
+      timestamp: Date.now(),
+      renotify: true,
       data: payload.data || {},
       actions: payload.actions || [
         {
@@ -113,14 +116,28 @@ export async function sendPushNotification(deliveryBoyId: number, payload: PushN
       ]
     };
 
-    // Send push notification
-    await webpush.sendNotification(
+    // Send push notification with enhanced options
+    const pushOptions = {
+      TTL: 3600, // Time to live in seconds (1 hour)
+      urgency: 'high',
+      headers: {
+        'Urgency': 'high'
+      }
+    };
+
+    const result = await webpush.sendNotification(
       pushSubscription,
-      JSON.stringify(notificationPayload)
+      JSON.stringify(notificationPayload),
+      pushOptions
     );
 
-    console.log(`Push notification sent to delivery boy ${deliveryBoyId}`);
-    return { success: true };
+    console.log(`✅ Push notification sent successfully to delivery boy ${deliveryBoyId}`, {
+      endpoint: sub.endpoint.includes('fcm') ? 'Android/Chrome' : 'Browser'
+    });
+    return { 
+      success: true, 
+      details: `Notification sent to ${sub.endpoint.includes('fcm') ? 'Android/Chrome' : 'Browser'}` 
+    };
     
   } catch (error) {
     console.error('Error sending push notification:', error);

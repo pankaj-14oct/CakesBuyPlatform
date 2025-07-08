@@ -57,8 +57,8 @@ self.addEventListener('push', (event) => {
   let notificationData = {
     title: '🚚 CakesBuy Delivery Alert',
     body: 'New order notification received',
-    icon: '/delivery-icon-192.png',
-    badge: '/delivery-icon-192.png',
+    icon: '/favicon.ico',
+    badge: '/favicon.ico',
     tag: 'delivery-notification',
     requireInteraction: true,
     vibrate: [800, 300, 800, 300, 800, 300, 800],
@@ -127,7 +127,7 @@ self.addEventListener('push', (event) => {
         // Fallback: try to show a basic notification
         return self.registration.showNotification('🚚 CakesBuy Alert', {
           body: 'New order notification',
-          icon: '/delivery-icon-192.png',
+          icon: '/favicon.ico',
           vibrate: [1000, 500, 1000],
           requireInteraction: true
         });

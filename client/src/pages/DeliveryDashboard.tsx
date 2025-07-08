@@ -314,7 +314,7 @@ export default function DeliveryDashboard() {
           setTimeout(() => {
             new Notification('🧪 Local Test Notification', {
               body: 'This is a local test notification for mobile devices',
-              icon: '/delivery-icon-192.png',
+              icon: '/favicon.ico',
               vibrate: [1000, 500, 1000],
               requireInteraction: true
             });
