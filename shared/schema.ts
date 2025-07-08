@@ -316,6 +316,18 @@ export const deliveryBoys = pgTable("delivery_boys", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Push Subscriptions for delivery boys
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: serial("id").primaryKey(),
+  deliveryBoyId: integer("delivery_boy_id").references(() => deliveryBoys.id).notNull(),
+  endpoint: text("endpoint").notNull(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Admin Configuration
 export const adminConfigs = pgTable("admin_configs", {
   id: serial("id").primaryKey(),
@@ -345,6 +357,7 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, c
 export const insertEventReminderSchema = createInsertSchema(eventReminders).omit({ id: true, createdAt: true });
 export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).omit({ id: true, createdAt: true });
 export const insertDeliveryBoySchema = createInsertSchema(deliveryBoys).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions).omit({ id: true, createdAt: true, updatedAt: true });
 
 // Loyalty Program insert schemas
 export const insertLoyaltyTransactionSchema = createInsertSchema(loyaltyTransactions).omit({ id: true, createdAt: true });
@@ -510,5 +523,9 @@ export type WalletTransaction = typeof walletTransactions.$inferSelect;
 export type InsertWalletTransaction = z.infer<typeof insertWalletTransactionSchema>;
 export type DeliveryBoy = typeof deliveryBoys.$inferSelect;
 export type InsertDeliveryBoy = z.infer<typeof insertDeliveryBoySchema>;
+
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type InsertPushSubscription = z.infer<typeof insertPushSubscriptionSchema>;
+
 export type AdminConfig = typeof adminConfigs.$inferSelect;
 export type InsertAdminConfig = z.infer<typeof insertAdminConfigSchema>;

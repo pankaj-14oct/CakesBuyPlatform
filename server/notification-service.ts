@@ -1,5 +1,6 @@
 import { WebSocket } from 'ws';
 import { sendEmail } from './email-service.js';
+import { sendOrderAssignmentPush } from './push-service.js';
 import type { Order, DeliveryBoy } from '../shared/schema.js';
 
 // Store active WebSocket connections for delivery boys
@@ -201,9 +202,26 @@ export async function notifyOrderAssignment(
   // Send email notification
   const emailSuccess = await sendOrderAssignmentEmail(deliveryBoy, order, orderDetails);
 
+  // Send push notification for background alerts
+  let pushSuccess = false;
+  try {
+    const pushResponse = await sendOrderAssignmentPush(deliveryBoy.id, {
+      id: order.id,
+      orderNumber: order.orderNumber,
+      total: order.total,
+      customerName: orderDetails?.customerName || 'Customer',
+      customerPhone: orderDetails?.customerPhone || '',
+      address: orderDetails?.address || ''
+    });
+    pushSuccess = pushResponse.success;
+  } catch (error) {
+    console.error('Failed to send push notification:', error);
+  }
+
   return {
     realTime: realTimeSuccess,
-    email: emailSuccess
+    email: emailSuccess,
+    push: pushSuccess
   };
 }
 

@@ -2181,6 +2181,54 @@ CakesBuy
     }
   });
 
+  // Push notification routes for delivery boys
+  app.post('/api/delivery/push/subscribe', authenticateDeliveryBoy, async (req: DeliveryBoyAuthRequest, res: Response) => {
+    try {
+      const { subscription } = req.body;
+      
+      if (!subscription || !subscription.endpoint) {
+        return res.status(400).json({ error: 'Invalid subscription data' });
+      }
+
+      const { savePushSubscription } = await import('./push-service.js');
+      const result = await savePushSubscription(req.deliveryBoy!.id, subscription);
+      
+      if (result.success) {
+        res.json({ message: 'Push subscription saved successfully' });
+      } else {
+        res.status(500).json({ error: result.error });
+      }
+    } catch (error) {
+      console.error('Error saving push subscription:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.delete('/api/delivery/push/unsubscribe', authenticateDeliveryBoy, async (req: DeliveryBoyAuthRequest, res: Response) => {
+    try {
+      const { removePushSubscription } = await import('./push-service.js');
+      const result = await removePushSubscription(req.deliveryBoy!.id);
+      
+      if (result.success) {
+        res.json({ message: 'Push subscription removed successfully' });
+      } else {
+        res.status(500).json({ error: result.error });
+      }
+    } catch (error) {
+      console.error('Error removing push subscription:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.get('/api/delivery/push/vapid-key', (req: Request, res: Response) => {
+    import('./push-service.js').then(({ getVapidPublicKey }) => {
+      res.json({ publicKey: getVapidPublicKey() });
+    }).catch(error => {
+      console.error('Error getting VAPID key:', error);
+      res.status(500).json({ error: 'Failed to get VAPID key' });
+    });
+  });
+
   app.post("/api/delivery/login", async (req, res) => {
     try {
       const validatedData = deliveryBoyLoginSchema.parse(req.body);

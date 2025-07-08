@@ -40,6 +40,7 @@ import { useDeliveryNotifications } from "@/hooks/useDeliveryNotifications";
 import { testNotificationSound } from "@/utils/testSound";
 import { notificationManager } from "@/utils/notificationManager";
 import { pwaInstaller, pushNotificationManager } from "@/utils/pwaInstall";
+import PushNotificationManager from "@/components/PushNotificationManager";
 
 interface DeliveryBoy {
   id: number;
@@ -1118,6 +1119,12 @@ export default function DeliveryDashboard() {
               </CardHeader>
               <CardContent className="space-y-6">
                 
+                {/* Push Notifications */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-lg">Background Notifications</h3>
+                  <PushNotificationManager deliveryBoyToken={deliveryBoyToken || ""} />
+                </div>
+
                 {/* PWA Installation */}
                 <div className="space-y-3">
                   <h3 className="font-semibold text-lg">Install Mobile App</h3>
