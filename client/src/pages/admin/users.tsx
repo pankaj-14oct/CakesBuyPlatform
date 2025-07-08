@@ -259,7 +259,7 @@ export default function AdminUsers() {
               Add New Customer
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New User</DialogTitle>
             </DialogHeader>
@@ -627,7 +627,7 @@ export default function AdminUsers() {
 
       {/* View User Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>User Details - #{selectedUser?.id}</DialogTitle>
           </DialogHeader>
