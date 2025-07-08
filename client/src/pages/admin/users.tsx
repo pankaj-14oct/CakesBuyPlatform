@@ -43,6 +43,17 @@ const createUserSchema = z.object({
 
 type CreateUserFormData = z.infer<typeof createUserSchema>;
 
+// Schema for editing users (all fields optional except password confirmation)
+const editUserSchema = z.object({
+  name: z.string().optional(),
+  email: z.string().email('Invalid email address').optional(),
+  phone: z.string().min(10, 'Phone number must be at least 10 digits').optional(),
+  password: z.string().min(6, 'Password must be at least 6 characters').optional(),
+  role: z.string().optional(),
+  birthday: z.string().optional(),
+  anniversary: z.string().optional(),
+});
+
 export default function AdminUsers() {
   const [selectedUser, setSelectedUser] = useState<SafeUser | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -68,8 +79,8 @@ export default function AdminUsers() {
   });
 
   // Form for editing users
-  const editForm = useForm<Partial<CreateUserFormData>>({
-    resolver: zodResolver(createUserSchema.partial()),
+  const editForm = useForm<z.infer<typeof editUserSchema>>({
+    resolver: zodResolver(editUserSchema),
     defaultValues: {
       email: '',
       phone: '',
