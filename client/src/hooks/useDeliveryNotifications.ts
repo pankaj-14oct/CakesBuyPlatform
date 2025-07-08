@@ -21,11 +21,17 @@ export function useDeliveryNotifications(token?: string) {
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.hostname;
-    const port = window.location.port || '5000'; // Default to 5000 for development
-    const wsUrl = `${protocol}//${host}:${port}/ws/delivery?token=${encodeURIComponent(token)}`;
+    // Use the same port as the current page
+    const port = window.location.port;
+    const wsUrl = port 
+      ? `${protocol}//${host}:${port}/ws/delivery?token=${encodeURIComponent(token)}`
+      : `${protocol}//${host}/ws/delivery?token=${encodeURIComponent(token)}`;
+
+    console.log('Attempting WebSocket connection to:', wsUrl);
 
     const connect = () => {
       try {
+        console.log('Creating WebSocket connection...', wsUrl);
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
 
@@ -38,6 +44,12 @@ export function useDeliveryNotifications(token?: string) {
           try {
             const notification: NotificationData = JSON.parse(event.data);
             console.log('Received notification:', notification);
+            
+            // Handle connection confirmation
+            if (notification.type === 'connected') {
+              console.log('WebSocket connection confirmed by server');
+              setIsConnected(true);
+            }
             
             setNotifications(prev => [notification, ...prev].slice(0, 50)); // Keep last 50 notifications
 

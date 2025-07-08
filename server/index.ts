@@ -57,13 +57,16 @@ app.use((req, res, next) => {
   });
 
   wss.on('connection', (ws, req) => {
-    log('WebSocket connection established');
+    log('WebSocket connection established from:', req.url);
     
     // Authenticate delivery boy from query parameters or headers
     const url = new URL(req.url!, `http://${req.headers.host}`);
     const token = url.searchParams.get('token') || req.headers.authorization?.replace('Bearer ', '');
     
+    log('WebSocket token received:', token ? 'Yes' : 'No');
+    
     if (!token) {
+      log('WebSocket authentication failed: No token provided');
       ws.close(1008, 'Authentication required');
       return;
     }
@@ -81,6 +84,7 @@ app.use((req, res, next) => {
           timestamp: new Date().toISOString()
         }));
       } else {
+        log('WebSocket authentication failed: Invalid token');
         ws.close(1008, 'Invalid authentication token');
       }
     } catch (error) {
