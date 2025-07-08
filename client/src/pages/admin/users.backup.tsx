@@ -17,7 +17,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { 
   Users, Eye, Search, Calendar, Mail, Phone, 
-  MapPin, Star, CreditCard, Gift, Crown, Plus, Edit, Shield, User as UserIcon, MoreVertical
+  MapPin, Star, CreditCard, Gift, Crown, Plus, Edit, Shield, User as UserIcon,
+  MoreVertical
 } from 'lucide-react';
 import { User, insertUserSchema } from '@shared/schema';
 import { formatPrice } from '@/lib/utils';
@@ -473,7 +474,141 @@ export default function AdminUsers() {
                       }) : 'N/A'}
                     </TableCell>
                     <TableCell>
-                      <div className="flex justify-center">
+                      <div className="flex space-x-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelectedUser(user)}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>User Details - #{user.id}</DialogTitle>
+                            </DialogHeader>
+                            {selectedUser && (
+                              <div className="space-y-6">
+                                {/* Basic Info */}
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Name</label>
+                                    <div className="flex items-center mt-1">
+                                      <UserIcon className="h-4 w-4 text-gray-400 mr-2" />
+                                      <span>{selectedUser.name || 'N/A'}</span>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Role</label>
+                                    <div className="flex items-center mt-1">
+                                      {getRoleBadge(selectedUser.role || 'customer')}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Email</label>
+                                    <div className="flex items-center mt-1">
+                                      <Mail className="h-4 w-4 text-gray-400 mr-2" />
+                                      <span>{selectedUser.email}</span>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Phone</label>
+                                    <div className="flex items-center mt-1">
+                                      <Phone className="h-4 w-4 text-gray-400 mr-2" />
+                                      <span>{selectedUser.phone}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Loyalty Info */}
+                                <div className="grid grid-cols-3 gap-4">
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Loyalty Tier</label>
+                                    <div className="flex items-center mt-1">
+                                      <Crown className="h-4 w-4 text-gray-400 mr-2" />
+                                      <Badge className={getTierColor(selectedUser.loyaltyTier || 'Bronze')}>
+                                        {getTierIcon(selectedUser.loyaltyTier || 'Bronze')} {selectedUser.loyaltyTier || 'Bronze'}
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Loyalty Points</label>
+                                    <div className="flex items-center mt-1">
+                                      <Star className="h-4 w-4 text-gray-400 mr-2" />
+                                      <span>{selectedUser.loyaltyPoints || 0}</span>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Total Spent</label>
+                                    <div className="flex items-center mt-1">
+                                      <CreditCard className="h-4 w-4 text-gray-400 mr-2" />
+                                      <span>{formatPrice(selectedUser.totalSpent || 0)}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Special Dates */}
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Birthday</label>
+                                    <div className="flex items-center mt-1">
+                                      <Calendar className="h-4 w-4 text-gray-400 mr-2" />
+                                      <span>{selectedUser.birthday || 'Not set'}</span>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Anniversary</label>
+                                    <div className="flex items-center mt-1">
+                                      <Calendar className="h-4 w-4 text-gray-400 mr-2" />
+                                      <span>{selectedUser.anniversary || 'Not set'}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Addresses */}
+                                <div>
+                                  <label className="text-sm font-medium text-gray-600">Addresses</label>
+                                  <div className="mt-2 space-y-2">
+                                    {selectedUser.addresses && selectedUser.addresses.length > 0 ? (
+                                      selectedUser.addresses.map((addr, index) => (
+                                        <div key={index} className="flex items-start space-x-2 p-2 bg-gray-50 rounded">
+                                          <MapPin className="h-4 w-4 text-gray-400 mt-0.5" />
+                                          <div className="flex-1">
+                                            <div className="font-medium">{addr.name}</div>
+                                            <div className="text-sm text-gray-600">{addr.address}</div>
+                                            <div className="text-sm text-gray-500">{addr.city}, {addr.pincode}</div>
+                                            <Badge variant="outline" className="mt-1">{addr.type}</Badge>
+                                          </div>
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <div className="text-gray-500 text-sm">No addresses added</div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Account Info */}
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Account Created</label>
+                                    <div className="mt-1">
+                                      {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleString('en-IN') : 'N/A'}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Last Updated</label>
+                                    <div className="mt-1">
+                                      {selectedUser.updatedAt ? new Date(selectedUser.updatedAt).toLocaleString('en-IN') : 'N/A'}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </DialogContent>
+                        </Dialog>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -501,122 +636,49 @@ export default function AdminUsers() {
               </TableBody>
             </Table>
           </div>
+          
+          {filteredUsers.length === 0 && (
+            <div className="text-center py-8">
+              <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
+              <p className="text-gray-500">
+                {searchTerm ? 'Try adjusting your search terms.' : 'No users have registered yet.'}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Create User Dialog */}
-      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Create New User</DialogTitle>
-          </DialogHeader>
-          <Form {...createForm}>
-            <form onSubmit={createForm.handleSubmit(handleCreateUser)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={createForm.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter user name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={createForm.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter phone number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={createForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter email address" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={createForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="Enter password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={createForm.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Role</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select user role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="customer">Customer</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex space-x-2">
-                <Button type="button" variant="outline" onClick={() => setCreateDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" className="bg-caramel-600 hover:bg-caramel-700">
-                  Create User
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-
       {/* Edit User Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Edit User - #{userToEdit?.id}</DialogTitle>
+            <DialogTitle>Edit User - {userToEdit?.name || userToEdit?.email}</DialogTitle>
           </DialogHeader>
           <Form {...editForm}>
-            <form onSubmit={editForm.handleSubmit(handleUpdateUser)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={editForm.handleSubmit(handleEditUser)} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={editForm.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>Full Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter user name" {...field} />
+                        <Input placeholder="Enter full name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter email address" type="email" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -635,68 +697,55 @@ export default function AdminUsers() {
                     </FormItem>
                   )}
                 />
-              </div>
-              <FormField
-                control={editForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter email address" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={editForm.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Role</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormField
+                  control={editForm.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select user role" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="customer">Customer</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="birthday"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Birthday (Optional)</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select user role" />
-                        </SelectTrigger>
+                        <Input placeholder="MM-DD" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="customer">Customer</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={editForm.control}
-                name="birthday"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Birthday</FormLabel>
-                    <FormControl>
-                      <Input type="date" placeholder="Enter birthday" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={editForm.control}
-                name="anniversary"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Anniversary</FormLabel>
-                    <FormControl>
-                      <Input type="date" placeholder="Enter anniversary" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex space-x-2">
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="anniversary"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Anniversary (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="MM-DD" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
                   Cancel
                 </Button>
