@@ -339,7 +339,7 @@ export default function AdminUsers() {
                   <Button type="button" variant="outline" onClick={() => setCreateDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" className="bg-caramel-600 hover:bg-caramel-700 text-white">
+                  <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white border-2 border-blue-600">
                     Create User
                   </Button>
                 </div>
