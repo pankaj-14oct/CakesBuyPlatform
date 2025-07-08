@@ -607,7 +607,7 @@ export default function AdminUsers() {
             <DialogTitle>Edit User - #{userToEdit?.id}</DialogTitle>
           </DialogHeader>
           <Form {...editForm}>
-            <form onSubmit={editForm.handleSubmit(handleUpdateUser)} className="space-y-4">
+            <form onSubmit={editForm.handleSubmit(handleEditUser)} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={editForm.control}
