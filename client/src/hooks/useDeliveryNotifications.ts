@@ -8,6 +8,12 @@ interface NotificationData {
   orderNumber?: string;
   message: string;
   timestamp: string;
+  orderDetails?: {
+    customerName: string;
+    customerPhone: string;
+    amount: number;
+    address: string;
+  };
 }
 
 export function useDeliveryNotifications(token?: string) {
@@ -62,12 +68,20 @@ export function useDeliveryNotifications(token?: string) {
                 variant: "destructive",
               });
 
-              // Use enhanced notification manager with ringtone-style alerts
+              // Use enhanced notification manager with full order details
+              const orderDetails = notification.orderDetails || {
+                customerName: 'Unknown Customer',
+                amount: 0,
+                address: 'Address not available'
+              };
+
+              console.log('Triggering notification manager with order details:', orderDetails);
+              
               notificationManager.showOrderNotification({
                 orderNumber: notification.orderNumber || 'Unknown',
-                customerName: 'Customer', // Extract from notification if available
-                amount: 0, // Extract from notification if available
-                address: 'Delivery Address' // Extract from notification if available
+                customerName: orderDetails.customerName,
+                amount: orderDetails.amount,
+                address: orderDetails.address
               });
 
               // Legacy fallback for backward compatibility

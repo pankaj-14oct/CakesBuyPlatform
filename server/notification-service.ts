@@ -6,11 +6,17 @@ import type { Order, DeliveryBoy } from '../shared/schema.js';
 const deliveryBoyConnections = new Map<number, WebSocket>();
 
 export interface NotificationData {
-  type: 'order_assigned' | 'order_updated' | 'order_cancelled';
-  orderId: number;
-  orderNumber: string;
+  type: 'order_assigned' | 'order_updated' | 'order_cancelled' | 'connected';
+  orderId?: number;
+  orderNumber?: string;
   message: string;
   timestamp: string;
+  orderDetails?: {
+    customerName: string;
+    customerPhone: string;
+    amount: number;
+    address: string;
+  };
 }
 
 /**
@@ -169,13 +175,24 @@ export async function notifyOrderAssignment(
   order: Order,
   orderDetails?: any
 ): Promise<{ realTime: boolean; email: boolean }> {
-  // Prepare notification data
+  // Parse customer info from delivery address
+  const customerInfo = typeof order.deliveryAddress === 'string' 
+    ? JSON.parse(order.deliveryAddress) 
+    : order.deliveryAddress;
+
+  // Prepare notification data with full order details
   const notification: NotificationData = {
     type: 'order_assigned',
     orderId: order.id,
     orderNumber: order.orderNumber,
-    message: `New order ${order.orderNumber} has been assigned to you`,
-    timestamp: new Date().toISOString()
+    message: `🚨 URGENT: New Order ${order.orderNumber} assigned to you!`,
+    timestamp: new Date().toISOString(),
+    orderDetails: {
+      customerName: customerInfo.name || 'Unknown Customer',
+      customerPhone: customerInfo.phone || '',
+      amount: Number(order.total) || 0,
+      address: `${customerInfo.address}, ${customerInfo.city} - ${customerInfo.pincode}` || 'Address not available'
+    }
   };
 
   // Send real-time notification
