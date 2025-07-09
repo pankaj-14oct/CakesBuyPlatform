@@ -117,7 +117,7 @@ app.use((req, res, next) => {
 
     try {
       // Verify admin JWT token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production') as any;
       
       if (decoded && decoded.userId && decoded.role === 'admin') {
         registerAdminConnection(decoded.userId, ws);

@@ -1134,6 +1134,41 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
+  // Admin: Test notification system
+  app.post("/api/admin/test-notification", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { getActiveAdminConnections, broadcastToAdmins } = await import("./notification-service");
+      
+      const activeConnections = getActiveAdminConnections();
+      
+      const testNotification = {
+        type: 'new_order' as const,
+        orderId: 999,
+        orderNumber: 'TEST-' + Date.now(),
+        message: `🧪 Test notification at ${new Date().toLocaleTimeString()}`,
+        timestamp: new Date().toISOString(),
+        orderDetails: {
+          customerName: 'Test Customer',
+          customerPhone: '1234567890',
+          amount: 100,
+          address: 'Test Address, Gurgaon'
+        }
+      };
+      
+      const sentCount = broadcastToAdmins(testNotification);
+      
+      res.json({
+        message: "Test notification sent",
+        activeConnections,
+        sentCount,
+        notification: testNotification
+      });
+    } catch (error) {
+      console.error("Test notification error:", error);
+      res.status(500).json({ message: "Failed to send test notification" });
+    }
+  });
+
   // Admin Login
   app.post("/api/admin/login", async (req, res) => {
     try {
@@ -1158,7 +1193,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      const token = generateToken(user.id, user.phone, user.email);
+      const token = generateToken(user.id, user.phone, user.email, user.role);
       
       res.json({
         message: "Admin login successful",

@@ -23,8 +23,8 @@ export interface DeliveryBoyAuthRequest extends Request {
   };
 }
 
-export const generateToken = (userId: number, phone: string, email: string): string => {
-  return jwt.sign({ userId, phone, email }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+export const generateToken = (userId: number, phone: string, email: string, role?: string): string => {
+  return jwt.sign({ userId, phone, email, role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
 
 export const generateDeliveryBoyToken = (deliveryBoyId: number, phone: string, name: string): string => {

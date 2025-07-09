@@ -63,7 +63,7 @@ export default function AdminNotifications() {
     if (!user || user.role !== 'admin') return;
 
     const connectWebSocket = () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
       if (!token) return;
 
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
