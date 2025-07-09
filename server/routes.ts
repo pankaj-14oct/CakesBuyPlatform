@@ -1134,6 +1134,72 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
+  // Sample CSV template download endpoints
+  app.get("/api/admin/sample-csv/:type", async (req, res) => {
+    try {
+      const { type } = req.params;
+      
+      let headers: string[] = [];
+      let sampleData: any[][] = [];
+      
+      switch (type) {
+        case 'products':
+          headers = ['name', 'slug', 'description', 'price', 'weight', 'category_id', 'images', 'is_bestseller', 'is_photo_cake'];
+          sampleData = [
+            ['Chocolate Truffle Cake', 'chocolate-truffle-cake', 'Rich chocolate cake with truffle layers', '899', '1kg', '1', 'https://example.com/chocolate.jpg;https://example.com/chocolate2.jpg', 'true', 'false'],
+            ['Vanilla Sponge Cake', 'vanilla-sponge-cake', 'Light and fluffy vanilla sponge cake', '599', '500g', '2', 'https://example.com/vanilla.jpg', 'false', 'false'],
+            ['Custom Photo Cake', 'custom-photo-cake', 'Personalized photo cake for special occasions', '1299', '1kg', '3', 'https://example.com/photo-cake.jpg', 'false', 'true'],
+            ['Red Velvet Cake', 'red-velvet-cake', 'Classic red velvet with cream cheese frosting', '749', '750g', '1', 'https://example.com/red-velvet.jpg', 'true', 'false'],
+            ['Strawberry Delight', 'strawberry-delight', 'Fresh strawberry cake with cream layers', '649', '500g', '2', 'https://example.com/strawberry.jpg', 'false', 'false']
+          ];
+          break;
+        case 'categories':
+          headers = ['name', 'slug', 'description', 'image'];
+          sampleData = [
+            ['Birthday Cakes', 'birthday-cakes', 'Special cakes for birthday celebrations', 'https://example.com/birthday-category.jpg'],
+            ['Anniversary Cakes', 'anniversary-cakes', 'Romantic cakes for anniversary celebrations', 'https://example.com/anniversary-category.jpg'],
+            ['Photo Cakes', 'photo-cakes', 'Customizable photo cakes for special memories', 'https://example.com/photo-category.jpg'],
+            ['Eggless Cakes', 'eggless-cakes', '100% eggless cakes for everyone', 'https://example.com/eggless-category.jpg'],
+            ['Designer Cakes', 'designer-cakes', 'Premium designer cakes for special occasions', 'https://example.com/designer-category.jpg']
+          ];
+          break;
+        case 'users':
+          headers = ['phone', 'email', 'name', 'role'];
+          sampleData = [
+            ['9876543210', 'john.doe@example.com', 'John Doe', 'customer'],
+            ['9876543211', 'jane.smith@example.com', 'Jane Smith', 'customer'],
+            ['9876543212', 'admin.user@example.com', 'Admin User', 'admin'],
+            ['9876543213', 'mary.johnson@example.com', 'Mary Johnson', 'customer'],
+            ['9876543214', 'david.wilson@example.com', 'David Wilson', 'customer']
+          ];
+          break;
+        default:
+          return res.status(400).json({ message: "Invalid template type" });
+      }
+      
+      // Create CSV content
+      const csvRows = [headers.join(',')];
+      for (const row of sampleData) {
+        const csvRow = row.map(value => {
+          if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+            return `"${value.replace(/"/g, '""')}"`;
+          }
+          return value;
+        });
+        csvRows.push(csvRow.join(','));
+      }
+      
+      const csvContent = csvRows.join('\n');
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="sample_${type}_template.csv"`);
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Sample CSV generation error:", error);
+      res.status(500).json({ message: "Failed to generate sample CSV" });
+    }
+  });
+
   // Bulk Upload and Export endpoints
   app.get("/api/admin/export/:type", requireAdmin, async (req: AuthRequest, res) => {
     try {

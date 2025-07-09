@@ -232,6 +232,20 @@ export default function AdminSettings() {
     bulkUploadMutation.mutate({ file: selectedFile, type: uploadType });
   };
 
+  const handleDownloadSample = (type: string) => {
+    const link = document.createElement('a');
+    link.href = `/api/admin/sample-csv/${type}`;
+    link.download = `sample_${type}_template.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Sample Downloaded",
+      description: `Sample ${type} CSV template downloaded successfully`,
+    });
+  };
+
   const getFieldsForType = (type: string) => {
     switch (type) {
       case 'products':
@@ -386,6 +400,45 @@ export default function AdminSettings() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Sample CSV Downloads */}
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h4 className="font-medium text-green-800 mb-3">Download Sample CSV Templates</h4>
+                <div className="grid grid-cols-3 gap-3">
+                  <Button
+                    onClick={() => handleDownloadSample('products')}
+                    variant="outline"
+                    size="sm"
+                    className="h-auto flex-col gap-1 p-3"
+                  >
+                    <Download className="h-4 w-4" />
+                    Products Sample
+                  </Button>
+                  <Button
+                    onClick={() => handleDownloadSample('categories')}
+                    variant="outline"
+                    size="sm"
+                    className="h-auto flex-col gap-1 p-3"
+                  >
+                    <Download className="h-4 w-4" />
+                    Categories Sample
+                  </Button>
+                  <Button
+                    onClick={() => handleDownloadSample('users')}
+                    variant="outline"
+                    size="sm"
+                    className="h-auto flex-col gap-1 p-3"
+                  >
+                    <Download className="h-4 w-4" />
+                    Users Sample
+                  </Button>
+                </div>
+                <p className="text-sm text-green-700 mt-2">
+                  Download these templates to see the required format and sample data for bulk imports.
+                </p>
+              </div>
+
+              <Separator />
+
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="uploadType">Select Import Type</Label>
