@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Database, Trash2, Download, Upload, Mail, Send, FileText, FileDown, FileUp } from "lucide-react";
@@ -388,15 +389,16 @@ export default function AdminSettings() {
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="uploadType">Select Import Type</Label>
-                  <select
-                    value={uploadType}
-                    onChange={(e) => setUploadType(e.target.value as any)}
-                    className="w-full mt-1 p-2 border border-gray-300 rounded-md"
-                  >
-                    <option value="products">Products</option>
-                    <option value="categories">Categories</option>
-                    <option value="users">Users</option>
-                  </select>
+                  <Select value={uploadType} onValueChange={(value) => setUploadType(value as any)}>
+                    <SelectTrigger className="w-full mt-1">
+                      <SelectValue placeholder="Select type to import" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="products">Products</SelectItem>
+                      <SelectItem value="categories">Categories</SelectItem>
+                      <SelectItem value="users">Users</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
