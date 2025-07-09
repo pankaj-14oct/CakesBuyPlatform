@@ -209,13 +209,45 @@ export default function AdminCategories() {
                   <SelectTrigger>
                     <SelectValue placeholder="Select parent category (optional)" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No Parent (Top Level)</SelectItem>
-                    {categories.filter(cat => cat.id !== editingCategory?.id).map((category) => (
-                      <SelectItem key={category.id} value={category.id.toString()}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
+                  <SelectContent className="max-h-60 overflow-y-auto">
+                    <SelectItem value="none">
+                      <span className="font-medium">No Parent (Top Level)</span>
+                    </SelectItem>
+                    
+                    {/* Parent Categories Section */}
+                    {categories
+                      .filter(cat => cat.id !== editingCategory?.id && !(cat as any).parentId)
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map((category) => (
+                        <SelectItem key={category.id} value={category.id.toString()}>
+                          <div className="flex items-center space-x-2 font-medium">
+                            <span>📁 {category.name}</span>
+                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
+                              Parent
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    
+                    {/* Child Categories Section (if any exist) */}
+                    {categories.some(cat => (cat as any).parentId && cat.id !== editingCategory?.id) && (
+                      <>
+                        <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50">
+                          Child Categories
+                        </div>
+                        {categories
+                          .filter(cat => cat.id !== editingCategory?.id && (cat as any).parentId)
+                          .sort((a, b) => a.name.localeCompare(b.name))
+                          .map((category) => (
+                            <SelectItem key={category.id} value={category.id.toString()}>
+                              <div className="flex items-center space-x-1 pl-4">
+                                <span className="text-gray-400">└─</span>
+                                <span>{category.name}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
