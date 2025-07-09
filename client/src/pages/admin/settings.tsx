@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Database, Trash2, Download, Upload, Mail, Send, FileText, FileDown, FileUp } from "lucide-react";
+import { Database, Trash2, Download, Upload, Mail, Send, FileText, FileDown, FileUp, AlertCircle } from "lucide-react";
 
 export default function AdminSettings() {
   const { toast } = useToast();
@@ -20,6 +20,36 @@ export default function AdminSettings() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadType, setUploadType] = useState<"products" | "categories" | "users">("products");
   const [previewData, setPreviewData] = useState<any[]>([]);
+  const [authStatus, setAuthStatus] = useState<'checking' | 'valid' | 'invalid'>('checking');
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setAuthStatus('invalid');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/admin/users', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        if (response.ok) {
+          setAuthStatus('valid');
+        } else {
+          setAuthStatus('invalid');
+        }
+      } catch (error) {
+        setAuthStatus('invalid');
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const importDummyDataMutation = useMutation({
     mutationFn: async () => {
@@ -87,14 +117,26 @@ export default function AdminSettings() {
   const exportDataMutation = useMutation({
     mutationFn: async (type: string) => {
       const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Please log in as admin to export data');
+      }
+      
       const response = await fetch(`/api/admin/export/${type}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
+      
       if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(errorData || 'Export failed');
+        const errorText = await response.text();
+        let errorMessage = 'Export failed';
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
       return response.blob();
     },
@@ -128,7 +170,12 @@ export default function AdminSettings() {
       formData.append('file', file);
       formData.append('type', type);
       
+      // Use fetch with manual token since apiRequest doesn't support FormData
       const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Please log in as admin to upload files');
+      }
+      
       const response = await fetch('/api/admin/bulk-upload', {
         method: 'POST',
         headers: {
@@ -138,8 +185,15 @@ export default function AdminSettings() {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Upload failed');
+        const errorText = await response.text();
+        let errorMessage = 'Upload failed';
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
       return response.json();
     },
@@ -280,6 +334,26 @@ export default function AdminSettings() {
         <h1 className="text-3xl font-bold text-charcoal">Settings</h1>
         <p className="text-gray-600 mt-2">Manage your application data and settings</p>
       </div>
+
+      {authStatus === 'invalid' && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-red-600" />
+              <div>
+                <h3 className="font-medium text-red-800">Authentication Required</h3>
+                <p className="text-sm text-red-700">
+                  Your admin session has expired. Please{" "}
+                  <a href="/admin-login" className="underline font-medium">
+                    log in again
+                  </a>{" "}
+                  to use upload and export features.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs defaultValue="data-management" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
