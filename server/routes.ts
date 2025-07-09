@@ -1316,7 +1316,10 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
             } else if (header === 'weights' && value) {
               value = value.split(';'); // Convert semicolon-separated to array  
             } else if (header === 'prices' && value) {
-              value = value.split(';').map(p => parseFloat(p.trim())); // Convert to array of numbers
+              const priceArray = value.split(';').map(p => parseFloat(p.trim()));
+              // Set basePrice as the first price and store weights as array
+              rowData.basePrice = priceArray[0];
+              value = priceArray; // Keep original for weights processing
             } else if (header === 'is_bestseller' || header === 'is_photo_cake') {
               value = value.toLowerCase() === 'true' || value === '1';
             } else if (header === 'price' || header === 'category_id' || header === 'id') {
@@ -1329,8 +1332,8 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
           });
           
           // Skip rows with missing required fields
-          if (type === 'products' && (!rowData.name || !rowData.price)) {
-            errors.push(`Row ${i + 2}: Missing required fields (name, price)`);
+          if (type === 'products' && (!rowData.name || (!rowData.basePrice && !rowData.price && !rowData.prices))) {
+            errors.push(`Row ${i + 2}: Missing required fields (name, prices)`);
             errorCount++;
             continue;
           }
@@ -1354,6 +1357,36 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
               if (!rowData.slug) {
                 rowData.slug = rowData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
               }
+              
+              // Process weights and prices together if both exist
+              if (rowData.weights && rowData.prices && Array.isArray(rowData.weights) && Array.isArray(rowData.prices)) {
+                const weightsArray = rowData.weights.map((weight: string, index: number) => ({
+                  weight: weight.trim(),
+                  price: rowData.prices[index] || rowData.prices[0] || 0
+                }));
+                rowData.weights = weightsArray;
+              }
+              
+              // Ensure required fields have defaults
+              if (!rowData.basePrice && rowData.prices && Array.isArray(rowData.prices)) {
+                rowData.basePrice = rowData.prices[0];
+              }
+              
+              // Convert boolean fields
+              if (rowData.is_bestseller !== undefined) {
+                rowData.isBestseller = rowData.is_bestseller;
+                delete rowData.is_bestseller;
+              }
+              if (rowData.is_photo_cake !== undefined) {
+                rowData.isPhotoCake = rowData.is_photo_cake;
+                delete rowData.is_photo_cake;
+              }
+              
+              // Set default values for required fields
+              rowData.isEggless = true; // Default for this eggless cake shop
+              rowData.isAvailable = true;
+              rowData.isCustomizable = true;
+              
               await storage.createCake(rowData);
               break;
             case 'categories':
