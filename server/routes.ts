@@ -1134,6 +1134,194 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
+  // Bulk Upload and Export endpoints
+  app.get("/api/admin/export/:type", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { type } = req.params;
+      
+      let data: any[] = [];
+      let headers: string[] = [];
+      
+      switch (type) {
+        case 'products':
+          data = await storage.getAllCakes();
+          headers = ['id', 'name', 'slug', 'description', 'price', 'weight', 'category_id', 'images', 'is_bestseller', 'is_photo_cake'];
+          break;
+        case 'categories':
+          data = await storage.getAllCategories();
+          headers = ['id', 'name', 'slug', 'description', 'image'];
+          break;
+        case 'users':
+          data = await storage.getAllUsers();
+          headers = ['id', 'phone', 'email', 'name', 'role'];
+          break;
+        default:
+          return res.status(400).json({ message: "Invalid export type" });
+      }
+      
+      // Convert data to CSV
+      const csvRows = [headers.join(',')];
+      for (const item of data) {
+        const row = headers.map(header => {
+          let value = item[header];
+          if (Array.isArray(value)) {
+            value = value.join(';'); // Use semicolon for array values
+          }
+          if (typeof value === 'string' && value.includes(',')) {
+            value = `"${value}"`; // Quote strings with commas
+          }
+          return value || '';
+        });
+        csvRows.push(row.join(','));
+      }
+      
+      const csvContent = csvRows.join('\n');
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${type}_export_${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Export error:", error);
+      res.status(500).json({ message: "Failed to export data" });
+    }
+  });
+
+  app.post("/api/admin/bulk-upload", requireAdmin, upload.single('file'), async (req: AuthRequest, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+      
+      const { type } = req.body;
+      if (!type || !['products', 'categories', 'users'].includes(type)) {
+        return res.status(400).json({ message: "Invalid upload type" });
+      }
+      
+      // Read and parse CSV file
+      const fileContent = fs.readFileSync(req.file.path, 'utf-8');
+      const lines = fileContent.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        return res.status(400).json({ message: "CSV file must have at least a header and one data row" });
+      }
+      
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+      const dataRows = lines.slice(1);
+      
+      let successCount = 0;
+      let errorCount = 0;
+      const errors: string[] = [];
+      
+      for (let i = 0; i < dataRows.length; i++) {
+        try {
+          const values = dataRows[i].split(',').map(v => v.trim().replace(/"/g, ''));
+          const rowData: any = {};
+          
+          headers.forEach((header, index) => {
+            let value = values[index] || '';
+            
+            // Handle special cases
+            if (header === 'images' && value) {
+              value = value.split(';'); // Convert semicolon-separated to array
+            } else if (header === 'is_bestseller' || header === 'is_photo_cake') {
+              value = value.toLowerCase() === 'true' || value === '1';
+            } else if (header === 'price' || header === 'category_id' || header === 'id') {
+              value = value ? parseFloat(value) : null;
+            }
+            
+            if (value !== '') {
+              rowData[header] = value;
+            }
+          });
+          
+          // Skip rows with missing required fields
+          if (type === 'products' && (!rowData.name || !rowData.price)) {
+            errors.push(`Row ${i + 2}: Missing required fields (name, price)`);
+            errorCount++;
+            continue;
+          }
+          
+          if (type === 'categories' && !rowData.name) {
+            errors.push(`Row ${i + 2}: Missing required field (name)`);
+            errorCount++;
+            continue;
+          }
+          
+          if (type === 'users' && (!rowData.phone || !rowData.email)) {
+            errors.push(`Row ${i + 2}: Missing required fields (phone, email)`);
+            errorCount++;
+            continue;
+          }
+          
+          // Create records
+          switch (type) {
+            case 'products':
+              delete rowData.id; // Let database auto-generate ID
+              if (!rowData.slug) {
+                rowData.slug = rowData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+              }
+              await storage.createCake(rowData);
+              break;
+            case 'categories':
+              delete rowData.id;
+              if (!rowData.slug) {
+                rowData.slug = rowData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+              }
+              await storage.createCategory(rowData);
+              break;
+            case 'users':
+              delete rowData.id;
+              if (!rowData.role) {
+                rowData.role = 'customer';
+              }
+              // Check if user already exists
+              const existingUser = await storage.getUserByPhone(rowData.phone);
+              if (existingUser) {
+                errors.push(`Row ${i + 2}: User with phone ${rowData.phone} already exists`);
+                errorCount++;
+                continue;
+              }
+              // Hash password if provided, otherwise set default
+              if (!rowData.password) {
+                rowData.password = await hashPassword('password123');
+              } else {
+                rowData.password = await hashPassword(rowData.password);
+              }
+              await storage.createUser(rowData);
+              break;
+          }
+          
+          successCount++;
+        } catch (error) {
+          errors.push(`Row ${i + 2}: ${error.message}`);
+          errorCount++;
+        }
+      }
+      
+      // Clean up uploaded file
+      fs.unlinkSync(req.file.path);
+      
+      res.json({
+        message: `Bulk upload completed`,
+        count: successCount,
+        successCount,
+        errorCount,
+        errors: errors.slice(0, 10), // Limit to first 10 errors
+        totalErrors: errors.length
+      });
+    } catch (error) {
+      console.error("Bulk upload error:", error);
+      if (req.file) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (cleanupError) {
+          console.error("Failed to cleanup uploaded file:", cleanupError);
+        }
+      }
+      res.status(500).json({ message: "Failed to process bulk upload" });
+    }
+  });
+
   // Admin: Test notification system
   app.post("/api/admin/test-notification", requireAdmin, async (req: AuthRequest, res) => {
     try {
