@@ -1,15 +1,25 @@
 import { db } from "./db";
 import { users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews } from "@shared/schema";
 import { hashPassword } from "./auth";
+import { eq } from "drizzle-orm";
 
 const seedData = {
   categories: [
-    { name: "Birthday Cakes", slug: "birthday-cakes", description: "Delicious birthday cakes for all ages", icon: "🎂", isActive: true },
-    { name: "Wedding Cakes", slug: "wedding-cakes", description: "Elegant wedding cakes for your special day", icon: "💒", isActive: true },
-    { name: "Anniversary Cakes", slug: "anniversary-cakes", description: "Celebrate milestones with beautiful cakes", icon: "💕", isActive: true },
-    { name: "Theme Cakes", slug: "theme-cakes", description: "Custom themed cakes for special occasions", icon: "🎨", isActive: true },
-    { name: "Eggless Cakes", slug: "eggless-cakes", description: "Delicious eggless options for everyone", icon: "🥚", isActive: true },
-    { name: "Photo Cakes", slug: "photo-cakes", description: "Personalized cakes with edible photos", icon: "📸", isActive: true },
+    // Parent category
+    { name: "Cakes", slug: "cakes", description: "All types of delicious cakes", icon: "🎂", isActive: true, parentId: null },
+    // Child categories
+    { name: "Birthday Cakes", slug: "birthday-cakes", description: "Delicious birthday cakes for all ages", icon: "🎂", isActive: true, parentId: 1 },
+    { name: "Wedding Cakes", slug: "wedding-cakes", description: "Elegant wedding cakes for your special day", icon: "💒", isActive: true, parentId: 1 },
+    { name: "Anniversary Cakes", slug: "anniversary-cakes", description: "Celebrate milestones with beautiful cakes", icon: "💕", isActive: true, parentId: 1 },
+    { name: "Theme Cakes", slug: "theme-cakes", description: "Custom themed cakes for special occasions", icon: "🎨", isActive: true, parentId: 1 },
+    { name: "Eggless Cakes", slug: "eggless-cakes", description: "Delicious eggless options for everyone", icon: "🥚", isActive: true, parentId: 1 },
+    { name: "Photo Cakes", slug: "photo-cakes", description: "Personalized cakes with edible photos", icon: "📸", isActive: true, parentId: 1 },
+    // Flavor-based child categories
+    { name: "Chocolate Cakes", slug: "chocolate-cakes", description: "Rich and indulgent chocolate cakes", icon: "🍫", isActive: true, parentId: 1 },
+    { name: "Vanilla Cakes", slug: "vanilla-cakes", description: "Classic vanilla flavored cakes", icon: "🤍", isActive: true, parentId: 1 },
+    { name: "Strawberry Cakes", slug: "strawberry-cakes", description: "Fresh strawberry flavored cakes", icon: "🍓", isActive: true, parentId: 1 },
+    { name: "Red Velvet Cakes", slug: "red-velvet-cakes", description: "Luxurious red velvet cakes", icon: "❤️", isActive: true, parentId: 1 },
+    { name: "Fruit Cakes", slug: "fruit-cakes", description: "Fresh fruit topped cakes", icon: "🍊", isActive: true, parentId: 1 },
   ],
 
   cakes: [
@@ -288,15 +298,71 @@ export async function seedDatabase() {
     };
     await db.insert(users).values(adminUser).onConflictDoNothing();
 
-    // Seed categories
+    // Seed categories with hierarchy
     console.log("📂 Seeding categories...");
-    for (const category of seedData.categories) {
-      await db.insert(categories).values(category).onConflictDoNothing();
+    
+    // First, create the parent category
+    const parentCategory = await db.insert(categories).values({
+      name: "Cakes",
+      slug: "cakes",
+      description: "All types of delicious cakes",
+      icon: "🎂",
+      isActive: true,
+      parentId: null
+    }).onConflictDoNothing().returning();
+    
+    // Get the parent category ID (either newly created or existing)
+    const existingParent = await db.select().from(categories).where(eq(categories.slug, "cakes")).limit(1);
+    const parentId = existingParent[0]?.id;
+    
+    if (parentId) {
+      // Create child categories
+      const childCategories = [
+        { name: "Birthday Cakes", slug: "birthday-cakes", description: "Delicious birthday cakes for all ages", icon: "🎂", isActive: true, parentId },
+        { name: "Wedding Cakes", slug: "wedding-cakes", description: "Elegant wedding cakes for your special day", icon: "💒", isActive: true, parentId },
+        { name: "Anniversary Cakes", slug: "anniversary-cakes", description: "Celebrate milestones with beautiful cakes", icon: "💕", isActive: true, parentId },
+        { name: "Theme Cakes", slug: "theme-cakes", description: "Custom themed cakes for special occasions", icon: "🎨", isActive: true, parentId },
+        { name: "Eggless Cakes", slug: "eggless-cakes", description: "Delicious eggless options for everyone", icon: "🥚", isActive: true, parentId },
+        { name: "Photo Cakes", slug: "photo-cakes", description: "Personalized cakes with edible photos", icon: "📸", isActive: true, parentId },
+        { name: "Chocolate Cakes", slug: "chocolate-cakes", description: "Rich and indulgent chocolate cakes", icon: "🍫", isActive: true, parentId },
+        { name: "Vanilla Cakes", slug: "vanilla-cakes", description: "Classic vanilla flavored cakes", icon: "🤍", isActive: true, parentId },
+        { name: "Strawberry Cakes", slug: "strawberry-cakes", description: "Fresh strawberry flavored cakes", icon: "🍓", isActive: true, parentId },
+        { name: "Red Velvet Cakes", slug: "red-velvet-cakes", description: "Luxurious red velvet cakes", icon: "❤️", isActive: true, parentId },
+        { name: "Fruit Cakes", slug: "fruit-cakes", description: "Fresh fruit topped cakes", icon: "🍊", isActive: true, parentId },
+      ];
+      
+      for (const category of childCategories) {
+        await db.insert(categories).values(category).onConflictDoNothing();
+      }
     }
 
-    // Seed cakes
+    // Seed cakes with updated category references
     console.log("🍰 Seeding cakes...");
-    for (const cake of seedData.cakes) {
+    
+    // Get category IDs for mapping
+    const birthdayCategory = await db.select().from(categories).where(eq(categories.slug, "birthday-cakes")).limit(1);
+    const anniversaryCategory = await db.select().from(categories).where(eq(categories.slug, "anniversary-cakes")).limit(1);
+    const chocolateCategory = await db.select().from(categories).where(eq(categories.slug, "chocolate-cakes")).limit(1);
+    const vanillaCategory = await db.select().from(categories).where(eq(categories.slug, "vanilla-cakes")).limit(1);
+    const redVelvetCategory = await db.select().from(categories).where(eq(categories.slug, "red-velvet-cakes")).limit(1);
+    
+    // Update cake data with correct category IDs
+    const cakesWithCorrectIds = [
+      {
+        ...seedData.cakes[0],
+        categoryId: chocolateCategory[0]?.id || birthdayCategory[0]?.id || parentId
+      },
+      {
+        ...seedData.cakes[1],
+        categoryId: vanillaCategory[0]?.id || birthdayCategory[0]?.id || parentId
+      },
+      {
+        ...seedData.cakes[2],
+        categoryId: redVelvetCategory[0]?.id || anniversaryCategory[0]?.id || parentId
+      }
+    ];
+    
+    for (const cake of cakesWithCorrectIds) {
       await db.insert(cakes).values(cake).onConflictDoNothing();
     }
 
