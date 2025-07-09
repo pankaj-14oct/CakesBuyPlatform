@@ -44,10 +44,11 @@ import DeliveryDashboard from "@/pages/DeliveryDashboard";
 import NotFound from "@/pages/not-found";
 
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, ShoppingCart, Tags, Percent, Settings, Plus, Mail, Users, FileText, Wallet, Truck } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Tags, Percent, Settings, Plus, Mail, Users, FileText, Wallet, Truck, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import AdminNotifications from "@/components/AdminNotifications";
+import { useAuth } from "@/hooks/use-auth";
 
 // Component to handle scroll restoration on route changes
 function ScrollRestoration() {
@@ -62,6 +63,7 @@ function ScrollRestoration() {
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
+  const { logoutMutation } = useAuth();
   
   const adminNavItems = [
     { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -116,12 +118,25 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
             })}
           </nav>
           
-          <div className="p-4 border-t">
+          <div className="p-4 border-t space-y-2">
             <Link href="/">
               <Button variant="outline" className="w-full">
                 Back to Store
               </Button>
             </Link>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700"
+              onClick={() => {
+                logoutMutation.mutate();
+                // Redirect to admin login page after logout
+                window.location.href = '/admin-login';
+              }}
+              disabled={logoutMutation.isPending}
+            >
+              <LogOut className="mr-3 h-4 w-4" />
+              {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
+            </Button>
           </div>
         </div>
 
