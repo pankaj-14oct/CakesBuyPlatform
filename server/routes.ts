@@ -1146,11 +1146,16 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
         case 'products':
           headers = ['name', 'slug', 'description', 'price', 'weight', 'category_id', 'images', 'is_bestseller', 'is_photo_cake'];
           sampleData = [
-            ['Chocolate Truffle Cake', 'chocolate-truffle-cake', 'Rich chocolate cake with truffle layers', '899', '1kg', '1', 'https://example.com/chocolate.jpg;https://example.com/chocolate2.jpg', 'true', 'false'],
-            ['Vanilla Sponge Cake', 'vanilla-sponge-cake', 'Light and fluffy vanilla sponge cake', '599', '500g', '2', 'https://example.com/vanilla.jpg', 'false', 'false'],
-            ['Custom Photo Cake', 'custom-photo-cake', 'Personalized photo cake for special occasions', '1299', '1kg', '3', 'https://example.com/photo-cake.jpg', 'false', 'true'],
-            ['Red Velvet Cake', 'red-velvet-cake', 'Classic red velvet with cream cheese frosting', '749', '750g', '1', 'https://example.com/red-velvet.jpg', 'true', 'false'],
-            ['Strawberry Delight', 'strawberry-delight', 'Fresh strawberry cake with cream layers', '649', '500g', '2', 'https://example.com/strawberry.jpg', 'false', 'false']
+            ['Chocolate Truffle Cake 500gm', 'chocolate-truffle-cake-500gm', 'Rich chocolate cake with truffle layers 500gm', '700', '500g', '1', 'https://example.com/chocolate.jpg;https://example.com/chocolate2.jpg', 'true', 'false'],
+            ['Chocolate Truffle Cake 1kg', 'chocolate-truffle-cake-1kg', 'Rich chocolate cake with truffle layers 1kg', '1400', '1kg', '1', 'https://example.com/chocolate.jpg;https://example.com/chocolate2.jpg', 'true', 'false'],
+            ['Vanilla Sponge Cake 500gm', 'vanilla-sponge-cake-500gm', 'Light and fluffy vanilla sponge cake 500gm', '450', '500g', '2', 'https://example.com/vanilla.jpg', 'false', 'false'],
+            ['Vanilla Sponge Cake 1kg', 'vanilla-sponge-cake-1kg', 'Light and fluffy vanilla sponge cake 1kg', '850', '1kg', '2', 'https://example.com/vanilla.jpg', 'false', 'false'],
+            ['Red Velvet Cake 500gm', 'red-velvet-cake-500gm', 'Classic red velvet with cream cheese frosting 500gm', '600', '500g', '1', 'https://example.com/red-velvet.jpg', 'true', 'false'],
+            ['Red Velvet Cake 1kg', 'red-velvet-cake-1kg', 'Classic red velvet with cream cheese frosting 1kg', '1100', '1kg', '1', 'https://example.com/red-velvet.jpg', 'true', 'false'],
+            ['Strawberry Delight 500gm', 'strawberry-delight-500gm', 'Fresh strawberry cake with cream layers 500gm', '550', '500g', '2', 'https://example.com/strawberry.jpg', 'false', 'false'],
+            ['Strawberry Delight 1kg', 'strawberry-delight-1kg', 'Fresh strawberry cake with cream layers 1kg', '1000', '1kg', '2', 'https://example.com/strawberry.jpg', 'false', 'false'],
+            ['Custom Photo Cake 500gm', 'custom-photo-cake-500gm', 'Personalized photo cake for special occasions 500gm', '800', '500g', '3', 'https://example.com/photo-cake.jpg', 'false', 'true'],
+            ['Custom Photo Cake 1kg', 'custom-photo-cake-1kg', 'Personalized photo cake for special occasions 1kg', '1500', '1kg', '3', 'https://example.com/photo-cake.jpg', 'false', 'true']
           ];
           break;
         case 'categories':
