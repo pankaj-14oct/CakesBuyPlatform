@@ -201,16 +201,16 @@ export default function AdminCategories() {
               <div>
                 <Label htmlFor="parentId">Parent Category</Label>
                 <Select
-                  value={form.watch('parentId')?.toString() || ''}
+                  value={form.watch('parentId')?.toString() || 'none'}
                   onValueChange={(value) => {
-                    form.setValue('parentId', value === '' ? undefined : parseInt(value));
+                    form.setValue('parentId', value === 'none' ? undefined : parseInt(value));
                   }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select parent category (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No Parent (Top Level)</SelectItem>
+                    <SelectItem value="none">No Parent (Top Level)</SelectItem>
                     {categories.filter(cat => cat.id !== editingCategory?.id).map((category) => (
                       <SelectItem key={category.id} value={category.id.toString()}>
                         {category.name}
