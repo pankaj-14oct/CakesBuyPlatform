@@ -1144,18 +1144,13 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
       
       switch (type) {
         case 'products':
-          headers = ['name', 'slug', 'description', 'price', 'weight', 'category_id', 'images', 'is_bestseller', 'is_photo_cake'];
+          headers = ['name', 'slug', 'description', 'flavors', 'weights', 'prices', 'category_id', 'images', 'is_bestseller', 'is_photo_cake'];
           sampleData = [
-            ['Chocolate Truffle Cake 500gm', 'chocolate-truffle-cake-500gm', 'Rich chocolate cake with truffle layers 500gm', '700', '500g', '1', 'https://example.com/chocolate.jpg;https://example.com/chocolate2.jpg', 'true', 'false'],
-            ['Chocolate Truffle Cake 1kg', 'chocolate-truffle-cake-1kg', 'Rich chocolate cake with truffle layers 1kg', '1400', '1kg', '1', 'https://example.com/chocolate.jpg;https://example.com/chocolate2.jpg', 'true', 'false'],
-            ['Vanilla Sponge Cake 500gm', 'vanilla-sponge-cake-500gm', 'Light and fluffy vanilla sponge cake 500gm', '450', '500g', '2', 'https://example.com/vanilla.jpg', 'false', 'false'],
-            ['Vanilla Sponge Cake 1kg', 'vanilla-sponge-cake-1kg', 'Light and fluffy vanilla sponge cake 1kg', '850', '1kg', '2', 'https://example.com/vanilla.jpg', 'false', 'false'],
-            ['Red Velvet Cake 500gm', 'red-velvet-cake-500gm', 'Classic red velvet with cream cheese frosting 500gm', '600', '500g', '1', 'https://example.com/red-velvet.jpg', 'true', 'false'],
-            ['Red Velvet Cake 1kg', 'red-velvet-cake-1kg', 'Classic red velvet with cream cheese frosting 1kg', '1100', '1kg', '1', 'https://example.com/red-velvet.jpg', 'true', 'false'],
-            ['Strawberry Delight 500gm', 'strawberry-delight-500gm', 'Fresh strawberry cake with cream layers 500gm', '550', '500g', '2', 'https://example.com/strawberry.jpg', 'false', 'false'],
-            ['Strawberry Delight 1kg', 'strawberry-delight-1kg', 'Fresh strawberry cake with cream layers 1kg', '1000', '1kg', '2', 'https://example.com/strawberry.jpg', 'false', 'false'],
-            ['Custom Photo Cake 500gm', 'custom-photo-cake-500gm', 'Personalized photo cake for special occasions 500gm', '800', '500g', '3', 'https://example.com/photo-cake.jpg', 'false', 'true'],
-            ['Custom Photo Cake 1kg', 'custom-photo-cake-1kg', 'Personalized photo cake for special occasions 1kg', '1500', '1kg', '3', 'https://example.com/photo-cake.jpg', 'false', 'true']
+            ['Chocolate Truffle Cake', 'chocolate-truffle-cake', 'Rich chocolate cake with truffle layers', 'Chocolate;Dark Chocolate;Milk Chocolate', '500g;1kg;2kg', '700;1400;2500', '1', 'https://example.com/chocolate.jpg;https://example.com/chocolate2.jpg', 'true', 'false'],
+            ['Vanilla Sponge Cake', 'vanilla-sponge-cake', 'Light and fluffy vanilla sponge cake', 'Vanilla;French Vanilla;Vanilla Bean', '500g;1kg;1.5kg', '450;850;1200', '2', 'https://example.com/vanilla.jpg', 'false', 'false'],
+            ['Red Velvet Cake', 'red-velvet-cake', 'Classic red velvet with cream cheese frosting', 'Red Velvet;Blue Velvet;Pink Velvet', '500g;1kg;2kg', '600;1100;2000', '1', 'https://example.com/red-velvet.jpg', 'true', 'false'],
+            ['Fresh Fruit Cake', 'fresh-fruit-cake', 'Seasonal fresh fruit cake with cream layers', 'Strawberry;Mango;Mixed Fruit;Pineapple', '500g;1kg;1.5kg;2kg', '550;1000;1450;2200', '2', 'https://example.com/fruit-cake.jpg', 'false', 'false'],
+            ['Custom Photo Cake', 'custom-photo-cake', 'Personalized photo cake for special occasions', 'Chocolate;Vanilla;Strawberry;Butterscotch', '500g;1kg;1.5kg;2kg', '800;1500;2100;3000', '3', 'https://example.com/photo-cake.jpg', 'false', 'true']
           ];
           break;
         case 'categories':
@@ -1216,7 +1211,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
       switch (type) {
         case 'products':
           data = await storage.getAllCakes();
-          headers = ['id', 'name', 'slug', 'description', 'price', 'weight', 'category_id', 'images', 'is_bestseller', 'is_photo_cake'];
+          headers = ['id', 'name', 'slug', 'description', 'flavors', 'weights', 'prices', 'category_id', 'images', 'is_bestseller', 'is_photo_cake'];
           break;
         case 'categories':
           data = await storage.getAllCategories();
@@ -1294,6 +1289,12 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
             // Handle special cases
             if (header === 'images' && value) {
               value = value.split(';'); // Convert semicolon-separated to array
+            } else if (header === 'flavors' && value) {
+              value = value.split(';'); // Convert semicolon-separated to array
+            } else if (header === 'weights' && value) {
+              value = value.split(';'); // Convert semicolon-separated to array  
+            } else if (header === 'prices' && value) {
+              value = value.split(';').map(p => parseFloat(p.trim())); // Convert to array of numbers
             } else if (header === 'is_bestseller' || header === 'is_photo_cake') {
               value = value.toLowerCase() === 'true' || value === '1';
             } else if (header === 'price' || header === 'category_id' || header === 'id') {

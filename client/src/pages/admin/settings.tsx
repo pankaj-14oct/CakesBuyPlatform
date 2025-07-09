@@ -249,7 +249,7 @@ export default function AdminSettings() {
   const getFieldsForType = (type: string) => {
     switch (type) {
       case 'products':
-        return ['name', 'slug', 'description', 'price', 'weight', 'category_id', 'images', 'is_bestseller', 'is_photo_cake'];
+        return ['name', 'slug', 'description', 'flavors', 'weights', 'prices', 'category_id', 'images', 'is_bestseller', 'is_photo_cake'];
       case 'categories':
         return ['name', 'slug', 'description', 'image'];
       case 'users':
@@ -531,7 +531,12 @@ export default function AdminSettings() {
                 <ul className="text-sm text-blue-700 space-y-1">
                   <li>• CSV files must have headers matching the expected fields</li>
                   <li>• Products require valid category_id references</li>
-                  <li>• Images should be comma-separated URLs for products</li>
+                  <li>• Use semicolon (;) to separate multiple values:</li>
+                  <li>&nbsp;&nbsp;- flavors: "Chocolate;Vanilla;Strawberry"</li>
+                  <li>&nbsp;&nbsp;- weights: "500g;1kg;2kg"</li>
+                  <li>&nbsp;&nbsp;- prices: "700;1400;2500"</li>
+                  <li>&nbsp;&nbsp;- images: "url1.jpg;url2.jpg"</li>
+                  <li>• Ensure flavors, weights, and prices arrays have matching counts</li>
                   <li>• Users with duplicate phones will be skipped</li>
                   <li>• Always backup your data before importing</li>
                 </ul>
