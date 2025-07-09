@@ -13,27 +13,18 @@ export async function apiRequest(
   data?: unknown | undefined,
   headers?: Record<string, string>
 ): Promise<Response> {
-  // Check for admin token first for admin routes, delivery token for delivery routes, then regular auth token
-  const adminToken = localStorage.getItem('admin_token');
-  const authToken = localStorage.getItem('auth_token');
+  // Check for tokens - use unified token storage
+  const token = localStorage.getItem('token');
   const deliveryToken = localStorage.getItem('delivery_token');
-  
-  let token;
-  if (url.includes('/admin')) {
-    token = adminToken || authToken;
-  } else if (url.includes('/delivery')) {
-    token = deliveryToken;
-  } else {
-    token = authToken || adminToken;
-  }
   
   const defaultHeaders: Record<string, string> = {};
   if (data) {
     defaultHeaders["Content-Type"] = "application/json";
   }
   
-  if (token) {
-    defaultHeaders.Authorization = `Bearer ${token}`;
+  const finalToken = url.includes('/delivery') ? deliveryToken : token;
+  if (finalToken) {
+    defaultHeaders.Authorization = `Bearer ${finalToken}`;
   }
 
   const res = await fetch(url, {
@@ -56,24 +47,16 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    // Check for admin token first for admin routes, delivery token for delivery routes, then regular auth token
-    const adminToken = localStorage.getItem('admin_token');
-    const authToken = localStorage.getItem('auth_token');
+    // Check for tokens - use unified token storage
+    const token = localStorage.getItem('token');
     const deliveryToken = localStorage.getItem('delivery_token');
     const url = queryKey[0] as string;
     
-    let token;
-    if (url.includes('/admin')) {
-      token = adminToken || authToken;
-    } else if (url.includes('/delivery')) {
-      token = deliveryToken;
-    } else {
-      token = authToken || adminToken;
-    }
+    const finalToken = url.includes('/delivery') ? deliveryToken : token;
     const headers: Record<string, string> = {};
     
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
+    if (finalToken) {
+      headers.Authorization = `Bearer ${finalToken}`;
     }
     
     const res = await fetch(queryKey[0] as string, {
