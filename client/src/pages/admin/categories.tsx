@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { Plus, Edit, Trash2, Package } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Category } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -22,6 +23,7 @@ const categorySchema = z.object({
   slug: z.string().min(2, 'Slug must be at least 2 characters'),
   description: z.string().optional(),
   icon: z.string().optional(),
+  parentId: z.number().optional(),
   isActive: z.boolean().default(true),
 });
 
@@ -44,6 +46,7 @@ export default function AdminCategories() {
       slug: '',
       description: '',
       icon: '',
+      parentId: undefined,
       isActive: true,
     }
   });
@@ -108,6 +111,7 @@ export default function AdminCategories() {
       slug: category.slug,
       description: category.description || '',
       icon: category.icon || '',
+      parentId: (category as any).parentId || undefined,
       isActive: category.isActive || true,
     });
     setIsCreateDialogOpen(true);
@@ -194,6 +198,28 @@ export default function AdminCategories() {
                 />
               </div>
 
+              <div>
+                <Label htmlFor="parentId">Parent Category</Label>
+                <Select
+                  value={form.watch('parentId')?.toString() || ''}
+                  onValueChange={(value) => {
+                    form.setValue('parentId', value === '' ? undefined : parseInt(value));
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select parent category (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No Parent (Top Level)</SelectItem>
+                    {categories.filter(cat => cat.id !== editingCategory?.id).map((category) => (
+                      <SelectItem key={category.id} value={category.id.toString()}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="flex items-center space-x-2">
                 <Switch
                   id="isActive"
@@ -248,6 +274,7 @@ export default function AdminCategories() {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Slug</TableHead>
+                  <TableHead>Parent Category</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Icon</TableHead>
                   <TableHead>Status</TableHead>
@@ -255,14 +282,25 @@ export default function AdminCategories() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {categories.map((category) => (
-                  <TableRow key={category.id}>
-                    <TableCell className="font-medium">{category.name}</TableCell>
-                    <TableCell className="font-mono text-sm">{category.slug}</TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {category.description || '-'}
-                    </TableCell>
-                    <TableCell className="text-2xl">{category.icon || '-'}</TableCell>
+                {categories.map((category) => {
+                  const parentCategory = categories.find(c => c.id === (category as any).parentId);
+                  return (
+                    <TableRow key={category.id}>
+                      <TableCell className="font-medium">
+                        {(category as any).parentId ? '├─ ' : ''}{category.name}
+                      </TableCell>
+                      <TableCell className="font-mono text-sm">{category.slug}</TableCell>
+                      <TableCell>
+                        {parentCategory ? (
+                          <Badge variant="outline">{parentCategory.name}</Badge>
+                        ) : (
+                          <span className="text-gray-500">Root Category</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="max-w-xs truncate">
+                        {category.description || '-'}
+                      </TableCell>
+                      <TableCell className="text-2xl">{category.icon || '-'}</TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
                         <Switch
@@ -294,8 +332,9 @@ export default function AdminCategories() {
                         </Button>
                       </div>
                     </TableCell>
-                  </TableRow>
-                ))}
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}
