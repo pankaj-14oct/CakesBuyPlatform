@@ -39,7 +39,7 @@ export default function AdminLogin() {
     },
     onSuccess: (data) => {
       // Store admin token
-      localStorage.setItem('admin_token', data.token);
+      localStorage.setItem('token', data.token);
       toast({
         title: "Login Successful",
         description: "Welcome to the admin panel",

@@ -42,9 +42,13 @@ export default function AdminSettings() {
           setAuthStatus('valid');
         } else {
           setAuthStatus('invalid');
+          // Clear invalid token
+          localStorage.removeItem('token');
         }
       } catch (error) {
         setAuthStatus('invalid');
+        // Clear invalid token
+        localStorage.removeItem('token');
       }
     };
 
