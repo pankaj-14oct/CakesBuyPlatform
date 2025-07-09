@@ -6,8 +6,11 @@ import type { Order, DeliveryBoy } from '../shared/schema.js';
 // Store active WebSocket connections for delivery boys
 const deliveryBoyConnections = new Map<number, WebSocket>();
 
+// Store active WebSocket connections for admin users
+const adminConnections = new Map<number, WebSocket>();
+
 export interface NotificationData {
-  type: 'order_assigned' | 'order_updated' | 'order_cancelled' | 'connected';
+  type: 'order_assigned' | 'order_updated' | 'order_cancelled' | 'connected' | 'new_order';
   orderId?: number;
   orderNumber?: string;
   message: string;
@@ -259,4 +262,82 @@ export function getActiveDeliveryBoyConnections(): number {
 export function isDeliveryBoyOnline(deliveryBoyId: number): boolean {
   const connection = deliveryBoyConnections.get(deliveryBoyId);
   return connection ? connection.readyState === WebSocket.OPEN : false;
+}
+
+/**
+ * Register an admin user's WebSocket connection for real-time notifications
+ */
+export function registerAdminConnection(adminId: number, ws: WebSocket) {
+  adminConnections.set(adminId, ws);
+  
+  // Clean up connection when it closes
+  ws.on('close', () => {
+    adminConnections.delete(adminId);
+  });
+  
+  ws.on('error', () => {
+    adminConnections.delete(adminId);
+  });
+}
+
+/**
+ * Send real-time notification to admin via WebSocket
+ */
+export function sendAdminNotification(adminId: number, notification: NotificationData) {
+  const connection = adminConnections.get(adminId);
+  if (connection && connection.readyState === WebSocket.OPEN) {
+    connection.send(JSON.stringify(notification));
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Send notification to all connected admins
+ */
+export function broadcastToAdmins(notification: NotificationData) {
+  let sentCount = 0;
+  for (const [adminId, connection] of adminConnections) {
+    if (connection.readyState === WebSocket.OPEN) {
+      connection.send(JSON.stringify(notification));
+      sentCount++;
+    }
+  }
+  return sentCount;
+}
+
+/**
+ * Send notification when a new order is placed
+ */
+export async function notifyNewOrder(order: any, orderDetails: any) {
+  const notification: NotificationData = {
+    type: 'new_order',
+    orderId: order.id,
+    orderNumber: order.orderNumber,
+    message: `🚨 NEW ORDER: ${order.orderNumber} from ${orderDetails.customerName} - ₹${order.total}`,
+    timestamp: new Date().toISOString(),
+    orderDetails: {
+      customerName: orderDetails.customerName,
+      customerPhone: orderDetails.customerPhone,
+      amount: order.total,
+      address: orderDetails.address
+    }
+  };
+
+  // Send to all connected admins
+  const sentCount = broadcastToAdmins(notification);
+  
+  console.log(`New order notification sent to ${sentCount} admin(s)`);
+  
+  return {
+    realTimeNotification: sentCount > 0 ? 'sent' : 'no_admins_online',
+    adminCount: sentCount
+  };
+}
+
+/**
+ * Get all active admin connections count
+ */
+export function getActiveAdminConnections(): number {
+  return adminConnections.size;
 }

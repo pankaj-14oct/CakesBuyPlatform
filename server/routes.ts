@@ -46,7 +46,7 @@ import {
 import { sendReminderEmail, type ReminderEmailData, sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, type OrderEmailData, sendWelcomeEmail, type WelcomeEmailData } from "./email-service";
 import { createInvoiceForOrder, updateInvoiceStatus, getInvoiceByOrderId, getInvoiceByNumber, getUserInvoices, getInvoiceWithOrder, getInvoiceDisplayData } from "./invoice-service";
 import { processPhotoCakeItems } from "./photo-cake-service";
-import { notifyOrderAssignment } from "./notification-service.js";
+import { notifyOrderAssignment, notifyNewOrder } from "./notification-service.js";
 import type { User } from "@shared/schema";
 
 // Helper function to create event reminders
@@ -435,6 +435,25 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
       } catch (invoiceError) {
         // Don't fail the order if invoice creation fails
         console.error('Failed to create invoice:', invoiceError);
+      }
+
+      // Send admin notification for new order
+      try {
+        const customerInfo = typeof order.deliveryAddress === 'string' 
+          ? JSON.parse(order.deliveryAddress) 
+          : order.deliveryAddress;
+        
+        const orderDetails = {
+          customerName: customerInfo.name || 'Unknown Customer',
+          customerPhone: customerInfo.phone || '',
+          address: `${customerInfo.address}, ${customerInfo.city} - ${customerInfo.pincode}` || 'Address not available'
+        };
+        
+        await notifyNewOrder(order, orderDetails);
+        console.log(`Admin notification sent for new order ${order.orderNumber}`);
+      } catch (notificationError) {
+        // Don't fail the order if notification fails
+        console.error('Failed to send admin notification:', notificationError);
       }
       
       res.status(201).json({ 

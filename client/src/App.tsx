@@ -47,6 +47,7 @@ import { Link, useLocation } from "wouter";
 import { LayoutDashboard, Package, ShoppingCart, Tags, Percent, Settings, Plus, Mail, Users, FileText, Wallet, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import AdminNotifications from "@/components/AdminNotifications";
 
 // Component to handle scroll restoration on route changes
 function ScrollRestoration() {
@@ -83,10 +84,13 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
         {/* Admin Sidebar */}
         <div className="w-64 bg-white shadow-sm border-r flex flex-col">
           <div className="p-6">
-            <Link href="/" className="flex items-center space-x-2 text-caramel hover:text-brown">
-              <Package className="h-6 w-6" />
-              <span className="font-bold text-xl">CakesBuy Admin</span>
-            </Link>
+            <div className="flex items-center justify-between">
+              <Link href="/" className="flex items-center space-x-2 text-caramel hover:text-brown">
+                <Package className="h-6 w-6" />
+                <span className="font-bold text-xl">CakesBuy Admin</span>
+              </Link>
+              <AdminNotifications />
+            </div>
           </div>
           
           <nav className="px-4 space-y-2 flex-1">
