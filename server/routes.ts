@@ -115,6 +115,28 @@ const upload = multer({
   }
 });
 
+// Separate multer configuration for CSV uploads
+const csvUpload = multer({ 
+  storage: storage_multer,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit for CSV files
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept CSV files
+    const allowedMimeTypes = [
+      'text/csv',
+      'application/csv',
+      'application/vnd.ms-excel'
+    ];
+    
+    if (allowedMimeTypes.includes(file.mimetype) || file.originalname.endsWith('.csv')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only CSV files are allowed'));
+    }
+  }
+});
+
 export async function registerRoutes(app: Express, httpServer?: any): Promise<Server> {
   
   // Single file upload endpoint
@@ -1252,7 +1274,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
-  app.post("/api/admin/bulk-upload", requireAdmin, upload.single('file'), async (req: AuthRequest, res) => {
+  app.post("/api/admin/bulk-upload", requireAdmin, csvUpload.single('file'), async (req: AuthRequest, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
