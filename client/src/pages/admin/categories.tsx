@@ -272,7 +272,7 @@ export default function AdminCategories() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
+                  <TableHead>Category Name</TableHead>
                   <TableHead>Slug</TableHead>
                   <TableHead>Parent Category</TableHead>
                   <TableHead>Description</TableHead>
@@ -282,19 +282,53 @@ export default function AdminCategories() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {categories.map((category) => {
+                {categories
+                  .sort((a, b) => {
+                    // First sort by parent status (parents first)
+                    const aIsParent = !(a as any).parentId;
+                    const bIsParent = !(b as any).parentId;
+                    
+                    if (aIsParent && !bIsParent) return -1;
+                    if (!aIsParent && bIsParent) return 1;
+                    
+                    // Then sort by name
+                    return a.name.localeCompare(b.name);
+                  })
+                  .map((category) => {
                   const parentCategory = categories.find(c => c.id === (category as any).parentId);
+                  const isChild = (category as any).parentId;
+                  
                   return (
-                    <TableRow key={category.id}>
+                    <TableRow key={category.id} className={isChild ? "bg-gray-50/50" : ""}>
                       <TableCell className="font-medium">
-                        {(category as any).parentId ? '├─ ' : ''}{category.name}
+                        <div className="flex items-center space-x-2">
+                          {isChild && (
+                            <div className="flex items-center text-gray-400 mr-1">
+                              <div className="w-3 h-3 border-l-2 border-b-2 border-gray-300 rounded-bl-sm"></div>
+                            </div>
+                          )}
+                          <div className="flex items-center space-x-2">
+                            <span className={isChild ? "text-gray-700 ml-2" : "text-gray-900 font-semibold"}>
+                              {category.name}
+                            </span>
+                            {!isChild && (
+                              <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
+                                Parent
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell className="font-mono text-sm">{category.slug}</TableCell>
                       <TableCell>
                         {parentCategory ? (
-                          <Badge variant="outline">{parentCategory.name}</Badge>
+                          <div className="flex items-center space-x-2">
+                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                              {parentCategory.name}
+                            </Badge>
+                          </div>
                         ) : (
-                          <span className="text-gray-500">Root Category</span>
+                          <span className="text-gray-500 text-sm font-medium">Root Category</span>
                         )}
                       </TableCell>
                       <TableCell className="max-w-xs truncate">
