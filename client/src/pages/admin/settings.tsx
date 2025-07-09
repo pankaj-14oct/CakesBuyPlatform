@@ -86,8 +86,16 @@ export default function AdminSettings() {
 
   const exportDataMutation = useMutation({
     mutationFn: async (type: string) => {
-      const response = await fetch(`/api/admin/export/${type}`);
-      if (!response.ok) throw new Error('Export failed');
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/export/${type}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(errorData || 'Export failed');
+      }
       return response.blob();
     },
     onSuccess: (blob, type) => {
@@ -120,12 +128,19 @@ export default function AdminSettings() {
       formData.append('file', file);
       formData.append('type', type);
       
+      const token = localStorage.getItem('token');
       const response = await fetch('/api/admin/bulk-upload', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
         body: formData,
       });
       
-      if (!response.ok) throw new Error('Upload failed');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Upload failed');
+      }
       return response.json();
     },
     onSuccess: (data) => {
