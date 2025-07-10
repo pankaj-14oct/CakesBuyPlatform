@@ -19,7 +19,7 @@ export default function CategoryCard({ category, cakeCount = 0 }: CategoryCardPr
   const gradient = gradientClasses[category.slug as keyof typeof gradientClasses] || 'from-caramel to-brown';
 
   return (
-    <Link href={`/category/${category.slug}`}>
+    <Link href={`/cakes/${category.slug}`}>
       <div className="text-center group cursor-pointer">
         <div className={`bg-gradient-to-br ${gradient} rounded-2xl p-6 mb-4 group-hover:scale-105 transition-transform duration-300`}>
           <div className="text-3xl text-white">

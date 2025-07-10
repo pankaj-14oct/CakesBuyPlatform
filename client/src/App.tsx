@@ -211,7 +211,7 @@ function Router() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/search" component={SearchPage} />
-        <Route path="/category/:slug" component={Category} />
+        <Route path="/cakes/:slug" component={Category} />
         <Route path="/product/:slug" component={Product} />
         <Route path="/cart" component={Cart} />
         <Route path="/checkout" component={Checkout} />

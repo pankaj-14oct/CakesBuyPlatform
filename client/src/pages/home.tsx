@@ -51,12 +51,12 @@ export default function Home() {
                 <CardContent className="p-6">
                   <h3 className="font-semibold text-charcoal mb-4">Quick Order</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <Link href="/category/birthday-cakes">
+                    <Link href="/cakes/birthday-cakes">
                       <Button className="w-full bg-pink text-white hover:bg-opacity-90 transition">
                         🎂 Eggless Birthday
                       </Button>
                     </Link>
-                    <Link href="/category/wedding-cakes">
+                    <Link href="/cakes/wedding-cakes">
                       <Button className="w-full bg-caramel text-white hover:bg-brown transition">
                         💒 Eggless Wedding
                       </Button>
@@ -66,13 +66,13 @@ export default function Home() {
               </Card>
 
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                <Link href="/category/all">
+                <Link href="/search">
                   <Button size="lg" className="bg-brown text-white hover:bg-opacity-90 transition">
                     <ShoppingBag className="mr-2 h-5 w-5" />
                     Order Now
                   </Button>
                 </Link>
-                <Link href="/category/all">
+                <Link href="/search">
                   <Button variant="outline" size="lg" className="border-brown text-brown hover:bg-brown hover:text-white transition">
                     View Menu
                   </Button>

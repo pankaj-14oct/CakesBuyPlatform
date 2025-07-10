@@ -88,7 +88,7 @@ export default function ProductPage() {
         <Card className="p-8 text-center">
           <h1 className="text-2xl font-bold text-charcoal mb-4">Cake Not Found</h1>
           <p className="text-charcoal opacity-70 mb-6">The requested cake could not be found.</p>
-          <Link href="/category/all">
+          <Link href="/search">
             <Button className="bg-caramel hover:bg-brown">Browse All Cakes</Button>
           </Link>
         </Card>
@@ -224,7 +224,7 @@ export default function ProductPage() {
           <div className="flex items-center space-x-2 text-sm">
             <Link href="/" className="text-caramel hover:underline">Home</Link>
             <span className="text-gray-400">/</span>
-            <Link href="/category/all" className="text-caramel hover:underline">Cakes</Link>
+            <Link href="/search" className="text-caramel hover:underline">Cakes</Link>
             <span className="text-gray-400">/</span>
             <span className="text-charcoal">{cake.name}</span>
           </div>
