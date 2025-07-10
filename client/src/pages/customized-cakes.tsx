@@ -89,7 +89,7 @@ export default function CustomizedCakesPage() {
       </div>
 
       {/* Features Section */}
-      <div className="py-20 bg-white">
+      <div className="py-20 bg-gradient-to-b from-orange-50 to-pink-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose Our Customized Cakes?</h2>
@@ -120,7 +120,7 @@ export default function CustomizedCakesPage() {
 
 
       {/* How It Works */}
-      <div className="py-20 bg-gradient-to-r from-pink-100 via-purple-50 to-orange-50">
+      <div className="py-20 bg-gradient-to-br from-purple-100 via-pink-100 to-orange-100">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
@@ -151,7 +151,7 @@ export default function CustomizedCakesPage() {
       </div>
 
       {/* Benefits Section */}
-      <div className="py-20 bg-white">
+      <div className="py-20 bg-gradient-to-b from-blue-50 to-indigo-50">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -160,7 +160,7 @@ export default function CustomizedCakesPage() {
               </h2>
             </div>
             
-            <div className="bg-gradient-to-br from-pink-50 to-orange-50 rounded-3xl p-8 md:p-12">
+            <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl border border-gray-100">
               <p className="text-lg text-gray-700 leading-relaxed mb-8">
                 Indulge in the world of delicious artistry with our customised cakes, designed to mirror your imagination and taste preferences. At CakesBuy, we believe that every celebration deserves a cake as unique as the occasion itself. Whether it's a birthday, wedding, anniversary, or any special event, our customised cakes allow you to be the creator of your own sweet masterpiece. From selecting your preferred flavours and fillings to choosing the perfect design that matches your theme, our expert bakers work closely with you to bring your vision to life. Easily purchase an online customised cake by browsing our heavenly collection. The seamless and convenient process allows you to order from the comfort of your home and also a true reflection of your style and the sweetness that tells your story, and let CakesBuy turn your sweetest dreams into reality.
               </p>
@@ -192,7 +192,7 @@ export default function CustomizedCakesPage() {
       </div>
 
       {/* CTA Section */}
-      <div className="py-20 bg-gradient-to-r from-pink-500 via-purple-500 to-orange-500">
+      <div className="py-20 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-2xl mx-auto text-white">
             <h2 className="text-4xl font-bold mb-6">Ready to Create Your Dream Cake?</h2>
