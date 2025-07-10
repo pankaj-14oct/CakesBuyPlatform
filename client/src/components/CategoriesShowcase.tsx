@@ -143,9 +143,11 @@ export default function CategoriesShowcase() {
 
         {/* Scroll indicator */}
         <div className="text-center text-gray-500 text-sm mb-8 px-4">
-          <span className="inline-flex items-center gap-2">
-            <span>← Scroll to see more categories →</span>
-          </span>
+          <Link href="/search">
+            <span className="inline-flex items-center gap-2 hover:text-caramel transition-colors cursor-pointer">
+              <span>← Scroll to see more categories →</span>
+            </span>
+          </Link>
         </div>
 
         {/* View All Categories Button */}
