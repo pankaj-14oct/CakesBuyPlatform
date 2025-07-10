@@ -53,31 +53,19 @@ export default function Home() {
                   <div className="grid grid-cols-2 gap-4">
                     <Link href="/cakes/birthday-cakes">
                       <Button className="w-full bg-pink text-white hover:bg-opacity-90 transition">
-                        🎂 Eggless Birthday
+                        🎂 Birthday Cakes
                       </Button>
                     </Link>
-                    <Link href="/cakes/wedding-cakes">
+                    <Link href="/cakes/anniversary-cakes">
                       <Button className="w-full bg-caramel text-white hover:bg-brown transition">
-                        💒 Eggless Wedding
+                        💕 Anniversary Cakes
                       </Button>
                     </Link>
                   </div>
                 </CardContent>
               </Card>
 
-              <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                <Link href="/search">
-                  <Button size="lg" className="bg-brown text-white hover:bg-opacity-90 transition">
-                    <ShoppingBag className="mr-2 h-5 w-5" />
-                    Order Now
-                  </Button>
-                </Link>
-                <Link href="/search">
-                  <Button variant="outline" size="lg" className="border-brown text-brown hover:bg-brown hover:text-white transition">
-                    View Menu
-                  </Button>
-                </Link>
-              </div>
+
 
               {/* Trust Indicators */}
               <div className="flex items-center justify-center lg:justify-start space-x-8">
