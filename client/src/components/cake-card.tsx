@@ -39,11 +39,15 @@ export default function CakeCard({ cake }: CakeCardProps) {
     );
   };
 
-  // Get price from weights or basePrice
+  // Calculate prices with proper error handling
   const weightPrice = cake.weights?.[0]?.price;
-  const basePrice = parseFloat(cake.basePrice) || 0;
-  const originalPrice = weightPrice || basePrice;
+  const basePrice = parseFloat(cake.basePrice || '0');
+  const originalPrice = Number(weightPrice) || Number(basePrice) || 0;
   const discountedPrice = Math.round(originalPrice * 0.9); // 10% discount
+  
+  // Ensure valid numbers before formatting
+  const validOriginalPrice = isNaN(originalPrice) ? 0 : originalPrice;
+  const validDiscountedPrice = isNaN(discountedPrice) ? 0 : discountedPrice;
 
   return (
     <Link href={`/product/${cake.slug}`}>
@@ -112,10 +116,10 @@ export default function CakeCard({ cake }: CakeCardProps) {
           <div className="flex items-center justify-between mb-4">
             <div>
               <span className="text-xl font-bold text-brown">
-                {formatPrice(discountedPrice)}
+                {formatPrice(validDiscountedPrice)}
               </span>
               <span className="text-sm text-charcoal opacity-60 line-through ml-2">
-                {formatPrice(originalPrice)}
+                {formatPrice(validOriginalPrice)}
               </span>
             </div>
             <div className="text-sm text-charcoal opacity-70">
