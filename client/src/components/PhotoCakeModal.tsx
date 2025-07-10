@@ -116,12 +116,12 @@ export default function PhotoCakeModal({
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl w-full max-h-[90vh] p-0 overflow-hidden">
-        <div className="flex flex-col h-full">
-          <DialogHeader className="p-6 pb-4">
+        <div className="flex flex-col h-full max-h-[90vh]">
+          <DialogHeader className="p-6 pb-4 flex-shrink-0">
             <DialogTitle className="text-xl font-semibold">Personalise your cake</DialogTitle>
           </DialogHeader>
           
-          <div className="flex-1 flex overflow-hidden">
+          <div className="flex-1 flex overflow-hidden min-h-0">
             {/* Left Side - Photo Preview */}
             <div className="w-1/2 p-6 bg-gray-50">
               <PhotoPreview
@@ -152,7 +152,7 @@ export default function PhotoCakeModal({
             
             {/* Right Side - Simple Upload and Text Controls */}
             <div className="w-1/2 flex flex-col">
-              <div className="flex-1 p-6 overflow-y-auto">
+              <div className="flex-1 p-6 overflow-y-auto min-h-0">
                 {/* Upload Section */}
                 <div className="mb-6">
                   <h3 className="text-lg font-medium mb-4">Upload Image</h3>
@@ -355,7 +355,7 @@ export default function PhotoCakeModal({
               </div>
               
               {/* Fixed Save Button */}
-              <div className="border-t bg-white p-6">
+              <div className="border-t bg-white p-6 flex-shrink-0">
                 <Button
                   onClick={handleSave}
                   className="w-full bg-red-500 hover:bg-red-600 text-white py-3 text-lg font-semibold"
