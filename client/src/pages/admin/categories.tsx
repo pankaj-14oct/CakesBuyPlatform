@@ -91,14 +91,15 @@ export default function AdminCategories() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiRequest('DELETE', `/api/admin/categories/${id}`);
+      const response = await apiRequest(`/api/admin/categories/${id}`, 'DELETE');
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
       toast({ title: "Category deleted successfully!" });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Delete category error:', error);
       toast({ title: "Failed to delete category", variant: "destructive" });
     }
   });
