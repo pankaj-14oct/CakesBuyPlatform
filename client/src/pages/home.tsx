@@ -304,7 +304,7 @@ export default function Home() {
           )}
 
           <div className="text-center mt-12">
-            <Link href="/category/all">
+            <Link href="/search">
               <Button size="lg" className="bg-brown text-white hover:bg-opacity-90">
                 View All Cakes
               </Button>
@@ -326,7 +326,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            <Link href="/category/birthday-cakes">
+            <Link href="/cakes/birthday-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl mb-3">🎂</div>
@@ -336,7 +336,7 @@ export default function Home() {
               </Card>
             </Link>
             
-            <Link href="/category/anniversary-cakes">
+            <Link href="/cakes/anniversary-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl mb-3">💕</div>
@@ -346,7 +346,7 @@ export default function Home() {
               </Card>
             </Link>
             
-            <Link href="/category/wedding-cakes">
+            <Link href="/cakes/wedding-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl mb-3">💒</div>
@@ -356,7 +356,7 @@ export default function Home() {
               </Card>
             </Link>
             
-            <Link href="/category/theme-cakes">
+            <Link href="/cakes/theme-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl mb-3">🎨</div>
@@ -366,7 +366,7 @@ export default function Home() {
               </Card>
             </Link>
             
-            <Link href="/category/photo-cakes">
+            <Link href="/cakes/photo-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl mb-3">📸</div>
@@ -376,7 +376,7 @@ export default function Home() {
               </Card>
             </Link>
             
-            <Link href="/category/eggless-cakes">
+            <Link href="/cakes/eggless-cakes">
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl mb-3">🥚</div>
