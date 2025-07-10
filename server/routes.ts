@@ -1645,7 +1645,7 @@ CakesBuy
         `
       };
 
-      const emailSent = await sendEmail(testEmailData);
+      const emailSent = await sendEmail(testEmailData.to, testEmailData.subject, testEmailData.text, testEmailData.html);
       
       if (emailSent) {
         res.json({ 

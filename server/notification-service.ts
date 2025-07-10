@@ -159,12 +159,7 @@ export async function sendOrderAssignmentEmail(
   `;
 
   try {
-    return await sendEmail({
-      to: deliveryBoy.email,
-      from: process.env.GMAIL_USER || 'order.cakesbuy@gmail.com',
-      subject,
-      html
-    });
+    return await sendEmail(deliveryBoy.email, subject, '', html);
   } catch (error) {
     console.error('Failed to send order assignment email:', error);
     return false;

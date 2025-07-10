@@ -14,14 +14,22 @@ if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
     auth: {
       user: process.env.GMAIL_USER,
       pass: process.env.GMAIL_APP_PASSWORD
+    },
+    tls: {
+      rejectUnauthorized: false
     }
   });
   
-  // Verify connection
+  // Verify connection (but don't fail startup if it fails)
   if (transporter) {
     transporter.verify(function(error, success) {
       if (error) {
-        console.error('Gmail SMTP connection error:', error);
+        console.error('Gmail SMTP connection error:', error.message);
+        console.error('Please check your Gmail credentials and ensure:');
+        console.error('1. GMAIL_USER is your full Gmail address');
+        console.error('2. GMAIL_APP_PASSWORD is a 16-character app password (not your regular password)');
+        console.error('3. 2-factor authentication is enabled on your Gmail account');
+        console.error('4. App password is generated from Gmail Security settings');
       } else {
         console.log('Gmail SMTP server is ready to send emails');
       }
@@ -37,36 +45,41 @@ interface EmailParams {
   html?: string;
 }
 
-export async function sendEmail(params: EmailParams): Promise<boolean> {
+export async function sendEmail(to: string, subject: string, text: string, html?: string): Promise<boolean> {
   if (!transporter) {
-    console.error('Gmail transporter not configured. Email not sent:', params.subject);
+    console.error('Gmail transporter not configured. Email not sent:', subject);
     console.error('Check GMAIL_USER and GMAIL_APP_PASSWORD environment variables');
     return false;
   }
 
   try {
-    console.log(`Attempting to send email to: ${params.to}, subject: ${params.subject}`);
+    console.log(`Attempting to send email to: ${to}, subject: ${subject}`);
     
     const mailOptions = {
-      from: params.from,
-      to: params.to,
-      subject: params.subject,
-      text: params.text,
-      html: params.html
+      from: `"CakesBuy" <${process.env.GMAIL_USER}>`,
+      to: to,
+      subject: subject,
+      text: text,
+      html: html || text
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log(`Email sent successfully to ${params.to}: ${params.subject}`, { messageId: result.messageId });
+    console.log(`Email sent successfully to ${to}: ${subject}`, { messageId: result.messageId });
     return true;
   } catch (error) {
     console.error('Gmail email error details:', {
       error: error instanceof Error ? error.message : error,
       stack: error instanceof Error ? error.stack : undefined,
-      to: params.to,
-      subject: params.subject
+      to: to,
+      subject: subject
     });
     return false;
   }
+}
+
+// Legacy function for backwards compatibility
+export async function sendEmailWithParams(params: EmailParams): Promise<boolean> {
+  return sendEmail(params.to, params.subject, params.text || '', params.html);
 }
 
 export interface ReminderEmailData {
@@ -163,13 +176,7 @@ export async function sendReminderEmail(data: ReminderEmailData): Promise<boolea
     CakesBuy - Making your celebrations sweeter!
   `;
 
-  return await sendEmail({
-    to: data.userEmail,
-    from: process.env.GMAIL_USER || 'noreply@cakesbuy.com',
-    subject,
-    text,
-    html
-  });
+  return await sendEmail(data.userEmail, subject, text, html);
 }
 
 // Order notification functions
@@ -301,13 +308,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
     CakesBuy - Making your celebrations sweeter!
   `;
 
-  return await sendEmail({
-    to: customerEmail,
-    from: process.env.GMAIL_USER || 'orders@cakesbuy.com',
-    subject,
-    text,
-    html
-  });
+  return await sendEmail(customerEmail, subject, text, html);
 }
 
 export interface WelcomeEmailData {
@@ -436,13 +437,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean>
     Contact: order.cakesbuy@gmail.com
   `;
 
-  return await sendEmail({
-    to: data.userEmail,
-    from: process.env.GMAIL_USER || 'order.cakesbuy@gmail.com',
-    subject,
-    text,
-    html
-  });
+  return await sendEmail(data.userEmail, subject, text, html);
 }
 
 export async function sendOrderStatusUpdateEmail(data: OrderEmailData): Promise<boolean> {
@@ -546,11 +541,5 @@ export async function sendOrderStatusUpdateEmail(data: OrderEmailData): Promise<
     CakesBuy - Making your celebrations sweeter!
   `;
 
-  return await sendEmail({
-    to: customerEmail,
-    from: process.env.GMAIL_USER || 'orders@cakesbuy.com',
-    subject,
-    text,
-    html
-  });
+  return await sendEmail(customerEmail, subject, text, html);
 }
