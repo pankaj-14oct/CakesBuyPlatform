@@ -175,21 +175,21 @@ export default function CustomizedCakesPage() {
                 Enjoy reliable cake delivery in Gurgaon that's prompt, professional, and handled with care. With CakesBuy, your custom cake arrives fresh, flawless, and full of flavour — exactly the way you pictured it. Explore our complete collection of cakes for <Link href="/" className="text-pink-600 hover:text-pink-700 font-semibold underline decoration-2 underline-offset-2">online cake delivery Gurgaon</Link> and discover why we're the preferred choice for celebrations across the city.
               </p>
 
-              <div className="grid md:grid-cols-3 gap-6 mt-8">
-                <div className="text-center">
-                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-3" />
-                  <h4 className="font-bold text-gray-900 mb-2">100% Eggless</h4>
-                  <p className="text-gray-600">All our customized cakes are completely eggless</p>
+              <div className="grid md:grid-cols-3 gap-6 mt-12">
+                <div className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border-2 border-green-100 hover:shadow-lg transition-all duration-300">
+                  <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
+                  <h4 className="text-xl font-bold text-gray-900 mb-3">100% Eggless</h4>
+                  <p className="text-gray-700 font-medium">All our customized cakes are completely eggless</p>
                 </div>
-                <div className="text-center">
-                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-3" />
-                  <h4 className="font-bold text-gray-900 mb-2">Same Day Delivery</h4>
-                  <p className="text-gray-600">Quick delivery across Gurgaon within hours</p>
+                <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-sky-50 rounded-2xl border-2 border-blue-100 hover:shadow-lg transition-all duration-300">
+                  <CheckCircle className="h-16 w-16 text-blue-600 mx-auto mb-4" />
+                  <h4 className="text-xl font-bold text-gray-900 mb-3">Same Day Delivery</h4>
+                  <p className="text-gray-700 font-medium">Quick delivery across Gurgaon within hours</p>
                 </div>
-                <div className="text-center">
-                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-3" />
-                  <h4 className="font-bold text-gray-900 mb-2">Expert Bakers</h4>
-                  <p className="text-gray-600">Skilled artisans bringing your vision to life</p>
+                <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-violet-50 rounded-2xl border-2 border-purple-100 hover:shadow-lg transition-all duration-300">
+                  <CheckCircle className="h-16 w-16 text-purple-600 mx-auto mb-4" />
+                  <h4 className="text-xl font-bold text-gray-900 mb-3">Expert Bakers</h4>
+                  <p className="text-gray-700 font-medium">Skilled artisans bringing your vision to life</p>
                 </div>
               </div>
             </div>
