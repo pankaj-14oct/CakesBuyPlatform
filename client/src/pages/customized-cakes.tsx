@@ -1,30 +1,34 @@
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { MessageCircle, Camera, Cake, Gift, Sparkles, ArrowRight, CheckCircle } from 'lucide-react';
+import { MessageCircle, Camera, Cake, Gift, Sparkles, ArrowRight, CheckCircle, Image, Palette, Heart, Brush } from 'lucide-react';
 
 export default function CustomizedCakesPage() {
 
   const features = [
     {
-      icon: Camera,
+      icon: Image,
       title: "Photo Perfect",
-      description: "Upload your favorite photos and we'll create edible prints with stunning clarity"
+      description: "Upload your favorite photos and we'll create edible prints with stunning clarity",
+      bgGradient: "from-blue-500 to-purple-500"
     },
     {
-      icon: Cake,
+      icon: Palette,
       title: "Custom Flavors",
-      description: "Choose from 20+ premium flavors or create your own unique combination"
+      description: "Choose from 20+ premium flavors or create your own unique combination",
+      bgGradient: "from-green-500 to-teal-500"
     },
     {
-      icon: Gift,
+      icon: Heart,
       title: "Personal Touch",
-      description: "Add custom messages, names, and special decorative elements"
+      description: "Add custom messages, names, and special decorative elements",
+      bgGradient: "from-pink-500 to-rose-500"
     },
     {
-      icon: Sparkles,
+      icon: Brush,
       title: "Artistic Design",
-      description: "Our expert bakers bring your imagination to life with artistic precision"
+      description: "Our expert bakers bring your imagination to life with artistic precision",
+      bgGradient: "from-orange-500 to-red-500"
     }
   ];
 
@@ -102,10 +106,10 @@ export default function CustomizedCakesPage() {
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <Card key={index} className="text-center p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-0 bg-gradient-to-br from-pink-50 to-orange-50">
+                <Card key={index} className="text-center p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-0 bg-white/80 backdrop-blur-sm">
                   <CardContent className="p-0">
-                    <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                      <Icon className="h-8 w-8 text-white" />
+                    <div className={`w-20 h-20 bg-gradient-to-br ${feature.bgGradient} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg transform hover:scale-110 transition-transform duration-300`}>
+                      <Icon className="h-10 w-10 text-white" />
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
                     <p className="text-gray-600 leading-relaxed">{feature.description}</p>
