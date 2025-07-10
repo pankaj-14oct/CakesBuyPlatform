@@ -198,13 +198,15 @@ export default function AdminCategories() {
               Add Category
             </Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
+            <DialogHeader className="flex-shrink-0">
               <DialogTitle>
                 {editingCategory ? 'Edit Category' : 'Create New Category'}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            
+            <div className="flex-1 overflow-y-auto pr-2">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="category-form">
               <div>
                 <Label htmlFor="name">Name</Label>
                 <Input
@@ -368,18 +370,23 @@ export default function AdminCategories() {
                 </Select>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="isActive"
-                  checked={form.watch('isActive')}
-                  onCheckedChange={(checked) => form.setValue('isActive', checked)}
-                />
-                <Label htmlFor="isActive">Active</Label>
-              </div>
-
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="isActive"
+                    checked={form.watch('isActive')}
+                    onCheckedChange={(checked) => form.setValue('isActive', checked)}
+                  />
+                  <Label htmlFor="isActive">Active</Label>
+                </div>
+              </form>
+            </div>
+            
+            {/* Sticky footer with buttons */}
+            <div className="flex-shrink-0 border-t pt-4 mt-4 bg-white">
               <div className="flex space-x-2">
                 <Button
                   type="submit"
+                  form="category-form"
                   disabled={createMutation.isPending || updateMutation.isPending}
                   className="bg-caramel hover:bg-brown"
                 >
@@ -398,7 +405,7 @@ export default function AdminCategories() {
                   Cancel
                 </Button>
               </div>
-            </form>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
