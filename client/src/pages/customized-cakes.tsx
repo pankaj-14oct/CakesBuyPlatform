@@ -1,7 +1,7 @@
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { MessageCircle, Camera, Cake, Gift, Sparkles, ArrowRight, CheckCircle, Image, Palette, Heart, Brush } from 'lucide-react';
+import { MessageCircle, Camera, Cake, Gift, Sparkles, ArrowRight, CheckCircle, Image, Palette, Heart, Brush, MessageSquare } from 'lucide-react';
 
 export default function CustomizedCakesPage() {
 
@@ -19,7 +19,7 @@ export default function CustomizedCakesPage() {
       bgGradient: "from-green-500 to-teal-500"
     },
     {
-      icon: Heart,
+      icon: MessageSquare,
       title: "Personal Touch",
       description: "Add custom messages, names, and special decorative elements",
       bgGradient: "from-pink-500 to-rose-500"
