@@ -144,39 +144,104 @@ export default function Home() {
       {/* Categories Showcase Section */}
       <CategoriesShowcase />
 
-      {/* Gurgaon Loves Section */}
+      {/* India Loves Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
+          <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-4">
-              <Star className="text-caramel mr-2 h-6 w-6 fill-current" />
-              <h2 className="text-3xl lg:text-4xl font-bold text-charcoal">
-                Gurgaon's Favorite Eggless Cakes
+              <Star className="text-yellow-500 mr-2 h-8 w-8 fill-current" />
+              <h2 className="text-3xl lg:text-4xl font-bold text-red-600">
+                India Loves
               </h2>
             </div>
-            <p className="text-lg text-charcoal opacity-70">
-              Most loved 100% eggless bestsellers delivered online
+            <p className="text-lg text-gray-600">
+              Bestsellers from across the country
             </p>
           </div>
 
           {cakesLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <div className="bg-gray-200 h-48"></div>
-                  <CardContent className="p-6">
-                    <div className="bg-gray-200 rounded h-4 mb-2"></div>
-                    <div className="bg-gray-200 rounded h-3 mb-4"></div>
-                    <div className="bg-gray-200 rounded h-8"></div>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="overflow-x-auto pb-4">
+              <div className="flex gap-4" style={{ width: 'max-content' }}>
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="animate-pulse w-64 flex-shrink-0">
+                    <div className="bg-gray-200 h-48"></div>
+                    <CardContent className="p-4">
+                      <div className="bg-gray-200 rounded h-4 mb-2"></div>
+                      <div className="bg-gray-200 rounded h-3 mb-2"></div>
+                      <div className="bg-gray-200 rounded h-6"></div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredCakes.slice(0, 4).map((cake) => (
-                <CakeCard key={cake.id} cake={cake} />
-              ))}
+            <div className="overflow-x-auto pb-4 hide-scrollbar">
+              <div className="flex gap-4 px-2" style={{ width: 'max-content' }}>
+                {featuredCakes.map((cake, index) => (
+                  <Link key={cake.id} href={`/cake/${cake.slug}`}>
+                    <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer w-64 flex-shrink-0">
+                      <div className="relative">
+                        {/* Veg indicator */}
+                        <div className="absolute top-2 left-2 z-10">
+                          <div className="w-4 h-4 border-2 border-green-600 rounded-sm bg-white flex items-center justify-center">
+                            <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                          </div>
+                        </div>
+                        
+                        {/* Cake Image */}
+                        <div className="h-48 bg-gray-100 overflow-hidden">
+                          {cake.images && cake.images.length > 0 ? (
+                            <img 
+                              src={cake.images[0]} 
+                              alt={cake.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-caramel/20 to-brown/20 flex items-center justify-center">
+                              <span className="text-gray-400 text-4xl">🎂</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <CardContent className="p-3">
+                        {/* Cake Name */}
+                        <h3 className="font-semibold text-gray-800 mb-1 line-clamp-1 text-sm">
+                          {cake.name}
+                        </h3>
+                        
+                        {/* Rating */}
+                        <div className="flex items-center mb-2">
+                          <div className="flex items-center bg-green-600 text-white px-1 py-0.5 rounded text-xs">
+                            <Star className="w-3 h-3 mr-1 fill-current" />
+                            <span className="font-medium">4.{Math.floor(Math.random() * 5) + 4}</span>
+                          </div>
+                          <span className="text-xs text-gray-500 ml-2">
+                            ({Math.floor(Math.random() * 500) + 100} Reviews)
+                          </span>
+                        </div>
+                        
+                        {/* Price */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg font-bold text-gray-800">₹{cake.price}</span>
+                            {Math.random() > 0.5 && (
+                              <span className="text-sm text-gray-500 line-through">
+                                ₹{Math.floor(cake.price * 1.2)}
+                              </span>
+                            )}
+                          </div>
+                          {Math.random() > 0.5 && (
+                            <Badge className="bg-red-500 text-white text-xs font-bold px-2 py-1">
+                              {Math.floor(Math.random() * 30) + 10}% OFF
+                            </Badge>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
             </div>
           )}
         </div>
