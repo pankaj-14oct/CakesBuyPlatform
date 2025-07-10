@@ -97,20 +97,30 @@ const upload = multer({
     fileSize: 20 * 1024 * 1024 // 20MB limit for high-quality images
   },
   fileFilter: (req, file, cb) => {
-    // Accept high-quality image formats for print quality
+    // Accept image formats - check both mimetype and extension
     const allowedMimeTypes = [
       'image/jpeg',
       'image/jpg', 
       'image/png',
       'image/webp',
       'image/tiff',
-      'image/bmp'
+      'image/bmp',
+      'image/gif',
+      'image/svg+xml'
     ];
     
-    if (allowedMimeTypes.includes(file.mimetype)) {
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.tiff', '.bmp', '.gif', '.svg'];
+    const fileExtension = file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.'));
+    
+    if (allowedMimeTypes.includes(file.mimetype) || allowedExtensions.includes(fileExtension)) {
       cb(null, true);
     } else {
-      cb(new Error('Only high-quality image files are allowed (JPEG, PNG, WebP, TIFF, BMP)'));
+      console.log('Rejected file:', {
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        extension: fileExtension
+      });
+      cb(new Error('Only image files are allowed (JPEG, PNG, WebP, TIFF, BMP, GIF, SVG)'));
     }
   }
 });
