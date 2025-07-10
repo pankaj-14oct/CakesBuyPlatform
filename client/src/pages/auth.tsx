@@ -74,33 +74,37 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-red-500 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-6">
-            <div className="bg-white/20 backdrop-blur-sm rounded-full p-6 border border-white/30">
-              <User className="h-12 w-12 text-white" />
+            <div className="bg-red-400/50 rounded-full p-4">
+              <User className="h-8 w-8 text-white" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2">My Account</h1>
-          <p className="text-white/80 text-lg">Welcome to CakesBuy</p>
+          <h1 className="text-3xl font-bold text-white mb-2">My Account</h1>
+          <p className="text-white/90 text-sm">Welcome to CakesBuy</p>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-6 shadow-2xl">
+        <div className="bg-red-400/30 backdrop-blur-sm rounded-2xl border border-red-400/40 p-6 shadow-lg">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-white/20 backdrop-blur-sm border-0 mb-6">
-              <TabsTrigger value="login" className="text-white data-[state=active]:bg-white/30 data-[state=active]:text-white">Sign In</TabsTrigger>
-              <TabsTrigger value="register" className="text-white data-[state=active]:bg-white/30 data-[state=active]:text-white">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-red-400/40 backdrop-blur-sm border-0 mb-6 p-1 rounded-xl">
+              <TabsTrigger 
+                value="login" 
+                className="text-white data-[state=active]:bg-red-400/60 data-[state=active]:text-white rounded-lg py-2 text-sm font-medium"
+              >
+                Sign In
+              </TabsTrigger>
+              <TabsTrigger 
+                value="register" 
+                className="text-white data-[state=active]:bg-red-400/60 data-[state=active]:text-white rounded-lg py-2 text-sm font-medium"
+              >
+                Sign Up
+              </TabsTrigger>
             </TabsList>
 
             {/* Login Tab */}
-            <TabsContent value="login">
-              <div className="space-y-4">
-                <div className="text-center mb-6">
-                  <h2 className="text-xl font-semibold text-white mb-2">Sign In</h2>
-                  <p className="text-white/70">Enter your credentials to access your account</p>
-                </div>
-                
+            <TabsContent value="login" className="space-y-4">
                 <Form {...loginForm}>
                   <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
                     <FormField
@@ -108,7 +112,7 @@ export default function AuthPage() {
                       name="phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-white">Phone Number</FormLabel>
+                          <FormLabel className="text-white text-sm font-medium">Phone Number</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Phone className="absolute left-3 top-3 h-4 w-4 text-white/60" />
@@ -116,7 +120,7 @@ export default function AuthPage() {
                                 {...field}
                                 type="tel"
                                 placeholder="Enter your phone number"
-                                className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-white/50 focus:ring-white/25"
+                                className="pl-10 bg-red-400/40 border-red-400/50 text-white placeholder:text-white/70 focus:border-red-300 focus:ring-red-300/50 rounded-lg"
                               />
                             </div>
                           </FormControl>
@@ -130,7 +134,7 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-white">Password</FormLabel>
+                          <FormLabel className="text-white text-sm font-medium">Password</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Lock className="absolute left-3 top-3 h-4 w-4 text-white/60" />
@@ -138,7 +142,7 @@ export default function AuthPage() {
                                 {...field}
                                 type="password"
                                 placeholder="Enter your password"
-                                className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-white/50 focus:ring-white/25"
+                                className="pl-10 bg-red-400/40 border-red-400/50 text-white placeholder:text-white/70 focus:border-red-300 focus:ring-red-300/50 rounded-lg"
                               />
                             </div>
                           </FormControl>
@@ -149,7 +153,7 @@ export default function AuthPage() {
 
                     <Button
                       type="submit"
-                      className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm"
+                      className="w-full bg-red-400/60 hover:bg-red-400/70 text-white border-0 rounded-lg py-3 font-medium"
                       disabled={loginMutation.isPending}
                     >
                       {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
@@ -162,16 +166,14 @@ export default function AuthPage() {
                     Forgot your password?
                   </Link>
                 </div>
-              </div>
             </TabsContent>
 
             {/* Register Tab */}
-            <TabsContent value="register">
-              <div className="space-y-4">
-                <div className="text-center mb-6">
-                  <h2 className="text-xl font-semibold text-white mb-2">Create Account</h2>
-                  <p className="text-white/70">Join CakesBuy and start ordering delicious cakes</p>
-                </div>
+            <TabsContent value="register" className="space-y-4">
+              <div className="text-center mb-4">
+                <h2 className="text-xl font-semibold text-white mb-1">Create Account</h2>
+                <p className="text-white/80 text-sm">Join CakesBuy and start ordering delicious cakes</p>
+              </div>
                 
                 <Form {...registerForm}>
                   <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
@@ -180,7 +182,7 @@ export default function AuthPage() {
                       name="phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-white">Phone Number</FormLabel>
+                          <FormLabel className="text-white text-sm font-medium">Phone Number</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Phone className="absolute left-3 top-3 h-4 w-4 text-white/60" />
@@ -188,7 +190,7 @@ export default function AuthPage() {
                                 {...field}
                                 type="tel"
                                 placeholder="Enter your phone number"
-                                className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-white/50 focus:ring-white/25"
+                                className="pl-10 bg-red-400/40 border-red-400/50 text-white placeholder:text-white/70 focus:border-red-300 focus:ring-red-300/50 rounded-lg"
                               />
                             </div>
                           </FormControl>
@@ -202,7 +204,7 @@ export default function AuthPage() {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-white">Email</FormLabel>
+                          <FormLabel className="text-white text-sm font-medium">Email</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Mail className="absolute left-3 top-3 h-4 w-4 text-white/60" />
@@ -210,7 +212,7 @@ export default function AuthPage() {
                                 {...field}
                                 type="email"
                                 placeholder="Enter your email"
-                                className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-white/50 focus:ring-white/25"
+                                className="pl-10 bg-red-400/40 border-red-400/50 text-white placeholder:text-white/70 focus:border-red-300 focus:ring-red-300/50 rounded-lg"
                               />
                             </div>
                           </FormControl>
@@ -224,7 +226,7 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-white">Password</FormLabel>
+                          <FormLabel className="text-white text-sm font-medium">Password</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Lock className="absolute left-3 top-3 h-4 w-4 text-white/60" />
@@ -232,7 +234,7 @@ export default function AuthPage() {
                                 {...field}
                                 type="password"
                                 placeholder="Create a password"
-                                className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-white/50 focus:ring-white/25"
+                                className="pl-10 bg-red-400/40 border-red-400/50 text-white placeholder:text-white/70 focus:border-red-300 focus:ring-red-300/50 rounded-lg"
                               />
                             </div>
                           </FormControl>
@@ -246,7 +248,7 @@ export default function AuthPage() {
                       name="confirmPassword"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-white">Confirm Password</FormLabel>
+                          <FormLabel className="text-white text-sm font-medium">Confirm Password</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Lock className="absolute left-3 top-3 h-4 w-4 text-white/60" />
@@ -254,7 +256,7 @@ export default function AuthPage() {
                                 {...field}
                                 type="password"
                                 placeholder="Confirm your password"
-                                className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-white/50 focus:ring-white/25"
+                                className="pl-10 bg-red-400/40 border-red-400/50 text-white placeholder:text-white/70 focus:border-red-300 focus:ring-red-300/50 rounded-lg"
                               />
                             </div>
                           </FormControl>
@@ -265,14 +267,13 @@ export default function AuthPage() {
 
                     <Button
                       type="submit"
-                      className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm"
+                      className="w-full bg-red-400/60 hover:bg-red-400/70 text-white border-0 rounded-lg py-3 font-medium"
                       disabled={registerMutation.isPending}
                     >
                       {registerMutation.isPending ? 'Creating Account...' : 'Create Account'}
                     </Button>
                   </form>
                 </Form>
-              </div>
             </TabsContent>
           </Tabs>
         </div>
