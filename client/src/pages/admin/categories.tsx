@@ -121,7 +121,7 @@ export default function AdminCategories() {
         method: 'POST',
         body: formData,
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
