@@ -224,18 +224,24 @@ export default function Home() {
                         {/* Price */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="text-lg font-bold text-gray-800">₹{cake.price}</span>
-                            {Math.random() > 0.5 && (
-                              <span className="text-sm text-gray-500 line-through">
-                                ₹{Math.floor(cake.price * 1.2)}
-                              </span>
-                            )}
+                            {(() => {
+                              const weightPrice = cake.weights && cake.weights.length > 0 ? cake.weights[0].price : null;
+                              const basePrice = cake.basePrice ? parseFloat(cake.basePrice.toString()) : 0;
+                              const originalPrice = weightPrice || basePrice || 0;
+                              const discountedPrice = Math.round(originalPrice * 0.9);
+                              return (
+                                <>
+                                  <span className="text-lg font-bold text-gray-800">₹{discountedPrice}</span>
+                                  <span className="text-sm text-gray-500 line-through">
+                                    ₹{originalPrice}
+                                  </span>
+                                </>
+                              );
+                            })()}
                           </div>
-                          {Math.random() > 0.5 && (
-                            <Badge className="bg-red-500 text-white text-xs font-bold px-2 py-1">
-                              {Math.floor(Math.random() * 30) + 10}% OFF
-                            </Badge>
-                          )}
+                          <Badge className="bg-red-500 text-white text-xs font-bold px-2 py-1">
+                            10% OFF
+                          </Badge>
                         </div>
                       </CardContent>
                     </Card>
