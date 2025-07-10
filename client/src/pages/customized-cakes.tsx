@@ -159,8 +159,8 @@ export default function CustomizedCakesPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                Tailored Sweetness: Explore CakesBuy's Customised Cake Creations
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                Your Cake, Your Way – Customised Cakes Delivered Across Gurgaon
               </h2>
             </div>
             
