@@ -1181,13 +1181,13 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
           ];
           break;
         case 'categories':
-          headers = ['name', 'slug', 'description', 'image'];
+          headers = ['name', 'slug', 'description', 'image', 'parent_id'];
           sampleData = [
-            ['Birthday Cakes', 'birthday-cakes', 'Special cakes for birthday celebrations', 'https://example.com/birthday-category.jpg'],
-            ['Anniversary Cakes', 'anniversary-cakes', 'Romantic cakes for anniversary celebrations', 'https://example.com/anniversary-category.jpg'],
-            ['Photo Cakes', 'photo-cakes', 'Customizable photo cakes for special memories', 'https://example.com/photo-category.jpg'],
-            ['Eggless Cakes', 'eggless-cakes', '100% eggless cakes for everyone', 'https://example.com/eggless-category.jpg'],
-            ['Designer Cakes', 'designer-cakes', 'Premium designer cakes for special occasions', 'https://example.com/designer-category.jpg']
+            ['Celebration Cakes', 'celebration-cakes', 'Perfect cakes for all types of celebrations', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop', '1'],
+            ['Premium Cakes', 'premium-cakes', 'Luxury premium cakes for special occasions', 'https://images.unsplash.com/photo-1535141192574-5d4897c12636?w=400&h=300&fit=crop', '1'],
+            ['Seasonal Cakes', 'seasonal-cakes', 'Special seasonal and festival cakes', 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&h=300&fit=crop', '1'],
+            ['Corporate Cakes', 'corporate-cakes', 'Professional cakes for corporate events and meetings', 'https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=400&h=300&fit=crop', '1'],
+            ['Kids Special', 'kids-special', 'Fun and colorful cakes designed especially for children', 'https://images.unsplash.com/photo-1464207687429-7505649dae38?w=400&h=300&fit=crop', '1']
           ];
           break;
         case 'users':
