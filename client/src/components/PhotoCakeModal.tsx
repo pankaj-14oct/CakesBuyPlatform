@@ -151,7 +151,8 @@ export default function PhotoCakeModal({
             </div>
             
             {/* Right Side - Simple Upload and Text Controls */}
-            <div className="w-1/2 p-6 flex flex-col max-h-[500px] overflow-y-auto">
+            <div className="w-1/2 flex flex-col">
+              <div className="flex-1 p-6 overflow-y-auto">
               {/* Upload Section */}
               <div className="mb-6">
                 <h3 className="text-lg font-medium mb-4">Upload Image</h3>
@@ -351,9 +352,9 @@ export default function PhotoCakeModal({
                   </div>
                 </div>
               </div>
-
-              {/* Save Button */}
-              <div className="mt-auto">
+              
+              {/* Fixed Save Button */}
+              <div className="border-t bg-white p-6">
                 <Button
                   onClick={handleSave}
                   className="w-full bg-red-500 hover:bg-red-600 text-white py-3 text-lg font-semibold"
