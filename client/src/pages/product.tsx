@@ -101,8 +101,9 @@ export default function ProductPage() {
   }
 
   const selectedWeightData = cake.weights?.find(w => w.weight === selectedWeight);
-  const basePrice = selectedWeightData?.price || cake.weights?.[0]?.price || 0;
-  const totalPrice = basePrice * quantity;
+  const originalPrice = selectedWeightData?.price || cake.weights?.[0]?.price || 0;
+  const discountedPrice = Math.round(originalPrice * 0.9); // 10% discount
+  const totalPrice = discountedPrice * quantity;
 
   // Check if this is a photo cake
   const isPhotoCake = cake.isPhotoCake || false;
@@ -165,7 +166,7 @@ export default function ProductPage() {
   const handleAddonSelection = (selectedAddons: { addon: Addon; quantity: number }[]) => {
     const weight = selectedWeight || cake.weights?.[0]?.weight || '';
     const flavor = selectedFlavor || cake.flavors?.[0] || '';
-    const price = selectedWeightData?.price || cake.weights?.[0]?.price || 0;
+    const price = discountedPrice;
 
     const cartItem = {
       id: Date.now(),
@@ -316,12 +317,20 @@ export default function ProductPage() {
               </div>
 
               {/* Price */}
-              <div className="text-3xl font-bold text-brown mb-6">
-                {formatPrice(totalPrice)}
-                {quantity > 1 && (
-                  <span className="text-sm text-charcoal opacity-60 ml-2">
-                    ({formatPrice(basePrice)} each)
+              <div className="mb-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-3xl font-bold text-brown">{formatPrice(totalPrice)}</span>
+                  <span className="text-xl text-charcoal opacity-60 line-through">
+                    {formatPrice(originalPrice * quantity)}
                   </span>
+                  <Badge className="bg-red-500 text-white text-sm font-semibold">
+                    10% OFF
+                  </Badge>
+                </div>
+                {quantity > 1 && (
+                  <div className="text-sm text-charcoal opacity-60">
+                    {formatPrice(discountedPrice)} each (was {formatPrice(originalPrice)})
+                  </div>
                 )}
               </div>
             </div>
@@ -342,7 +351,7 @@ export default function ProductPage() {
                     <SelectContent>
                       {cake.weights?.map((weight) => (
                         <SelectItem key={weight.weight} value={weight.weight}>
-                          {weight.weight} - {formatPrice(weight.price)}
+                          {weight.weight} - {formatPrice(Math.round(weight.price * 0.9))} <span className="line-through opacity-60">{formatPrice(weight.price)}</span>
                         </SelectItem>
                       ))}
                     </SelectContent>
