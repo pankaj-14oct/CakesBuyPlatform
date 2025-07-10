@@ -139,10 +139,10 @@ export default function CustomizedCakesPage() {
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-5xl font-bold text-gray-900 mb-6">
-              Your Wish. Our <span className="text-pink-600">Whisk</span>
+              Crafted with Care, <span className="text-pink-600">Inspired by You</span>
             </h1>
             <p className="text-xl text-gray-700 mb-8 leading-relaxed">
-              Turn your sweet imagination into reality with freshly baked, personalised cakes for every celebration.
+              Celebrate your special moments with custom-designed cakes, made just the way you imagined.
             </p>
             
             {/* Illustration */}
