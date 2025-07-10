@@ -1,86 +1,9 @@
-import { useState } from 'react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Star, Heart, Camera, Cake, Gift, Sparkles, ArrowRight, CheckCircle } from 'lucide-react';
+import { MessageCircle, Camera, Cake, Gift, Sparkles, ArrowRight, CheckCircle } from 'lucide-react';
 
 export default function CustomizedCakesPage() {
-  const [selectedCategory, setSelectedCategory] = useState('all');
-
-  // Sample customized cake images and data
-  const customizedCakes = [
-    {
-      id: 1,
-      name: "Nature Theme Birthday Cake",
-      image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=400&fit=crop",
-      category: "birthday",
-      description: "Multi-tier cake with fondant animals and nature elements",
-      price: "₹2,499",
-      rating: 4.8,
-      reviews: 45
-    },
-    {
-      id: 2,
-      name: "Wedding Anniversary Special",
-      image: "https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?w=400&h=400&fit=crop",
-      category: "anniversary",
-      description: "Elegant two-tier cake with personalized photo and golden accents",
-      price: "₹3,299",
-      rating: 4.9,
-      reviews: 32
-    },
-    {
-      id: 3,
-      name: "Kids Character Theme",
-      image: "https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=400&h=400&fit=crop",
-      category: "kids",
-      description: "Colorful themed cake with favorite cartoon characters",
-      price: "₹1,899",
-      rating: 4.7,
-      reviews: 67
-    },
-    {
-      id: 4,
-      name: "Corporate Event Cake",
-      image: "https://images.unsplash.com/photo-1519869325930-281384150729?w=400&h=400&fit=crop",
-      category: "corporate",
-      description: "Professional cake design with company logo and branding",
-      price: "₹4,599",
-      rating: 4.6,
-      reviews: 23
-    },
-    {
-      id: 5,
-      name: "Photo Memory Cake",
-      image: "https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=400&h=400&fit=crop",
-      category: "photo",
-      description: "Personalized cake with edible photo print and custom message",
-      price: "₹1,799",
-      rating: 4.8,
-      reviews: 89
-    },
-    {
-      id: 6,
-      name: "Luxury Wedding Cake",
-      image: "https://images.unsplash.com/photo-1535254973040-607b474cb50d?w=400&h=400&fit=crop",
-      category: "wedding",
-      description: "Three-tier wedding cake with intricate sugar flower details",
-      price: "₹5,999",
-      rating: 5.0,
-      reviews: 18
-    }
-  ];
-
-  const categories = [
-    { id: 'all', name: 'All Designs', count: customizedCakes.length },
-    { id: 'birthday', name: 'Birthday', count: customizedCakes.filter(c => c.category === 'birthday').length },
-    { id: 'wedding', name: 'Wedding', count: customizedCakes.filter(c => c.category === 'wedding').length },
-    { id: 'anniversary', name: 'Anniversary', count: customizedCakes.filter(c => c.category === 'anniversary').length },
-    { id: 'kids', name: 'Kids Special', count: customizedCakes.filter(c => c.category === 'kids').length },
-    { id: 'photo', name: 'Photo Cakes', count: customizedCakes.filter(c => c.category === 'photo').length },
-    { id: 'corporate', name: 'Corporate', count: customizedCakes.filter(c => c.category === 'corporate').length }
-  ];
 
   const features = [
     {
@@ -128,9 +51,7 @@ export default function CustomizedCakesPage() {
     }
   ];
 
-  const filteredCakes = selectedCategory === 'all' 
-    ? customizedCakes 
-    : customizedCakes.filter(cake => cake.category === selectedCategory);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
@@ -196,82 +117,7 @@ export default function CustomizedCakesPage() {
         </div>
       </div>
 
-      {/* Our Customized Cakes Gallery */}
-      <div className="py-20 bg-gradient-to-b from-gray-50 to-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Customised Cakes</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Tailored Sweetness: Explore CakesBuy's Customised Cake Creations
-            </p>
-          </div>
 
-          {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`rounded-full px-6 py-2 transition-all duration-200 ${
-                  selectedCategory === category.id
-                    ? 'bg-pink-500 text-white shadow-lg transform scale-105'
-                    : 'hover:bg-pink-50 hover:border-pink-300'
-                }`}
-              >
-                {category.name}
-                <Badge className="ml-2 bg-orange-100 text-orange-800 text-xs">
-                  {category.count}
-                </Badge>
-              </Button>
-            ))}
-          </div>
-
-          {/* Cakes Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredCakes.map((cake) => (
-              <Card key={cake.id} className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-3 overflow-hidden border-0 bg-white">
-                <div className="relative overflow-hidden">
-                  <img
-                    src={cake.image}
-                    alt={cake.name}
-                    className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute top-4 right-4">
-                    <Button size="icon" variant="outline" className="rounded-full bg-white/90 hover:bg-white shadow-lg">
-                      <Heart className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="absolute bottom-4 left-4">
-                    <Badge className="bg-green-500 text-white">Custom Design</Badge>
-                  </div>
-                </div>
-                
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-pink-600 transition-colors">
-                    {cake.name}
-                  </h3>
-                  <p className="text-gray-600 mb-4 line-clamp-2">{cake.description}</p>
-                  
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-semibold text-gray-700">{cake.rating}</span>
-                      <span className="text-sm text-gray-500">({cake.reviews} reviews)</span>
-                    </div>
-                    <div className="text-2xl font-bold text-pink-600">{cake.price}</div>
-                  </div>
-                  
-                  <Button className="w-full bg-gradient-to-r from-pink-500 to-orange-500 text-white hover:from-pink-600 hover:to-orange-600 rounded-full font-semibold shadow-lg">
-                    Customize This Design
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* How It Works */}
       <div className="py-20 bg-gradient-to-r from-pink-100 via-purple-50 to-orange-50">
