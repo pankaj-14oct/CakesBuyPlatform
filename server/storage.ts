@@ -1,6 +1,7 @@
 import {
   users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews, eventReminders, otpVerifications,
   loyaltyTransactions, loyaltyRewards, userRewards, invoices, walletTransactions, adminConfigs, deliveryBoys,
+  orderRatings,
   type User, type InsertUser, type Category, type InsertCategory,
   type Cake, type InsertCake, type Addon, type InsertAddon,
   type Order, type InsertOrder, type DeliveryArea, type InsertDeliveryArea,
@@ -9,7 +10,7 @@ import {
   type LoyaltyTransaction, type InsertLoyaltyTransaction, type LoyaltyReward, type InsertLoyaltyReward,
   type UserReward, type InsertUserReward, type Invoice, type InsertInvoice,
   type WalletTransaction, type InsertWalletTransaction, type AdminConfig, type InsertAdminConfig,
-  type DeliveryBoy, type InsertDeliveryBoy
+  type DeliveryBoy, type InsertDeliveryBoy, type OrderRating, type InsertOrderRating
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, and, desc, isNotNull, or, gte, lte } from "drizzle-orm";
@@ -60,6 +61,14 @@ export interface IStorage {
   // Reviews
   getCakeReviews(cakeId: number): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
+
+  // Order Ratings
+  createOrderRating(rating: InsertOrderRating): Promise<OrderRating>;
+  getOrderRating(orderId: number): Promise<OrderRating | undefined>;
+  getOrderRatingById(id: number): Promise<OrderRating | undefined>;
+  updateOrderRating(id: number, updates: Partial<OrderRating>): Promise<void>;
+  getDeliveredOrdersWithoutRating(): Promise<Order[]>;
+  updateOrderRatingEmailStatus(orderId: number, sent: boolean): Promise<void>;
 
   // Admin methods
   // Categories management
@@ -451,6 +460,71 @@ export class DatabaseStorage implements IStorage {
       createdAt: new Date()
     }).returning();
     return review;
+  }
+
+  // Order Ratings
+  async createOrderRating(insertRating: InsertOrderRating): Promise<OrderRating> {
+    const [rating] = await db.insert(orderRatings).values({
+      ...insertRating,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }).returning();
+    return rating;
+  }
+
+  async getOrderRating(orderId: number): Promise<OrderRating | undefined> {
+    const [rating] = await db.select().from(orderRatings).where(eq(orderRatings.orderId, orderId));
+    return rating || undefined;
+  }
+
+  async getOrderRatingById(id: number): Promise<OrderRating | undefined> {
+    const [rating] = await db.select().from(orderRatings).where(eq(orderRatings.id, id));
+    return rating || undefined;
+  }
+
+  async updateOrderRating(id: number, updates: Partial<OrderRating>): Promise<void> {
+    await db.update(orderRatings)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(orderRatings.id, id));
+  }
+
+  async getDeliveredOrdersWithoutRating(): Promise<Order[]> {
+    // Get orders that are delivered but don't have a rating email sent yet
+    const ordersWithoutRating = await db.select()
+      .from(orders)
+      .leftJoin(orderRatings, eq(orders.id, orderRatings.orderId))
+      .where(
+        and(
+          eq(orders.status, 'delivered'),
+          or(
+            isNotNull(orderRatings.feedbackEmailSent),
+            eq(orderRatings.feedbackEmailSent, false)
+          )
+        )
+      );
+
+    return ordersWithoutRating.map(row => row.orders);
+  }
+
+  async updateOrderRatingEmailStatus(orderId: number, sent: boolean): Promise<void> {
+    // First check if a rating record exists for this order
+    const existingRating = await this.getOrderRating(orderId);
+    
+    if (existingRating) {
+      // Update existing record
+      await this.updateOrderRating(existingRating.id, {
+        feedbackEmailSent: sent,
+        feedbackEmailSentAt: sent ? new Date() : null
+      });
+    } else {
+      // Create a new rating record just to track email status
+      await this.createOrderRating({
+        orderId,
+        overallRating: 0, // Will be updated when user actually rates
+        feedbackEmailSent: sent,
+        feedbackEmailSentAt: sent ? new Date() : null
+      });
+    }
   }
 
   // Admin methods

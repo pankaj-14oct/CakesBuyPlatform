@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ShoppingCart, Eye, Package, Truck, CheckCircle, 
-  Clock, XCircle, MapPin, Phone, Calendar, UserPlus 
+  Clock, XCircle, MapPin, Phone, Calendar, UserPlus, Mail, Star
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -80,6 +80,27 @@ export default function AdminOrders() {
     },
     onError: () => {
       toast({ title: "Failed to assign delivery boy", variant: "destructive" });
+    }
+  });
+
+  const sendRatingEmailMutation = useMutation({
+    mutationFn: async ({ orderId, customerEmail }: { orderId: number; customerEmail?: string }) => {
+      const payload: any = {};
+      if (customerEmail) {
+        payload.customerEmail = customerEmail;
+      }
+      const response = await apiRequest(`/api/orders/${orderId}/send-rating-email`, 'POST', payload);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Rating email sent successfully!" });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Failed to send rating email", 
+        description: error.message || "Please try again later.",
+        variant: "destructive" 
+      });
     }
   });
 
@@ -345,22 +366,37 @@ export default function AdminOrders() {
                                     <CardTitle className="text-lg">Update Status</CardTitle>
                                   </CardHeader>
                                   <CardContent>
-                                    <Select
-                                      value={selectedOrder.status}
-                                      onValueChange={(value) => handleStatusChange(selectedOrder.id, value)}
-                                    >
-                                      <SelectTrigger className="w-48">
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="pending">Pending</SelectItem>
-                                        <SelectItem value="confirmed">Confirmed</SelectItem>
-                                        <SelectItem value="preparing">Preparing</SelectItem>
-                                        <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
-                                        <SelectItem value="delivered">Delivered</SelectItem>
-                                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                                      </SelectContent>
-                                    </Select>
+                                    <div className="flex items-center gap-4">
+                                      <Select
+                                        value={selectedOrder.status}
+                                        onValueChange={(value) => handleStatusChange(selectedOrder.id, value)}
+                                      >
+                                        <SelectTrigger className="w-48">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="pending">Pending</SelectItem>
+                                          <SelectItem value="confirmed">Confirmed</SelectItem>
+                                          <SelectItem value="preparing">Preparing</SelectItem>
+                                          <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
+                                          <SelectItem value="delivered">Delivered</SelectItem>
+                                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      
+                                      {selectedOrder.status === 'delivered' && (
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => sendRatingEmailMutation.mutate({ orderId: selectedOrder.id })}
+                                          disabled={sendRatingEmailMutation.isPending}
+                                          className="flex items-center gap-2"
+                                        >
+                                          <Mail className="h-4 w-4" />
+                                          {sendRatingEmailMutation.isPending ? 'Sending...' : 'Send Rating Email'}
+                                        </Button>
+                                      )}
+                                    </div>
                                   </CardContent>
                                 </Card>
 

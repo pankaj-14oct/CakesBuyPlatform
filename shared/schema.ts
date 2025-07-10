@@ -171,6 +171,40 @@ export const reviews = pgTable("reviews", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Order Ratings - Specifically for post-delivery feedback
+export const orderRatings = pgTable("order_ratings", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").references(() => orders.id).notNull(),
+  userId: integer("user_id").references(() => users.id),
+  
+  // Overall Experience Rating
+  overallRating: integer("overall_rating").notNull(), // 1-5 stars
+  
+  // Specific Ratings
+  tasteRating: integer("taste_rating"), // 1-5 stars
+  qualityRating: integer("quality_rating"), // 1-5 stars
+  deliveryRating: integer("delivery_rating"), // 1-5 stars
+  packagingRating: integer("packaging_rating"), // 1-5 stars
+  
+  // Comments
+  comment: text("comment"),
+  improvements: text("improvements"), // What could be improved
+  
+  // Would recommend?
+  wouldRecommend: boolean("would_recommend").default(true),
+  
+  // Delivery Boy Rating (if applicable)
+  deliveryBoyRating: integer("delivery_boy_rating"), // 1-5 stars
+  deliveryBoyComment: text("delivery_boy_comment"),
+  
+  // Email tracking
+  feedbackEmailSent: boolean("feedback_email_sent").default(false),
+  feedbackEmailSentAt: timestamp("feedback_email_sent_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const eventReminders = pgTable("event_reminders", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
@@ -356,6 +390,7 @@ export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, ord
 export const insertDeliveryAreaSchema = createInsertSchema(deliveryAreas).omit({ id: true });
 export const insertPromoCodeSchema = createInsertSchema(promoCodes).omit({ id: true, usedCount: true });
 export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, createdAt: true });
+export const insertOrderRatingSchema = createInsertSchema(orderRatings).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertEventReminderSchema = createInsertSchema(eventReminders).omit({ id: true, createdAt: true });
 export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).omit({ id: true, createdAt: true });
 export const insertDeliveryBoySchema = createInsertSchema(deliveryBoys).omit({ id: true, createdAt: true, updatedAt: true });
@@ -486,6 +521,21 @@ export const profileUpdateSchema = z.object({
   anniversary: z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/, 'Anniversary must be in MM-DD format').optional(),
 });
 
+// Order Rating schema
+export const orderRatingSchema = z.object({
+  orderId: z.number().positive('Order ID is required'),
+  overallRating: z.number().min(1, 'Overall rating is required').max(5, 'Rating must be between 1 and 5'),
+  tasteRating: z.number().min(1).max(5).optional(),
+  qualityRating: z.number().min(1).max(5).optional(),
+  deliveryRating: z.number().min(1).max(5).optional(),
+  packagingRating: z.number().min(1).max(5).optional(),
+  comment: z.string().optional(),
+  improvements: z.string().optional(),
+  wouldRecommend: z.boolean().default(true),
+  deliveryBoyRating: z.number().min(1).max(5).optional(),
+  deliveryBoyComment: z.string().optional(),
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -503,6 +553,8 @@ export type PromoCode = typeof promoCodes.$inferSelect;
 export type InsertPromoCode = z.infer<typeof insertPromoCodeSchema>;
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
+export type OrderRating = typeof orderRatings.$inferSelect;
+export type InsertOrderRating = z.infer<typeof insertOrderRatingSchema>;
 export type EventReminder = typeof eventReminders.$inferSelect;
 export type InsertEventReminder = z.infer<typeof insertEventReminderSchema>;
 export type OtpVerification = typeof otpVerifications.$inferSelect;

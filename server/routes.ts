@@ -30,7 +30,8 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   deliveryBoyLoginSchema,
-  deliveryBoyRegisterSchema
+  deliveryBoyRegisterSchema,
+  orderRatingSchema
 } from "@shared/schema";
 import { 
   generateToken, 
@@ -44,6 +45,7 @@ import {
   type DeliveryBoyAuthRequest
 } from "./auth";
 import { sendReminderEmail, type ReminderEmailData, sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, type OrderEmailData, sendWelcomeEmail, type WelcomeEmailData } from "./email-service";
+import { sendRatingRequestEmail } from "./rating-service";
 import { createInvoiceForOrder, updateInvoiceStatus, getInvoiceByOrderId, getInvoiceByNumber, getUserInvoices, getInvoiceWithOrder, getInvoiceDisplayData } from "./invoice-service";
 import { processPhotoCakeItems } from "./photo-cake-service";
 import { notifyOrderAssignment, notifyNewOrder } from "./notification-service.js";
@@ -589,6 +591,28 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
       } catch (emailError) {
         // Don't fail the status update if email fails
         console.error('Failed to send order status email:', emailError);
+      }
+
+      // Send rating email if order is delivered
+      if (status === 'delivered') {
+        try {
+          let customerEmail = order.deliveryAddress.email;
+          const customerName = order.deliveryAddress.name;
+          
+          // If no email in delivery address and order has user, get from user
+          if (!customerEmail && order.userId) {
+            const user = await storage.getUser(order.userId);
+            customerEmail = user?.email;
+          }
+          
+          if (customerEmail) {
+            await sendRatingRequestEmail(orderId, customerEmail, customerName, order.orderNumber);
+            console.log(`Rating request email sent to ${customerEmail} for order ${order.orderNumber}`);
+          }
+        } catch (emailError) {
+          // Don't fail the status update if email fails
+          console.error('Failed to send rating request email:', emailError);
+        }
       }
 
       res.json({ message: "Order status updated successfully", order });
@@ -3051,6 +3075,142 @@ CakesBuy
       res.json({ message: "Order status updated successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to update order status" });
+    }
+  });
+
+  // Order Rating Routes
+  
+  // Get order rating page (for public access via rating URL)
+  app.get("/api/orders/:orderId/rating", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const order = await storage.getOrder(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      const existingRating = await storage.getOrderRating(orderId);
+      
+      res.json({
+        order: {
+          id: order.id,
+          orderNumber: order.orderNumber,
+          items: order.items,
+          total: order.total,
+          deliveryDate: order.deliveryDate,
+          deliveryAddress: order.deliveryAddress,
+          status: order.status
+        },
+        rating: existingRating
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch order rating data" });
+    }
+  });
+
+  // Submit order rating (public access)
+  app.post("/api/orders/:orderId/rating", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const ratingData = orderRatingSchema.parse(req.body);
+      
+      // Verify order exists and is delivered
+      const order = await storage.getOrder(orderId);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      if (order.status !== 'delivered') {
+        return res.status(400).json({ message: "Order must be delivered before rating" });
+      }
+      
+      // Check if rating already exists
+      const existingRating = await storage.getOrderRating(orderId);
+      
+      if (existingRating && existingRating.overallRating > 0) {
+        // Update existing rating
+        await storage.updateOrderRating(existingRating.id, {
+          ...ratingData,
+          updatedAt: new Date()
+        });
+        res.json({ message: "Rating updated successfully" });
+      } else {
+        // Create new rating or update placeholder
+        if (existingRating) {
+          await storage.updateOrderRating(existingRating.id, {
+            ...ratingData,
+            updatedAt: new Date()
+          });
+        } else {
+          await storage.createOrderRating({
+            orderId,
+            ...ratingData,
+            feedbackEmailSent: false
+          });
+        }
+        res.json({ message: "Rating submitted successfully" });
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid rating data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to submit rating" });
+    }
+  });
+
+  // Send rating email for delivered order (admin/system use)
+  app.post("/api/orders/:orderId/send-rating-email", requireAdmin, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const order = await storage.getOrder(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      if (order.status !== 'delivered') {
+        return res.status(400).json({ message: "Order must be delivered before sending rating email" });
+      }
+      
+      let user = null;
+      if (order.userId) {
+        user = await storage.getUser(order.userId);
+      }
+      
+      let customerEmail = req.body.customerEmail;
+      const customerName = order.deliveryAddress.name;
+      
+      // If no email provided, try to get from delivery address or user
+      if (!customerEmail) {
+        customerEmail = order.deliveryAddress.email;
+        
+        // If no email in delivery address and order has user, get from user
+        if (!customerEmail && order.userId) {
+          customerEmail = user?.email;
+        }
+      }
+      
+      if (!customerEmail) {
+        return res.status(400).json({ message: "Customer email is required" });
+      }
+      
+      await sendRatingRequestEmail(orderId, customerEmail, customerName, order.orderNumber);
+      await storage.updateOrderRatingEmailStatus(orderId, true);
+      res.json({ message: "Rating email sent successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to send rating email" });
+    }
+  });
+
+  // Get all ratings for admin
+  app.get("/api/admin/ratings", requireAdmin, async (req, res) => {
+    try {
+      // This would need to be implemented in storage
+      // For now, return empty array
+      res.json([]);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch ratings" });
     }
   });
 
