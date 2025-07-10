@@ -7,6 +7,10 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatPrice(price: string | number): string {
   const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+  // Handle NaN case
+  if (isNaN(numPrice) || numPrice === null || numPrice === undefined) {
+    return '₹0';
+  }
   return `₹${numPrice.toLocaleString('en-IN')}`;
 }
 

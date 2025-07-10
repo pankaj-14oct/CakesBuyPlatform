@@ -39,8 +39,11 @@ export default function CakeCard({ cake }: CakeCardProps) {
     );
   };
 
-  const originalPrice = cake.weights?.[0]?.price || parseFloat(cake.basePrice) || 0;
-  const discountedPrice = originalPrice * 0.9; // 10% discount simulation
+  // Get price from weights or basePrice
+  const weightPrice = cake.weights?.[0]?.price;
+  const basePrice = parseFloat(cake.basePrice) || 0;
+  const originalPrice = weightPrice || basePrice;
+  const discountedPrice = Math.round(originalPrice * 0.9); // 10% discount
 
   return (
     <Link href={`/product/${cake.slug}`}>
