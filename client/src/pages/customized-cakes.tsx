@@ -83,7 +83,7 @@ export default function CustomizedCakesPage() {
 
             <Button 
               className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-200"
-              onClick={() => window.open('https://wa.me/1234567890', '_blank')}
+              onClick={() => window.open('https://wa.me/918287177303', '_blank')}
             >
               <MessageCircle className="mr-2 h-5 w-5" />
               Chat with us on WhatsApp
@@ -207,7 +207,7 @@ export default function CustomizedCakesPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 className="bg-white text-pink-600 hover:bg-gray-100 px-8 py-4 rounded-full text-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-200"
-                onClick={() => window.open('https://wa.me/1234567890', '_blank')}
+                onClick={() => window.open('https://wa.me/918287177303', '_blank')}
               >
                 <MessageCircle className="mr-2 h-5 w-5" />
                 Start Your Custom Order
