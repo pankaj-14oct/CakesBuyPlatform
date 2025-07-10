@@ -165,12 +165,14 @@ export default function CustomizedCakesPage() {
             </div>
             
             <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl border border-gray-100">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Design Your Perfect Cake with CakesBuy – Now in Gurgaon</h3>
               <p className="text-lg text-gray-700 leading-relaxed mb-8">
-                Indulge in the world of delicious artistry with our customised cakes, designed to mirror your imagination and taste preferences. At CakesBuy, we believe that every celebration deserves a cake as unique as the occasion itself. Whether it's a birthday, wedding, anniversary, or any special event, our customised cakes allow you to be the creator of your own sweet masterpiece. From selecting your preferred flavours and fillings to choosing the perfect design that matches your theme, our expert bakers work closely with you to bring your vision to life. Easily purchase an online customised cake by browsing our heavenly collection. The seamless and convenient process allows you to order from the comfort of your home and also a true reflection of your style and the sweetness that tells your story, and let CakesBuy turn your sweetest dreams into reality.
+                At CakesBuy, we turn your sweet ideas into delicious realities. Whether it's a birthday surprise, an anniversary delight, or a theme party, our customised cakes are created to match your exact vision. Choose your flavours, fillings, and design down to the tiniest detail — and watch your imagination come to life. With our easy-to-use platform, ordering a custom cake online in Gurgaon is seamless and satisfying. Each cake is more than dessert — it's your story, baked and beautifully told.
               </p>
               
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Online Cake Delivery in Gurgaon – From Our Oven to Your Occasion</h3>
               <p className="text-lg text-gray-700 leading-relaxed mb-8">
-                Experience the convenience of <strong>online cake delivery</strong> with CakesBuy, where customisation creation is delivered with care, on time, and exactly as you envisioned it. We understand the importance of punctuality and precision when it comes to special occasions, which is why we ensure that every cake is handled with the utmost care from the moment it leaves our kitchen to the moment it reaches your celebration. With CakesBuy, you have full control and supervision over your customised cake creation but rest assured that you will have the cake that not only meets your expectations, but exceeds them, creating memories that last a lifetime.
+                Enjoy reliable cake delivery in Gurgaon that's prompt, professional, and handled with care. With CakesBuy, your custom cake arrives fresh, flawless, and full of flavour — exactly the way you pictured it. Explore our complete collection of cakes for <Link href="/" className="text-pink-600 hover:text-pink-700 font-semibold underline decoration-2 underline-offset-2">online cake delivery Gurgaon</Link> and discover why we're the preferred choice for celebrations across the city.
               </p>
 
               <div className="grid md:grid-cols-3 gap-6 mt-8">
