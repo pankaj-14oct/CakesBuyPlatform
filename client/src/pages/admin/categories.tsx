@@ -60,6 +60,8 @@ export default function AdminCategories() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      setEditingCategory(null);
+      setUploadedImage(null);
       setIsCreateDialogOpen(false);
       form.reset();
       toast({ title: "Category created successfully!" });
@@ -77,6 +79,9 @@ export default function AdminCategories() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
       setEditingCategory(null);
+      setUploadedImage(null);
+      setIsCreateDialogOpen(false);
+      form.reset();
       toast({ title: "Category updated successfully!" });
     },
     onError: () => {
