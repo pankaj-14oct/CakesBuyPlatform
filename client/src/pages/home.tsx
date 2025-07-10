@@ -7,6 +7,7 @@ import { ShoppingBag, Truck, Shield, Clock, CheckCircle, Star } from 'lucide-rea
 import { Category, Cake } from '@shared/schema';
 import CategoryCard from '@/components/category-card';
 import CakeCard from '@/components/cake-card';
+import CategoriesShowcase from '@/components/CategoriesShowcase';
 
 export default function Home() {
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
@@ -140,100 +141,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Quick Category Access */}
-      <section className="py-12 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl lg:text-3xl font-bold text-charcoal mb-4">
-              100% Eggless Cake Categories
-            </h2>
-            <p className="text-charcoal opacity-70">All our cakes are completely egg-free and delicious</p>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
-            <Link href="/category/birthday-cakes">
-              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl mb-2">🎂</div>
-                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">BIRTHDAY</h3>
-                </CardContent>
-              </Card>
-            </Link>
-            <Link href="/category/wedding-cakes">
-              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl mb-2">💒</div>
-                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">WEDDING</h3>
-                </CardContent>
-              </Card>
-            </Link>
-            <Link href="/category/theme-cakes">
-              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl mb-2">🎨</div>
-                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">THEME</h3>
-                </CardContent>
-              </Card>
-            </Link>
-            <Link href="/category/eggless-cakes">
-              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl mb-2">🥚</div>
-                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">EGGLESS</h3>
-                </CardContent>
-              </Card>
-            </Link>
-            <Link href="/category/photo-cakes">
-              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl mb-2">📸</div>
-                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">PHOTO</h3>
-                </CardContent>
-              </Card>
-            </Link>
-            <Link href="/category/anniversary-cakes">
-              <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl mb-2">💕</div>
-                  <h3 className="font-semibold text-charcoal group-hover:text-caramel">ANNIVERSARY</h3>
-                </CardContent>
-              </Card>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Categories Section */}
-      <section className="py-16 bg-cream">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-charcoal mb-4">
-              Browse Our Cake Categories
-            </h2>
-            <p className="text-lg text-charcoal opacity-70">
-              From classic birthdays to custom creations, find the perfect cake for every occasion
-            </p>
-          </div>
-
-          {categoriesLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="bg-gray-200 rounded-2xl h-24 mb-4"></div>
-                  <div className="bg-gray-200 rounded h-4 mb-2"></div>
-                  <div className="bg-gray-200 rounded h-3"></div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-              {categories.map((category) => (
-                <CategoryCard key={category.id} category={category} />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+      {/* Categories Showcase Section */}
+      <CategoriesShowcase />
 
       {/* Gurgaon Loves Section */}
       <section className="py-16 bg-white">
