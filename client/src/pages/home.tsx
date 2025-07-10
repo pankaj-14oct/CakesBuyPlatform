@@ -227,21 +227,12 @@ export default function Home() {
                             {(() => {
                               const weightPrice = cake.weights && cake.weights.length > 0 ? cake.weights[0].price : null;
                               const basePrice = cake.basePrice ? parseFloat(cake.basePrice.toString()) : 0;
-                              const originalPrice = weightPrice || basePrice || 0;
-                              const discountedPrice = Math.round(originalPrice * 0.9);
+                              const price = weightPrice || basePrice || 0;
                               return (
-                                <>
-                                  <span className="text-lg font-bold text-gray-800">₹{discountedPrice}</span>
-                                  <span className="text-sm text-gray-500 line-through">
-                                    ₹{originalPrice}
-                                  </span>
-                                </>
+                                <span className="text-lg font-bold text-gray-800">₹{price}</span>
                               );
                             })()}
                           </div>
-                          <Badge className="bg-red-500 text-white text-xs font-bold px-2 py-1">
-                            10% OFF
-                          </Badge>
                         </div>
                       </CardContent>
                     </Card>

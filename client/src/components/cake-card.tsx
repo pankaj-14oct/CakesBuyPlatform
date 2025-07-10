@@ -44,8 +44,7 @@ export default function CakeCard({ cake }: CakeCardProps) {
   const basePrice = cake.basePrice ? parseFloat(cake.basePrice.toString()) : 0;
   
   // Use weight price if available, otherwise use base price
-  const originalPrice = weightPrice || basePrice || 0;
-  const discountedPrice = Math.round(originalPrice * 0.9); // 10% discount
+  const price = weightPrice || basePrice || 0;
 
   return (
     <Link href={`/product/${cake.slug}`}>
@@ -114,10 +113,7 @@ export default function CakeCard({ cake }: CakeCardProps) {
           <div className="flex items-center justify-between mb-4">
             <div>
               <span className="text-xl font-bold text-brown">
-                {formatPrice(discountedPrice)}
-              </span>
-              <span className="text-sm text-charcoal opacity-60 line-through ml-2">
-                {formatPrice(originalPrice)}
+                {formatPrice(price)}
               </span>
             </div>
             <div className="text-sm text-charcoal opacity-70">
