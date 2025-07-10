@@ -72,9 +72,9 @@ export default function CategoriesShowcase() {
     cat.name.toLowerCase().includes('cakes') && !cat.parentId
   );
   
-  // Get only child categories under "Cakes"
+  // Get only child categories under "Cakes" that should show on homepage
   const cakeChildCategories = activeCategories.filter(cat => 
-    cat.parentId === cakesParentCategory?.id
+    cat.parentId === cakesParentCategory?.id && (cat as any).showOnHomepage !== false
   );
 
   if (isLoading) {
@@ -90,8 +90,9 @@ export default function CategoriesShowcase() {
     );
   }
 
-  // If no cake child categories found, show all active categories as fallback
-  const categoriesToShow = cakeChildCategories.length > 0 ? cakeChildCategories : activeCategories.slice(0, 8);
+  // If no cake child categories found, show all active categories that should show on homepage as fallback
+  const homepageCategories = activeCategories.filter(cat => (cat as any).showOnHomepage !== false);
+  const categoriesToShow = cakeChildCategories.length > 0 ? cakeChildCategories : homepageCategories.slice(0, 8);
 
   return (
     <section className="py-16 bg-gradient-to-br from-pink-50 to-orange-50">

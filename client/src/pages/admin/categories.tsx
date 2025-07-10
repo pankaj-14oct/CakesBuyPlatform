@@ -25,6 +25,7 @@ const categorySchema = z.object({
   image: z.string().optional(),
   parentId: z.number().optional(),
   isActive: z.boolean().default(true),
+  showOnHomepage: z.boolean().default(true),
 });
 
 type CategoryForm = z.infer<typeof categorySchema>;
@@ -50,6 +51,7 @@ export default function AdminCategories() {
       image: '',
       parentId: undefined,
       isActive: true,
+      showOnHomepage: true,
     }
   });
 
@@ -172,6 +174,7 @@ export default function AdminCategories() {
       image: categoryImage,
       parentId: (category as any).parentId || undefined,
       isActive: category.isActive || true,
+      showOnHomepage: (category as any).showOnHomepage !== undefined ? (category as any).showOnHomepage : true,
     });
     setIsCreateDialogOpen(true);
   };
@@ -186,6 +189,13 @@ export default function AdminCategories() {
     updateMutation.mutate({
       id: category.id,
       data: { ...category, isActive: !category.isActive }
+    });
+  };
+
+  const toggleShowOnHomepage = (category: Category) => {
+    updateMutation.mutate({
+      id: category.id,
+      data: { ...category, showOnHomepage: !(category as any).showOnHomepage }
     });
   };
 
@@ -384,6 +394,15 @@ export default function AdminCategories() {
                   />
                   <Label htmlFor="isActive">Active</Label>
                 </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="showOnHomepage"
+                    checked={form.watch('showOnHomepage')}
+                    onCheckedChange={(checked) => form.setValue('showOnHomepage', checked)}
+                  />
+                  <Label htmlFor="showOnHomepage">Show on Homepage</Label>
+                </div>
               </form>
             </div>
             
@@ -440,6 +459,7 @@ export default function AdminCategories() {
                   <TableHead>Description</TableHead>
                   <TableHead>Image</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Show on Homepage</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -521,6 +541,18 @@ export default function AdminCategories() {
                         />
                         <Badge variant={category.isActive ? "default" : "secondary"}>
                           {category.isActive ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={(category as any).showOnHomepage !== undefined ? (category as any).showOnHomepage : true}
+                          onCheckedChange={() => toggleShowOnHomepage(category)}
+                          disabled={updateMutation.isPending}
+                        />
+                        <Badge variant={(category as any).showOnHomepage !== false ? "default" : "secondary"}>
+                          {(category as any).showOnHomepage !== false ? 'Shown' : 'Hidden'}
                         </Badge>
                       </div>
                     </TableCell>

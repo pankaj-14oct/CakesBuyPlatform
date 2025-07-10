@@ -40,6 +40,7 @@ export const categories = pgTable("categories", {
   image: text("image"),
   parentId: integer("parent_id").references(() => categories.id),
   isActive: boolean("is_active").default(true),
+  showOnHomepage: boolean("show_on_homepage").default(true),
 });
 
 export const cakes = pgTable("cakes", {
