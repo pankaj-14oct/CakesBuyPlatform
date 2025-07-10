@@ -37,7 +37,7 @@ export const categories = pgTable("categories", {
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
   description: text("description"),
-  icon: text("icon"),
+  image: text("image"),
   parentId: integer("parent_id").references(() => categories.id),
   isActive: boolean("is_active").default(true),
 });

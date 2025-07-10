@@ -6,20 +6,20 @@ import { eq } from "drizzle-orm";
 const seedData = {
   categories: [
     // Parent category
-    { name: "Cakes", slug: "cakes", description: "All types of delicious cakes", icon: "🎂", isActive: true, parentId: null },
+    { name: "Cakes", slug: "cakes", description: "All types of delicious cakes", image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop", isActive: true, parentId: null },
     // Child categories
-    { name: "Birthday Cakes", slug: "birthday-cakes", description: "Delicious birthday cakes for all ages", icon: "🎂", isActive: true, parentId: 1 },
-    { name: "Wedding Cakes", slug: "wedding-cakes", description: "Elegant wedding cakes for your special day", icon: "💒", isActive: true, parentId: 1 },
-    { name: "Anniversary Cakes", slug: "anniversary-cakes", description: "Celebrate milestones with beautiful cakes", icon: "💕", isActive: true, parentId: 1 },
-    { name: "Theme Cakes", slug: "theme-cakes", description: "Custom themed cakes for special occasions", icon: "🎨", isActive: true, parentId: 1 },
-    { name: "Eggless Cakes", slug: "eggless-cakes", description: "Delicious eggless options for everyone", icon: "🥚", isActive: true, parentId: 1 },
-    { name: "Photo Cakes", slug: "photo-cakes", description: "Personalized cakes with edible photos", icon: "📸", isActive: true, parentId: 1 },
+    { name: "Birthday Cakes", slug: "birthday-cakes", description: "Delicious birthday cakes for all ages", image: "https://images.unsplash.com/photo-1464207687429-7505649dae38?w=400&h=300&fit=crop", isActive: true, parentId: 1 },
+    { name: "Wedding Cakes", slug: "wedding-cakes", description: "Elegant wedding cakes for your special day", image: "https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=400&h=300&fit=crop", isActive: true, parentId: 1 },
+    { name: "Anniversary Cakes", slug: "anniversary-cakes", description: "Celebrate milestones with beautiful cakes", image: "https://images.unsplash.com/photo-1535254973040-607b474cb50d?w=400&h=300&fit=crop", isActive: true, parentId: 1 },
+    { name: "Theme Cakes", slug: "theme-cakes", description: "Custom themed cakes for special occasions", image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&h=300&fit=crop", isActive: true, parentId: 1 },
+    { name: "Eggless Cakes", slug: "eggless-cakes", description: "Delicious eggless options for everyone", image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&h=300&fit=crop", isActive: true, parentId: 1 },
+    { name: "Photo Cakes", slug: "photo-cakes", description: "Personalized cakes with edible photos", image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop", isActive: true, parentId: 1 },
     // Flavor-based child categories
-    { name: "Chocolate Cakes", slug: "chocolate-cakes", description: "Rich and indulgent chocolate cakes", icon: "🍫", isActive: true, parentId: 1 },
-    { name: "Vanilla Cakes", slug: "vanilla-cakes", description: "Classic vanilla flavored cakes", icon: "🤍", isActive: true, parentId: 1 },
-    { name: "Strawberry Cakes", slug: "strawberry-cakes", description: "Fresh strawberry flavored cakes", icon: "🍓", isActive: true, parentId: 1 },
-    { name: "Red Velvet Cakes", slug: "red-velvet-cakes", description: "Luxurious red velvet cakes", icon: "❤️", isActive: true, parentId: 1 },
-    { name: "Fruit Cakes", slug: "fruit-cakes", description: "Fresh fruit topped cakes", icon: "🍊", isActive: true, parentId: 1 },
+    { name: "Chocolate Cakes", slug: "chocolate-cakes", description: "Rich and indulgent chocolate cakes", image: "https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?w=400&h=300&fit=crop", isActive: true, parentId: 1 },
+    { name: "Vanilla Cakes", slug: "vanilla-cakes", description: "Classic vanilla flavored cakes", image: "https://images.unsplash.com/photo-1586314075303-a93b06ced511?w=400&h=300&fit=crop", isActive: true, parentId: 1 },
+    { name: "Strawberry Cakes", slug: "strawberry-cakes", description: "Fresh strawberry flavored cakes", image: "https://images.unsplash.com/photo-1614707267971-d2d2dbe5b261?w=400&h=300&fit=crop", isActive: true, parentId: 1 },
+    { name: "Red Velvet Cakes", slug: "red-velvet-cakes", description: "Luxurious red velvet cakes", image: "https://images.unsplash.com/photo-1616690710400-a16d146927c5?w=400&h=300&fit=crop", isActive: true, parentId: 1 },
+    { name: "Fruit Cakes", slug: "fruit-cakes", description: "Fresh fruit topped cakes", image: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=300&fit=crop", isActive: true, parentId: 1 },
   ],
 
   cakes: [

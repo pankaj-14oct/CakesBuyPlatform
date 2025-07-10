@@ -22,7 +22,7 @@ const categorySchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   slug: z.string().min(2, 'Slug must be at least 2 characters'),
   description: z.string().optional(),
-  icon: z.string().optional(),
+  image: z.string().optional(),
   parentId: z.number().optional(),
   isActive: z.boolean().default(true),
 });
@@ -45,7 +45,7 @@ export default function AdminCategories() {
       name: '',
       slug: '',
       description: '',
-      icon: '',
+      image: '',
       parentId: undefined,
       isActive: true,
     }
@@ -110,7 +110,7 @@ export default function AdminCategories() {
       name: category.name,
       slug: category.slug,
       description: category.description || '',
-      icon: category.icon || '',
+      image: (category as any).image || '',
       parentId: (category as any).parentId || undefined,
       isActive: category.isActive || true,
     });
@@ -190,12 +190,15 @@ export default function AdminCategories() {
               </div>
 
               <div>
-                <Label htmlFor="icon">Icon (Emoji)</Label>
+                <Label htmlFor="image">Category Image</Label>
                 <Input
-                  id="icon"
-                  {...form.register('icon')}
-                  placeholder="🎂"
+                  id="image"
+                  {...form.register('image')}
+                  placeholder="Image URL or upload an image"
                 />
+                <p className="text-sm text-gray-500 mt-1">
+                  Enter an image URL or upload an image file
+                </p>
               </div>
 
               <div>
@@ -308,7 +311,7 @@ export default function AdminCategories() {
                   <TableHead>Slug</TableHead>
                   <TableHead>Parent Category</TableHead>
                   <TableHead>Description</TableHead>
-                  <TableHead>Icon</TableHead>
+                  <TableHead>Image</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -366,7 +369,22 @@ export default function AdminCategories() {
                       <TableCell className="max-w-xs truncate">
                         {category.description || '-'}
                       </TableCell>
-                      <TableCell className="text-2xl">{category.icon || '-'}</TableCell>
+                      <TableCell>
+                        {(category as any).image ? (
+                          <img 
+                            src={(category as any).image} 
+                            alt={category.name}
+                            className="w-12 h-12 object-cover rounded-lg"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <span className="text-gray-400 text-xs">No Image</span>
+                          </div>
+                        )}
+                      </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
                         <Switch
