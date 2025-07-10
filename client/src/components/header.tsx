@@ -197,7 +197,7 @@ export default function Header() {
             </Link>
 
             {/* Location Selector - Desktop */}
-            <div className="hidden md:flex items-center space-x-2">
+            <div className="hidden md:flex items-center space-x-2 ml-4">
               <MapPin className="h-4 w-4" />
               <span className="text-sm">Gurgaon</span>
             </div>
@@ -383,7 +383,7 @@ export default function Header() {
       {/* Navigation Menu - Desktop Only */}
       <nav className="bg-white border-b shadow-sm hidden md:block">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center space-x-8 py-3 overflow-x-auto">
+          <div className="flex items-center justify-start space-x-8 py-3 overflow-x-auto">
             {navItems.map((item) => (
               <Link
                 key={item.href}
