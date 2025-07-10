@@ -74,246 +74,207 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-cream flex">
-      {/* Left side - Form */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
-              <Cake className="h-12 w-12 text-caramel" />
+    <div className="min-h-screen bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-6">
+            <div className="bg-white/20 backdrop-blur-sm rounded-full p-6 border border-white/30">
+              <User className="h-12 w-12 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-charcoal">Welcome to CakesBuy</h1>
-            <p className="text-charcoal opacity-70 mt-2">Your sweet moments start here</p>
           </div>
+          <h1 className="text-4xl font-bold text-white mb-2">My Account</h1>
+          <p className="text-white/80 text-lg">Welcome to CakesBuy</p>
+        </div>
 
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-6 shadow-2xl">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Sign In</TabsTrigger>
-              <TabsTrigger value="register">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-white/20 backdrop-blur-sm border-0 mb-6">
+              <TabsTrigger value="login" className="text-white data-[state=active]:bg-white/30 data-[state=active]:text-white">Sign In</TabsTrigger>
+              <TabsTrigger value="register" className="text-white data-[state=active]:bg-white/30 data-[state=active]:text-white">Sign Up</TabsTrigger>
             </TabsList>
 
             {/* Login Tab */}
             <TabsContent value="login">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Sign In</CardTitle>
-                  <CardDescription>
-                    Enter your credentials to access your account
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Form {...loginForm}>
-                    <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
-                      <FormField
-                        control={loginForm.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Phone Number</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Phone className="absolute left-3 top-3 h-4 w-4 text-charcoal opacity-50" />
-                                <Input
-                                  {...field}
-                                  type="tel"
-                                  placeholder="Enter your phone number"
-                                  className="pl-10"
-                                />
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+              <div className="space-y-4">
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-semibold text-white mb-2">Sign In</h2>
+                  <p className="text-white/70">Enter your credentials to access your account</p>
+                </div>
+                
+                <Form {...loginForm}>
+                  <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
+                    <FormField
+                      control={loginForm.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Phone Number</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Phone className="absolute left-3 top-3 h-4 w-4 text-white/60" />
+                              <Input
+                                {...field}
+                                type="tel"
+                                placeholder="Enter your phone number"
+                                className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-white/50 focus:ring-white/25"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-red-200" />
+                        </FormItem>
+                      )}
+                    />
 
-                      <FormField
-                        control={loginForm.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Password</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Lock className="absolute left-3 top-3 h-4 w-4 text-charcoal opacity-50" />
-                                <Input
-                                  {...field}
-                                  type="password"
-                                  placeholder="Enter your password"
-                                  className="pl-10"
-                                />
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    <FormField
+                      control={loginForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Password</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Lock className="absolute left-3 top-3 h-4 w-4 text-white/60" />
+                              <Input
+                                {...field}
+                                type="password"
+                                placeholder="Enter your password"
+                                className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-white/50 focus:ring-white/25"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-red-200" />
+                        </FormItem>
+                      )}
+                    />
 
-                      <Button
-                        type="submit"
-                        className="w-full bg-caramel hover:bg-brown text-white"
-                        disabled={loginMutation.isPending}
-                      >
-                        {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
-                      </Button>
-                    </form>
-                  </Form>
-                  
-                  <div className="mt-4 text-center text-sm text-gray-600">
-                    <Link href="/forgot-password" className="text-caramel hover:text-brown font-medium">
-                      Forgot your password?
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
+                    <Button
+                      type="submit"
+                      className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm"
+                      disabled={loginMutation.isPending}
+                    >
+                      {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
+                    </Button>
+                  </form>
+                </Form>
+                
+                <div className="mt-4 text-center text-sm">
+                  <Link href="/forgot-password" className="text-white/80 hover:text-white font-medium">
+                    Forgot your password?
+                  </Link>
+                </div>
+              </div>
             </TabsContent>
 
             {/* Register Tab */}
             <TabsContent value="register">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Create Account</CardTitle>
-                  <CardDescription>
-                    Join CakesBuy and start ordering delicious cakes
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Form {...registerForm}>
-                    <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
-                      <FormField
-                        control={registerForm.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Phone Number</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Phone className="absolute left-3 top-3 h-4 w-4 text-charcoal opacity-50" />
-                                <Input
-                                  {...field}
-                                  type="tel"
-                                  placeholder="Enter your phone number"
-                                  className="pl-10"
-                                />
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+              <div className="space-y-4">
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-semibold text-white mb-2">Create Account</h2>
+                  <p className="text-white/70">Join CakesBuy and start ordering delicious cakes</p>
+                </div>
+                
+                <Form {...registerForm}>
+                  <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
+                    <FormField
+                      control={registerForm.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Phone Number</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Phone className="absolute left-3 top-3 h-4 w-4 text-white/60" />
+                              <Input
+                                {...field}
+                                type="tel"
+                                placeholder="Enter your phone number"
+                                className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-white/50 focus:ring-white/25"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-red-200" />
+                        </FormItem>
+                      )}
+                    />
 
-                      <FormField
-                        control={registerForm.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Mail className="absolute left-3 top-3 h-4 w-4 text-charcoal opacity-50" />
-                                <Input
-                                  {...field}
-                                  type="email"
-                                  placeholder="Enter your email"
-                                  className="pl-10"
-                                />
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    <FormField
+                      control={registerForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Email</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Mail className="absolute left-3 top-3 h-4 w-4 text-white/60" />
+                              <Input
+                                {...field}
+                                type="email"
+                                placeholder="Enter your email"
+                                className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-white/50 focus:ring-white/25"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-red-200" />
+                        </FormItem>
+                      )}
+                    />
 
-                      <FormField
-                        control={registerForm.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Password</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Lock className="absolute left-3 top-3 h-4 w-4 text-charcoal opacity-50" />
-                                <Input
-                                  {...field}
-                                  type="password"
-                                  placeholder="Create a password"
-                                  className="pl-10"
-                                />
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    <FormField
+                      control={registerForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Password</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Lock className="absolute left-3 top-3 h-4 w-4 text-white/60" />
+                              <Input
+                                {...field}
+                                type="password"
+                                placeholder="Create a password"
+                                className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-white/50 focus:ring-white/25"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-red-200" />
+                        </FormItem>
+                      )}
+                    />
 
-                      <FormField
-                        control={registerForm.control}
-                        name="confirmPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Confirm Password</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Lock className="absolute left-3 top-3 h-4 w-4 text-charcoal opacity-50" />
-                                <Input
-                                  {...field}
-                                  type="password"
-                                  placeholder="Confirm your password"
-                                  className="pl-10"
-                                />
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    <FormField
+                      control={registerForm.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Confirm Password</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Lock className="absolute left-3 top-3 h-4 w-4 text-white/60" />
+                              <Input
+                                {...field}
+                                type="password"
+                                placeholder="Confirm your password"
+                                className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-white/50 focus:ring-white/25"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-red-200" />
+                        </FormItem>
+                      )}
+                    />
 
-                      <Button
-                        type="submit"
-                        className="w-full bg-caramel hover:bg-brown text-white"
-                        disabled={registerMutation.isPending}
-                      >
-                        {registerMutation.isPending ? 'Creating Account...' : 'Create Account'}
-                      </Button>
-                    </form>
-                  </Form>
-                </CardContent>
-              </Card>
+                    <Button
+                      type="submit"
+                      className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm"
+                      disabled={registerMutation.isPending}
+                    >
+                      {registerMutation.isPending ? 'Creating Account...' : 'Create Account'}
+                    </Button>
+                  </form>
+                </Form>
+              </div>
             </TabsContent>
           </Tabs>
-        </div>
-      </div>
-
-      {/* Right side - Hero */}
-      <div className="hidden md:flex md:w-1/2 items-center justify-center p-8" style={{
-        background: 'linear-gradient(to bottom right, hsl(30, 51%, 64%), hsl(21, 75%, 31%))'
-      }}>
-        <div className="text-center max-w-md" style={{ color: 'white' }}>
-          <div className="mb-8">
-            <Cake className="h-20 w-20 md:h-24 md:w-24 mx-auto mb-6 drop-shadow-lg" />
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 drop-shadow-md">Delicious Cakes Delivered</h2>
-            <p className="text-base md:text-lg opacity-95 mb-6 drop-shadow-sm">
-              Fresh, handcrafted cakes made with love. Same-day delivery available in Gurgaon.
-            </p>
-          </div>
-          
-          <div className="space-y-4 text-sm md:text-base">
-            <div className="flex items-center justify-center space-x-3">
-              <div className="w-2 h-2 bg-white rounded-full flex-shrink-0 shadow-sm"></div>
-              <span className="drop-shadow-sm font-medium">Custom cake designs</span>
-            </div>
-            <div className="flex items-center justify-center space-x-3">
-              <div className="w-2 h-2 bg-white rounded-full flex-shrink-0 shadow-sm"></div>
-              <span className="drop-shadow-sm font-medium">Premium ingredients</span>
-            </div>
-            <div className="flex items-center justify-center space-x-3">
-              <div className="w-2 h-2 bg-white rounded-full flex-shrink-0 shadow-sm"></div>
-              <span className="drop-shadow-sm font-medium">Same-day delivery</span>
-            </div>
-            <div className="flex items-center justify-center space-x-3">
-              <div className="w-2 h-2 bg-white rounded-full flex-shrink-0 shadow-sm"></div>
-              <span className="drop-shadow-sm font-medium">Secure payments</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>
