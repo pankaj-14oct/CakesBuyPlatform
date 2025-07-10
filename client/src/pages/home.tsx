@@ -151,11 +151,11 @@ export default function Home() {
             <div className="flex items-center justify-center mb-4">
               <Star className="text-yellow-500 mr-2 h-8 w-8 fill-current" />
               <h2 className="text-3xl lg:text-4xl font-bold text-red-600">
-                India Loves
+                Loved by Gurgaon, Baked by CakesBuy
               </h2>
             </div>
             <p className="text-lg text-gray-600">
-              Bestsellers from across the country
+              From Birthday Classics to Designer Delights
             </p>
           </div>
 
