@@ -97,30 +97,21 @@ const upload = multer({
     fileSize: 20 * 1024 * 1024 // 20MB limit for high-quality images
   },
   fileFilter: (req, file, cb) => {
-    // Accept image formats - check both mimetype and extension
-    const allowedMimeTypes = [
-      'image/jpeg',
-      'image/jpg', 
-      'image/png',
-      'image/webp',
-      'image/tiff',
-      'image/bmp',
-      'image/gif',
-      'image/svg+xml'
-    ];
+    // Accept all image formats - be very permissive for debugging
+    console.log('File upload attempt:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      fieldname: file.fieldname
+    });
     
-    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.tiff', '.bmp', '.gif', '.svg'];
-    const fileExtension = file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.'));
-    
-    if (allowedMimeTypes.includes(file.mimetype) || allowedExtensions.includes(fileExtension)) {
+    // Just check if it starts with 'image/' or has image extension
+    if (file.mimetype.startsWith('image/') || 
+        file.originalname.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp|bmp|tiff|svg)$/)) {
+      console.log('File accepted');
       cb(null, true);
     } else {
-      console.log('Rejected file:', {
-        originalname: file.originalname,
-        mimetype: file.mimetype,
-        extension: fileExtension
-      });
-      cb(new Error('Only image files are allowed (JPEG, PNG, WebP, TIFF, BMP, GIF, SVG)'));
+      console.log('File rejected - not an image');
+      cb(new Error('Only image files are allowed'));
     }
   }
 });
