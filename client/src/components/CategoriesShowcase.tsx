@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Cake, Heart, Star, Gift } from 'lucide-react';
+import { Cake, Heart, Star, Gift, Camera, Cherry, Grape, Layers, Sparkles, Palette } from 'lucide-react';
 
 interface Category {
   id: number;
@@ -28,11 +28,19 @@ const categoryGradients = [
 ];
 
 const categoryIcons = {
-  'birthday': <Cake className="w-6 h-6" />,
-  'anniversary': <Heart className="w-6 h-6" />,
-  'wedding': <Gift className="w-6 h-6" />,
-  'theme': <Star className="w-6 h-6" />,
-  'default': <Cake className="w-6 h-6" />
+  'birthday': <Cake className="w-8 h-8" />,
+  'anniversary': <Heart className="w-8 h-8" />,
+  'wedding': <Gift className="w-8 h-8" />,
+  'theme': <Star className="w-8 h-8" />,
+  'photo': <Camera className="w-8 h-8" />,
+  'chocolate': <Layers className="w-8 h-8" />,
+  'vanilla': <Sparkles className="w-8 h-8" />,
+  'strawberry': <Cherry className="w-8 h-8" />,
+  'fruit': <Grape className="w-8 h-8" />,
+  'red velvet': <Heart className="w-8 h-8" />,
+  'eggless': <Cake className="w-8 h-8" />,
+  'custom': <Palette className="w-8 h-8" />,
+  'default': <Cake className="w-8 h-8" />
 };
 
 const getIconForCategory = (name: string) => {
@@ -41,6 +49,14 @@ const getIconForCategory = (name: string) => {
   if (lowerName.includes('anniversary')) return categoryIcons.anniversary;
   if (lowerName.includes('wedding')) return categoryIcons.wedding;
   if (lowerName.includes('theme')) return categoryIcons.theme;
+  if (lowerName.includes('photo')) return categoryIcons.photo;
+  if (lowerName.includes('chocolate')) return categoryIcons.chocolate;
+  if (lowerName.includes('vanilla')) return categoryIcons.vanilla;
+  if (lowerName.includes('strawberry')) return categoryIcons.strawberry;
+  if (lowerName.includes('fruit')) return categoryIcons.fruit;
+  if (lowerName.includes('red velvet')) return categoryIcons['red velvet'];
+  if (lowerName.includes('eggless')) return categoryIcons.eggless;
+  if (lowerName.includes('custom')) return categoryIcons.custom;
   return categoryIcons.default;
 };
 
