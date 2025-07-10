@@ -140,6 +140,28 @@ const csvUpload = multer({
 
 export async function registerRoutes(app: Express, httpServer?: any): Promise<Server> {
   
+  // Admin middleware - simpler approach without TypeScript conflicts
+  const requireAdmin = (req: AuthRequest, res: any, next: any) => {
+    // Use the existing authenticateToken middleware first
+    authenticateToken(req, res, async () => {
+      try {
+        if (!req.user) {
+          return res.status(401).json({ message: "Access token required" });
+        }
+
+        // Get full user info to check role
+        const user = await storage.getUser(req.user.id);
+        if (!user || user.role !== 'admin') {
+          return res.status(403).json({ message: "Admin access required" });
+        }
+
+        next();
+      } catch (error) {
+        return res.status(401).json({ message: "Admin access required" });
+      }
+    });
+  };
+
   // Single file upload endpoint
   app.post("/api/upload", upload.single('image'), (req, res) => {
     try {
@@ -912,7 +934,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
   // Admin API Routes
   
   // Admin Categories
-  app.post("/api/admin/categories", async (req, res) => {
+  app.post("/api/admin/categories", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const categoryData = insertCategorySchema.parse(req.body);
       const category = await storage.createCategory(categoryData);
@@ -925,7 +947,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
-  app.put("/api/admin/categories/:id", async (req, res) => {
+  app.put("/api/admin/categories/:id", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.updateCategory(id, req.body);
@@ -935,7 +957,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
-  app.delete("/api/admin/categories/:id", async (req, res) => {
+  app.delete("/api/admin/categories/:id", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteCategory(id);
@@ -946,7 +968,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
   });
 
   // Admin Cakes
-  app.post("/api/admin/cakes", async (req, res) => {
+  app.post("/api/admin/cakes", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const cakeData = insertCakeSchema.parse(req.body);
       const cake = await storage.createCake(cakeData);
@@ -959,7 +981,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
-  app.put("/api/admin/cakes/:id", async (req, res) => {
+  app.put("/api/admin/cakes/:id", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.updateCake(id, req.body);
@@ -969,7 +991,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
-  app.delete("/api/admin/cakes/:id", async (req, res) => {
+  app.delete("/api/admin/cakes/:id", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteCake(id);
@@ -980,7 +1002,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
   });
 
   // Admin Orders
-  app.get("/api/admin/orders", async (req, res) => {
+  app.get("/api/admin/orders", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const { status } = req.query;
       
@@ -997,7 +1019,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
   });
 
   // Admin Promo Codes
-  app.get("/api/admin/promo-codes", async (req, res) => {
+  app.get("/api/admin/promo-codes", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const promoCodes = await storage.getAllPromoCodes();
       res.json(promoCodes);
@@ -1006,7 +1028,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
-  app.post("/api/admin/promo-codes", async (req, res) => {
+  app.post("/api/admin/promo-codes", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const promoData = insertPromoCodeSchema.parse(req.body);
       const promoCode = await storage.createPromoCode(promoData);
@@ -1019,7 +1041,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
-  app.put("/api/admin/promo-codes/:id", async (req, res) => {
+  app.put("/api/admin/promo-codes/:id", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.updatePromoCode(id, req.body);
@@ -1029,7 +1051,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
-  app.delete("/api/admin/promo-codes/:id", async (req, res) => {
+  app.delete("/api/admin/promo-codes/:id", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deletePromoCode(id);
@@ -1040,7 +1062,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
   });
 
   // Admin Add-ons
-  app.post("/api/admin/addons", async (req, res) => {
+  app.post("/api/admin/addons", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const addonData = insertAddonSchema.parse(req.body);
       const addon = await storage.createAddon(addonData);
@@ -1053,7 +1075,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
-  app.put("/api/admin/addons/:id", async (req, res) => {
+  app.put("/api/admin/addons/:id", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.updateAddon(id, req.body);
@@ -1063,7 +1085,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
-  app.delete("/api/admin/addons/:id", async (req, res) => {
+  app.delete("/api/admin/addons/:id", requireAdmin, async (req: AuthRequest, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteAddon(id);
@@ -1073,27 +1095,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
-  // Admin middleware - simpler approach without TypeScript conflicts
-  const requireAdmin = (req: AuthRequest, res: any, next: any) => {
-    // Use the existing authenticateToken middleware first
-    authenticateToken(req, res, async () => {
-      try {
-        if (!req.user) {
-          return res.status(401).json({ message: "Access token required" });
-        }
 
-        // Get full user info to check role
-        const user = await storage.getUser(req.user.id);
-        if (!user || user.role !== 'admin') {
-          return res.status(403).json({ message: "Admin access required" });
-        }
-
-        next();
-      } catch (error) {
-        return res.status(401).json({ message: "Admin access required" });
-      }
-    });
-  };
 
   // Admin Invoice Management
   app.get("/api/admin/invoices", requireAdmin, async (req: AuthRequest, res) => {
