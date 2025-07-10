@@ -363,7 +363,7 @@ export default function Header() {
                   <Link href="/auth">
                     <Button className="bg-white text-red-600 hover:bg-gray-100 font-semibold px-4 py-2 rounded-lg hidden md:flex">
                       <User className="h-4 w-4 mr-2" />
-                      Login / Sign Up
+                      My Account
                     </Button>
                   </Link>
                   {/* Mobile User Icon */}
