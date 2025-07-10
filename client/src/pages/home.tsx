@@ -472,9 +472,11 @@ export default function Home() {
                 </div>
               </div>
 
-              <Button size="lg" className="bg-brown text-white hover:bg-opacity-90">
-                Start Customizing
-              </Button>
+              <Link href="/cakes/photo-cakes">
+                <Button size="lg" className="bg-brown text-white hover:bg-opacity-90">
+                  Start Customizing
+                </Button>
+              </Link>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
