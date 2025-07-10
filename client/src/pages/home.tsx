@@ -178,8 +178,8 @@ export default function Home() {
             <div className="overflow-x-auto pb-4 hide-scrollbar">
               <div className="flex gap-4 px-2" style={{ width: 'max-content' }}>
                 {featuredCakes.map((cake, index) => (
-                  <Link key={cake.id} href={`/cake/${cake.slug}`}>
-                    <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer w-64 flex-shrink-0">
+                  <Link key={cake.id} href={`/product/${cake.slug}`}>
+                    <Card className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer w-64 flex-shrink-0 border hover:border-caramel/30">
                       <div className="relative">
                         {/* Veg indicator */}
                         <div className="absolute top-2 left-2 z-10">
