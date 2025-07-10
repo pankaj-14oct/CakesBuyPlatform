@@ -74,7 +74,7 @@ export default function CategoriesShowcase() {
         </div>
 
         {/* Horizontal Scrollable Categories */}
-        <div className="overflow-x-auto pb-6">
+        <div className="overflow-x-auto pb-6 hide-scrollbar">
           <div className="flex gap-6 px-4" style={{ width: 'max-content' }}>
             {mainCategories.map((category, index) => {
               const gradientClass = categoryGradients[index % categoryGradients.length];
