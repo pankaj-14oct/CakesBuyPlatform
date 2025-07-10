@@ -22,7 +22,7 @@ export default function CustomizedCakesPage() {
       icon: MessageSquare,
       title: "Personal Touch",
       description: "Add custom messages, names, and special decorative elements",
-      bgGradient: "from-pink-500 to-rose-500"
+      bgGradient: "from-purple-500 to-indigo-500"
     },
     {
       icon: Brush,
