@@ -50,7 +50,16 @@ export default function CategoriesShowcase() {
   });
 
   const activeCategories = categories.filter(cat => cat.isActive);
-  const mainCategories = activeCategories.filter(cat => !cat.parentId);
+  
+  // Find the "Cakes" parent category
+  const cakesParentCategory = activeCategories.find(cat => 
+    cat.name.toLowerCase().includes('cakes') && !cat.parentId
+  );
+  
+  // Get only child categories under "Cakes"
+  const cakeChildCategories = activeCategories.filter(cat => 
+    cat.parentId === cakesParentCategory?.id
+  );
 
   if (isLoading) {
     return (
@@ -65,6 +74,9 @@ export default function CategoriesShowcase() {
     );
   }
 
+  // If no cake child categories found, show all active categories as fallback
+  const categoriesToShow = cakeChildCategories.length > 0 ? cakeChildCategories : activeCategories.slice(0, 8);
+
   return (
     <section className="py-16 bg-gradient-to-br from-pink-50 to-orange-50">
       <div className="w-full">
@@ -75,15 +87,14 @@ export default function CategoriesShowcase() {
 
         {/* Horizontal Scrollable Categories */}
         <div className="overflow-x-auto pb-6 hide-scrollbar">
-          <div className="flex gap-6 px-4" style={{ width: 'max-content' }}>
-            {mainCategories.map((category, index) => {
+          <div className="flex gap-4 px-4" style={{ width: 'max-content' }}>
+            {categoriesToShow.map((category, index) => {
               const gradientClass = categoryGradients[index % categoryGradients.length];
-              const childCategories = activeCategories.filter(cat => cat.parentId === category.id);
               
               return (
                 <Link key={category.id} href={`/categories/${category.slug}`}>
-                  <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer overflow-hidden w-80 flex-shrink-0">
-                    <div className={`relative h-48 bg-gradient-to-br ${gradientClass} flex items-center justify-center`}>
+                  <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer overflow-hidden w-52 flex-shrink-0 rounded-3xl">
+                    <div className={`relative h-40 bg-gradient-to-br ${gradientClass} flex items-center justify-center`}>
                       {/* Decorative stars */}
                       <div className="absolute inset-0 overflow-hidden">
                         <div className="absolute top-4 left-4 w-2 h-2 bg-white/30 rounded-full animate-pulse"></div>
@@ -93,16 +104,16 @@ export default function CategoriesShowcase() {
                       </div>
 
                       {/* Category image or icon */}
-                      <div className="relative z-10 flex flex-col items-center justify-center">
+                      <div className="relative z-10 flex flex-col items-center justify-center h-full w-full">
                         {category.image ? (
                           <img 
                             src={category.image} 
                             alt={category.name}
-                            className="w-20 h-20 object-cover rounded-full border-4 border-white/30 shadow-lg group-hover:scale-110 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                           />
                         ) : (
-                          <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center border-4 border-white/30 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                            <div className="text-white">
+                          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center border-4 border-white/30 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                            <div className="text-white text-xl">
                               {getIconForCategory(category.name)}
                             </div>
                           </div>
@@ -112,32 +123,16 @@ export default function CategoriesShowcase() {
                         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           <div className="absolute top-2 right-2 w-1 h-1 bg-white rounded-full animate-ping"></div>
                           <div className="absolute bottom-2 left-2 w-1 h-1 bg-white rounded-full animate-ping delay-100"></div>
+                          <div className="absolute top-4 left-6 w-1 h-1 bg-white rounded-full animate-ping delay-200"></div>
+                          <div className="absolute bottom-6 right-8 w-1 h-1 bg-white rounded-full animate-ping delay-300"></div>
                         </div>
                       </div>
                     </div>
 
-                    <CardContent className="p-6 text-center bg-white">
-                      <h3 className="text-lg font-bold text-gray-800 mb-2 group-hover:text-caramel transition-colors">
+                    <CardContent className="p-4 text-center bg-white">
+                      <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider group-hover:text-caramel transition-colors">
                         {category.name}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                        {category.description || `Delicious ${category.name.toLowerCase()} for every occasion`}
-                      </p>
-                      
-                      {childCategories.length > 0 && (
-                        <div className="flex flex-wrap gap-1 justify-center">
-                          {childCategories.slice(0, 3).map(child => (
-                            <Badge key={child.id} variant="secondary" className="text-xs bg-gray-100 text-gray-700 hover:bg-caramel hover:text-white transition-colors">
-                              {child.name}
-                            </Badge>
-                          ))}
-                          {childCategories.length > 3 && (
-                            <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-700">
-                              +{childCategories.length - 3} more
-                            </Badge>
-                          )}
-                        </div>
-                      )}
                     </CardContent>
                   </Card>
                 </Link>
