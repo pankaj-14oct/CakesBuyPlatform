@@ -198,17 +198,18 @@ export default function CustomizedCakesPage() {
       </div>
 
       {/* CTA Section */}
-      <div className="py-20 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-2xl mx-auto text-white">
-            <h2 className="text-4xl font-bold mb-6">Ready to Create Your Dream Cake?</h2>
-            <p className="text-xl mb-8 opacity-90">
+      <div className="py-20 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold mb-6 text-white drop-shadow-lg">Ready to Create Your Dream Cake?</h2>
+            <p className="text-xl mb-8 text-white drop-shadow-md">
               Let's bring your sweetest imagination to life with our expert customization services
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
-                className="bg-white text-pink-600 hover:bg-gray-100 px-8 py-4 rounded-full text-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-200"
+                className="bg-white text-pink-600 hover:bg-gray-100 px-8 py-4 rounded-full text-lg font-bold shadow-2xl transform hover:scale-105 transition-all duration-200 border-2 border-white"
                 onClick={() => window.open('https://wa.me/918287177303', '_blank')}
               >
                 <MessageCircle className="mr-2 h-5 w-5" />
@@ -218,7 +219,7 @@ export default function CustomizedCakesPage() {
               <Link href="/cakes/photo-cakes">
                 <Button 
                   variant="outline" 
-                  className="border-white text-white hover:bg-white hover:text-pink-600 px-8 py-4 rounded-full text-lg font-semibold shadow-lg transform hover:scale-105 transition-all duration-200"
+                  className="border-2 border-white text-white hover:bg-white hover:text-pink-600 px-8 py-4 rounded-full text-lg font-bold shadow-2xl transform hover:scale-105 transition-all duration-200 bg-transparent backdrop-blur-sm"
                 >
                   Browse Photo Cakes
                   <ArrowRight className="ml-2 h-5 w-5" />
