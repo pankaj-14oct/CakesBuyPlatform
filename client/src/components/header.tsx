@@ -19,15 +19,15 @@ export default function Header() {
   const { user, isAuthenticated, logoutMutation } = useAuth();
 
   const navItems = [
-    { href: '/category/eggless-cakes', label: 'Cakes' },
-    { href: '/category/theme-cakes', label: 'Theme Cakes' },
-    { href: '/category/relationship-cakes', label: 'By Relationship' },
-    { href: '/category/desserts', label: 'Desserts' },
-    { href: '/category/birthday-cakes', label: 'Birthday' },
-    { href: '/category/hampers', label: 'Hampers', badge: 'New' },
-    { href: '/category/anniversary-cakes', label: 'Anniversary' },
+    { href: '/search', label: 'Cakes' },
+    { href: '/cakes/theme-cakes', label: 'Theme Cakes' },
+    { href: '/cakes/relationship-cakes', label: 'By Relationship' },
+    { href: '/cakes/desserts', label: 'Desserts' },
+    { href: '/cakes/birthday-cakes', label: 'Birthday' },
+    { href: '/cakes/hampers', label: 'Hampers', badge: 'New' },
+    { href: '/cakes/anniversary-cakes', label: 'Anniversary' },
     { href: '/occasions', label: 'Occasion' },
-    { href: '/customized-cakes', label: 'Customized Cakes' },
+    { href: '/cakes/photo-cakes', label: 'Customized Cakes' },
   ];
 
   const handleSearch = (e: React.FormEvent) => {
