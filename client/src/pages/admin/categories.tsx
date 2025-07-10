@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Edit, Trash2, Package } from 'lucide-react';
+import { Plus, Edit, Trash2, Package, Upload, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Category } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
@@ -32,6 +32,8 @@ type CategoryForm = z.infer<typeof categorySchema>;
 export default function AdminCategories() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -97,20 +99,71 @@ export default function AdminCategories() {
   });
 
   const onSubmit = (data: CategoryForm) => {
+    const submitData = {
+      ...data,
+      image: uploadedImage || data.image
+    };
+    
     if (editingCategory) {
-      updateMutation.mutate({ id: editingCategory.id, data });
+      updateMutation.mutate({ id: editingCategory.id, data: submitData });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(submitData);
+    }
+  };
+
+  const handleImageUpload = useCallback(async (file: File) => {
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const response = await fetch('/api/admin/upload-image', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Upload failed');
+      
+      const data = await response.json();
+      setUploadedImage(data.imageUrl);
+      form.setValue('image', data.imageUrl);
+      toast({ title: "Image uploaded successfully!" });
+    } catch (error) {
+      toast({ title: "Failed to upload image", variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+    }
+  }, [form, toast]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    const files = Array.from(e.dataTransfer.files);
+    const imageFile = files.find(file => file.type.startsWith('image/'));
+    
+    if (imageFile) {
+      handleImageUpload(imageFile);
+    }
+  }, [handleImageUpload]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      handleImageUpload(file);
     }
   };
 
   const handleEdit = (category: Category) => {
     setEditingCategory(category);
+    const categoryImage = (category as any).image || '';
+    setUploadedImage(categoryImage);
     form.reset({
       name: category.name,
       slug: category.slug,
       description: category.description || '',
-      image: (category as any).image || '',
+      image: categoryImage,
       parentId: (category as any).parentId || undefined,
       isActive: category.isActive || true,
     });
@@ -190,15 +243,75 @@ export default function AdminCategories() {
               </div>
 
               <div>
-                <Label htmlFor="image">Category Image</Label>
-                <Input
-                  id="image"
-                  {...form.register('image')}
-                  placeholder="Image URL or upload an image"
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  Enter an image URL or upload an image file
-                </p>
+                <Label>Category Image</Label>
+                <div 
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400 transition-colors"
+                  onDrop={handleDrop}
+                  onDragOver={(e) => e.preventDefault()}
+                  onClick={() => document.getElementById('image-upload')?.click()}
+                >
+                  {uploadedImage ? (
+                    <div className="space-y-4">
+                      <img 
+                        src={uploadedImage} 
+                        alt="Category preview" 
+                        className="w-32 h-32 object-cover rounded-lg mx-auto"
+                      />
+                      <div className="flex items-center justify-center space-x-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setUploadedImage(null);
+                            form.setValue('image', '');
+                          }}
+                        >
+                          <X className="w-4 h-4 mr-1" />
+                          Remove
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            document.getElementById('image-upload')?.click();
+                          }}
+                        >
+                          <Upload className="w-4 h-4 mr-1" />
+                          Change
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {isUploading ? (
+                        <div className="text-gray-500">
+                          <Upload className="w-8 h-8 mx-auto mb-2 animate-pulse" />
+                          Uploading image...
+                        </div>
+                      ) : (
+                        <>
+                          <Upload className="w-8 h-8 mx-auto text-gray-400" />
+                          <div>
+                            <p className="text-gray-600 font-medium">Click to upload or drag and drop</p>
+                            <p className="text-sm text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                  <input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileChange}
+                    disabled={isUploading}
+                  />
+                </div>
               </div>
 
               <div>
@@ -278,6 +391,7 @@ export default function AdminCategories() {
                   onClick={() => {
                     setIsCreateDialogOpen(false);
                     setEditingCategory(null);
+                    setUploadedImage(null);
                     form.reset();
                   }}
                 >

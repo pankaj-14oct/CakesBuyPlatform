@@ -157,6 +157,8 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
+
+
   // Multiple file upload endpoint for product images
   app.post("/api/upload/multiple", upload.array('images', 10), (req, res) => {
     try {
@@ -1481,6 +1483,25 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     } catch (error) {
       console.error("Test notification error:", error);
       res.status(500).json({ message: "Failed to send test notification" });
+    }
+  });
+
+  // Admin image upload endpoint
+  app.post("/api/admin/upload-image", requireAdmin, upload.single('image'), (req: AuthRequest, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No image uploaded" });
+      }
+      
+      const imageUrl = `/uploads/${req.file.filename}`;
+      res.json({ 
+        message: "Image uploaded successfully", 
+        imageUrl,
+        filename: req.file.filename 
+      });
+    } catch (error) {
+      console.error("Admin image upload error:", error);
+      res.status(500).json({ message: "Failed to upload image" });
     }
   });
 
