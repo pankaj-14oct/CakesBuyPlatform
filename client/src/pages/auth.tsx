@@ -74,37 +74,35 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-red-500 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-6">
-            <div className="bg-red-400/50 rounded-full p-4">
-              <User className="h-8 w-8 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-6xl bg-white rounded-xl shadow-2xl overflow-hidden">
+        <div className="flex min-h-[600px]">
+          {/* Left Side - Form */}
+          <div className="w-1/2 p-8 lg:p-12">
+            <div className="mb-8">
+              <div className="flex items-center mb-6">
+                <Cake className="h-8 w-8 text-caramel mr-3" />
+                <h1 className="text-2xl font-bold text-charcoal">CakesBuy</h1>
+              </div>
+              <h2 className="text-3xl font-bold text-charcoal mb-2">
+                {activeTab === 'login' ? 'Welcome Back!' : 'Create Account'}
+              </h2>
+              <p className="text-gray-600">
+                {activeTab === 'login' 
+                  ? 'Sign in to your account to continue ordering delicious cakes'
+                  : 'Join CakesBuy and start ordering 100% eggless cakes'
+                }
+              </p>
             </div>
-          </div>
-          <h1 className="text-3xl font-bold text-white mb-2">My Account</h1>
-          <p className="text-white/90 text-sm">Welcome to CakesBuy</p>
-        </div>
 
-        <div className="bg-red-400/30 backdrop-blur-sm rounded-2xl border border-red-400/40 p-6 shadow-lg">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-red-400/40 backdrop-blur-sm border-0 mb-6 p-1 rounded-xl">
-              <TabsTrigger 
-                value="login" 
-                className="text-white data-[state=active]:bg-red-400/60 data-[state=active]:text-white rounded-lg py-2 text-sm font-medium"
-              >
-                Sign In
-              </TabsTrigger>
-              <TabsTrigger 
-                value="register" 
-                className="text-white data-[state=active]:bg-red-400/60 data-[state=active]:text-white rounded-lg py-2 text-sm font-medium"
-              >
-                Sign Up
-              </TabsTrigger>
-            </TabsList>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-8 bg-gray-100">
+                <TabsTrigger value="login" className="data-[state=active]:bg-white">Sign In</TabsTrigger>
+                <TabsTrigger value="register" className="data-[state=active]:bg-white">Sign Up</TabsTrigger>
+              </TabsList>
 
-            {/* Login Tab */}
-            <TabsContent value="login" className="space-y-4">
+              {/* Login Tab */}
+              <TabsContent value="login" className="space-y-6">
                 <Form {...loginForm}>
                   <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
                     <FormField
@@ -112,19 +110,19 @@ export default function AuthPage() {
                       name="phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-white text-sm font-medium">Phone Number</FormLabel>
+                          <FormLabel className="text-charcoal font-medium">Phone Number</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Phone className="absolute left-3 top-3 h-4 w-4 text-white/60" />
+                              <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                               <Input
                                 {...field}
                                 type="tel"
                                 placeholder="Enter your phone number"
-                                className="pl-10 bg-red-400/40 border-red-400/50 text-white placeholder:text-white/70 focus:border-red-300 focus:ring-red-300/50 rounded-lg"
+                                className="pl-10 border-gray-300 focus:border-caramel focus:ring-caramel/20"
                               />
                             </div>
                           </FormControl>
-                          <FormMessage className="text-red-200" />
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -134,47 +132,42 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-white text-sm font-medium">Password</FormLabel>
+                          <FormLabel className="text-charcoal font-medium">Password</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Lock className="absolute left-3 top-3 h-4 w-4 text-white/60" />
+                              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                               <Input
                                 {...field}
                                 type="password"
                                 placeholder="Enter your password"
-                                className="pl-10 bg-red-400/40 border-red-400/50 text-white placeholder:text-white/70 focus:border-red-300 focus:ring-red-300/50 rounded-lg"
+                                className="pl-10 border-gray-300 focus:border-caramel focus:ring-caramel/20"
                               />
                             </div>
                           </FormControl>
-                          <FormMessage className="text-red-200" />
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
 
+                    <div className="text-right">
+                      <Link href="/forgot-password" className="text-caramel hover:text-brown text-sm font-medium">
+                        Forgot password?
+                      </Link>
+                    </div>
+
                     <Button
                       type="submit"
-                      className="w-full bg-red-400/60 hover:bg-red-400/70 text-white border-0 rounded-lg py-3 font-medium"
+                      className="w-full bg-caramel hover:bg-brown text-white py-3 font-medium"
                       disabled={loginMutation.isPending}
                     >
                       {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
                     </Button>
                   </form>
                 </Form>
-                
-                <div className="mt-4 text-center text-sm">
-                  <Link href="/forgot-password" className="text-white/80 hover:text-white font-medium">
-                    Forgot your password?
-                  </Link>
-                </div>
-            </TabsContent>
+              </TabsContent>
 
-            {/* Register Tab */}
-            <TabsContent value="register" className="space-y-4">
-              <div className="text-center mb-4">
-                <h2 className="text-xl font-semibold text-white mb-1">Create Account</h2>
-                <p className="text-white/80 text-sm">Join CakesBuy and start ordering delicious cakes</p>
-              </div>
-                
+              {/* Register Tab */}
+              <TabsContent value="register" className="space-y-6">
                 <Form {...registerForm}>
                   <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
                     <FormField
@@ -182,19 +175,19 @@ export default function AuthPage() {
                       name="phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-white text-sm font-medium">Phone Number</FormLabel>
+                          <FormLabel className="text-charcoal font-medium">Phone Number</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Phone className="absolute left-3 top-3 h-4 w-4 text-white/60" />
+                              <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                               <Input
                                 {...field}
                                 type="tel"
                                 placeholder="Enter your phone number"
-                                className="pl-10 bg-red-400/40 border-red-400/50 text-white placeholder:text-white/70 focus:border-red-300 focus:ring-red-300/50 rounded-lg"
+                                className="pl-10 border-gray-300 focus:border-caramel focus:ring-caramel/20"
                               />
                             </div>
                           </FormControl>
-                          <FormMessage className="text-red-200" />
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -204,19 +197,19 @@ export default function AuthPage() {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-white text-sm font-medium">Email</FormLabel>
+                          <FormLabel className="text-charcoal font-medium">Email</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Mail className="absolute left-3 top-3 h-4 w-4 text-white/60" />
+                              <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                               <Input
                                 {...field}
                                 type="email"
                                 placeholder="Enter your email"
-                                className="pl-10 bg-red-400/40 border-red-400/50 text-white placeholder:text-white/70 focus:border-red-300 focus:ring-red-300/50 rounded-lg"
+                                className="pl-10 border-gray-300 focus:border-caramel focus:ring-caramel/20"
                               />
                             </div>
                           </FormControl>
-                          <FormMessage className="text-red-200" />
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -226,19 +219,19 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-white text-sm font-medium">Password</FormLabel>
+                          <FormLabel className="text-charcoal font-medium">Password</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Lock className="absolute left-3 top-3 h-4 w-4 text-white/60" />
+                              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                               <Input
                                 {...field}
                                 type="password"
                                 placeholder="Create a password"
-                                className="pl-10 bg-red-400/40 border-red-400/50 text-white placeholder:text-white/70 focus:border-red-300 focus:ring-red-300/50 rounded-lg"
+                                className="pl-10 border-gray-300 focus:border-caramel focus:ring-caramel/20"
                               />
                             </div>
                           </FormControl>
-                          <FormMessage className="text-red-200" />
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -248,34 +241,80 @@ export default function AuthPage() {
                       name="confirmPassword"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-white text-sm font-medium">Confirm Password</FormLabel>
+                          <FormLabel className="text-charcoal font-medium">Confirm Password</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Lock className="absolute left-3 top-3 h-4 w-4 text-white/60" />
+                              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                               <Input
                                 {...field}
                                 type="password"
                                 placeholder="Confirm your password"
-                                className="pl-10 bg-red-400/40 border-red-400/50 text-white placeholder:text-white/70 focus:border-red-300 focus:ring-red-300/50 rounded-lg"
+                                className="pl-10 border-gray-300 focus:border-caramel focus:ring-caramel/20"
                               />
                             </div>
                           </FormControl>
-                          <FormMessage className="text-red-200" />
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
 
                     <Button
                       type="submit"
-                      className="w-full bg-red-400/60 hover:bg-red-400/70 text-white border-0 rounded-lg py-3 font-medium"
+                      className="w-full bg-caramel hover:bg-brown text-white py-3 font-medium"
                       disabled={registerMutation.isPending}
                     >
                       {registerMutation.isPending ? 'Creating Account...' : 'Create Account'}
                     </Button>
                   </form>
                 </Form>
-            </TabsContent>
-          </Tabs>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Right Side - Text Area */}
+          <div className="w-1/2 bg-gradient-to-br from-caramel to-brown p-8 lg:p-12 flex items-center justify-center text-white">
+            <div className="text-center max-w-md">
+              <div className="mb-8">
+                <Cake className="h-20 w-20 mx-auto mb-6 opacity-90" />
+                <h3 className="text-3xl font-bold mb-4">
+                  {activeTab === 'login' ? 'Sweet Moments Await!' : 'Join Our Sweet Community!'}
+                </h3>
+                <p className="text-lg opacity-90 leading-relaxed">
+                  {activeTab === 'login' 
+                    ? 'Welcome back to CakesBuy - your trusted partner for 100% eggless cakes. Continue your sweet journey with us and create memorable moments with every bite.'
+                    : 'Discover the joy of 100% eggless cakes made with love. Join thousands of happy customers who trust CakesBuy for their special celebrations.'
+                  }
+                </p>
+              </div>
+              
+              <div className="space-y-4 text-left">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-bold">✓</span>
+                  </div>
+                  <span>100% Eggless & Fresh Cakes</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-bold">✓</span>
+                  </div>
+                  <span>Same Day Delivery in Gurgaon</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-bold">✓</span>
+                  </div>
+                  <span>Custom Photo Cakes Available</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-bold">✓</span>
+                  </div>
+                  <span>Loyalty Rewards & Special Offers</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
