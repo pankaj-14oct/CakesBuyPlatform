@@ -63,21 +63,6 @@ export default function CakeCard({ cake }: CakeCardProps) {
                 Same Day
               </Badge>
             )}
-            {cake.isBestseller && (
-              <Badge className="bg-pink text-white text-xs font-semibold">
-                Bestseller
-              </Badge>
-            )}
-            {cake.isEggless && (
-              <Badge className="bg-green-500 text-white text-xs font-semibold">
-                Eggless
-              </Badge>
-            )}
-            {cake.isPhotoCake && (
-              <Badge className="bg-blue-500 text-white text-xs font-semibold">
-                📸 Photo
-              </Badge>
-            )}
           </div>
           
           {/* Like Button */}

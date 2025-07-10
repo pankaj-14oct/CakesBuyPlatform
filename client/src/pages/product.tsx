@@ -275,12 +275,6 @@ export default function ProductPage() {
                       Same Day
                     </Badge>
                   )}
-                  {cake.isBestseller && (
-                    <Badge className="bg-pink text-white">Bestseller</Badge>
-                  )}
-                  {cake.isEggless && (
-                    <Badge className="bg-green-500 text-white">Eggless</Badge>
-                  )}
                 </div>
 
                 {/* Like Button */}
