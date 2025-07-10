@@ -153,9 +153,9 @@ export default function PhotoCakeModal({
             {/* Right Side - Simple Upload and Text Controls */}
             <div className="w-1/2 flex flex-col">
               <div className="flex-1 p-6 overflow-y-auto">
-              {/* Upload Section */}
-              <div className="mb-6">
-                <h3 className="text-lg font-medium mb-4">Upload Image</h3>
+                {/* Upload Section */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium mb-4">Upload Image</h3>
                 
                 {!uploadedImage ? (
                   <div
@@ -242,113 +242,114 @@ export default function PhotoCakeModal({
                     </div>
                   </div>
                 )}
-              </div>
-
-              {/* Message Section */}
-              <div className="mb-6">
-                <h3 className="text-lg font-medium mb-4">Cake Message</h3>
-                
-                {/* Occasion Type */}
-                <div className="mb-4">
-                  <Label className="text-sm font-medium mb-2 block">Occasion Type</Label>
-                  <Select value={occasionType} onValueChange={(value: OccasionType) => setOccasionType(value)}>
-                    <SelectTrigger className="border-gray-300 focus:border-red-500">
-                      <SelectValue placeholder="Select occasion" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60 overflow-y-auto">
-                      <SelectItem value="birthday">Birthday</SelectItem>
-                      <SelectItem value="anniversary">Anniversary</SelectItem>
-                      <SelectItem value="wedding">Wedding</SelectItem>
-                      <SelectItem value="graduation">Graduation</SelectItem>
-                      <SelectItem value="congratulations">Congratulations</SelectItem>
-                      <SelectItem value="valentine">Valentine's Day</SelectItem>
-                      <SelectItem value="mothers-day">Mother's Day</SelectItem>
-                      <SelectItem value="fathers-day">Father's Day</SelectItem>
-                      <SelectItem value="celebration">Celebration</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
 
-                {/* Name Input */}
-                <div className="mb-4">
-                  <Label className="text-sm font-medium mb-2 block">Name on Cake</Label>
-                  <div className="relative">
-                    <Input
-                      placeholder="Enter text for your cake..."
-                      value={customText}
-                      onChange={(e) => setCustomText(e.target.value)}
-                      maxLength={15}
-                      className="border-gray-300 focus:border-red-500 pr-12"
-                    />
-                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">
-                      {customText.length} / 15
-                    </span>
+                {/* Message Section */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium mb-4">Cake Message</h3>
+                  
+                  {/* Occasion Type */}
+                  <div className="mb-4">
+                    <Label className="text-sm font-medium mb-2 block">Occasion Type</Label>
+                    <Select value={occasionType} onValueChange={(value: OccasionType) => setOccasionType(value)}>
+                      <SelectTrigger className="border-gray-300 focus:border-red-500">
+                        <SelectValue placeholder="Select occasion" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60 overflow-y-auto">
+                        <SelectItem value="birthday">Birthday</SelectItem>
+                        <SelectItem value="anniversary">Anniversary</SelectItem>
+                        <SelectItem value="wedding">Wedding</SelectItem>
+                        <SelectItem value="graduation">Graduation</SelectItem>
+                        <SelectItem value="congratulations">Congratulations</SelectItem>
+                        <SelectItem value="valentine">Valentine's Day</SelectItem>
+                        <SelectItem value="mothers-day">Mother's Day</SelectItem>
+                        <SelectItem value="fathers-day">Father's Day</SelectItem>
+                        <SelectItem value="celebration">Celebration</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                </div>
 
-                {/* Text Color */}
-                <div className="mb-4">
-                  <Label className="text-sm font-medium mb-2 block">Text Color</Label>
-                  <div className="flex gap-2">
-                    {[
-                      { color: '#DC2626', name: 'Red' },
-                      { color: '#059669', name: 'Green' },
-                      { color: '#2563EB', name: 'Blue' },
-                      { color: '#7C3AED', name: 'Purple' },
-                      { color: '#EA580C', name: 'Orange' },
-                      { color: '#BE185D', name: 'Pink' },
-                      { color: '#000000', name: 'Black' },
-                      { color: '#FFFFFF', name: 'White' }
-                    ].map((item) => (
-                      <button
-                        key={item.color}
-                        onClick={() => setTextColor(item.color)}
-                        className={`w-8 h-8 rounded-full border-2 ${
-                          textColor === item.color ? 'border-gray-800' : 'border-gray-300'
-                        }`}
-                        style={{ backgroundColor: item.color }}
-                        title={item.name}
+                  {/* Name Input */}
+                  <div className="mb-4">
+                    <Label className="text-sm font-medium mb-2 block">Name on Cake</Label>
+                    <div className="relative">
+                      <Input
+                        placeholder="Enter text for your cake..."
+                        value={customText}
+                        onChange={(e) => setCustomText(e.target.value)}
+                        maxLength={15}
+                        className="border-gray-300 focus:border-red-500 pr-12"
                       />
-                    ))}
-                  </div>
-                </div>
-
-                {/* Font Style */}
-                <div className="mb-4">
-                  <Label className="text-sm font-medium mb-2 block">Font Style</Label>
-                  <Select value={fontFamily} onValueChange={setFontFamily}>
-                    <SelectTrigger className="border-gray-300 focus:border-red-500">
-                      <SelectValue placeholder="Select font style" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60 overflow-y-auto">
-                      <SelectItem value="Dancing Script">Dancing Script (Elegant Cursive)</SelectItem>
-                      <SelectItem value="Pacifico">Pacifico (Italian Style)</SelectItem>
-                      <SelectItem value="Great Vibes">Great Vibes (Luxury Script)</SelectItem>
-                      <SelectItem value="Satisfy">Satisfy (Handwritten)</SelectItem>
-                      <SelectItem value="Lobster">Lobster (Bold Curves)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Font Size */}
-                <div className="mb-4">
-                  <Label className="text-sm font-medium mb-2 block">Font Size</Label>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-500">Small</span>
-                    <div className="flex-1">
-                      <Slider
-                        value={[fontSize]}
-                        onValueChange={(value) => setFontSize(value[0])}
-                        max={300}
-                        min={50}
-                        step={10}
-                        className="w-full"
-                      />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">
+                        {customText.length} / 15
+                      </span>
                     </div>
-                    <span className="text-xs text-gray-500">Large</span>
                   </div>
-                  <div className="text-center text-xs text-gray-500 mt-1">
-                    {fontSize}%
+
+                  {/* Text Color */}
+                  <div className="mb-4">
+                    <Label className="text-sm font-medium mb-2 block">Text Color</Label>
+                    <div className="flex gap-2">
+                      {[
+                        { color: '#DC2626', name: 'Red' },
+                        { color: '#059669', name: 'Green' },
+                        { color: '#2563EB', name: 'Blue' },
+                        { color: '#7C3AED', name: 'Purple' },
+                        { color: '#EA580C', name: 'Orange' },
+                        { color: '#BE185D', name: 'Pink' },
+                        { color: '#000000', name: 'Black' },
+                        { color: '#FFFFFF', name: 'White' }
+                      ].map((item) => (
+                        <button
+                          key={item.color}
+                          onClick={() => setTextColor(item.color)}
+                          className={`w-8 h-8 rounded-full border-2 ${
+                            textColor === item.color ? 'border-gray-800' : 'border-gray-300'
+                          }`}
+                          style={{ backgroundColor: item.color }}
+                          title={item.name}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Font Style */}
+                  <div className="mb-4">
+                    <Label className="text-sm font-medium mb-2 block">Font Style</Label>
+                    <Select value={fontFamily} onValueChange={setFontFamily}>
+                      <SelectTrigger className="border-gray-300 focus:border-red-500">
+                        <SelectValue placeholder="Select font style" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60 overflow-y-auto">
+                        <SelectItem value="Dancing Script">Dancing Script (Elegant Cursive)</SelectItem>
+                        <SelectItem value="Pacifico">Pacifico (Italian Style)</SelectItem>
+                        <SelectItem value="Great Vibes">Great Vibes (Luxury Script)</SelectItem>
+                        <SelectItem value="Satisfy">Satisfy (Handwritten)</SelectItem>
+                        <SelectItem value="Lobster">Lobster (Bold Curves)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Font Size */}
+                  <div className="mb-4">
+                    <Label className="text-sm font-medium mb-2 block">Font Size</Label>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-gray-500">Small</span>
+                      <div className="flex-1">
+                        <Slider
+                          value={[fontSize]}
+                          onValueChange={(value) => setFontSize(value[0])}
+                          max={300}
+                          min={50}
+                          step={10}
+                          className="w-full"
+                        />
+                      </div>
+                      <span className="text-xs text-gray-500">Large</span>
+                    </div>
+                    <div className="text-center text-xs text-gray-500 mt-1">
+                      {fontSize}%
+                    </div>
                   </div>
                 </div>
               </div>
