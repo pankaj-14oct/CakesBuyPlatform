@@ -244,65 +244,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Cakes */}
-      <section className="py-16 bg-cream">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-12">
-            <div>
-              <h2 className="text-3xl lg:text-4xl font-bold text-charcoal mb-4">
-                All Eggless Bestsellers
-              </h2>
-              <p className="text-lg text-charcoal opacity-70">
-                100% egg-free cakes loved by health-conscious customers
-              </p>
-            </div>
-            
-            <div className="hidden md:flex space-x-4">
-              <Button variant="outline" className="border-caramel text-caramel hover:bg-caramel hover:text-white">
-                All
-              </Button>
-              <Button variant="ghost" className="text-charcoal hover:text-caramel">
-                Birthday
-              </Button>
-              <Button variant="ghost" className="text-charcoal hover:text-caramel">
-                Eggless
-              </Button>
-              <Button variant="ghost" className="text-charcoal hover:text-caramel">
-                Custom
-              </Button>
-            </div>
-          </div>
 
-          {cakesLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {[...Array(4)].map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <div className="bg-gray-200 h-48"></div>
-                  <CardContent className="p-6">
-                    <div className="bg-gray-200 rounded h-4 mb-2"></div>
-                    <div className="bg-gray-200 rounded h-3 mb-4"></div>
-                    <div className="bg-gray-200 rounded h-8"></div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {featuredCakes.map((cake) => (
-                <CakeCard key={cake.id} cake={cake} />
-              ))}
-            </div>
-          )}
-
-          <div className="text-center mt-12">
-            <Link href="/search">
-              <Button size="lg" className="bg-brown text-white hover:bg-opacity-90">
-                View All Cakes
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
 
 
 
