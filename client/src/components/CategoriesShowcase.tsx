@@ -92,7 +92,7 @@ export default function CategoriesShowcase() {
               const gradientClass = categoryGradients[index % categoryGradients.length];
               
               return (
-                <Link key={category.id} href={`/categories/${category.slug}`}>
+                <Link key={category.id} href={`/category/${category.slug}`}>
                   <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer overflow-hidden w-52 flex-shrink-0 rounded-3xl">
                     <div className={`relative h-40 bg-gradient-to-br ${gradientClass} flex items-center justify-center`}>
                       {/* Decorative stars */}
@@ -150,9 +150,9 @@ export default function CategoriesShowcase() {
 
         {/* View All Categories Button */}
         <div className="text-center px-4">
-          <Link href="/categories">
+          <Link href="/search">
             <button className="bg-caramel hover:bg-brown text-white font-semibold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
-              View All Categories
+              View All Cakes
             </button>
           </Link>
         </div>
