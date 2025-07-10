@@ -25,6 +25,7 @@ import InvoiceDetailPage from "@/pages/InvoiceDetail";
 import LoyaltyPage from "@/pages/loyalty";
 import TrackOrderPage from "@/pages/track-order";
 import SearchPage from "@/pages/search";
+import CustomizedCakesPage from "@/pages/customized-cakes";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminCategories from "@/pages/admin/categories";
 import AdminProducts from "@/pages/admin/products";
@@ -228,6 +229,7 @@ function Router() {
         <Route path="/invoices/:invoiceNumber" component={InvoiceDetailPage} />
         <Route path="/loyalty" component={LoyaltyPage} />
         <Route path="/track-order" component={TrackOrderPage} />
+        <Route path="/customized-cakes" component={CustomizedCakesPage} />
         <Route component={NotFound} />
       </Switch>
     </>

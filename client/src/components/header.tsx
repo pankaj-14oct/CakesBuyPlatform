@@ -27,7 +27,7 @@ export default function Header() {
     { href: '/cakes/hampers', label: 'Hampers', badge: 'New' },
     { href: '/cakes/anniversary-cakes', label: 'Anniversary' },
     { href: '/occasions', label: 'Occasion' },
-    { href: '/cakes/photo-cakes', label: 'Customized Cakes' },
+    { href: '/customized-cakes', label: 'Customized Cakes' },
   ];
 
   const handleSearch = (e: React.FormEvent) => {
