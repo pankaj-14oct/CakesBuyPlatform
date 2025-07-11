@@ -1667,6 +1667,30 @@ CakesBuy
     }
   });
 
+  // Rating email test
+  app.post('/api/test-rating-email', async (req, res) => {
+    try {
+      const { orderId, customerEmail, customerName, orderNumber } = req.body;
+      
+      if (!orderId || !customerEmail || !customerName || !orderNumber) {
+        return res.status(400).json({ 
+          error: 'Missing required fields: orderId, customerEmail, customerName, orderNumber' 
+        });
+      }
+
+      const { sendRatingRequestEmail } = await import('./rating-service');
+      const result = await sendRatingRequestEmail(orderId, customerEmail, customerName, orderNumber);
+      
+      res.json({ 
+        success: result,
+        message: result ? 'Rating request email sent successfully!' : 'Failed to send rating email'
+      });
+    } catch (error) {
+      console.error('Rating email error:', error);
+      res.status(500).json({ error: 'Failed to send rating email' });
+    }
+  });
+
   // OTP Authentication Routes
   
   // Send OTP for registration
