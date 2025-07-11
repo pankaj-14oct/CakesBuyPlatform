@@ -268,17 +268,17 @@ export default function AdminNavigation() {
                     <div>
                       <Label htmlFor="category">Linked Category (Optional)</Label>
                       <Select 
-                        value={formData.categoryId?.toString() || ""} 
+                        value={formData.categoryId?.toString() || "none"} 
                         onValueChange={(value) => setFormData(prev => ({ 
                           ...prev, 
-                          categoryId: value ? parseInt(value) : undefined 
+                          categoryId: value && value !== "none" ? parseInt(value) : undefined 
                         }))}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No category</SelectItem>
+                          <SelectItem value="none">No category</SelectItem>
                           {categories.map((category) => (
                             <SelectItem key={category.id} value={category.id.toString()}>
                               {category.name}
@@ -451,17 +451,17 @@ export default function AdminNavigation() {
                                 <div>
                                   <Label htmlFor="edit-category">Linked Category (Optional)</Label>
                                   <Select 
-                                    value={formData.categoryId?.toString() || ""} 
+                                    value={formData.categoryId?.toString() || "none"} 
                                     onValueChange={(value) => setFormData(prev => ({ 
                                       ...prev, 
-                                      categoryId: value ? parseInt(value) : undefined 
+                                      categoryId: value && value !== "none" ? parseInt(value) : undefined 
                                     }))}
                                   >
                                     <SelectTrigger>
                                       <SelectValue placeholder="Select a category" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="">No category</SelectItem>
+                                      <SelectItem value="none">No category</SelectItem>
                                       {categories.map((category) => (
                                         <SelectItem key={category.id} value={category.id.toString()}>
                                           {category.name}
