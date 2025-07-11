@@ -377,7 +377,61 @@ export const adminConfigs = pgTable("admin_configs", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Navigation Items
+export const navigationItems = pgTable("navigation_items", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
+  url: text("url").notNull(),
+  position: integer("position").notNull().default(0),
+  isActive: boolean("is_active").default(true),
+  isNew: boolean("is_new").default(false), // Shows "New" badge
+  categoryId: integer("category_id").references(() => categories.id), // Optional link to category
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
+
+
+// Types
+export type User = typeof users.$inferSelect;
+export type InsertUser = typeof insertUserSchema._type;
+export type Category = typeof categories.$inferSelect;
+export type InsertCategory = typeof insertCategorySchema._type;
+export type Cake = typeof cakes.$inferSelect;
+export type InsertCake = typeof insertCakeSchema._type;
+export type Addon = typeof addons.$inferSelect;
+export type InsertAddon = typeof insertAddonSchema._type;
+export type Order = typeof orders.$inferSelect;
+export type InsertOrder = typeof insertOrderSchema._type;
+export type DeliveryArea = typeof deliveryAreas.$inferSelect;
+export type InsertDeliveryArea = typeof insertDeliveryAreaSchema._type;
+export type PromoCode = typeof promoCodes.$inferSelect;
+export type InsertPromoCode = typeof insertPromoCodeSchema._type;
+export type Review = typeof reviews.$inferSelect;
+export type InsertReview = typeof insertReviewSchema._type;
+export type OrderRating = typeof orderRatings.$inferSelect;
+export type InsertOrderRating = typeof insertOrderRatingSchema._type;
+export type EventReminder = typeof eventReminders.$inferSelect;
+export type InsertEventReminder = typeof insertEventReminderSchema._type;
+export type OtpVerification = typeof otpVerifications.$inferSelect;
+export type InsertOtpVerification = typeof insertOtpVerificationSchema._type;
+export type LoyaltyTransaction = typeof loyaltyTransactions.$inferSelect;
+export type InsertLoyaltyTransaction = typeof insertLoyaltyTransactionSchema._type;
+export type LoyaltyReward = typeof loyaltyRewards.$inferSelect;
+export type InsertLoyaltyReward = typeof insertLoyaltyRewardSchema._type;
+export type UserReward = typeof userRewards.$inferSelect;
+export type InsertUserReward = typeof insertUserRewardSchema._type;
+export type Invoice = typeof invoices.$inferSelect;
+export type InsertInvoice = typeof insertInvoiceSchema._type;
+export type WalletTransaction = typeof walletTransactions.$inferSelect;
+export type InsertWalletTransaction = typeof insertWalletTransactionSchema._type;
+export type AdminConfig = typeof adminConfigs.$inferSelect;
+export type InsertAdminConfig = typeof insertAdminConfigSchema._type;
+export type DeliveryBoy = typeof deliveryBoys.$inferSelect;
+export type InsertDeliveryBoy = typeof insertDeliveryBoySchema._type;
+export type NavigationItem = typeof navigationItems.$inferSelect;
+export type InsertNavigationItem = typeof insertNavigationItemSchema._type;
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, updatedAt: true });
@@ -407,6 +461,7 @@ export const insertInvoiceSchema = createInsertSchema(invoices).omit({ id: true,
 // Wallet and Admin Config insert schemas
 export const insertWalletTransactionSchema = createInsertSchema(walletTransactions).omit({ id: true, createdAt: true });
 export const insertAdminConfigSchema = createInsertSchema(adminConfigs).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertNavigationItemSchema = createInsertSchema(navigationItems).omit({ id: true, createdAt: true, updatedAt: true });
 
 // Auth schemas
 export const loginSchema = z.object({

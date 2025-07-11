@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews } from "@shared/schema";
+import { users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews, navigationItems } from "@shared/schema";
 import { hashPassword } from "./auth";
 import { eq } from "drizzle-orm";
 
@@ -388,6 +388,24 @@ export async function seedDatabase() {
     console.log("📦 Seeding orders...");
     for (const order of seedData.orders) {
       await db.insert(orders).values(order).onConflictDoNothing();
+    }
+
+    // Seed navigation items
+    console.log("🧭 Seeding navigation items...");
+    const navigationData = [
+      { name: "Cakes", slug: "cakes", url: "/category/cakes", position: 0, isActive: true, isNew: false },
+      { name: "Theme Cakes", slug: "theme-cakes", url: "/category/theme-cakes", position: 1, isActive: true, isNew: false },
+      { name: "By Relationship", slug: "by-relationship", url: "/category/by-relationship", position: 2, isActive: true, isNew: false },
+      { name: "Desserts", slug: "desserts", url: "/category/desserts", position: 3, isActive: true, isNew: false },
+      { name: "Birthday", slug: "birthday", url: "/category/birthday-cakes", position: 4, isActive: true, isNew: false },
+      { name: "Hampers", slug: "hampers", url: "/category/hampers", position: 5, isActive: true, isNew: true },
+      { name: "Anniversary", slug: "anniversary", url: "/category/anniversary-cakes", position: 6, isActive: true, isNew: false },
+      { name: "Occasion", slug: "occasion", url: "/category/occasion", position: 7, isActive: true, isNew: false },
+      { name: "Customized Cakes", slug: "customized-cakes", url: "/customized-cakes", position: 8, isActive: true, isNew: false },
+    ];
+    
+    for (const navItem of navigationData) {
+      await db.insert(navigationItems).values(navItem).onConflictDoNothing();
     }
 
     console.log("✅ Database seeding completed successfully!");

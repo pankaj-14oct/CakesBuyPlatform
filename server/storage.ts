@@ -1,7 +1,7 @@
 import {
   users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews, eventReminders, otpVerifications,
   loyaltyTransactions, loyaltyRewards, userRewards, invoices, walletTransactions, adminConfigs, deliveryBoys,
-  orderRatings,
+  orderRatings, navigationItems,
   type User, type InsertUser, type Category, type InsertCategory,
   type Cake, type InsertCake, type Addon, type InsertAddon,
   type Order, type InsertOrder, type DeliveryArea, type InsertDeliveryArea,
@@ -10,7 +10,8 @@ import {
   type LoyaltyTransaction, type InsertLoyaltyTransaction, type LoyaltyReward, type InsertLoyaltyReward,
   type UserReward, type InsertUserReward, type Invoice, type InsertInvoice,
   type WalletTransaction, type InsertWalletTransaction, type AdminConfig, type InsertAdminConfig,
-  type DeliveryBoy, type InsertDeliveryBoy, type OrderRating, type InsertOrderRating
+  type DeliveryBoy, type InsertDeliveryBoy, type OrderRating, type InsertOrderRating,
+  type NavigationItem, type InsertNavigationItem
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, and, desc, isNotNull, or, gte, lte } from "drizzle-orm";
@@ -159,6 +160,14 @@ export interface IStorage {
   assignOrderToDeliveryBoy(orderId: number, deliveryBoyId: number): Promise<void>;
   getDeliveryBoyOrders(deliveryBoyId: number, status?: string): Promise<Order[]>;
   updateOrderAssignment(orderId: number, status: string, deliveryBoyId?: number): Promise<void>;
+
+  // Navigation Items management
+  getNavigationItems(): Promise<NavigationItem[]>;
+  getNavigationItem(id: number): Promise<NavigationItem | undefined>;
+  createNavigationItem(item: InsertNavigationItem): Promise<NavigationItem>;
+  updateNavigationItem(id: number, updates: Partial<NavigationItem>): Promise<void>;
+  deleteNavigationItem(id: number): Promise<void>;
+  reorderNavigationItems(itemIds: number[]): Promise<void>;
 
 }
 
@@ -1052,6 +1061,52 @@ export class DatabaseStorage implements IStorage {
     await db.update(orders)
       .set(updateData)
       .where(eq(orders.id, orderId));
+  }
+
+  // Navigation Items Management
+  async getNavigationItems(): Promise<NavigationItem[]> {
+    return db.select().from(navigationItems)
+      .where(eq(navigationItems.isActive, true))
+      .orderBy(navigationItems.position);
+  }
+
+  async getNavigationItem(id: number): Promise<NavigationItem | undefined> {
+    const [item] = await db.select().from(navigationItems).where(eq(navigationItems.id, id));
+    return item || undefined;
+  }
+
+  async createNavigationItem(item: InsertNavigationItem): Promise<NavigationItem> {
+    const navigationItemData = {
+      ...item,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    const [newItem] = await db.insert(navigationItems).values(navigationItemData).returning();
+    return newItem;
+  }
+
+  async updateNavigationItem(id: number, updates: Partial<NavigationItem>): Promise<void> {
+    await db.update(navigationItems)
+      .set({
+        ...updates,
+        updatedAt: new Date()
+      })
+      .where(eq(navigationItems.id, id));
+  }
+
+  async deleteNavigationItem(id: number): Promise<void> {
+    await db.delete(navigationItems).where(eq(navigationItems.id, id));
+  }
+
+  async reorderNavigationItems(itemIds: number[]): Promise<void> {
+    for (let i = 0; i < itemIds.length; i++) {
+      await db.update(navigationItems)
+        .set({
+          position: i,
+          updatedAt: new Date()
+        })
+        .where(eq(navigationItems.id, itemIds[i]));
+    }
   }
 
 }

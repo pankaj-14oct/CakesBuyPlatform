@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -8,6 +9,18 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ShoppingCart, Menu, MapPin, Search, User, LogOut, Package, Heart, Calendar, Wallet, MapPinIcon, MessageCircle, Settings, Truck, FileText, CreditCard, Star } from 'lucide-react';
 import { useCart } from './cart-context';
 import { useAuth } from '@/hooks/use-auth';
+import { apiRequest } from '@/lib/queryClient';
+
+interface NavigationItem {
+  id: number;
+  name: string;
+  slug: string;
+  url: string;
+  position: number;
+  isActive: boolean;
+  isNew: boolean;
+  categoryId?: number;
+}
 
 export default function Header() {
   const [location, setLocation] = useLocation();
@@ -18,17 +31,23 @@ export default function Header() {
   const { state: cartState } = useCart();
   const { user, isAuthenticated, logoutMutation } = useAuth();
 
-  const navItems = [
-    { href: '/search', label: 'Cakes' },
-    { href: '/cakes/theme-cakes', label: 'Theme Cakes' },
-    { href: '/cakes/relationship-cakes', label: 'By Relationship' },
-    { href: '/cakes/desserts', label: 'Desserts' },
-    { href: '/cakes/birthday-cakes', label: 'Birthday' },
-    { href: '/cakes/hampers', label: 'Hampers', badge: 'New' },
-    { href: '/cakes/anniversary-cakes', label: 'Anniversary' },
-    { href: '/occasions', label: 'Occasion' },
-    { href: '/customized-cakes', label: 'Customized Cakes' },
-  ];
+  // Fetch navigation items from API
+  const { data: navigationItems = [] } = useQuery<NavigationItem[]>({
+    queryKey: ['/api/navigation-items'],
+    queryFn: () => apiRequest('/api/navigation-items')
+  });
+
+  // Filter and sort navigation items
+  const navItems = navigationItems && navigationItems.length > 0 
+    ? navigationItems
+        .filter(item => item.isActive)
+        .sort((a, b) => a.position - b.position)
+        .map(item => ({
+          href: item.url,
+          label: item.name,
+          badge: item.isNew ? 'New' : undefined
+        }))
+    : [];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

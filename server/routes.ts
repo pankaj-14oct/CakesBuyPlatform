@@ -3300,6 +3300,81 @@ CakesBuy
     }
   });
 
+  // Navigation Items API routes
+  app.get("/api/navigation-items", async (req, res) => {
+    try {
+      const items = await storage.getNavigationItems();
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch navigation items" });
+    }
+  });
+
+  // Admin Navigation Items Management
+  app.get("/api/admin/navigation-items", requireAdmin, async (req, res) => {
+    try {
+      const items = await storage.getNavigationItems();
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch navigation items" });
+    }
+  });
+
+  app.post("/api/admin/navigation-items", requireAdmin, async (req, res) => {
+    try {
+      const { insertNavigationItemSchema } = await import("@shared/schema");
+      const itemData = insertNavigationItemSchema.parse(req.body);
+      const newItem = await storage.createNavigationItem(itemData);
+      res.json(newItem);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid navigation item data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create navigation item" });
+    }
+  });
+
+  app.put("/api/admin/navigation-items/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { insertNavigationItemSchema } = await import("@shared/schema");
+      const updateData = insertNavigationItemSchema.partial().parse(req.body);
+      
+      await storage.updateNavigationItem(id, updateData);
+      res.json({ message: "Navigation item updated successfully" });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid navigation item data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update navigation item" });
+    }
+  });
+
+  app.delete("/api/admin/navigation-items/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteNavigationItem(id);
+      res.json({ message: "Navigation item deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete navigation item" });
+    }
+  });
+
+  app.post("/api/admin/navigation-items/reorder", requireAdmin, async (req, res) => {
+    try {
+      const { itemIds } = req.body;
+      
+      if (!Array.isArray(itemIds)) {
+        return res.status(400).json({ message: "itemIds must be an array" });
+      }
+      
+      await storage.reorderNavigationItems(itemIds);
+      res.json({ message: "Navigation items reordered successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to reorder navigation items" });
+    }
+  });
+
   const server = httpServer || createServer(app);
   return server;
 }
