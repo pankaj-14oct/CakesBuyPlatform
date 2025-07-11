@@ -3335,7 +3335,7 @@ CakesBuy
   // Admin Navigation Items Management
   app.get("/api/admin/navigation-items", requireAdmin, async (req, res) => {
     try {
-      const items = await storage.getNavigationItems();
+      const items = await storage.getAllNavigationItems();
       res.json(items);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch navigation items" });
@@ -3355,6 +3355,12 @@ CakesBuy
       // Auto-generate URL if not provided
       if (!itemData.url || itemData.url.trim() === '') {
         itemData.url = await generateUrl(itemData.name, itemData.categoryId);
+      }
+      
+      // Auto-assign position if not provided
+      if (!itemData.position && itemData.position !== 0) {
+        const existingItems = await storage.getAllNavigationItems();
+        itemData.position = existingItems.length;
       }
       
       const newItem = await storage.createNavigationItem(itemData);

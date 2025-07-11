@@ -1070,6 +1070,11 @@ export class DatabaseStorage implements IStorage {
       .orderBy(navigationItems.position);
   }
 
+  async getAllNavigationItems(): Promise<NavigationItem[]> {
+    return db.select().from(navigationItems)
+      .orderBy(navigationItems.position);
+  }
+
   async getNavigationItem(id: number): Promise<NavigationItem | undefined> {
     const [item] = await db.select().from(navigationItems).where(eq(navigationItems.id, id));
     return item || undefined;
