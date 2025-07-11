@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/use-auth';
 import { useLocation, Link } from 'wouter';
-import { Cake, User, Mail, Lock, Phone } from 'lucide-react';
+import { Cake, User, Mail, Lock, Phone, ArrowLeft } from 'lucide-react';
 import { useEffect } from 'react';
 
 const loginSchema = z.object({
@@ -79,6 +79,18 @@ export default function AuthPage() {
         <div className="flex flex-col lg:flex-row min-h-[600px]">
           {/* Left Side - Form */}
           <div className="w-full lg:w-1/2 p-4 sm:p-8 lg:p-12">
+            {/* Mobile Back Button */}
+            <div className="lg:hidden mb-4">
+              <Button
+                variant="ghost"
+                onClick={() => setLocation('/')}
+                className="flex items-center text-gray-600 hover:text-gray-900 p-0"
+              >
+                <ArrowLeft className="h-5 w-5 mr-2" />
+                Back to Home
+              </Button>
+            </div>
+            
             <div className="mb-8">
               <div className="flex items-center mb-4 sm:mb-6">
                 <Cake className="h-6 w-6 sm:h-8 sm:w-8 text-caramel mr-2 sm:mr-3" />
