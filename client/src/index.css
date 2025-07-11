@@ -20,6 +20,12 @@
   display: none;  /* Safari and Chrome */
 }
 
+/* Smooth scrolling for mobile */
+.hide-scrollbar {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
 /* Custom slider styling */
 input[type="range"] {
   -webkit-appearance: none;
