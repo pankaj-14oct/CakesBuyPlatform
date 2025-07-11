@@ -1574,6 +1574,45 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
+  // Admin: Test welcome email
+  app.post("/api/admin/test-welcome-email", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { email, phone } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email address is required" });
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Invalid email address format" });
+      }
+
+      const { sendWelcomeEmail } = await import("./email-service");
+      
+      const welcomeEmailData = {
+        userEmail: email,
+        userName: email.split("@")[0], // Use email prefix as name
+        userPhone: phone || "9311553545"
+      };
+      
+      await sendWelcomeEmail(welcomeEmailData);
+      
+      res.json({ 
+        message: "Welcome email sent successfully",
+        details: {
+          email,
+          phone: phone || "9311553545",
+          timestamp: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error("Test welcome email error:", error);
+      res.status(500).json({ message: "Failed to send welcome email" });
+    }
+  });
+
   // Admin: Test email service
   app.post("/api/admin/test-email", requireAdmin, async (req: AuthRequest, res) => {
     try {
