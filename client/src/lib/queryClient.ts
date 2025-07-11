@@ -14,7 +14,7 @@ export async function apiRequest(
   headers?: Record<string, string>
 ): Promise<Response> {
   // Check for tokens - use unified token storage
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('auth_token');
   const deliveryToken = localStorage.getItem('delivery_token');
   
   const defaultHeaders: Record<string, string> = {};
@@ -48,7 +48,7 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     // Check for tokens - use unified token storage
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     const deliveryToken = localStorage.getItem('delivery_token');
     const url = queryKey[0] as string;
     
