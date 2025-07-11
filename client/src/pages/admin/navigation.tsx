@@ -53,13 +53,19 @@ export default function AdminNavigation() {
   // Fetch navigation items
   const { data: navigationItems = [], isLoading } = useQuery<NavigationItem[]>({
     queryKey: ['/api/admin/navigation-items'],
-    queryFn: () => apiRequest('/api/admin/navigation-items')
+    queryFn: async () => {
+      const response = await apiRequest('/api/admin/navigation-items');
+      return Array.isArray(response) ? response : [];
+    }
   });
 
   // Fetch categories for dropdown
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
-    queryFn: () => apiRequest('/api/categories')
+    queryFn: async () => {
+      const response = await apiRequest('/api/categories');
+      return Array.isArray(response) ? response : [];
+    }
   });
 
   // Create navigation item mutation
@@ -191,7 +197,7 @@ export default function AdminNavigation() {
     }
   };
 
-  const displayItems = reorderMode ? (tempOrder || []) : (navigationItems || []);
+  const displayItems = reorderMode ? (Array.isArray(tempOrder) ? tempOrder : []) : (Array.isArray(navigationItems) ? navigationItems : []);
 
   if (isLoading) {
     return (
