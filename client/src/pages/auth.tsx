@@ -76,18 +76,18 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
       <div className="w-full max-w-6xl bg-white rounded-xl shadow-2xl overflow-hidden">
-        <div className="flex min-h-[600px]">
+        <div className="flex flex-col lg:flex-row min-h-[600px]">
           {/* Left Side - Form */}
-          <div className="w-1/2 p-8 lg:p-12">
+          <div className="w-full lg:w-1/2 p-4 sm:p-8 lg:p-12">
             <div className="mb-8">
-              <div className="flex items-center mb-6">
-                <Cake className="h-8 w-8 text-caramel mr-3" />
-                <h1 className="text-2xl font-bold text-charcoal">CakesBuy</h1>
+              <div className="flex items-center mb-4 sm:mb-6">
+                <Cake className="h-6 w-6 sm:h-8 sm:w-8 text-caramel mr-2 sm:mr-3" />
+                <h1 className="text-xl sm:text-2xl font-bold text-charcoal">CakesBuy</h1>
               </div>
-              <h2 className="text-3xl font-bold text-charcoal mb-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-charcoal mb-2">
                 {activeTab === 'login' ? 'Welcome Back!' : 'Create Account'}
               </h2>
-              <p className="text-gray-600">
+              <p className="text-sm sm:text-base text-gray-600">
                 {activeTab === 'login' 
                   ? 'Sign in to your account to continue ordering delicious cakes'
                   : 'Join CakesBuy and start ordering 100% eggless cakes'
@@ -96,21 +96,21 @@ export default function AuthPage() {
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-8 bg-gray-100">
-                <TabsTrigger value="login" className="data-[state=active]:bg-white">Sign In</TabsTrigger>
-                <TabsTrigger value="register" className="data-[state=active]:bg-white">Sign Up</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 mb-6 sm:mb-8 bg-gray-100">
+                <TabsTrigger value="login" className="data-[state=active]:bg-white text-sm sm:text-base">Sign In</TabsTrigger>
+                <TabsTrigger value="register" className="data-[state=active]:bg-white text-sm sm:text-base">Sign Up</TabsTrigger>
               </TabsList>
 
               {/* Login Tab */}
               <TabsContent value="login" className="space-y-6">
                 <Form {...loginForm}>
-                  <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
+                  <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-3 sm:space-y-4">
                     <FormField
                       control={loginForm.control}
                       name="phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-charcoal font-medium">Phone Number</FormLabel>
+                          <FormLabel className="text-charcoal font-medium text-sm sm:text-base">Phone Number</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -132,7 +132,7 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-charcoal font-medium">Password</FormLabel>
+                          <FormLabel className="text-charcoal font-medium text-sm sm:text-base">Password</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -169,13 +169,13 @@ export default function AuthPage() {
               {/* Register Tab */}
               <TabsContent value="register" className="space-y-6">
                 <Form {...registerForm}>
-                  <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
+                  <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-3 sm:space-y-4">
                     <FormField
                       control={registerForm.control}
                       name="phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-charcoal font-medium">Phone Number</FormLabel>
+                          <FormLabel className="text-charcoal font-medium text-sm sm:text-base">Phone Number</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -197,7 +197,7 @@ export default function AuthPage() {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-charcoal font-medium">Email</FormLabel>
+                          <FormLabel className="text-charcoal font-medium text-sm sm:text-base">Email</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -219,7 +219,7 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-charcoal font-medium">Password</FormLabel>
+                          <FormLabel className="text-charcoal font-medium text-sm sm:text-base">Password</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -241,7 +241,7 @@ export default function AuthPage() {
                       name="confirmPassword"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-charcoal font-medium">Confirm Password</FormLabel>
+                          <FormLabel className="text-charcoal font-medium text-sm sm:text-base">Confirm Password</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -272,14 +272,14 @@ export default function AuthPage() {
           </div>
 
           {/* Right Side - Text Area */}
-          <div className="w-1/2 bg-gradient-to-br from-caramel to-brown p-8 lg:p-12 flex items-center justify-center text-white">
+          <div className="w-full lg:w-1/2 bg-gradient-to-br from-caramel to-brown p-6 sm:p-8 lg:p-12 flex items-center justify-center text-white">
             <div className="text-center max-w-md">
-              <div className="mb-8">
-                <Cake className="h-20 w-20 mx-auto mb-6 opacity-90" />
-                <h3 className="text-3xl font-bold mb-4">
+              <div className="mb-6 sm:mb-8">
+                <Cake className="h-16 w-16 sm:h-20 sm:w-20 mx-auto mb-4 sm:mb-6 opacity-90" />
+                <h3 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
                   {activeTab === 'login' ? 'Sweet Moments Await!' : 'Join Our Sweet Community!'}
                 </h3>
-                <p className="text-lg opacity-90 leading-relaxed">
+                <p className="text-base sm:text-lg opacity-90 leading-relaxed">
                   {activeTab === 'login' 
                     ? 'Welcome back to CakesBuy - your trusted partner for 100% eggless cakes. Continue your sweet journey with us and create memorable moments with every bite.'
                     : 'Discover the joy of 100% eggless cakes made with love. Join thousands of happy customers who trust CakesBuy for their special celebrations.'
@@ -287,30 +287,30 @@ export default function AuthPage() {
                 </p>
               </div>
               
-              <div className="space-y-4 text-left">
+              <div className="space-y-3 sm:space-y-4 text-left">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
                     <span className="text-sm font-bold">✓</span>
                   </div>
-                  <span>100% Eggless & Fresh Cakes</span>
+                  <span className="text-sm sm:text-base">100% Eggless & Fresh Cakes</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
                     <span className="text-sm font-bold">✓</span>
                   </div>
-                  <span>Same Day Delivery in Gurgaon</span>
+                  <span className="text-sm sm:text-base">Same Day Delivery in Gurgaon</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
                     <span className="text-sm font-bold">✓</span>
                   </div>
-                  <span>Custom Photo Cakes Available</span>
+                  <span className="text-sm sm:text-base">Custom Photo Cakes Available</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
                     <span className="text-sm font-bold">✓</span>
                   </div>
-                  <span>Loyalty Rewards & Special Offers</span>
+                  <span className="text-sm sm:text-base">Loyalty Rewards & Special Offers</span>
                 </div>
               </div>
             </div>
