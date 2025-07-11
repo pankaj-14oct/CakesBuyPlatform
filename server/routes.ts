@@ -538,7 +538,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
-  app.patch("/api/orders/:id/status", requireAdmin, async (req: AuthRequest, res) => {
+  app.patch("/api/admin/orders/:id/status", requireAdmin, async (req: AuthRequest, res) => {
     try {
       console.log('=== ORDER STATUS UPDATE REQUEST ===');
       console.log('Request body:', req.body);
