@@ -43,7 +43,7 @@ export default function Header() {
       {/* Top Header */}
       <header className="bg-red-500 text-white sticky top-0 z-50">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center h-16">
             {/* Mobile Menu Button */}
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
@@ -190,7 +190,7 @@ export default function Header() {
             </Sheet>
 
             {/* Logo */}
-            <Link href="/" className="flex items-center">
+            <Link href="/" className="flex items-center ml-2 md:ml-4">
               <div className="text-2xl font-bold text-white">
                 CakesBuy
               </div>
@@ -217,7 +217,7 @@ export default function Header() {
             </div>
 
             {/* Right Side Actions */}
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-1 ml-auto">
               {/* Track Order - Desktop */}
               <Link href="/track-order">
                 <Button variant="ghost" className="text-white hover:bg-red-600 hidden md:flex items-center gap-2 px-4 py-2 text-sm font-medium">
