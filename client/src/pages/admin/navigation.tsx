@@ -191,7 +191,7 @@ export default function AdminNavigation() {
     }
   };
 
-  const displayItems = reorderMode ? tempOrder : navigationItems;
+  const displayItems = reorderMode ? (tempOrder || []) : (navigationItems || []);
 
   if (isLoading) {
     return (
