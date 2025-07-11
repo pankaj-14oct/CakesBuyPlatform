@@ -7,8 +7,24 @@ interface RatingEmailData {
   customerEmail: string;
   orderTotal: string;
   deliveryDate: string;
-  items: string[];
+  deliveryTime: string;
+  items: OrderItem[];
+  subtotal: string;
+  deliveryFee: string;
+  discount?: string;
+  paymentMethod: string;
+  deliveryAddress: string;
+  specialInstructions?: string;
   ratingUrl: string;
+}
+
+interface OrderItem {
+  name: string;
+  weight: string;
+  flavor: string;
+  price: string;
+  customMessage?: string;
+  hasPhotoCustomization?: boolean;
 }
 
 export async function sendRatingRequestEmail(orderId: number, customerEmail: string, customerName: string, orderNumber: string): Promise<boolean> {
@@ -26,8 +42,20 @@ export async function sendRatingRequestEmail(orderId: number, customerEmail: str
     // Create rating URL
     const ratingUrl = `${process.env.REPLIT_APP_URL || 'http://localhost:5000'}/rate-order/${orderId}`;
 
-    // Extract order items for email
-    const orderItems = order.items.map((item: any) => `${item.name} (${item.weight})`);
+    // Extract order items with detailed information
+    const orderItems: OrderItem[] = order.items.map((item: any) => ({
+      name: item.name,
+      weight: item.weight,
+      flavor: item.flavor,
+      price: `₹${parseFloat(item.price).toFixed(2)}`,
+      customMessage: item.customMessage,
+      hasPhotoCustomization: !!item.photoCustomization?.compositeImage
+    }));
+
+    // Format delivery address
+    const deliveryAddress = typeof order.deliveryAddress === 'string' 
+      ? order.deliveryAddress 
+      : `${order.deliveryAddress.address}, ${order.deliveryAddress.city}, ${order.deliveryAddress.state} - ${order.deliveryAddress.pincode}`;
 
     const emailData: RatingEmailData = {
       orderNumber,
@@ -40,7 +68,14 @@ export async function sendRatingRequestEmail(orderId: number, customerEmail: str
         month: 'long',
         day: 'numeric'
       }),
+      deliveryTime: order.deliveryTime || 'Standard Delivery',
       items: orderItems,
+      subtotal: `₹${parseFloat(order.subtotal).toFixed(2)}`,
+      deliveryFee: `₹${parseFloat(order.deliveryFee || '0').toFixed(2)}`,
+      discount: order.discount ? `₹${parseFloat(order.discount).toFixed(2)}` : undefined,
+      paymentMethod: order.paymentMethod?.toUpperCase() || 'COD',
+      deliveryAddress,
+      specialInstructions: order.specialInstructions,
       ratingUrl
     };
 
@@ -61,23 +96,46 @@ export async function sendRatingRequestEmail(orderId: number, customerEmail: str
 }
 
 function generateRatingEmailTemplate(data: RatingEmailData): { text: string; html: string } {
+  // Format items for text email
+  const itemsText = data.items.map(item => {
+    let itemStr = `- ${item.name} (${item.weight}, ${item.flavor}) - ${item.price}`;
+    if (item.customMessage) itemStr += `\n  Custom Message: "${item.customMessage}"`;
+    if (item.hasPhotoCustomization) itemStr += `\n  📸 Personalized Photo Cake`;
+    return itemStr;
+  }).join('\n');
+
   const text = `
 Dear ${data.customerName},
 
-Thank you for choosing CakesBuy! Your recent order has been delivered.
+Thank you for choosing CakesBuy! Your recent order has been successfully delivered.
 
-Order Details:
-- Order Number: ${data.orderNumber}
-- Delivery Date: ${data.deliveryDate}
-- Items: ${data.items.join(', ')}
-- Total: ${data.orderTotal}
+📋 ORDER SUMMARY
+Order Number: ${data.orderNumber}
+Delivery Date: ${data.deliveryDate} (${data.deliveryTime})
+Payment Method: ${data.paymentMethod}
 
-We hope you loved your delicious 100% eggless cake! Your feedback helps us serve you better.
+🍰 ITEMS ORDERED
+${itemsText}
+
+💰 BILLING BREAKDOWN
+Subtotal: ${data.subtotal}
+Delivery Fee: ${data.deliveryFee}${data.discount ? `\nDiscount: -${data.discount}` : ''}
+Total Paid: ${data.orderTotal}
+
+📍 DELIVERED TO
+${data.deliveryAddress}
+${data.specialInstructions ? `\nSpecial Instructions: ${data.specialInstructions}` : ''}
+
+We hope you absolutely loved your fresh, delicious 100% eggless cake! Your feedback helps us serve you better and helps other customers make informed decisions.
 
 Please take a moment to rate your experience:
 ${data.ratingUrl}
 
-Your review helps other customers make informed decisions and helps us improve our service.
+What we'd love to know:
+- How did you find the taste and quality?
+- Was the delivery on time?
+- How was the packaging?
+- Would you recommend us to friends?
 
 Thank you for being a valued customer!
 
@@ -88,6 +146,21 @@ Team CakesBuy
 📞 +91-XXXXXXXXXX
 `;
 
+  // Format items for HTML email
+  const itemsHtml = data.items.map(item => `
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 10px 0; border-left: 3px solid #D2691E;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <strong style="color: #D2691E;">${item.name}</strong>
+        <span style="font-weight: bold;">${item.price}</span>
+      </div>
+      <div style="color: #666; font-size: 14px;">
+        <span>Weight: ${item.weight}</span> • <span>Flavor: ${item.flavor}</span>
+        ${item.hasPhotoCustomization ? '<br><span style="color: #e91e63;">📸 Personalized Photo Cake</span>' : ''}
+        ${item.customMessage ? `<br><em>Custom Message: "${item.customMessage}"</em>` : ''}
+      </div>
+    </div>
+  `).join('');
+
   const html = `
 <!DOCTYPE html>
 <html>
@@ -96,59 +169,119 @@ Team CakesBuy
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rate Your CakesBuy Experience</title>
   <style>
-    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { text-align: center; background: linear-gradient(135deg, #D2691E, #8B4513); color: white; padding: 30px; border-radius: 10px 10px 0 0; }
-    .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-    .order-details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #D2691E; }
-    .rating-button { display: inline-block; background: #D2691E; color: white; padding: 15px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 20px 0; }
-    .rating-button:hover { background: #8B4513; }
-    .footer { text-align: center; color: #666; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; }
-    .star-rating { font-size: 24px; color: #FFD700; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f5f5f5; }
+    .container { max-width: 650px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .header { text-align: center; background: linear-gradient(135deg, #D2691E, #8B4513); color: white; padding: 40px 20px; }
+    .content { padding: 40px 30px; }
+    .section { margin: 30px 0; }
+    .order-details { background: #f8f9fa; padding: 25px; border-radius: 10px; border-left: 5px solid #D2691E; }
+    .billing-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+    .billing-total { display: flex; justify-content: space-between; padding: 15px 0; font-weight: bold; font-size: 18px; color: #D2691E; border-top: 2px solid #D2691E; margin-top: 10px; }
+    .rating-section { text-align: center; background: linear-gradient(135deg, #fff3e0, #ffe0b2); padding: 30px; border-radius: 10px; margin: 30px 0; }
+    .rating-button { display: inline-block; background: #D2691E; color: white; padding: 18px 35px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; transition: all 0.3s; }
+    .rating-button:hover { background: #8B4513; transform: translateY(-2px); }
+    .footer { text-align: center; color: #666; margin-top: 40px; padding-top: 30px; border-top: 2px solid #eee; }
+    .star-rating { font-size: 28px; margin: 15px 0; }
+    .highlights { background: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    .address-box { background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin: 15px 0; }
+    h2 { color: #D2691E; margin-bottom: 20px; }
+    h3 { color: #8B4513; margin-bottom: 15px; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>🍰 Thank You for Your Order!</h1>
-      <p>Your delicious 100% eggless cake has been delivered</p>
+      <h1 style="margin: 0; font-size: 28px;">🍰 Thank You for Your Order!</h1>
+      <p style="margin: 10px 0 0 0; font-size: 18px; opacity: 0.9;">Your delicious 100% eggless cake has been delivered</p>
     </div>
     
     <div class="content">
-      <p>Dear <strong>${data.customerName}</strong>,</p>
+      <p style="font-size: 16px; margin-bottom: 25px;">Dear <strong>${data.customerName}</strong>,</p>
       
-      <p>We hope you absolutely loved your fresh, delicious cake from CakesBuy! Your order has been successfully delivered, and we'd love to hear about your experience.</p>
+      <p style="font-size: 16px; margin-bottom: 30px;">We hope you absolutely loved your fresh, delicious cake from CakesBuy! Your order has been successfully delivered, and we'd love to hear about your experience.</p>
       
-      <div class="order-details">
-        <h3>📋 Order Summary</h3>
-        <p><strong>Order Number:</strong> ${data.orderNumber}</p>
-        <p><strong>Delivery Date:</strong> ${data.deliveryDate}</p>
-        <p><strong>Items:</strong> ${data.items.join(', ')}</p>
-        <p><strong>Total:</strong> ${data.orderTotal}</p>
+      <div class="section">
+        <h2>📋 Order Summary</h2>
+        <div class="order-details">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div><strong>Order Number:</strong><br>${data.orderNumber}</div>
+            <div><strong>Payment Method:</strong><br>${data.paymentMethod}</div>
+            <div><strong>Delivery Date:</strong><br>${data.deliveryDate}</div>
+            <div><strong>Delivery Time:</strong><br>${data.deliveryTime}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>🍰 Items Ordered</h2>
+        ${itemsHtml}
+      </div>
+
+      <div class="section">
+        <h2>💰 Billing Breakdown</h2>
+        <div class="order-details">
+          <div class="billing-row">
+            <span>Subtotal:</span>
+            <span>${data.subtotal}</span>
+          </div>
+          <div class="billing-row">
+            <span>Delivery Fee:</span>
+            <span>${data.deliveryFee}</span>
+          </div>
+          ${data.discount ? `
+          <div class="billing-row" style="color: #28a745;">
+            <span>Discount:</span>
+            <span>-${data.discount}</span>
+          </div>` : ''}
+          <div class="billing-total">
+            <span>Total Paid:</span>
+            <span>${data.orderTotal}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>📍 Delivery Information</h2>
+        <div class="address-box">
+          <strong>Delivered to:</strong><br>
+          ${data.deliveryAddress}
+          ${data.specialInstructions ? `<br><br><strong>Special Instructions:</strong><br><em>${data.specialInstructions}</em>` : ''}
+        </div>
       </div>
       
-      <div style="text-align: center; margin: 30px 0;">
+      <div class="rating-section">
         <div class="star-rating">⭐⭐⭐⭐⭐</div>
-        <h3>How was your experience?</h3>
-        <p>Your feedback helps us improve and helps other customers make informed decisions.</p>
-        <a href="${data.ratingUrl}" class="rating-button">Rate Your Experience</a>
+        <h3 style="margin: 15px 0; color: #333;">How was your experience?</h3>
+        <p style="margin-bottom: 25px; color: #666;">Your feedback helps us improve and helps other customers make informed decisions.</p>
+        <a href="${data.ratingUrl}" class="rating-button">Rate Your Experience Now</a>
       </div>
       
-      <div style="background: #fff3cd; padding: 15px; border-radius: 6px; margin: 20px 0;">
-        <h4>🎯 What we'd love to know:</h4>
-        <ul>
-          <li>How did you find the taste and quality?</li>
-          <li>Was the delivery on time?</li>
-          <li>How was the packaging?</li>
-          <li>Would you recommend us to friends?</li>
+      <div class="highlights">
+        <h4 style="color: #2e7d32; margin-bottom: 15px;">🎯 What we'd love to know:</h4>
+        <ul style="color: #2e7d32; padding-left: 20px;">
+          <li>How did you find the taste and quality of your cake?</li>
+          <li>Was the delivery on time and professional?</li>
+          <li>How was the packaging and presentation?</li>
+          <li>Would you recommend CakesBuy to friends and family?</li>
+          <li>Any suggestions for improvement?</li>
         </ul>
       </div>
-    </div>
-    
-    <div class="footer">
-      <p><strong>CakesBuy - 100% Eggless Cake Shop</strong></p>
-      <p>📧 support@cakesbuy.com | 📞 +91-XXXXXXXXXX</p>
-      <p>Thank you for choosing CakesBuy for your sweet moments! 🍰</p>
+      
+      <div class="footer">
+        <p style="margin-bottom: 15px; font-size: 18px; color: #D2691E;">
+          <strong>🍰 CakesBuy - 100% Eggless Cake Shop</strong>
+        </p>
+        <p style="margin: 5px 0; color: #666;">
+          📧 support@cakesbuy.com | 📞 +91-XXXXXXXXXX
+        </p>
+        <p style="margin: 5px 0; color: #999; font-size: 14px;">
+          Freshly baked with love in Gurgaon | Same-day delivery available
+        </p>
+        <p style="margin-top: 20px; color: #999; font-size: 12px;">
+          You received this email because you placed an order with CakesBuy. 
+          If you have any questions, please contact our support team.
+        </p>
+      </div>
     </div>
   </div>
 </body>
