@@ -9,11 +9,14 @@ if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
 let transporter: nodemailer.Transporter | null = null;
 
 if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+  // Clean up the app password by removing any spaces
+  const cleanPassword = process.env.GMAIL_APP_PASSWORD.replace(/\s/g, '');
+  
   transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD
+      pass: cleanPassword
     },
     tls: {
       rejectUnauthorized: false
@@ -30,6 +33,8 @@ if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
         console.error('2. GMAIL_APP_PASSWORD is a 16-character app password (not your regular password)');
         console.error('3. 2-factor authentication is enabled on your Gmail account');
         console.error('4. App password is generated from Gmail Security settings');
+        console.error('5. App password should be 16 characters without spaces');
+        console.error('6. Make sure "Less secure app access" is NOT enabled (use App Password instead)');
       } else {
         console.log('Gmail SMTP server is ready to send emails');
       }
