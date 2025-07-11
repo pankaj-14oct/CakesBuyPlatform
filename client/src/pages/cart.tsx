@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Link } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -8,13 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { 
   Plus, Minus, Trash2, ShoppingBag, ArrowLeft, 
-  Truck, Tag, Gift, Heart, Star, ChevronLeft, ChevronRight
+  Truck, Tag, Gift, Heart, Star
 } from 'lucide-react';
 import { useCart } from '@/components/cart-context';
 import { formatPrice } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import useEmblaCarousel from 'embla-carousel-react';
+
 
 export default function CartPage() {
   const { state: cartState, dispatch } = useCart();
@@ -23,23 +23,7 @@ export default function CartPage() {
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
   const { toast } = useToast();
 
-  // Carousel functionality
-  const [emblaRef, emblaApi] = useEmblaCarousel({ 
-    loop: false,
-    align: 'start',
-    slidesToScroll: 1,
-    breakpoints: {
-      '(min-width: 768px)': { slidesToScroll: 2 }
-    }
-  });
 
-  const scrollPrev = useCallback(() => {
-    if (emblaApi) emblaApi.scrollPrev();
-  }, [emblaApi]);
-
-  const scrollNext = useCallback(() => {
-    if (emblaApi) emblaApi.scrollNext();
-  }, [emblaApi]);
 
   // Fetch addons for recommendations
   const { data: addons, isLoading: addonsLoading, error: addonsError } = useQuery({
@@ -354,61 +338,41 @@ export default function CartPage() {
               </Card>
             ))}
 
-            {/* Addons Section with Carousel */}
+            {/* Addons Section with Horizontal Scroll */}
             {addons && addons.length > 0 && (
               <Card className="mt-6">
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base sm:text-lg text-charcoal">
-                      Treat Yourself <span className="text-caramel">More</span> With
-                    </CardTitle>
-                    <div className="hidden sm:flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={scrollPrev}
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={scrollNext}
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
+                  <CardTitle className="text-base sm:text-lg text-charcoal">
+                    Treat Yourself <span className="text-caramel">More</span> With
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="embla" ref={emblaRef}>
-                    <div className="embla__container flex">
+                  <div className="overflow-x-auto hide-scrollbar">
+                    <div className="flex gap-3 pb-2">
                       {addons.map((addon: any) => (
-                        <div key={addon.id} className="embla__slide flex-none w-36 sm:w-40 md:w-48 mr-3 sm:mr-4">
+                        <div key={addon.id} className="flex-none w-32 sm:w-36">
                           <div className="bg-white rounded-lg border p-2 sm:p-3 text-center h-full flex flex-col">
-                            <div className="mb-2 sm:mb-3">
+                            <div className="mb-2">
                               <img 
                                 src={addon.image || '/api/placeholder/100/100'} 
                                 alt={addon.name}
-                                className="w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-lg object-cover"
+                                className="w-12 h-12 sm:w-14 sm:h-14 mx-auto rounded-lg object-cover"
                               />
                             </div>
-                            <h4 className="font-medium text-charcoal text-xs sm:text-sm mb-1 line-clamp-2">{addon.name}</h4>
-                            <div className="text-caramel font-bold text-xs sm:text-sm mb-2">
+                            <h4 className="font-medium text-charcoal text-xs mb-1 line-clamp-2 min-h-[2rem]">{addon.name}</h4>
+                            <div className="text-caramel font-bold text-xs mb-2">
                               {formatPrice(parseFloat(addon.price))}
                             </div>
                             <div className="flex items-center justify-center mb-2">
                               <div className="flex items-center text-yellow-500 text-xs">
-                                <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-current" />
-                                <span className="ml-0.5 sm:ml-1 text-xs">4.5</span>
-                                <span className="text-gray-500 ml-0.5 sm:ml-1 text-xs">(120)</span>
+                                <Star className="h-2.5 w-2.5 fill-current" />
+                                <span className="ml-1 text-xs">4.5</span>
+                                <span className="text-gray-500 ml-1 text-xs">(120)</span>
                               </div>
                             </div>
                             <Button 
                               size="sm" 
-                              className="w-full bg-white border border-caramel text-caramel hover:bg-caramel hover:text-white text-xs py-1.5 sm:py-2 mt-auto"
+                              className="w-full bg-white border border-caramel text-caramel hover:bg-caramel hover:text-white text-xs py-1.5 mt-auto"
                               onClick={() => handleAddAddon(addon)}
                             >
                               Add
