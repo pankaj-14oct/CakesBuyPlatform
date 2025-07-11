@@ -28,11 +28,16 @@ export default function AdminProtected({ children }: AdminProtectedProps) {
         const response = await apiRequest("/api/admin/users", "GET");
         if (response.ok) {
           setIsAdmin(true);
+        } else {
+          // If admin verification fails, clear token and redirect to admin login
+          localStorage.removeItem('token');
+          setIsVerifying(false);
         }
       } catch (error) {
         console.log("Admin verification failed:", error);
-        // Clear invalid token
+        // Clear invalid token and redirect to admin login
         localStorage.removeItem('token');
+        setIsVerifying(false);
       } finally {
         setIsVerifying(false);
       }
