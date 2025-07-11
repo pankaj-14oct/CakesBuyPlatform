@@ -323,7 +323,7 @@ export interface WelcomeEmailData {
 }
 
 export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean> {
-  const subject = `🎉 Welcome to CakesBuy! Your Account is Ready`;
+  const subject = `🎉 Welcome to CakesBuy! ₹50 Wallet Bonus Added`;
   
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
@@ -338,12 +338,24 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean>
           <p style="margin: 0; font-size: 16px;">Congratulations! Your account has been successfully created.</p>
         </div>
         
+        <!-- Welcome Bonus Section -->
+        <div style="background-color: #fff3e0; border: 2px solid #FF9800; padding: 20px; margin: 20px 0; border-radius: 12px; text-align: center;">
+          <h2 style="color: #FF9800; margin: 0 0 10px 0; font-size: 24px;">🎁 Welcome Bonus!</h2>
+          <div style="background-color: #FF9800; color: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+            <h3 style="margin: 0; font-size: 28px;">₹50</h3>
+            <p style="margin: 5px 0 0 0; font-size: 16px;">Added to your CakesBuy Wallet</p>
+          </div>
+          <p style="color: #666; margin: 10px 0 0 0; font-size: 14px;">
+            Use this bonus amount on your first order or save it for later!
+          </p>
+        </div>
+        
         <p style="font-size: 16px; line-height: 1.6; color: #333;">
           Dear ${data.userName},
         </p>
         
         <p style="font-size: 16px; line-height: 1.6; color: #333;">
-          Welcome to CakesBuy - Gurgaon's premier destination for 100% eggless cakes! We're thrilled to have you join our sweet family.
+          Welcome to CakesBuy - Gurgaon's premier destination for 100% eggless cakes! We're thrilled to have you join our sweet family and we've added ₹50 to your wallet as a welcome gift.
         </p>
         
         <div style="background-color: #f8f8f8; border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px;">
@@ -361,16 +373,21 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean>
               <td style="padding: 8px 0; color: #666;">Phone:</td>
               <td style="padding: 8px 0; font-weight: bold; color: #333;">${data.userPhone}</td>
             </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #666;">Wallet Balance:</td>
+              <td style="padding: 8px 0; font-weight: bold; color: #4CAF50;">₹50.00</td>
+            </tr>
           </table>
         </div>
         
         <div style="background-color: #fff3e0; border: 1px solid #ff9800; padding: 20px; margin: 20px 0; border-radius: 8px;">
           <h3 style="color: #ff9800; margin: 0 0 15px 0;">🎁 What's Next?</h3>
           <ul style="margin: 0; padding-left: 20px; color: #333;">
+            <li style="margin-bottom: 8px;">Use your ₹50 wallet bonus on your first order</li>
             <li style="margin-bottom: 8px;">Browse our delicious collection of 100% eggless cakes</li>
             <li style="margin-bottom: 8px;">Add your delivery addresses for quick checkout</li>
             <li style="margin-bottom: 8px;">Set up birthday and anniversary reminders for special discounts</li>
-            <li style="margin-bottom: 8px;">Earn loyalty points with every order</li>
+            <li style="margin-bottom: 8px;">Earn loyalty points with every order and get more wallet rewards</li>
           </ul>
         </div>
         
@@ -407,25 +424,29 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean>
   `;
 
   const text = `
-    Welcome to CakesBuy!
+    Welcome to CakesBuy! ₹50 Wallet Bonus Added
     
     Dear ${data.userName},
     
     Congratulations! Your account has been successfully created.
     
+    🎁 WELCOME BONUS: ₹50 has been added to your CakesBuy Wallet!
+    
     Welcome to CakesBuy - Gurgaon's premier destination for 100% eggless cakes! 
-    We're thrilled to have you join our sweet family.
+    We're thrilled to have you join our sweet family and we've added ₹50 to your wallet as a welcome gift.
     
     Your Account Details:
     - Name: ${data.userName}
     - Email: ${data.userEmail}
     - Phone: ${data.userPhone}
+    - Wallet Balance: ₹50.00
     
     What's Next?
+    - Use your ₹50 wallet bonus on your first order
     - Browse our delicious collection of 100% eggless cakes
     - Add your delivery addresses for quick checkout
     - Set up birthday and anniversary reminders for special discounts
-    - Earn loyalty points with every order
+    - Earn loyalty points with every order and get more wallet rewards
     
     Why Choose CakesBuy?
     - 100% Eggless: Perfect for vegetarians and health-conscious customers

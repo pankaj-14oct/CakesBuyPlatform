@@ -1752,15 +1752,26 @@ CakesBuy
         return res.status(400).json({ message: "Phone number already registered" });
       }
       
-      // Hash password and create user
+      // Hash password and create user with 50Rs welcome bonus
       const hashedPassword = await hashPassword(password);
       const newUser = await storage.createUser({
         email,
         password: hashedPassword,
         phone,
-        addresses: []
+        addresses: [],
+        walletBalance: "50" // 50Rs welcome bonus
       });
       
+      // Add wallet transaction for welcome bonus
+      await storage.createWalletTransaction({
+        userId: newUser.id,
+        type: "credit",
+        amount: "50",
+        description: "Welcome bonus - Thank you for joining CakesBuy!",
+        transactionId: `WB-${Date.now()}-${newUser.id}`,
+        status: "completed"
+      });
+
       // Generate JWT token
       // Send welcome email
       const welcomeEmailData: WelcomeEmailData = {
@@ -1919,14 +1930,26 @@ CakesBuy
         return res.status(400).json({ message: "Phone number already registered" });
       }
       
-      // Hash password and create user
+      // Hash password and create user with 50Rs welcome bonus
       const hashedPassword = await hashPassword(password);
       const newUser = await storage.createUser({
         email,
         password: hashedPassword,
         phone,
-        addresses: []
+        addresses: [],
+        walletBalance: "50" // 50Rs welcome bonus
       });
+      
+      // Add wallet transaction for welcome bonus
+      await storage.createWalletTransaction({
+        userId: newUser.id,
+        type: "credit",
+        amount: "50",
+        description: "Welcome bonus - Thank you for joining CakesBuy!",
+        transactionId: `WB-${Date.now()}-${newUser.id}`,
+        status: "completed"
+      });
+      
       // Send welcome email
       const welcomeEmailData: WelcomeEmailData = {
         userEmail: newUser.email,
