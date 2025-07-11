@@ -32,14 +32,6 @@ export default function AdminOrders() {
 
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ['/api/admin/orders', statusFilter],
-    queryFn: async () => {
-      const url = statusFilter === 'all' 
-        ? '/api/admin/orders' 
-        : `/api/admin/orders?status=${statusFilter}`;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Failed to fetch orders');
-      return response.json();
-    },
   });
 
   // Fetch delivery boys for assignment
