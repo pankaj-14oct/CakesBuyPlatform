@@ -346,35 +346,36 @@ export default function CartPage() {
                     Treat Yourself <span className="text-caramel">More</span> With
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto hide-scrollbar">
-                    <div className="flex gap-1.5 px-4 pb-3">
+                <CardContent className="p-4">
+                  <div className="overflow-x-auto hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                    <div className="flex gap-3 pb-2" style={{ minWidth: 'max-content' }}>
                       {addons.map((addon: any) => (
-                        <div key={addon.id} className="flex-none w-24">
-                          <div className="bg-white rounded border p-1.5 text-center">
-                            <div className="mb-1">
+                        <div key={addon.id} className="flex-shrink-0 w-40">
+                          <div className="bg-white rounded-lg border p-3 text-center h-full flex flex-col shadow-sm">
+                            <div className="mb-3">
                               <img 
                                 src={addon.image || '/api/placeholder/100/100'} 
                                 alt={addon.name}
-                                className="w-8 h-8 mx-auto rounded object-cover"
+                                className="w-16 h-16 mx-auto rounded-lg object-cover"
                               />
                             </div>
-                            <h4 className="text-[8px] font-medium text-charcoal leading-tight mb-1 line-clamp-2">{addon.name}</h4>
-                            <div className="text-caramel font-bold text-[8px] mb-1">
+                            <h4 className="font-medium text-charcoal text-sm mb-1 line-clamp-2">{addon.name}</h4>
+                            <div className="text-caramel font-bold text-sm mb-2">
                               {formatPrice(parseFloat(addon.price))}
                             </div>
-                            <div className="flex items-center justify-center mb-1">
-                              <div className="flex items-center text-yellow-500 text-[7px]">
-                                <Star className="h-1.5 w-1.5 fill-current" />
-                                <span className="ml-0.5">4.5</span>
+                            <div className="flex items-center justify-center mb-2">
+                              <div className="flex items-center text-yellow-500 text-xs">
+                                <Star className="h-3 w-3 fill-current" />
+                                <span className="ml-1">4.5</span>
+                                <span className="text-gray-500 ml-1">(120)</span>
                               </div>
                             </div>
                             <Button 
                               size="sm" 
-                              className="w-full bg-white border border-caramel text-caramel hover:bg-caramel hover:text-white text-[7px] py-0.5 h-5"
+                              className="w-full bg-white border border-caramel text-caramel hover:bg-caramel hover:text-white text-xs py-2 mt-auto"
                               onClick={() => handleAddAddon(addon)}
                             >
-                              Add
+                              Add to Cart
                             </Button>
                           </div>
                         </div>
