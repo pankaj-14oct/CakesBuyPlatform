@@ -359,10 +359,10 @@ export default function CartPage() {
               <Card className="mt-6">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg text-charcoal">
+                    <CardTitle className="text-base sm:text-lg text-charcoal">
                       Treat Yourself <span className="text-caramel">More</span> With
                     </CardTitle>
-                    <div className="flex gap-2">
+                    <div className="hidden sm:flex gap-2">
                       <Button
                         variant="outline"
                         size="icon"
@@ -386,32 +386,32 @@ export default function CartPage() {
                   <div className="embla" ref={emblaRef}>
                     <div className="embla__container flex">
                       {addons.map((addon: any) => (
-                        <div key={addon.id} className="embla__slide flex-none w-48 mr-4">
-                          <div className="bg-white rounded-lg border p-3 text-center h-full">
-                            <div className="mb-3">
+                        <div key={addon.id} className="embla__slide flex-none w-36 sm:w-40 md:w-48 mr-3 sm:mr-4">
+                          <div className="bg-white rounded-lg border p-2 sm:p-3 text-center h-full flex flex-col">
+                            <div className="mb-2 sm:mb-3">
                               <img 
                                 src={addon.image || '/api/placeholder/100/100'} 
                                 alt={addon.name}
-                                className="w-16 h-16 mx-auto rounded-lg object-cover"
+                                className="w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-lg object-cover"
                               />
                             </div>
-                            <h4 className="font-medium text-charcoal text-sm mb-1">{addon.name}</h4>
-                            <div className="text-caramel font-bold text-sm mb-2">
+                            <h4 className="font-medium text-charcoal text-xs sm:text-sm mb-1 line-clamp-2">{addon.name}</h4>
+                            <div className="text-caramel font-bold text-xs sm:text-sm mb-2">
                               {formatPrice(parseFloat(addon.price))}
                             </div>
                             <div className="flex items-center justify-center mb-2">
                               <div className="flex items-center text-yellow-500 text-xs">
-                                <Star className="h-3 w-3 fill-current" />
-                                <span className="ml-1">4.5</span>
-                                <span className="text-gray-500 ml-1">(120)</span>
+                                <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-current" />
+                                <span className="ml-0.5 sm:ml-1 text-xs">4.5</span>
+                                <span className="text-gray-500 ml-0.5 sm:ml-1 text-xs">(120)</span>
                               </div>
                             </div>
                             <Button 
                               size="sm" 
-                              className="w-full bg-white border border-caramel text-caramel hover:bg-caramel hover:text-white text-xs"
+                              className="w-full bg-white border border-caramel text-caramel hover:bg-caramel hover:text-white text-xs py-1.5 sm:py-2 mt-auto"
                               onClick={() => handleAddAddon(addon)}
                             >
-                              Add to Cart
+                              Add
                             </Button>
                           </div>
                         </div>
