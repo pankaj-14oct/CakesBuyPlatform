@@ -13,21 +13,34 @@ interface RatingEmailData {
 
 export async function sendRatingRequestEmail(orderId: number, customerEmail: string, customerName: string, orderNumber: string): Promise<boolean> {
   try {
+    // Import storage to get order data
+    const { storage } = await import("./storage");
+    
+    // Get order data
+    const order = await storage.getOrder(orderId);
+    if (!order) {
+      console.error(`Order not found for rating email: ${orderId}`);
+      return false;
+    }
+
     // Create rating URL
     const ratingUrl = `${process.env.REPLIT_APP_URL || 'http://localhost:5000'}/rate-order/${orderId}`;
+
+    // Extract order items for email
+    const orderItems = order.items.map((item: any) => `${item.name} (${item.weight})`);
 
     const emailData: RatingEmailData = {
       orderNumber,
       customerName,
       customerEmail,
-      orderTotal: '₹0.00', // Will be updated from order data
-      deliveryDate: new Date().toLocaleDateString('en-IN', {
+      orderTotal: `₹${parseFloat(order.total).toFixed(2)}`,
+      deliveryDate: new Date(order.deliveryDate).toLocaleDateString('en-IN', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       }),
-      items: ['Order items'], // Will be updated from order data
+      items: orderItems,
       ratingUrl
     };
 
