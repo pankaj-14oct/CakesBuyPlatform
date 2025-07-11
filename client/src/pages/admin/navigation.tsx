@@ -60,13 +60,17 @@ export default function AdminNavigation() {
   });
 
   // Fetch categories for dropdown
-  const { data: categories = [] } = useQuery<Category[]>({
+  const { data: categories = [], isLoading: isCategoriesLoading } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
     queryFn: async () => {
       const response = await apiRequest('/api/categories');
+      console.log('Categories API Response:', response);
       return Array.isArray(response) ? response : [];
     }
   });
+
+  // Debug categories
+  console.log('Categories data:', categories, 'Length:', categories.length);
 
   // Create navigation item mutation
   const createMutation = useMutation({
@@ -279,11 +283,15 @@ export default function AdminNavigation() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">No category</SelectItem>
-                          {categories.map((category) => (
-                            <SelectItem key={category.id} value={category.id.toString()}>
-                              {category.name}
-                            </SelectItem>
-                          ))}
+                          {categories.length > 0 ? (
+                            categories.map((category) => (
+                              <SelectItem key={category.id} value={category.id.toString()}>
+                                {category.name}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="loading" disabled>Loading categories...</SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -462,11 +470,15 @@ export default function AdminNavigation() {
                                     </SelectTrigger>
                                     <SelectContent>
                                       <SelectItem value="none">No category</SelectItem>
-                                      {categories.map((category) => (
-                                        <SelectItem key={category.id} value={category.id.toString()}>
-                                          {category.name}
-                                        </SelectItem>
-                                      ))}
+                                      {categories.length > 0 ? (
+                                        categories.map((category) => (
+                                          <SelectItem key={category.id} value={category.id.toString()}>
+                                            {category.name}
+                                          </SelectItem>
+                                        ))
+                                      ) : (
+                                        <SelectItem value="loading" disabled>Loading categories...</SelectItem>
+                                      )}
                                     </SelectContent>
                                   </Select>
                                 </div>
