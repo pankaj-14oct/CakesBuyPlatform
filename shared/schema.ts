@@ -381,8 +381,8 @@ export const adminConfigs = pgTable("admin_configs", {
 export const navigationItems = pgTable("navigation_items", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  slug: text("slug").notNull(),
-  url: text("url").notNull(),
+  slug: text("slug"), // Optional - auto-generated from name if empty
+  url: text("url"), // Optional - auto-generated from category/name if empty
   position: integer("position").notNull().default(0),
   isActive: boolean("is_active").default(true),
   isNew: boolean("is_new").default(false), // Shows "New" badge

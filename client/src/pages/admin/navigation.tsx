@@ -17,8 +17,8 @@ import { apiRequest } from '@/lib/queryClient';
 interface NavigationItem {
   id: number;
   name: string;
-  slug: string;
-  url: string;
+  slug: string | null;
+  url: string | null;
   position: number;
   isActive: boolean;
   isNew: boolean;
@@ -64,13 +64,9 @@ export default function AdminNavigation() {
     queryKey: ['/api/categories'],
     queryFn: async () => {
       const response = await apiRequest('/api/categories');
-      console.log('Categories API Response:', response);
       return Array.isArray(response) ? response : [];
     }
   });
-
-  // Debug categories
-  console.log('Categories data:', categories, 'Length:', categories.length);
 
   // Create navigation item mutation
   const createMutation = useMutation({
@@ -152,8 +148,8 @@ export default function AdminNavigation() {
     setEditingItem(item);
     setFormData({
       name: item.name,
-      slug: item.slug,
-      url: item.url,
+      slug: item.slug || '',
+      url: item.url || '',
       isActive: item.isActive,
       isNew: item.isNew,
       categoryId: item.categoryId
@@ -164,15 +160,10 @@ export default function AdminNavigation() {
     deleteMutation.mutate(id);
   };
 
-  const generateSlug = (name: string) => {
-    return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-  };
-
   const handleNameChange = (name: string) => {
     setFormData(prev => ({ 
       ...prev, 
-      name,
-      slug: generateSlug(name)
+      name
     }));
   };
 
@@ -251,22 +242,21 @@ export default function AdminNavigation() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="slug">Slug</Label>
+                      <Label htmlFor="slug">Slug (Optional)</Label>
                       <Input
                         id="slug"
                         value={formData.slug}
                         onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                        required
+                        placeholder="Auto-generated from name if empty"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="url">URL</Label>
+                      <Label htmlFor="url">URL (Optional)</Label>
                       <Input
                         id="url"
                         value={formData.url}
                         onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
-                        placeholder="/category/example"
-                        required
+                        placeholder="Auto-generated from category/name if empty"
                       />
                     </div>
                     <div>
@@ -403,7 +393,7 @@ export default function AdminNavigation() {
                     </TableCell>
                     <TableCell>
                       <code className="text-sm bg-gray-100 px-2 py-1 rounded">
-                        {item.url}
+                        {item.url || 'Auto-generated'}
                       </code>
                     </TableCell>
                     <TableCell>
@@ -439,21 +429,21 @@ export default function AdminNavigation() {
                                   />
                                 </div>
                                 <div>
-                                  <Label htmlFor="edit-slug">Slug</Label>
+                                  <Label htmlFor="edit-slug">Slug (Optional)</Label>
                                   <Input
                                     id="edit-slug"
                                     value={formData.slug}
                                     onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                                    required
+                                    placeholder="Auto-generated from name if empty"
                                   />
                                 </div>
                                 <div>
-                                  <Label htmlFor="edit-url">URL</Label>
+                                  <Label htmlFor="edit-url">URL (Optional)</Label>
                                   <Input
                                     id="edit-url"
                                     value={formData.url}
                                     onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
-                                    required
+                                    placeholder="Auto-generated from category/name if empty"
                                   />
                                 </div>
                                 <div>

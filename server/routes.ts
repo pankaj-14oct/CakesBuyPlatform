@@ -3300,6 +3300,28 @@ CakesBuy
     }
   });
 
+  // Helper function to generate slug from name
+  function generateSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+  }
+
+  // Helper function to generate URL from category and name
+  async function generateUrl(name: string, categoryId?: number): Promise<string> {
+    if (categoryId) {
+      const category = await storage.getCategory(categoryId);
+      if (category) {
+        return `/category/${category.slug}`;
+      }
+    }
+    // Fallback to using name as slug
+    return `/${generateSlug(name)}`;
+  }
+
   // Navigation Items API routes
   app.get("/api/navigation-items", async (req, res) => {
     try {
@@ -3324,6 +3346,17 @@ CakesBuy
     try {
       const { insertNavigationItemSchema } = await import("@shared/schema");
       const itemData = insertNavigationItemSchema.parse(req.body);
+      
+      // Auto-generate slug if not provided
+      if (!itemData.slug || itemData.slug.trim() === '') {
+        itemData.slug = generateSlug(itemData.name);
+      }
+      
+      // Auto-generate URL if not provided
+      if (!itemData.url || itemData.url.trim() === '') {
+        itemData.url = await generateUrl(itemData.name, itemData.categoryId);
+      }
+      
       const newItem = await storage.createNavigationItem(itemData);
       res.json(newItem);
     } catch (error) {
@@ -3339,6 +3372,23 @@ CakesBuy
       const id = parseInt(req.params.id);
       const { insertNavigationItemSchema } = await import("@shared/schema");
       const updateData = insertNavigationItemSchema.partial().parse(req.body);
+      
+      // Auto-generate slug if not provided but name is provided
+      if (updateData.name && (!updateData.slug || updateData.slug.trim() === '')) {
+        updateData.slug = generateSlug(updateData.name);
+      }
+      
+      // Auto-generate URL if not provided but name or categoryId is provided
+      if ((!updateData.url || updateData.url.trim() === '') && (updateData.name || updateData.categoryId !== undefined)) {
+        // Get the current item to use existing name if not provided
+        const currentItem = await storage.getNavigationItem(id);
+        const nameToUse = updateData.name || currentItem?.name || '';
+        const categoryIdToUse = updateData.categoryId !== undefined ? updateData.categoryId : currentItem?.categoryId;
+        
+        if (nameToUse) {
+          updateData.url = await generateUrl(nameToUse, categoryIdToUse);
+        }
+      }
       
       await storage.updateNavigationItem(id, updateData);
       res.json({ message: "Navigation item updated successfully" });
