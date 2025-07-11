@@ -15,6 +15,7 @@ export async function apiRequest(
 ): Promise<Response> {
   // Check for tokens - use unified token storage
   const token = localStorage.getItem('auth_token');
+  const adminToken = localStorage.getItem('admin_token');
   const deliveryToken = localStorage.getItem('delivery_token');
   
   const defaultHeaders: Record<string, string> = {};
@@ -22,7 +23,14 @@ export async function apiRequest(
     defaultHeaders["Content-Type"] = "application/json";
   }
   
-  const finalToken = url.includes('/delivery') ? deliveryToken : token;
+  let finalToken;
+  if (url.includes('/admin')) {
+    finalToken = adminToken;
+  } else if (url.includes('/delivery')) {
+    finalToken = deliveryToken;
+  } else {
+    finalToken = token;
+  }
   if (finalToken) {
     defaultHeaders.Authorization = `Bearer ${finalToken}`;
   }
@@ -49,10 +57,18 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     // Check for tokens - use unified token storage
     const token = localStorage.getItem('auth_token');
+    const adminToken = localStorage.getItem('admin_token');
     const deliveryToken = localStorage.getItem('delivery_token');
     const url = queryKey[0] as string;
     
-    const finalToken = url.includes('/delivery') ? deliveryToken : token;
+    let finalToken;
+    if (url.includes('/admin')) {
+      finalToken = adminToken;
+    } else if (url.includes('/delivery')) {
+      finalToken = deliveryToken;
+    } else {
+      finalToken = token;
+    }
     const headers: Record<string, string> = {};
     
     if (finalToken) {

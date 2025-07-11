@@ -17,7 +17,7 @@ export default function AdminProtected({ children }: AdminProtectedProps) {
   useEffect(() => {
     const verifyAdmin = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('admin_token');
         
         if (!token) {
           setIsVerifying(false);
@@ -30,13 +30,13 @@ export default function AdminProtected({ children }: AdminProtectedProps) {
           setIsAdmin(true);
         } else {
           // If admin verification fails, clear token and redirect to admin login
-          localStorage.removeItem('token');
+          localStorage.removeItem('admin_token');
           setIsVerifying(false);
         }
       } catch (error) {
         console.log("Admin verification failed:", error);
         // Clear invalid token and redirect to admin login
-        localStorage.removeItem('token');
+        localStorage.removeItem('admin_token');
         setIsVerifying(false);
       } finally {
         setIsVerifying(false);
