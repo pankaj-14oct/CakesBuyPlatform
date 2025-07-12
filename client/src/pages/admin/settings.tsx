@@ -103,7 +103,7 @@ export default function AdminSettings() {
 
   const exportDataMutation = useMutation({
     mutationFn: async (type: string) => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('admin_token');
       if (!token) {
         throw new Error('Please log in as admin to export data');
       }
@@ -158,7 +158,7 @@ export default function AdminSettings() {
       formData.append('type', type);
       
       // Use fetch with manual token since apiRequest doesn't support FormData
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('admin_token');
       if (!token) {
         throw new Error('Please log in as admin to upload files');
       }
