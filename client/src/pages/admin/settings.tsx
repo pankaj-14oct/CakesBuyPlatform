@@ -25,7 +25,7 @@ export default function AdminSettings() {
   // Check authentication status
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('admin_token');
       if (!token) {
         setAuthStatus('invalid');
         return;
@@ -43,12 +43,12 @@ export default function AdminSettings() {
         } else {
           setAuthStatus('invalid');
           // Clear invalid token
-          localStorage.removeItem('token');
+          localStorage.removeItem('admin_token');
         }
       } catch (error) {
         setAuthStatus('invalid');
         // Clear invalid token
-        localStorage.removeItem('token');
+        localStorage.removeItem('admin_token');
       }
     };
 
