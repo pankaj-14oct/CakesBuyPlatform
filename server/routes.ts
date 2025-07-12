@@ -46,6 +46,8 @@ import {
   type DeliveryBoyAuthRequest
 } from "./auth";
 import { sendReminderEmail, type ReminderEmailData, sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, type OrderEmailData, sendWelcomeEmail, type WelcomeEmailData } from "./email-service";
+import { whatsAppService, type WhatsAppOrderData } from "./whatsapp-service";
+import { setupWhatsAppAdminRoutes } from "./whatsapp-admin";
 import { sendRatingRequestEmail } from "./rating-service";
 import { createInvoiceForOrder, updateInvoiceStatus, getInvoiceByOrderId, getInvoiceByNumber, getUserInvoices, getInvoiceWithOrder, getInvoiceDisplayData } from "./invoice-service";
 import { processPhotoCakeItems } from "./photo-cake-service";
@@ -462,6 +464,17 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
           await sendOrderConfirmationEmail(emailData);
           console.log(`Order confirmation email sent to ${customerEmail} for order ${order.orderNumber}`);
         }
+
+        // Send WhatsApp order confirmation
+        const customerPhone = order.deliveryAddress.phone || (req.user ? (await storage.getUser(req.user.id))?.phone : null);
+        if (customerPhone) {
+          try {
+            await whatsAppService.sendOrderConfirmation(order, customerPhone, customerName);
+            console.log(`WhatsApp order confirmation sent to ${customerPhone} for order ${order.orderNumber}`);
+          } catch (whatsappError) {
+            console.error('Failed to send WhatsApp order confirmation:', whatsappError);
+          }
+        }
       } catch (emailError) {
         // Don't fail the order if email fails
         console.error('Failed to send order confirmation email:', emailError);
@@ -589,6 +602,19 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
             
             await sendOrderStatusUpdateEmail(emailData);
             console.log(`Order status email sent to ${customerEmail} for order ${order.orderNumber} (${status})`);
+          }
+
+          // Send WhatsApp notification for delivery
+          if (status === 'delivered') {
+            const customerPhone = order.deliveryAddress.phone || (order.userId ? (await storage.getUser(order.userId))?.phone : null);
+            if (customerPhone) {
+              try {
+                await whatsAppService.sendOrderDelivered(order, customerPhone, customerName);
+                console.log(`WhatsApp delivery notification sent to ${customerPhone} for order ${order.orderNumber}`);
+              } catch (whatsappError) {
+                console.error('Failed to send WhatsApp delivery notification:', whatsappError);
+              }
+            }
           }
         } catch (emailError) {
           // Don't fail the status update if email fails
@@ -1826,6 +1852,12 @@ CakesBuy
       sendWelcomeEmail(welcomeEmailData).catch(error => {
         console.error("Failed to send welcome email:", error);
       });
+
+      // Send WhatsApp welcome message asynchronously
+      whatsAppService.sendWelcomeMessage(newUser.phone, newUser.email.split("@")[0]).catch(error => {
+        console.error("Failed to send WhatsApp welcome message:", error);
+      });
+
       const token = generateToken(newUser.id, newUser.phone, newUser.email);
       
       res.status(201).json({
@@ -3545,6 +3577,9 @@ CakesBuy
       res.status(500).json({ message: "Failed to delete page" });
     }
   });
+
+  // Setup WhatsApp admin routes
+  setupWhatsAppAdminRoutes(app);
 
   const server = httpServer || createServer(app);
   return server;

@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Database, Trash2, Download, Upload, Mail, Send, FileText, FileDown, FileUp, AlertCircle } from "lucide-react";
+import { Database, Trash2, Download, Upload, Mail, Send, FileText, FileDown, FileUp, AlertCircle, MessageCircle, CheckCircle, XCircle } from "lucide-react";
 
 export default function AdminSettings() {
   const { toast } = useToast();
@@ -21,6 +21,9 @@ export default function AdminSettings() {
   const [uploadType, setUploadType] = useState<"products" | "categories" | "users">("products");
   const [previewData, setPreviewData] = useState<any[]>([]);
   const [authStatus, setAuthStatus] = useState<'checking' | 'valid' | 'invalid'>('checking');
+  const [whatsappStatus, setWhatsappStatus] = useState<any>(null);
+  const [testWhatsAppPhone, setTestWhatsAppPhone] = useState("");
+  const [testWhatsAppMessage, setTestWhatsAppMessage] = useState("");
 
   // Check authentication status
   useEffect(() => {
@@ -35,7 +38,24 @@ export default function AdminSettings() {
       setAuthStatus('valid');
     };
 
+    const checkWhatsApp = async () => {
+      try {
+        const response = await fetch('/api/admin/whatsapp/status', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          }
+        });
+        if (response.ok) {
+          const status = await response.json();
+          setWhatsappStatus(status);
+        }
+      } catch (error) {
+        console.error('Failed to check WhatsApp status:', error);
+      }
+    };
+
     checkAuth();
+    checkWhatsApp();
   }, []);
 
   const importDummyDataMutation = useMutation({
@@ -96,6 +116,28 @@ export default function AdminSettings() {
       toast({
         title: "Error",
         description: error.message || "Failed to send test email",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const testWhatsAppMutation = useMutation({
+    mutationFn: async ({ phone, message }: { phone: string; message: string }) => {
+      const response = await apiRequest("/api/admin/whatsapp/test", "POST", { phone, message });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "WhatsApp test completed successfully",
+      });
+      setTestWhatsAppPhone("");
+      setTestWhatsAppMessage("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to test WhatsApp",
         variant: "destructive",
       });
     },
@@ -343,10 +385,11 @@ export default function AdminSettings() {
       )}
 
       <Tabs defaultValue="data-management" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="data-management">Data Management</TabsTrigger>
           <TabsTrigger value="import-export">Import & Export</TabsTrigger>
           <TabsTrigger value="email-testing">Email Testing</TabsTrigger>
+          <TabsTrigger value="whatsapp-testing">WhatsApp Testing</TabsTrigger>
           <TabsTrigger value="app-info">App Info</TabsTrigger>
         </TabsList>
 
@@ -666,6 +709,107 @@ export default function AdminSettings() {
             </div>
           </CardContent>
         </Card>
+        </TabsContent>
+
+        <TabsContent value="whatsapp-testing" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageCircle className="h-5 w-5" />
+                WhatsApp Notifications
+              </CardTitle>
+              <CardDescription>
+                Manage and test WhatsApp order notifications
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* WhatsApp Status */}
+              <div className="space-y-3">
+                <h4 className="font-medium">Connection Status</h4>
+                <div className="flex items-center gap-3 p-3 rounded-lg border">
+                  {whatsappStatus?.connected ? (
+                    <>
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <div>
+                        <p className="font-medium text-green-800">Connected</p>
+                        <p className="text-sm text-green-600">WhatsApp is ready for order notifications</p>
+                      </div>
+                    </>
+                  ) : whatsappStatus?.qrGenerated ? (
+                    <>
+                      <AlertCircle className="h-5 w-5 text-orange-600" />
+                      <div>
+                        <p className="font-medium text-orange-800">QR Code Ready</p>
+                        <p className="text-sm text-orange-600">Check server logs for QR code to scan</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="h-5 w-5 text-red-600" />
+                      <div>
+                        <p className="font-medium text-red-800">Disconnected</p>
+                        <p className="text-sm text-red-600">WhatsApp service is initializing or unavailable</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* WhatsApp Test */}
+              <div className="space-y-3">
+                <h4 className="font-medium">Test WhatsApp Message</h4>
+                <div className="space-y-2">
+                  <Label htmlFor="testWhatsAppPhone">Phone Number (with country code)</Label>
+                  <Input
+                    id="testWhatsAppPhone"
+                    type="tel"
+                    placeholder="91XXXXXXXXXX"
+                    value={testWhatsAppPhone}
+                    onChange={(e) => setTestWhatsAppPhone(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="testWhatsAppMessage">Test Message</Label>
+                  <Input
+                    id="testWhatsAppMessage"
+                    placeholder="Enter test message"
+                    value={testWhatsAppMessage}
+                    onChange={(e) => setTestWhatsAppMessage(e.target.value)}
+                  />
+                </div>
+                <Button 
+                  onClick={() => testWhatsAppMutation.mutate({ phone: testWhatsAppPhone, message: testWhatsAppMessage })}
+                  disabled={testWhatsAppMutation.isPending || !testWhatsAppPhone || !testWhatsAppMessage}
+                  className="w-full"
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  {testWhatsAppMutation.isPending ? "Testing..." : "Send Test Message"}
+                </Button>
+              </div>
+
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h4 className="font-medium text-green-800 mb-2">WhatsApp Features:</h4>
+                <ul className="text-sm text-green-700 space-y-1">
+                  <li>• ✅ Automatic order confirmation messages</li>
+                  <li>• ✅ Delivery completion notifications</li>
+                  <li>• ✅ Welcome messages for new customers</li>
+                  <li>• ✅ Free messaging using WhatsApp Web</li>
+                  <li>• ✅ Rich format with emojis and order details</li>
+                  <li>• ✅ Supports Indian phone numbers (+91)</li>
+                </ul>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-medium text-blue-800 mb-2">Setup Instructions:</h4>
+                <ol className="text-sm text-blue-700 space-y-1 list-decimal list-inside">
+                  <li>Check server console for QR code when service starts</li>
+                  <li>Scan QR code with WhatsApp on your phone</li>
+                  <li>Keep WhatsApp Web session active for notifications</li>
+                  <li>Test with your phone number to verify setup</li>
+                </ol>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="app-info" className="space-y-6">
