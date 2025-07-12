@@ -51,11 +51,18 @@ export default function AdminNavigation() {
   const queryClient = useQueryClient();
 
   // Fetch navigation items
-  const { data: navigationItems = [], isLoading } = useQuery<NavigationItem[]>({
+  const { data: navigationItems = [], isLoading, error } = useQuery<NavigationItem[]>({
     queryKey: ['/api/admin/navigation-items'],
     queryFn: async () => {
-      const response = await apiRequest('/api/admin/navigation-items');
-      return Array.isArray(response) ? response : [];
+      try {
+        const response = await apiRequest('/api/admin/navigation-items');
+        const data = await response.json();
+        console.log('Navigation items data:', data);
+        return Array.isArray(data) ? data : [];
+      } catch (err) {
+        console.error('Navigation items fetch error:', err);
+        throw err;
+      }
     }
   });
 
@@ -193,11 +200,31 @@ export default function AdminNavigation() {
   };
 
   const displayItems = reorderMode ? (Array.isArray(tempOrder) ? tempOrder : []) : (Array.isArray(navigationItems) ? navigationItems : []);
+  
+  console.log('Navigation items state:', {
+    navigationItems,
+    isLoading,
+    error,
+    displayItems,
+    displayItemsLength: displayItems.length,
+    isArray: Array.isArray(navigationItems)
+  });
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">Loading navigation items...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-red-500">Error loading navigation items</p>
+          <p className="text-sm text-gray-500 mt-2">{error.message}</p>
+        </div>
       </div>
     );
   }
