@@ -392,6 +392,10 @@ export async function seedDatabase() {
 
     // Seed navigation items
     console.log("🧭 Seeding navigation items...");
+    
+    // Clear existing navigation items to prevent duplicates
+    await db.delete(navigationItems);
+    
     const navigationData = [
       { name: "Cakes", slug: "cakes", url: "/category/cakes", position: 0, isActive: true, isNew: false },
       { name: "Theme Cakes", slug: "theme-cakes", url: "/category/theme-cakes", position: 1, isActive: true, isNew: false },
@@ -405,7 +409,7 @@ export async function seedDatabase() {
     ];
     
     for (const navItem of navigationData) {
-      await db.insert(navigationItems).values(navItem).onConflictDoNothing();
+      await db.insert(navigationItems).values(navItem);
     }
 
     console.log("✅ Database seeding completed successfully!");
