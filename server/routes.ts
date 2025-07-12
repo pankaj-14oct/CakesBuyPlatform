@@ -1831,13 +1831,12 @@ CakesBuy
       });
       
       // Add wallet transaction for welcome bonus
-      await storage.createWalletTransaction({
+      await storage.addWalletTransaction({
         userId: newUser.id,
         type: "credit",
         amount: "50",
         description: "Welcome bonus - Thank you for joining CakesBuy!",
-        transactionId: `WB-${Date.now()}-${newUser.id}`,
-        status: "completed"
+        balanceAfter: "50"
       });
 
       // Generate JWT token
@@ -2015,13 +2014,12 @@ CakesBuy
       });
       
       // Add wallet transaction for welcome bonus
-      await storage.createWalletTransaction({
+      await storage.addWalletTransaction({
         userId: newUser.id,
         type: "credit",
         amount: "50",
         description: "Welcome bonus - Thank you for joining CakesBuy!",
-        transactionId: `WB-${Date.now()}-${newUser.id}`,
-        status: "completed"
+        balanceAfter: "50"
       });
       
       // Send welcome email
@@ -2052,6 +2050,7 @@ CakesBuy
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid registration data", errors: error.errors });
       }
+      console.error("Registration error:", error);
       res.status(500).json({ message: "Failed to register user" });
     }
   });
