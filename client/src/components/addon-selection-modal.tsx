@@ -103,21 +103,21 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-caramel">
+      <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] h-[85vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0">
+          <DialogTitle className="text-xl sm:text-2xl font-bold text-caramel">
             Add More Fun To Celebration
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col h-full">
-          <Tabs value={activeCategory} onValueChange={setActiveCategory} className="flex-1">
-            <TabsList className="grid w-full grid-cols-6">
+        <div className="flex flex-col flex-1 min-h-0">
+          <Tabs value={activeCategory} onValueChange={setActiveCategory} className="flex-1 flex flex-col">
+            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 flex-shrink-0">
               {categories.map(category => (
                 <TabsTrigger
                   key={category.id}
                   value={category.id}
-                  className="text-xs"
+                  className="text-[10px] sm:text-xs px-1 sm:px-2"
                 >
                   {category.label}
                 </TabsTrigger>
@@ -128,44 +128,44 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
               <TabsContent
                 key={category.id}
                 value={category.id}
-                className="mt-4 overflow-y-auto max-h-96"
+                className="mt-2 sm:mt-4 flex-1 overflow-y-auto"
               >
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4 pb-4">
                   {category.items.map((addon: Addon) => {
                     const quantity = getAddonQuantity(addon.id);
                     return (
                       <div
                         key={addon.id}
-                        className="bg-white rounded-lg border p-3 text-center relative"
+                        className="bg-white rounded-lg border p-2 sm:p-3 text-center relative"
                       >
                         {quantity > 0 && (
-                          <Badge className="absolute -top-2 -right-2 bg-caramel text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                          <Badge className="absolute -top-2 -right-2 bg-caramel text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-xs">
                             {quantity}
                           </Badge>
                         )}
                         
-                        <div className="mb-3">
+                        <div className="mb-2 sm:mb-3">
                           <img
                             src="/api/placeholder/120/120"
                             alt={addon.name}
-                            className="w-20 h-20 mx-auto rounded-lg object-cover"
+                            className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-lg object-cover"
                           />
                         </div>
                         
-                        <h4 className="font-medium text-charcoal text-sm mb-1 h-10 overflow-hidden">
+                        <h4 className="font-medium text-charcoal text-xs sm:text-sm mb-1 h-8 sm:h-10 overflow-hidden leading-tight">
                           {addon.name}
                         </h4>
                         
-                        <div className="text-caramel font-bold text-sm mb-3">
+                        <div className="text-caramel font-bold text-xs sm:text-sm mb-2 sm:mb-3">
                           {formatPrice(parseFloat(addon.price))} {addon.category === 'candles' && 'Per Candle'}
                         </div>
 
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="flex items-center justify-center gap-1 sm:gap-2">
                           {quantity > 0 && (
                             <Button
                               size="sm"
                               variant="outline"
-                              className="w-8 h-8 p-0"
+                              className="w-6 h-6 sm:w-8 sm:h-8 p-0 text-xs"
                               onClick={() => handleRemoveAddon(addon.id)}
                             >
                               -
@@ -174,7 +174,7 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
                           
                           <Button
                             size="sm"
-                            className="bg-white border border-caramel text-caramel hover:bg-caramel hover:text-white text-xs px-3"
+                            className="bg-white border border-caramel text-caramel hover:bg-caramel hover:text-white text-xs px-2 sm:px-3 h-6 sm:h-8"
                             onClick={() => handleAddAddon(addon)}
                           >
                             {quantity > 0 ? '+' : 'Add'}
@@ -189,25 +189,25 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
           </Tabs>
 
           {/* Bottom Actions */}
-          <div className="flex items-center justify-between pt-4 border-t">
+          <div className="flex-shrink-0 flex items-center justify-between pt-3 sm:pt-4 border-t bg-white">
             <Button
               variant="ghost"
               onClick={handleSkip}
-              className="text-charcoal hover:text-caramel"
+              className="text-charcoal hover:text-caramel text-sm sm:text-base"
             >
               Skip
             </Button>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               {selectedAddons.length > 0 && (
-                <div className="text-sm text-charcoal">
+                <div className="text-xs sm:text-sm text-charcoal">
                   {selectedAddons.reduce((sum, item) => sum + item.quantity, 0)} items selected
                 </div>
               )}
               
               <Button
                 onClick={handleContinue}
-                className="bg-red-600 hover:bg-red-700 text-white px-8"
+                className="bg-red-600 hover:bg-red-700 text-white px-4 sm:px-8 text-sm sm:text-base"
               >
                 Continue
               </Button>
