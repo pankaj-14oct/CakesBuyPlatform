@@ -113,6 +113,16 @@ export default function Footer() {
                   Delivery Partner Login
                 </Link>
               </li>
+              <li>
+                <Link href="/privacy-policy" className="text-gray-300 hover:text-caramel transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="text-gray-300 hover:text-caramel transition-colors">
+                  Terms of Service
+                </Link>
+              </li>
             </ul>
           </div>
 
