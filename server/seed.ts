@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews, navigationItems } from "@shared/schema";
+import { users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews, navigationItems, pages } from "@shared/schema";
 import { hashPassword } from "./auth";
 import { eq } from "drizzle-orm";
 
@@ -410,6 +410,167 @@ export async function seedDatabase() {
     
     for (const navItem of navigationData) {
       await db.insert(navigationItems).values(navItem);
+    }
+
+    // Seed sample pages
+    console.log("📄 Seeding sample pages...");
+    
+    const pagesData = [
+      {
+        title: "About Us",
+        slug: "about-us",
+        content: `<div class="prose max-w-none">
+          <h1>About CakesBuy</h1>
+          <p>Welcome to CakesBuy - your premier destination for 100% eggless cakes in Gurgaon. Since our establishment, we have been committed to creating delicious, fresh, and beautiful cakes that bring joy to every celebration.</p>
+          
+          <h2>Our Story</h2>
+          <p>CakesBuy was founded with a simple mission: to provide high-quality, eggless cakes that don't compromise on taste or quality. We understand the importance of dietary preferences and restrictions, which is why every cake we create is completely egg-free while maintaining the rich, moist texture and delicious flavors you expect.</p>
+          
+          <h2>What Makes Us Special</h2>
+          <ul>
+            <li><strong>100% Eggless:</strong> All our cakes are made without eggs, perfect for vegetarians and those with egg allergies</li>
+            <li><strong>Same-Day Delivery:</strong> Fresh cakes delivered to your doorstep in Gurgaon within hours</li>
+            <li><strong>Custom Photo Cakes:</strong> Personalize your celebrations with high-quality photo prints on cakes</li>
+            <li><strong>Premium Ingredients:</strong> We use only the finest ingredients to ensure exceptional taste and quality</li>
+            <li><strong>Expert Bakers:</strong> Our skilled team has years of experience in eggless baking</li>
+          </ul>
+          
+          <h2>Our Commitment</h2>
+          <p>At CakesBuy, we are committed to making every celebration special. Whether it's a birthday, anniversary, or any special occasion, we ensure that our cakes not only look amazing but taste incredible too.</p>
+          
+          <p>Contact us today to experience the difference that fresh, eggless cakes can make for your celebrations!</p>
+        </div>`,
+        metaDescription: "CakesBuy - Premium 100% eggless cakes in Gurgaon with same-day delivery. Custom photo cakes, birthday cakes, anniversary cakes and more.",
+        metaKeywords: "eggless cakes, cakes in gurgaon, same day delivery, photo cakes, birthday cakes, anniversary cakes",
+        isPublished: true,
+        showInMenu: true,
+        menuOrder: 1,
+        createdBy: 1,
+        updatedBy: 1
+      },
+      {
+        title: "Privacy Policy",
+        slug: "privacy-policy",
+        content: `<div class="prose max-w-none">
+          <h1>Privacy Policy</h1>
+          <p><em>Last updated: ${new Date().toLocaleDateString()}</em></p>
+          
+          <h2>Information We Collect</h2>
+          <p>When you use CakesBuy, we may collect the following information:</p>
+          <ul>
+            <li>Personal information such as name, email address, and phone number</li>
+            <li>Delivery address and payment information</li>
+            <li>Order history and preferences</li>
+            <li>Website usage data and cookies</li>
+          </ul>
+          
+          <h2>How We Use Your Information</h2>
+          <p>We use the collected information to:</p>
+          <ul>
+            <li>Process and fulfill your cake orders</li>
+            <li>Communicate with you about your orders</li>
+            <li>Improve our services and user experience</li>
+            <li>Send you promotional offers (with your consent)</li>
+            <li>Comply with legal obligations</li>
+          </ul>
+          
+          <h2>Information Sharing</h2>
+          <p>We do not sell, trade, or rent your personal information to third parties. We may share information with:</p>
+          <ul>
+            <li>Delivery partners to fulfill your orders</li>
+            <li>Payment processors for transaction processing</li>
+            <li>Legal authorities when required by law</li>
+          </ul>
+          
+          <h2>Data Security</h2>
+          <p>We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.</p>
+          
+          <h2>Your Rights</h2>
+          <p>You have the right to:</p>
+          <ul>
+            <li>Access and update your personal information</li>
+            <li>Request deletion of your data</li>
+            <li>Opt-out of marketing communications</li>
+            <li>File a complaint with relevant authorities</li>
+          </ul>
+          
+          <h2>Contact Us</h2>
+          <p>If you have any questions about this Privacy Policy, please contact us at:</p>
+          <ul>
+            <li>Email: privacy@cakesbuy.com</li>
+            <li>Phone: +91-XXXXXXXXXX</li>
+          </ul>
+        </div>`,
+        metaDescription: "CakesBuy Privacy Policy - Learn how we collect, use, and protect your personal information when you order cakes online.",
+        metaKeywords: "privacy policy, data protection, cakesbuy terms",
+        isPublished: true,
+        showInMenu: true,
+        menuOrder: 2,
+        createdBy: 1,
+        updatedBy: 1
+      },
+      {
+        title: "Terms & Conditions",
+        slug: "terms-conditions",
+        content: `<div class="prose max-w-none">
+          <h1>Terms & Conditions</h1>
+          <p><em>Last updated: ${new Date().toLocaleDateString()}</em></p>
+          
+          <h2>1. Acceptance of Terms</h2>
+          <p>By using CakesBuy's services, you agree to comply with and be bound by these Terms & Conditions.</p>
+          
+          <h2>2. Orders and Payment</h2>
+          <ul>
+            <li>All orders are subject to availability and confirmation</li>
+            <li>Prices are subject to change without notice</li>
+            <li>Payment must be completed to confirm your order</li>
+            <li>We accept various payment methods including UPI, cards, and cash on delivery</li>
+          </ul>
+          
+          <h2>3. Delivery</h2>
+          <ul>
+            <li>We deliver within Gurgaon city limits</li>
+            <li>Delivery charges may apply based on location and order value</li>
+            <li>Same-day delivery is available for orders placed before 6 PM</li>
+            <li>We are not responsible for delays due to weather or unforeseen circumstances</li>
+          </ul>
+          
+          <h2>4. Cancellation and Refunds</h2>
+          <ul>
+            <li>Orders can be cancelled up to 2 hours before delivery time</li>
+            <li>Refunds will be processed within 5-7 business days</li>
+            <li>Custom/photo cakes cannot be cancelled once production begins</li>
+          </ul>
+          
+          <h2>5. Quality Guarantee</h2>
+          <ul>
+            <li>We guarantee fresh, high-quality eggless cakes</li>
+            <li>If you're not satisfied, contact us within 2 hours of delivery</li>
+            <li>We reserve the right to replace or refund defective products</li>
+          </ul>
+          
+          <h2>6. Limitation of Liability</h2>
+          <p>CakesBuy's liability is limited to the value of the order placed. We are not responsible for any indirect or consequential damages.</p>
+          
+          <h2>7. Contact Information</h2>
+          <p>For any questions regarding these terms, contact us at:</p>
+          <ul>
+            <li>Email: support@cakesbuy.com</li>
+            <li>Phone: +91-XXXXXXXXXX</li>
+          </ul>
+        </div>`,
+        metaDescription: "CakesBuy Terms & Conditions - Read our terms of service for ordering eggless cakes online in Gurgaon.",
+        metaKeywords: "terms and conditions, cakesbuy terms, order terms, delivery terms",
+        isPublished: true,
+        showInMenu: true,
+        menuOrder: 3,
+        createdBy: 1,
+        updatedBy: 1
+      }
+    ];
+    
+    for (const page of pagesData) {
+      await db.insert(pages).values(page).onConflictDoNothing();
     }
 
     console.log("✅ Database seeding completed successfully!");

@@ -38,6 +38,7 @@ import AdminInvoices from "@/pages/admin/invoices";
 import AdminWallet from "@/pages/admin/wallet";
 import AdminDelivery from "@/pages/admin/delivery";
 import AdminNavigation from "@/pages/admin/navigation";
+import AdminPages from "@/pages/admin/pages";
 import AdminReminders from "@/pages/AdminReminders";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminProtected from "@/components/AdminProtected";
@@ -80,6 +81,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
     { path: "/admin/wallet", label: "Wallet Management", icon: Wallet },
     { path: "/admin/delivery", label: "Delivery Management", icon: Truck },
     { path: "/admin/navigation", label: "Navigation", icon: Menu },
+    { path: "/admin/pages", label: "Pages", icon: FileText },
     { path: "/admin/reminders", label: "Email Reminders", icon: Mail },
     { path: "/admin/settings", label: "Settings", icon: Settings },
   ];
@@ -200,6 +202,7 @@ function Router() {
             <Route path="/admin/wallet" component={AdminWallet} />
             <Route path="/admin/delivery" component={AdminDelivery} />
             <Route path="/admin/navigation" component={AdminNavigation} />
+            <Route path="/admin/pages" component={AdminPages} />
             <Route path="/admin/reminders" component={AdminReminders} />
             <Route path="/admin/settings" component={AdminSettings} />
             <Route component={NotFound} />

@@ -17,6 +17,7 @@ import {
   insertInvoiceSchema,
   insertDeliveryBoySchema,
   adminDeliveryBoyRegisterSchema,
+  insertPageSchema,
   loginSchema,
   registerSchema,
   addressSchema,
@@ -3428,6 +3429,118 @@ CakesBuy
       res.json({ message: "Navigation items reordered successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to reorder navigation items" });
+    }
+  });
+
+  // ==========================================
+  // PAGES MANAGEMENT ROUTES
+  // ==========================================
+
+  // Public route to get published pages
+  app.get("/api/pages", async (req, res) => {
+    try {
+      const pages = await storage.getPublishedPages();
+      res.json(pages);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch pages" });
+    }
+  });
+
+  // Public route to get a specific page by slug
+  app.get("/api/pages/:slug", async (req, res) => {
+    try {
+      const page = await storage.getPageBySlug(req.params.slug);
+      if (!page || !page.isPublished) {
+        return res.status(404).json({ message: "Page not found" });
+      }
+      res.json(page);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch page" });
+    }
+  });
+
+  // Admin routes for pages management
+  app.get("/api/admin/pages", requireAdmin, async (req, res) => {
+    try {
+      const pages = await storage.getPages();
+      res.json(pages);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch pages" });
+    }
+  });
+
+  app.get("/api/admin/pages/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const page = await storage.getPage(id);
+      if (!page) {
+        return res.status(404).json({ message: "Page not found" });
+      }
+      res.json(page);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch page" });
+    }
+  });
+
+  app.post("/api/admin/pages", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertPageSchema.parse(req.body);
+      
+      // Check if slug already exists
+      const existingPage = await storage.getPageBySlug(validatedData.slug);
+      if (existingPage) {
+        return res.status(400).json({ message: "A page with this slug already exists" });
+      }
+
+      const page = await storage.createPage({
+        ...validatedData,
+        createdBy: req.user!.id,
+        updatedBy: req.user!.id
+      });
+      
+      res.json(page);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid page data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create page" });
+    }
+  });
+
+  app.put("/api/admin/pages/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertPageSchema.partial().parse(req.body);
+
+      // Check if slug already exists (excluding current page)
+      if (validatedData.slug) {
+        const existingPage = await storage.getPageBySlug(validatedData.slug);
+        if (existingPage && existingPage.id !== id) {
+          return res.status(400).json({ message: "A page with this slug already exists" });
+        }
+      }
+
+      await storage.updatePage(id, {
+        ...validatedData,
+        updatedBy: req.user!.id
+      });
+      
+      res.json({ message: "Page updated successfully" });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid page data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update page" });
+    }
+  });
+
+  app.delete("/api/admin/pages/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePage(id);
+      res.json({ message: "Page deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete page" });
     }
   });
 

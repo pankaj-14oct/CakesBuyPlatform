@@ -1,7 +1,7 @@
 import {
   users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews, eventReminders, otpVerifications,
   loyaltyTransactions, loyaltyRewards, userRewards, invoices, walletTransactions, adminConfigs, deliveryBoys,
-  orderRatings, navigationItems,
+  orderRatings, navigationItems, pages,
   type User, type InsertUser, type Category, type InsertCategory,
   type Cake, type InsertCake, type Addon, type InsertAddon,
   type Order, type InsertOrder, type DeliveryArea, type InsertDeliveryArea,
@@ -11,7 +11,7 @@ import {
   type UserReward, type InsertUserReward, type Invoice, type InsertInvoice,
   type WalletTransaction, type InsertWalletTransaction, type AdminConfig, type InsertAdminConfig,
   type DeliveryBoy, type InsertDeliveryBoy, type OrderRating, type InsertOrderRating,
-  type NavigationItem, type InsertNavigationItem
+  type NavigationItem, type InsertNavigationItem, type Page, type InsertPage
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, and, desc, isNotNull, or, gte, lte } from "drizzle-orm";
@@ -168,6 +168,15 @@ export interface IStorage {
   updateNavigationItem(id: number, updates: Partial<NavigationItem>): Promise<void>;
   deleteNavigationItem(id: number): Promise<void>;
   reorderNavigationItems(itemIds: number[]): Promise<void>;
+
+  // Pages management
+  getPages(): Promise<Page[]>;
+  getPublishedPages(): Promise<Page[]>;
+  getPage(id: number): Promise<Page | undefined>;
+  getPageBySlug(slug: string): Promise<Page | undefined>;
+  createPage(page: InsertPage): Promise<Page>;
+  updatePage(id: number, updates: Partial<Page>): Promise<void>;
+  deletePage(id: number): Promise<void>;
 
 }
 
@@ -1112,6 +1121,50 @@ export class DatabaseStorage implements IStorage {
         })
         .where(eq(navigationItems.id, itemIds[i]));
     }
+  }
+
+  // Pages Management
+  async getPages(): Promise<Page[]> {
+    return db.select().from(pages).orderBy(desc(pages.createdAt));
+  }
+
+  async getPublishedPages(): Promise<Page[]> {
+    return db.select().from(pages)
+      .where(eq(pages.isPublished, true))
+      .orderBy(pages.menuOrder, pages.title);
+  }
+
+  async getPage(id: number): Promise<Page | undefined> {
+    const [page] = await db.select().from(pages).where(eq(pages.id, id));
+    return page || undefined;
+  }
+
+  async getPageBySlug(slug: string): Promise<Page | undefined> {
+    const [page] = await db.select().from(pages).where(eq(pages.slug, slug));
+    return page || undefined;
+  }
+
+  async createPage(page: InsertPage): Promise<Page> {
+    const pageData = {
+      ...page,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    const [newPage] = await db.insert(pages).values(pageData).returning();
+    return newPage;
+  }
+
+  async updatePage(id: number, updates: Partial<Page>): Promise<void> {
+    await db.update(pages)
+      .set({
+        ...updates,
+        updatedAt: new Date()
+      })
+      .where(eq(pages.id, id));
+  }
+
+  async deletePage(id: number): Promise<void> {
+    await db.delete(pages).where(eq(pages.id, id));
   }
 
 }

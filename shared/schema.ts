@@ -377,6 +377,23 @@ export const adminConfigs = pgTable("admin_configs", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Pages for static content management
+export const pages = pgTable("pages", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  content: text("content").notNull(),
+  metaDescription: text("meta_description"),
+  metaKeywords: text("meta_keywords"),
+  isPublished: boolean("is_published").default(true),
+  showInMenu: boolean("show_in_menu").default(false),
+  menuOrder: integer("menu_order").default(0),
+  createdBy: integer("created_by").references(() => users.id),
+  updatedBy: integer("updated_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Navigation Items
 export const navigationItems = pgTable("navigation_items", {
   id: serial("id").primaryKey(),
@@ -432,6 +449,8 @@ export type DeliveryBoy = typeof deliveryBoys.$inferSelect;
 export type InsertDeliveryBoy = typeof insertDeliveryBoySchema._type;
 export type NavigationItem = typeof navigationItems.$inferSelect;
 export type InsertNavigationItem = typeof insertNavigationItemSchema._type;
+export type Page = typeof pages.$inferSelect;
+export type InsertPage = typeof insertPageSchema._type;
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, updatedAt: true });
@@ -462,6 +481,7 @@ export const insertInvoiceSchema = createInsertSchema(invoices).omit({ id: true,
 export const insertWalletTransactionSchema = createInsertSchema(walletTransactions).omit({ id: true, createdAt: true });
 export const insertAdminConfigSchema = createInsertSchema(adminConfigs).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertNavigationItemSchema = createInsertSchema(navigationItems).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertPageSchema = createInsertSchema(pages).omit({ id: true, createdAt: true, updatedAt: true });
 
 // Auth schemas
 export const loginSchema = z.object({
