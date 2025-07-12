@@ -457,7 +457,16 @@ export default function AdminPages() {
                       <Button
                         variant="outline"
                         size="sm"
+                        onClick={() => window.open(`/page/${page.slug}`, '_blank')}
+                        title="View Page"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => handleEdit(page)}
+                        title="Edit Page"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -466,6 +475,7 @@ export default function AdminPages() {
                         size="sm"
                         onClick={() => handleDelete(page.id)}
                         className="text-destructive hover:text-destructive"
+                        title="Delete Page"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

@@ -45,6 +45,7 @@ import AdminProtected from "@/components/AdminProtected";
 import DeliveryLogin from "@/pages/DeliveryLogin";
 import DeliveryDashboard from "@/pages/DeliveryDashboard";
 import RateOrder from "@/pages/RateOrder";
+import PageView from "@/pages/page-view";
 import NotFound from "@/pages/not-found";
 
 import { Link, useLocation } from "wouter";
@@ -238,6 +239,7 @@ function Router() {
         <Route path="/track-order" component={TrackOrderPage} />
         <Route path="/customized-cakes" component={CustomizedCakesPage} />
         <Route path="/rate-order/:orderId" component={RateOrder} />
+        <Route path="/page/:slug" component={PageView} />
         <Route component={NotFound} />
       </Switch>
     </>
