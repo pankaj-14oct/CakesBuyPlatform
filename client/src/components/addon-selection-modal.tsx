@@ -130,7 +130,7 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
               <TabsContent
                 key={category.id}
                 value={category.id}
-                className="mt-2 sm:mt-4 flex-1 overflow-y-auto px-4 sm:px-6 pb-20"
+                className="mt-2 sm:mt-4 flex-1 overflow-y-auto px-4 sm:px-6 pb-20 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
               >
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4">
                   {category.items.map((addon: Addon) => {
