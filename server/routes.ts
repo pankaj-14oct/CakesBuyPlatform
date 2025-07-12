@@ -568,30 +568,32 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
         return res.status(404).json({ message: "Order not found" });
       }
 
-      // Send status update email
-      try {
-        let customerEmail = order.deliveryAddress.email;
-        const customerName = order.deliveryAddress.name;
-        
-        // If no email in delivery address and order has user, get from user
-        if (!customerEmail && order.userId) {
-          const user = await storage.getUser(order.userId);
-          customerEmail = user?.email;
-        }
-        
-        if (customerEmail) {
-          const emailData: OrderEmailData = {
-            customerEmail,
-            customerName,
-            order
-          };
+      // Send status update email only for order placement and delivery
+      if (status === 'confirmed' || status === 'delivered') {
+        try {
+          let customerEmail = order.deliveryAddress.email;
+          const customerName = order.deliveryAddress.name;
           
-          await sendOrderStatusUpdateEmail(emailData);
-          console.log(`Order status email sent to ${customerEmail} for order ${order.orderNumber} (${status})`);
+          // If no email in delivery address and order has user, get from user
+          if (!customerEmail && order.userId) {
+            const user = await storage.getUser(order.userId);
+            customerEmail = user?.email;
+          }
+          
+          if (customerEmail) {
+            const emailData: OrderEmailData = {
+              customerEmail,
+              customerName,
+              order
+            };
+            
+            await sendOrderStatusUpdateEmail(emailData);
+            console.log(`Order status email sent to ${customerEmail} for order ${order.orderNumber} (${status})`);
+          }
+        } catch (emailError) {
+          // Don't fail the status update if email fails
+          console.error('Failed to send order status email:', emailError);
         }
-      } catch (emailError) {
-        // Don't fail the status update if email fails
-        console.error('Failed to send order status email:', emailError);
       }
 
       // Send rating email if order is delivered
