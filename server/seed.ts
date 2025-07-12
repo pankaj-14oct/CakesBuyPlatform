@@ -514,7 +514,6 @@ export async function seedDatabase() {
         slug: "terms-conditions",
         content: `<div class="prose max-w-none">
           <h1>Terms & Conditions</h1>
-          <p><em>Last updated: ${new Date().toLocaleDateString()}</em></p>
           
           <h2>1. Acceptance of Terms</h2>
           <p>By using CakesBuy's services, you agree to comply with and be bound by these Terms & Conditions.</p>
