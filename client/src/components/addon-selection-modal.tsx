@@ -103,15 +103,15 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] h-[85vh] overflow-hidden flex flex-col p-0">
+      <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] h-[80vh] overflow-hidden flex flex-col p-0">
         <DialogHeader className="flex-shrink-0 p-4 sm:p-6 pb-2">
           <DialogTitle className="text-xl sm:text-2xl font-bold text-caramel">
             Add More Fun To Celebration
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col flex-1 min-h-0 relative">
-          <Tabs value={activeCategory} onValueChange={setActiveCategory} className="flex-1 flex flex-col">
+        <div className="flex flex-col flex-1 min-h-0">
+          <Tabs value={activeCategory} onValueChange={setActiveCategory} className="flex-1 flex flex-col min-h-0">
             <div className="flex-shrink-0 overflow-x-auto hide-scrollbar px-4 sm:px-6">
               <TabsList className="flex w-max min-w-full justify-start">
                 {categories.map(category => (
@@ -126,13 +126,14 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
               </TabsList>
             </div>
 
-            {categories.map(category => (
-              <TabsContent
-                key={category.id}
-                value={category.id}
-                className="mt-2 sm:mt-4 flex-1 overflow-y-auto px-4 sm:px-6 pb-20 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
-              >
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4">
+            <div className="flex-1 relative min-h-0">
+              {categories.map(category => (
+                <TabsContent
+                  key={category.id}
+                  value={category.id}
+                  className="absolute inset-0 overflow-y-auto px-4 sm:px-6 pb-20 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
+                >
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4 pt-2 sm:pt-4">
                   {category.items.map((addon: Addon) => {
                     const quantity = getAddonQuantity(addon.id);
                     return (
@@ -185,13 +186,14 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
                       </div>
                     );
                   })}
-                </div>
-              </TabsContent>
-            ))}
+                  </div>
+                </TabsContent>
+              ))}
+            </div>
           </Tabs>
 
           {/* Bottom Actions - Sticky */}
-          <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between p-4 sm:p-6 border-t bg-white shadow-lg">
+          <div className="flex-shrink-0 flex items-center justify-between p-4 sm:p-6 border-t bg-white shadow-lg">
             <Button
               variant="ghost"
               onClick={handleSkip}
