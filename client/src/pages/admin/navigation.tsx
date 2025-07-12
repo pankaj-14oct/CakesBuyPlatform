@@ -50,19 +50,13 @@ export default function AdminNavigation() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch navigation items
+  // Fetch navigation items (already sorted by position)
   const { data: navigationItems = [], isLoading, error } = useQuery<NavigationItem[]>({
     queryKey: ['/api/admin/navigation-items'],
     queryFn: async () => {
-      try {
-        const response = await apiRequest('/api/admin/navigation-items');
-        const data = await response.json();
-        console.log('Navigation items data:', data);
-        return Array.isArray(data) ? data : [];
-      } catch (err) {
-        console.error('Navigation items fetch error:', err);
-        throw err;
-      }
+      const response = await apiRequest('/api/admin/navigation-items');
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
     }
   });
 
@@ -200,15 +194,6 @@ export default function AdminNavigation() {
   };
 
   const displayItems = reorderMode ? (Array.isArray(tempOrder) ? tempOrder : []) : (Array.isArray(navigationItems) ? navigationItems : []);
-  
-  console.log('Navigation items state:', {
-    navigationItems,
-    isLoading,
-    error,
-    displayItems,
-    displayItemsLength: displayItems.length,
-    isArray: Array.isArray(navigationItems)
-  });
 
   if (isLoading) {
     return (

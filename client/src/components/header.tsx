@@ -31,35 +31,24 @@ export default function Header() {
   const { state: cartState } = useCart();
   const { user, isAuthenticated, logoutMutation } = useAuth();
 
-  // Fetch navigation items from API
+  // Fetch navigation items from API (already sorted by position)
   const { data: navigationItems = [] } = useQuery<NavigationItem[]>({
     queryKey: ['/api/navigation-items'],
     queryFn: async () => {
       const response = await apiRequest('/api/navigation-items');
       const data = await response.json();
-      console.log('Navigation items API response:', data);
       return data;
     }
   });
 
-  // Filter and sort navigation items
+  // Transform navigation items for rendering (already sorted by backend)
   const navItems = navigationItems && navigationItems.length > 0 
-    ? navigationItems
-        .filter(item => item.isActive)
-        .sort((a, b) => a.position - b.position)
-        .map(item => ({
-          href: item.url,
-          label: item.name,
-          badge: item.isNew ? 'New' : undefined
-        }))
+    ? navigationItems.map(item => ({
+        href: item.url,
+        label: item.name,
+        badge: item.isNew ? 'New' : undefined
+      }))
     : [];
-  
-  console.log('Header navigation state:', {
-    navigationItems,
-    navigationItemsLength: navigationItems?.length,
-    navItems,
-    navItemsLength: navItems.length
-  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
