@@ -457,7 +457,7 @@ export default function AdminPages() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.open(`/page/${page.slug}`, '_blank')}
+                        onClick={() => window.open(`/${page.slug}`, '_blank')}
                         title="View Page"
                       >
                         <Eye className="h-4 w-4" />

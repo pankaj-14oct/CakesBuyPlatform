@@ -9,6 +9,18 @@ import { Badge } from '@/components/ui/badge';
 export default function PageView() {
   const { slug } = useParams<{ slug: string }>();
 
+  // Skip this component if slug matches known routes
+  const knownRoutes = [
+    'search', 'cart', 'checkout', 'delivery', 'auth', 'otp-register', 
+    'forgot-password', 'admin-login', 'occasions', 'occasion-reminder', 
+    'profile', 'orders', 'invoices', 'loyalty', 'track-order', 
+    'customized-cakes', 'admin', 'delivery'
+  ];
+  
+  if (knownRoutes.includes(slug || '') || (slug || '').startsWith('admin/') || (slug || '').startsWith('delivery/')) {
+    return null; // Let other routes handle this
+  }
+
   const { data: page, isLoading, error } = useQuery<Page>({
     queryKey: ['/api/pages', slug],
     queryFn: async () => {
@@ -18,6 +30,7 @@ export default function PageView() {
       }
       return response.json();
     },
+    retry: false, // Don't retry on 404s
   });
 
   if (isLoading) {

@@ -239,7 +239,7 @@ function Router() {
         <Route path="/track-order" component={TrackOrderPage} />
         <Route path="/customized-cakes" component={CustomizedCakesPage} />
         <Route path="/rate-order/:orderId" component={RateOrder} />
-        <Route path="/page/:slug" component={PageView} />
+        <Route path="/:slug" component={PageView} />
         <Route component={NotFound} />
       </Switch>
     </>
