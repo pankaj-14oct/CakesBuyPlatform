@@ -34,7 +34,12 @@ export default function Header() {
   // Fetch navigation items from API
   const { data: navigationItems = [] } = useQuery<NavigationItem[]>({
     queryKey: ['/api/navigation-items'],
-    queryFn: () => apiRequest('/api/navigation-items')
+    queryFn: async () => {
+      const response = await apiRequest('/api/navigation-items');
+      const data = await response.json();
+      console.log('Navigation items API response:', data);
+      return data;
+    }
   });
 
   // Filter and sort navigation items
@@ -48,6 +53,13 @@ export default function Header() {
           badge: item.isNew ? 'New' : undefined
         }))
     : [];
+  
+  console.log('Header navigation state:', {
+    navigationItems,
+    navigationItemsLength: navigationItems?.length,
+    navItems,
+    navItemsLength: navItems.length
+  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
