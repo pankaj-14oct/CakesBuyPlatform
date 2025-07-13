@@ -331,19 +331,22 @@ export default function ProductPage() {
               <CardContent className="space-y-4">
                 {/* Weight Selection */}
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">Weight</Label>
-                  <Select value={selectedWeight} onValueChange={setSelectedWeight}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select weight" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cake.weights?.map((weight) => (
-                        <SelectItem key={weight.weight} value={weight.weight}>
-                          {weight.weight} - {formatPrice(weight.price)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label className="text-sm font-medium mb-3 block">Select Weight</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {cake.weights?.map((weight) => (
+                      <button
+                        key={weight.weight}
+                        onClick={() => setSelectedWeight(weight.weight)}
+                        className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${
+                          selectedWeight === weight.weight
+                            ? 'bg-pink-200 border-pink-300 text-pink-800'
+                            : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        {weight.weight}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Flavor Selection */}
