@@ -38,7 +38,7 @@ type CartAction =
   | { type: 'REMOVE_ITEM'; payload: number }
   | { type: 'UPDATE_QUANTITY'; payload: { id: number; quantity: number } }
   | { type: 'UPDATE_ITEM'; payload: { id: number; updates: Partial<CartItem> } }
-  | { type: 'ADD_ADDON'; payload: { itemId: number; addon: Addon; quantity: number } }
+  | { type: 'ADD_ADDON'; payload: { itemId: number; addon: Addon; quantity: number; customInput?: string } }
   | { type: 'UPDATE_ADDON_QUANTITY'; payload: { itemId: number; addonIndex: number; quantity: number } }
   | { type: 'CLEAR_CART' }
   | { type: 'LOAD_CART'; payload: CartState };
@@ -103,20 +103,26 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     case 'ADD_ADDON': {
       const newItems = state.items.map(item => {
         if (item.id === action.payload.itemId) {
+          // For addons with custom input, check if the exact same addon with same custom input exists
           const existingAddonIndex = item.addons.findIndex(
-            a => a.addon.id === action.payload.addon.id
+            a => a.addon.id === action.payload.addon.id && 
+                 a.customInput === action.payload.customInput
           );
 
           if (existingAddonIndex > -1) {
-            // Update existing addon quantity
+            // Update existing addon quantity only if it's the same custom input
             const updatedAddons = [...item.addons];
             updatedAddons[existingAddonIndex].quantity += action.payload.quantity;
             return { ...item, addons: updatedAddons };
           } else {
-            // Add new addon
+            // Add new addon (even if same addon ID but different custom input)
             return {
               ...item,
-              addons: [...item.addons, { addon: action.payload.addon, quantity: action.payload.quantity }]
+              addons: [...item.addons, { 
+                addon: action.payload.addon, 
+                quantity: action.payload.quantity,
+                customInput: action.payload.customInput
+              }]
             };
           }
         }
