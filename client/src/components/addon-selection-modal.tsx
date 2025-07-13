@@ -62,7 +62,7 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
 
   const handleAddAddon = (addon: Addon) => {
     // Special handling for number candles
-    if (addon.name === "Number Candles") {
+    if (addon.name === "Number Candles" && addon.category === "candles") {
       if (!numberCandleInput.trim()) {
         alert("Please enter the number for the candles first");
         return;
@@ -175,7 +175,7 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
                       >
                         {quantity > 0 && (
                           <Badge className="absolute -top-2 -right-2 bg-caramel text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-xs">
-                            {addon.name === "Number Candles" ? 
+                            {addon.name === "Number Candles" && addon.category === "candles" ? 
                               (selectedAddons.find(item => item.addon.id === addon.id)?.customInput || quantity) : 
                               quantity
                             }
@@ -195,7 +195,7 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
                         </h4>
                         
                         <div className="text-caramel font-bold text-xs sm:text-sm mb-2 sm:mb-3">
-                          {addon.name === "Number Candles" ? (
+                          {addon.name === "Number Candles" && addon.category === "candles" ? (
                             <span>
                               {formatPrice(parseFloat(addon.price))} Per Candle
                               {quantity > 0 && (
@@ -211,7 +211,7 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
                           )}
                         </div>
 
-                        {addon.name === "Number Candles" ? (
+                        {addon.name === "Number Candles" && addon.category === "candles" ? (
                           <div className="space-y-2">
                             <Input
                               type="text"
