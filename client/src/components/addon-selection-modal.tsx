@@ -19,6 +19,7 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
   const [selectedAddons, setSelectedAddons] = useState<{ addon: Addon; quantity: number; customInput?: string }[]>([]);
   const [activeCategory, setActiveCategory] = useState('popular');
   const [numberCandleInput, setNumberCandleInput] = useState<string>('');
+  const [showNumberInput, setShowNumberInput] = useState<number | null>(null); // Track which addon should show input
 
   // Fetch addons
   const { data: addons } = useQuery({
@@ -35,6 +36,7 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
       setSelectedAddons([]);
       setActiveCategory('popular');
       setNumberCandleInput('');
+      setShowNumberInput(null);
     }
   }, [isOpen]);
 
@@ -63,6 +65,12 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
   const handleAddAddon = (addon: Addon) => {
     // Special handling for number candles
     if (addon.name === "Number Candles" && addon.category === "candles") {
+      // If input is not shown, show it first
+      if (showNumberInput !== addon.id) {
+        setShowNumberInput(addon.id);
+        return;
+      }
+      
       if (!numberCandleInput.trim()) {
         alert("Please enter the number for the candles first");
         return;
@@ -84,8 +92,9 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
         }
       });
       
-      // Clear input after adding
+      // Clear input after adding and hide input
       setNumberCandleInput('');
+      setShowNumberInput(null);
       return;
     }
     
@@ -114,6 +123,11 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
             : item
         );
       } else {
+        // If removing the last item, also hide the input field for number candles
+        if (showNumberInput === addonId) {
+          setShowNumberInput(null);
+          setNumberCandleInput('');
+        }
         return prev.filter(item => item.addon.id !== addonId);
       }
     });
@@ -213,14 +227,17 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
 
                         {addon.name === "Number Candles" && addon.category === "candles" ? (
                           <div className="space-y-2">
-                            <Input
-                              type="text"
-                              placeholder="Enter number (e.g., 25)"
-                              value={numberCandleInput}
-                              onChange={(e) => setNumberCandleInput(e.target.value.replace(/[^0-9]/g, ''))}
-                              className="h-6 sm:h-8 text-xs"
-                              maxLength={3}
-                            />
+                            {showNumberInput === addon.id && (
+                              <Input
+                                type="text"
+                                placeholder="Enter number (e.g., 25)"
+                                value={numberCandleInput}
+                                onChange={(e) => setNumberCandleInput(e.target.value.replace(/[^0-9]/g, ''))}
+                                className="h-6 sm:h-8 text-xs"
+                                maxLength={3}
+                                autoFocus
+                              />
+                            )}
                             <div className="flex items-center justify-center gap-1 sm:gap-2">
                               {quantity > 0 && (
                                 <Button
@@ -238,7 +255,7 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
                                 className="bg-white border border-caramel text-caramel hover:bg-caramel hover:text-white text-xs px-2 sm:px-3 h-6 sm:h-8"
                                 onClick={() => handleAddAddon(addon)}
                               >
-                                {quantity > 0 ? 'Update' : 'Add'}
+                                {showNumberInput === addon.id ? (quantity > 0 ? 'Update' : 'Add') : 'Add'}
                               </Button>
                             </div>
                           </div>
