@@ -302,7 +302,18 @@ export default function TrackOrderPage() {
                             </div>
                           )}
                           {item.addons && item.addons.length > 0 && (
-                            <p>Add-ons: {item.addons.map(addon => addon.name).join(', ')}</p>
+                            <div>
+                              <p className="font-medium">Add-ons:</p>
+                              {item.addons.map((addon, addonIndex) => (
+                                <p key={addonIndex} className="ml-2">
+                                  • {addon.name}
+                                  {addon.customInput && (
+                                    <span className="text-gray-600"> ({addon.customInput})</span>
+                                  )}
+                                  {' '}x{addon.quantity} - {formatPrice(addon.price)}
+                                </p>
+                              ))}
+                            </div>
                           )}
                         </div>
                       </div>

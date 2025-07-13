@@ -395,7 +395,8 @@ export default function CheckoutPage() {
           id: addon.addon.id,
           name: addon.addon.name,
           price: parseFloat(addon.addon.price),
-          quantity: addon.quantity
+          quantity: addon.quantity,
+          customInput: addon.customInput
         }))
       })),
       subtotal: subtotal.toString(),

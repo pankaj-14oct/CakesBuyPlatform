@@ -101,7 +101,7 @@ export const orders = pgTable("orders", {
       compositeImage?: string; // Generated final image combining background + user photo + text
     };
     price: number;
-    addons?: Array<{ id: number; name: string; price: number; quantity: number }>;
+    addons?: Array<{ id: number; name: string; price: number; quantity: number; customInput?: string }>;
   }>>().notNull(),
   subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
   deliveryFee: decimal("delivery_fee", { precision: 10, scale: 2 }).default("0"),

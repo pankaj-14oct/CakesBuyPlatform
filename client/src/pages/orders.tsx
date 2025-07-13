@@ -49,6 +49,7 @@ interface Order {
       name: string;
       price: number;
       quantity: number;
+      customInput?: string;
     }>;
   }>;
   specialInstructions?: string;
@@ -312,7 +313,11 @@ export default function OrdersPage() {
                                         <p className="font-medium">Add-ons:</p>
                                         {item.addons.map((addon, addonIndex) => (
                                           <p key={addonIndex} className="ml-2">
-                                            • {addon.name} x{addon.quantity} - {formatPrice(addon.price)}
+                                            • {addon.name}
+                                            {addon.customInput && (
+                                              <span className="text-gray-600"> ({addon.customInput})</span>
+                                            )}
+                                            {' '}x{addon.quantity} - {formatPrice(addon.price)}
                                           </p>
                                         ))}
                                       </div>
