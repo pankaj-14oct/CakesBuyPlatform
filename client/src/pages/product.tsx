@@ -349,22 +349,24 @@ export default function ProductPage() {
                   </div>
                 </div>
 
-                {/* Flavor Selection */}
-                <div>
-                  <Label className="text-sm font-medium mb-2 block">Flavor</Label>
-                  <Select value={selectedFlavor} onValueChange={setSelectedFlavor}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select flavor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cake.flavors?.map((flavor) => (
-                        <SelectItem key={flavor} value={flavor}>
-                          {flavor}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Flavor Selection - Only show if flavors exist */}
+                {cake.flavors && cake.flavors.length > 0 && (
+                  <div>
+                    <Label className="text-sm font-medium mb-2 block">Flavor</Label>
+                    <Select value={selectedFlavor} onValueChange={setSelectedFlavor}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select flavor" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cake.flavors?.map((flavor) => (
+                          <SelectItem key={flavor} value={flavor}>
+                            {flavor}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 {/* Custom Message */}
                 <div>
