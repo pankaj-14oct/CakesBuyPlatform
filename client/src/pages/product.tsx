@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -51,6 +51,23 @@ export default function ProductPage() {
     },
     enabled: !!slug,
   });
+
+  // Auto-initialize weight and flavor when cake data is loaded
+  useEffect(() => {
+    if (cake) {
+      // Auto-select weight if only one option or set first as default
+      if (cake.weights && cake.weights.length === 1) {
+        setSelectedWeight(cake.weights[0].weight);
+      } else if (cake.weights && cake.weights.length > 0 && !selectedWeight) {
+        setSelectedWeight(cake.weights[0].weight);
+      }
+      
+      // Auto-select flavor if only one option
+      if (cake.flavors && cake.flavors.length === 1) {
+        setSelectedFlavor(cake.flavors[0]);
+      }
+    }
+  }, [cake, selectedWeight]);
 
   const { data: reviews = [] } = useQuery<Review[]>({
     queryKey: ['/api/cakes', cake?.id, 'reviews'],
@@ -130,7 +147,7 @@ export default function ProductPage() {
 
   const handleAddToCart = () => {
     // Validate required selections
-    if (!selectedWeight && cake.weights && cake.weights.length > 1) {
+    if (!selectedWeight && cake.weights && cake.weights.length > 0) {
       toast({
         title: "Please select a weight",
         description: "Choose your preferred cake weight before adding to cart.",
@@ -139,7 +156,7 @@ export default function ProductPage() {
       return;
     }
     
-    if (!selectedFlavor && cake.flavors && cake.flavors.length > 1) {
+    if (!selectedFlavor && cake.flavors && cake.flavors.length > 0) {
       toast({
         title: "Please select a flavor",
         description: "Choose your preferred cake flavor before adding to cart.",
@@ -485,9 +502,13 @@ export default function ProductPage() {
             <div className="space-y-3">
               <Button
                 size="lg"
-                className="w-full bg-brown text-white hover:bg-opacity-90"
+                className="w-full bg-brown text-white hover:bg-opacity-90 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 onClick={handleAddToCart}
-                disabled={!selectedWeight || !selectedFlavor}
+                disabled={
+                  (!selectedWeight && cake.weights && cake.weights.length > 0) ||
+                  (!selectedFlavor && cake.flavors && cake.flavors.length > 0) ||
+                  (isPhotoCake && !uploadedImage)
+                }
               >
                 Add to Cart - {formatPrice(totalPrice)}
               </Button>
