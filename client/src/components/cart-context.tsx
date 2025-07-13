@@ -23,6 +23,7 @@ export interface CartItem {
   addons: Array<{
     addon: Addon;
     quantity: number;
+    customInput?: string;
   }>;
 }
 
@@ -38,6 +39,7 @@ type CartAction =
   | { type: 'UPDATE_QUANTITY'; payload: { id: number; quantity: number } }
   | { type: 'UPDATE_ITEM'; payload: { id: number; updates: Partial<CartItem> } }
   | { type: 'ADD_ADDON'; payload: { itemId: number; addon: Addon; quantity: number } }
+  | { type: 'UPDATE_ADDON_QUANTITY'; payload: { itemId: number; addonIndex: number; quantity: number } }
   | { type: 'CLEAR_CART' }
   | { type: 'LOAD_CART'; payload: CartState };
 
@@ -117,6 +119,28 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
               addons: [...item.addons, { addon: action.payload.addon, quantity: action.payload.quantity }]
             };
           }
+        }
+        return item;
+      });
+
+      const total = calculateTotal(newItems);
+      const itemCount = newItems.reduce((sum, item) => sum + item.quantity, 0);
+
+      return { items: newItems, total, itemCount };
+    }
+
+    case 'UPDATE_ADDON_QUANTITY': {
+      const newItems = state.items.map(item => {
+        if (item.id === action.payload.itemId) {
+          const updatedAddons = [...item.addons];
+          if (action.payload.quantity <= 0) {
+            // Remove addon if quantity is 0 or less
+            updatedAddons.splice(action.payload.addonIndex, 1);
+          } else {
+            // Update addon quantity
+            updatedAddons[action.payload.addonIndex].quantity = action.payload.quantity;
+          }
+          return { ...item, addons: updatedAddons };
         }
         return item;
       });

@@ -59,6 +59,13 @@ export default function CartPage() {
     });
   };
 
+  const handleAddonQuantityChange = (itemId: number, addonIndex: number, newQuantity: number) => {
+    dispatch({ 
+      type: 'UPDATE_ADDON_QUANTITY', 
+      payload: { itemId, addonIndex, quantity: newQuantity } 
+    });
+  };
+
   const handleAddAddon = (addon: any) => {
     // Find the first cake item in the cart to add the addon to
     const firstCakeItem = cartState.items[0];
@@ -168,7 +175,9 @@ export default function CartPage() {
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             {cartState.items.map((item) => (
-              <Card key={item.id}>
+              <div key={item.id} className="space-y-2">
+                {/* Main Cake Item */}
+                <Card>
                 <CardContent className="p-6">
                   <div className="flex gap-4">
                     {/* Product Image */}
@@ -269,19 +278,7 @@ export default function CartPage() {
                             </div>
                           )}
                           
-                          {/* Add-ons */}
-                          {item.addons.length > 0 && (
-                            <div className="mt-2">
-                              <p className="text-xs font-medium text-charcoal opacity-60 mb-1">Add-ons:</p>
-                              <div className="flex flex-wrap gap-1">
-                                {item.addons.map((addon, index) => (
-                                  <Badge key={index} variant="outline" className="text-xs">
-                                    {addon.addon.name} x{addon.quantity}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+
                         </div>
 
                         {/* Remove Button */}
@@ -319,15 +316,11 @@ export default function CartPage() {
 
                         <div className="text-right">
                           <div className="font-bold text-brown">
-                            {formatPrice((item.price + item.addons.reduce((sum, addon) => 
-                              sum + parseFloat(addon.addon.price) * addon.quantity, 0
-                            )) * item.quantity)}
+                            {formatPrice(item.price * item.quantity)}
                           </div>
                           {item.quantity > 1 && (
                             <div className="text-sm text-charcoal opacity-60">
-                              {formatPrice(item.price + item.addons.reduce((sum, addon) => 
-                                sum + parseFloat(addon.addon.price) * addon.quantity, 0
-                              ))} each
+                              {formatPrice(item.price)} each
                             </div>
                           )}
                         </div>
@@ -336,6 +329,69 @@ export default function CartPage() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Separate Addon Items */}
+              {item.addons.map((addon, addonIndex) => (
+                <Card key={`${item.id}-addon-${addonIndex}`} className="ml-4 border-l-4 border-caramel">
+                  <CardContent className="p-4">
+                    <div className="flex gap-4">
+                      {/* Addon Image */}
+                      <div className="flex-shrink-0">
+                        <img 
+                          src={addon.addon.image || "/api/placeholder/100/100"}
+                          alt={addon.addon.name}
+                          className="w-16 h-16 object-cover rounded-lg"
+                        />
+                      </div>
+
+                      {/* Addon Details */}
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-medium text-charcoal mb-1">
+                              {addon.addon.name}
+                              {addon.customInput && (
+                                <span className="text-sm text-gray-600 ml-2">({addon.customInput})</span>
+                              )}
+                            </h4>
+                            <p className="text-sm text-charcoal opacity-70">{addon.addon.description}</p>
+                          </div>
+                        </div>
+
+                        {/* Addon Quantity and Price */}
+                        <div className="flex items-center justify-between mt-3">
+                          <div className="flex items-center space-x-3">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => handleAddonQuantityChange(item.id, addonIndex, addon.quantity - 1)}
+                            >
+                              <Minus className="h-3 w-3" />
+                            </Button>
+                            <span className="font-medium w-6 text-center text-sm">{addon.quantity}</span>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => handleAddonQuantityChange(item.id, addonIndex, addon.quantity + 1)}
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
+
+                          <div className="text-right">
+                            <div className="font-bold text-brown">
+                              {formatPrice(parseFloat(addon.addon.price) * addon.quantity)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
             ))}
 
             {/* Addons Section with Horizontal Scroll */}
