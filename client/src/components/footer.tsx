@@ -1,10 +1,38 @@
 import { Link } from 'wouter';
-import { Facebook, Instagram, Twitter, MessageCircle, Phone, Mail, MapPin, Clock } from 'lucide-react';
+import { Facebook, Instagram, Twitter, MessageCircle, Phone, Mail, MapPin, Clock, Gift, Wallet } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
+import { Button } from '@/components/ui/button';
 
 export default function Footer() {
+  const { isAuthenticated } = useAuth();
+  
   return (
     <footer className="bg-charcoal text-white py-16">
       <div className="container mx-auto px-4">
+        {/* Wallet Reward Banner for non-authenticated users */}
+        {!isAuthenticated && (
+          <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 mb-8 text-center">
+            <div className="flex items-center justify-center space-x-2 mb-4">
+              <Gift className="h-6 w-6 text-white" />
+              <span className="text-xl font-bold text-white">New User Special!</span>
+            </div>
+            <div className="mb-4">
+              <div className="flex items-center justify-center space-x-2 mb-2">
+                <Wallet className="h-8 w-8 text-white" />
+                <span className="text-3xl font-bold text-white">₹50</span>
+                <span className="text-lg text-white">instant wallet credit</span>
+              </div>
+              <p className="text-sm text-orange-100">Sign up now and get ₹50 credit to use on your first order!</p>
+            </div>
+            <Link href="/auth">
+              <Button className="bg-white text-orange-600 hover:bg-gray-100 font-semibold px-6 py-3 rounded-lg">
+                <Gift className="h-4 w-4 mr-2" />
+                Claim Your ₹50 Now
+              </Button>
+            </Link>
+          </div>
+        )}
+        
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div>

@@ -3,13 +3,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'wouter';
-import { ShoppingBag, Truck, Shield, Clock, CheckCircle, Star } from 'lucide-react';
+import { ShoppingBag, Truck, Shield, Clock, CheckCircle, Star, Gift, Wallet } from 'lucide-react';
 import { Category, Cake } from '@shared/schema';
 import CategoryCard from '@/components/category-card';
 import CakeCard from '@/components/cake-card';
 import CategoriesShowcase from '@/components/CategoriesShowcase';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function Home() {
+  const { isAuthenticated } = useAuth();
+  
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
   });
@@ -25,6 +28,23 @@ export default function Home() {
 
   return (
     <div className="bg-cream">
+      {/* Wallet Reward Banner - Only for non-authenticated users */}
+      {!isAuthenticated && (
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 px-4 text-center">
+          <div className="container mx-auto flex items-center justify-center space-x-2">
+            <Gift className="h-5 w-5" />
+            <span className="text-sm font-medium">
+              🎉 New User Special: Sign up now and get ₹50 wallet credit instantly! 
+            </span>
+            <Link href="/auth">
+              <Button size="sm" className="bg-white text-orange-600 hover:bg-gray-100 ml-2">
+                Sign Up Now
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
+      
       {/* Hero Section */}
       <section className="hero-gradient py-16 lg:py-24">
         <div className="container mx-auto px-4">

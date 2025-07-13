@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/use-auth';
 import { useLocation, Link } from 'wouter';
-import { Cake, User, Mail, Lock, Phone, ArrowLeft } from 'lucide-react';
+import { Cake, User, Mail, Lock, Phone, ArrowLeft, Wallet, Gift, Star } from 'lucide-react';
 import { useEffect } from 'react';
 
 const loginSchema = z.object({
@@ -105,6 +105,24 @@ export default function AuthPage() {
                   : 'Join CakesBuy and start ordering 100% eggless cakes'
                 }
               </p>
+              
+              {/* Wallet Reward Banner for Signup */}
+              {activeTab === 'register' && (
+                <div className="bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4 mt-4">
+                  <div className="flex items-center justify-center space-x-2 mb-2">
+                    <Gift className="h-5 w-5 text-orange-600" />
+                    <span className="text-lg font-bold text-orange-800">Welcome Bonus!</span>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex items-center justify-center space-x-2 mb-2">
+                      <Wallet className="h-6 w-6 text-orange-600" />
+                      <span className="text-2xl font-bold text-orange-800">₹50</span>
+                      <span className="text-sm text-orange-700">instant wallet credit</span>
+                    </div>
+                    <p className="text-xs text-orange-600 font-medium">Use immediately on your first order!</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -272,10 +290,13 @@ export default function AuthPage() {
 
                     <Button
                       type="submit"
-                      className="w-full bg-caramel hover:bg-brown text-white py-3 font-medium"
+                      className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-200"
                       disabled={registerMutation.isPending}
                     >
-                      {registerMutation.isPending ? 'Creating Account...' : 'Create Account'}
+                      <div className="flex items-center justify-center space-x-2">
+                        <Gift className="h-5 w-5" />
+                        <span>{registerMutation.isPending ? 'Creating Account...' : 'Create Account & Get ₹50'}</span>
+                      </div>
                     </Button>
                   </form>
                 </Form>
@@ -289,17 +310,28 @@ export default function AuthPage() {
               <div className="mb-6 sm:mb-8">
                 <Cake className="h-16 w-16 sm:h-20 sm:w-20 mx-auto mb-4 sm:mb-6 opacity-90" />
                 <h3 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
-                  {activeTab === 'login' ? 'Sweet Moments Await!' : 'Join Our Sweet Community!'}
+                  {activeTab === 'login' ? 'Sweet Moments Await!' : 'Join & Get ₹50 Instantly!'}
                 </h3>
                 <p className="text-base sm:text-lg opacity-90 leading-relaxed">
                   {activeTab === 'login' 
                     ? 'Welcome back to CakesBuy - your trusted partner for 100% eggless cakes. Continue your sweet journey with us and create memorable moments with every bite.'
-                    : 'Discover the joy of 100% eggless cakes made with love. Join thousands of happy customers who trust CakesBuy for their special celebrations.'
+                    : 'Sign up now and get ₹50 wallet credit instantly! Discover the joy of 100% eggless cakes made with love. Join thousands of happy customers who trust CakesBuy for their special celebrations.'
                   }
                 </p>
               </div>
               
               <div className="space-y-3 sm:space-y-4 text-left">
+                {activeTab === 'register' && (
+                  <div className="flex items-center space-x-3 bg-white/10 rounded-lg p-3">
+                    <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                      <Wallet className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                      <span className="text-sm sm:text-base font-semibold">₹50 Instant Wallet Credit</span>
+                      <p className="text-xs opacity-80">Use immediately on your first order!</p>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
                     <span className="text-sm font-bold">✓</span>

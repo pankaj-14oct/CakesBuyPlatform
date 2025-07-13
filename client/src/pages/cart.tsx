@@ -8,16 +8,18 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { 
   Plus, Minus, Trash2, ShoppingBag, ArrowLeft, 
-  Truck, Tag, Gift, Heart, Star
+  Truck, Tag, Gift, Heart, Star, Wallet, UserPlus
 } from 'lucide-react';
 import { useCart } from '@/components/cart-context';
 import { formatPrice } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/use-auth';
 
 
 export default function CartPage() {
   const { state: cartState, dispatch } = useCart();
+  const { isAuthenticated } = useAuth();
   const [promoCode, setPromoCode] = useState('');
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
@@ -616,6 +618,42 @@ export default function CartPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Signup Incentive for non-authenticated users */}
+            {!isAuthenticated && (
+              <Card className="bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-center space-x-2 mb-3">
+                    <Gift className="h-5 w-5 text-orange-600" />
+                    <span className="text-sm font-bold text-orange-800">Save More with Account!</span>
+                  </div>
+                  <div className="text-center mb-3">
+                    <div className="flex items-center justify-center space-x-2 mb-2">
+                      <Wallet className="h-6 w-6 text-orange-600" />
+                      <span className="text-xl font-bold text-orange-800">₹50</span>
+                      <span className="text-sm text-orange-700">instant credit</span>
+                    </div>
+                    <p className="text-xs text-orange-600 mb-3">
+                      Create an account during checkout and get ₹50 wallet credit instantly!
+                    </p>
+                    <div className="flex items-center justify-center space-x-4 text-xs text-orange-600">
+                      <div className="flex items-center space-x-1">
+                        <span>✓</span>
+                        <span>Track orders</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <span>✓</span>
+                        <span>Loyalty rewards</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <span>✓</span>
+                        <span>Faster checkout</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Checkout Button */}
             <Link href="/checkout">
