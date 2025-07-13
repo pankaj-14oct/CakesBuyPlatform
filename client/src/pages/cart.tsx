@@ -21,6 +21,8 @@ export default function CartPage() {
   const [promoCode, setPromoCode] = useState('');
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const [numberCandleInput, setNumberCandleInput] = useState<string>('');
+  const [showNumberInput, setShowNumberInput] = useState<number | null>(null);
   const { toast } = useToast();
 
 
@@ -67,7 +69,58 @@ export default function CartPage() {
   };
 
   const handleAddAddon = (addon: any) => {
-    // Find the first cake item in the cart to add the addon to
+    // Special handling for number candles
+    if (addon.name === "Number Candles" && addon.category === "candles") {
+      // If input is not shown, show it first
+      if (showNumberInput !== addon.id) {
+        setShowNumberInput(addon.id);
+        return;
+      }
+      
+      if (!numberCandleInput.trim()) {
+        toast({
+          title: "Enter number first",
+          description: "Please enter the number for the candles first",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Find the first cake item in the cart to add the addon to
+      const firstCakeItem = cartState.items[0];
+      if (firstCakeItem) {
+        // Calculate quantity based on number of digits
+        const digits = numberCandleInput.length;
+        
+        dispatch({ 
+          type: 'ADD_ADDON', 
+          payload: { 
+            itemId: firstCakeItem.id, 
+            addon: addon,
+            quantity: digits,
+            customInput: numberCandleInput
+          } 
+        });
+        
+        toast({
+          title: "Number candles added!",
+          description: `${digits} number candles (${numberCandleInput}) added to your cart.`,
+        });
+        
+        // Clear input after adding and hide input
+        setNumberCandleInput('');
+        setShowNumberInput(null);
+      } else {
+        toast({
+          title: "Add a cake first",
+          description: "Please add a cake to your cart before adding addons.",
+          variant: "destructive"
+        });
+      }
+      return;
+    }
+    
+    // Regular addon handling
     const firstCakeItem = cartState.items[0];
     if (firstCakeItem) {
       dispatch({ 
@@ -417,7 +470,11 @@ export default function CartPage() {
                             </div>
                             <h4 className="font-medium text-charcoal text-sm mb-1 line-clamp-2">{addon.name}</h4>
                             <div className="text-caramel font-bold text-sm mb-2">
-                              {formatPrice(parseFloat(addon.price))}
+                              {addon.name === "Number Candles" && addon.category === "candles" ? (
+                                <span>{formatPrice(parseFloat(addon.price))} Per Candle</span>
+                              ) : (
+                                formatPrice(parseFloat(addon.price))
+                              )}
                             </div>
                             <div className="flex items-center justify-center mb-2">
                               <div className="flex items-center text-yellow-500 text-xs">
@@ -426,12 +483,31 @@ export default function CartPage() {
                                 <span className="text-gray-500 ml-1">(120)</span>
                               </div>
                             </div>
+                            
+                            {/* Number Candles Input Field */}
+                            {addon.name === "Number Candles" && addon.category === "candles" && showNumberInput === addon.id && (
+                              <div className="mb-2">
+                                <Input
+                                  type="text"
+                                  placeholder="Enter number (e.g., 25)"
+                                  value={numberCandleInput}
+                                  onChange={(e) => setNumberCandleInput(e.target.value.replace(/[^0-9]/g, ''))}
+                                  className="h-8 text-xs"
+                                  maxLength={3}
+                                  autoFocus
+                                />
+                              </div>
+                            )}
+                            
                             <Button 
                               size="sm" 
                               className="w-full bg-white border border-caramel text-caramel hover:bg-caramel hover:text-white text-xs py-2 mt-auto"
                               onClick={() => handleAddAddon(addon)}
                             >
-                              Add to Cart
+                              {addon.name === "Number Candles" && addon.category === "candles" && showNumberInput === addon.id 
+                                ? "Add to Cart" 
+                                : "Add to Cart"
+                              }
                             </Button>
                           </div>
                         </div>
