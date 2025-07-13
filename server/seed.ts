@@ -1,7 +1,7 @@
 import { db } from "./db";
 import { users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews, navigationItems, pages } from "@shared/schema";
 import { hashPassword } from "./auth";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 const seedData = {
   categories: [
@@ -368,6 +368,17 @@ export async function seedDatabase() {
 
     // Seed addons
     console.log("🎁 Seeding addons...");
+    
+    // First, remove any existing duplicates by keeping only the first occurrence of each unique addon
+    await db.execute(sql`
+      DELETE FROM addons 
+      WHERE id NOT IN (
+        SELECT MIN(id) 
+        FROM addons 
+        GROUP BY name, description, price, category
+      );
+    `);
+    
     for (const addon of seedData.addons) {
       await db.insert(addons).values(addon).onConflictDoNothing();
     }
