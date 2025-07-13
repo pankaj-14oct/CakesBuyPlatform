@@ -179,7 +179,7 @@ export default function ProductPage() {
     setShowAddonModal(true);
   };
 
-  const handleAddonSelection = (selectedAddons: { addon: Addon; quantity: number }[]) => {
+  const handleAddonSelection = (selectedAddons: { addon: Addon; quantity: number; customInput?: string }[]) => {
     const weight = selectedWeight || cake.weights?.[0]?.weight || '';
     const flavor = selectedFlavor || cake.flavors?.[0] || '';
     const price = basePrice;

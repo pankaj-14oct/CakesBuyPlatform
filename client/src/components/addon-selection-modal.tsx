@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 import { formatPrice } from '@/lib/utils';
 import { apiRequest } from '@/lib/queryClient';
 import { Addon } from '@shared/schema';
@@ -11,12 +12,13 @@ import { Addon } from '@shared/schema';
 interface AddonSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onContinue: (selectedAddons: { addon: Addon; quantity: number }[]) => void;
+  onContinue: (selectedAddons: { addon: Addon; quantity: number; customInput?: string }[]) => void;
 }
 
 export default function AddonSelectionModal({ isOpen, onClose, onContinue }: AddonSelectionModalProps) {
-  const [selectedAddons, setSelectedAddons] = useState<{ addon: Addon; quantity: number }[]>([]);
+  const [selectedAddons, setSelectedAddons] = useState<{ addon: Addon; quantity: number; customInput?: string }[]>([]);
   const [activeCategory, setActiveCategory] = useState('popular');
+  const [numberCandleInput, setNumberCandleInput] = useState<string>('');
 
   // Fetch addons
   const { data: addons } = useQuery({
@@ -32,6 +34,7 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
     if (isOpen) {
       setSelectedAddons([]);
       setActiveCategory('popular');
+      setNumberCandleInput('');
     }
   }, [isOpen]);
 
@@ -58,6 +61,35 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
   ];
 
   const handleAddAddon = (addon: Addon) => {
+    // Special handling for number candles
+    if (addon.name === "Number Candles") {
+      if (!numberCandleInput.trim()) {
+        alert("Please enter the number for the candles first");
+        return;
+      }
+      
+      // Calculate quantity based on number of digits
+      const digits = numberCandleInput.length;
+      
+      setSelectedAddons(prev => {
+        const existing = prev.find(item => item.addon.id === addon.id);
+        if (existing) {
+          return prev.map(item =>
+            item.addon.id === addon.id
+              ? { ...item, quantity: digits, customInput: numberCandleInput }
+              : item
+          );
+        } else {
+          return [...prev, { addon, quantity: digits, customInput: numberCandleInput }];
+        }
+      });
+      
+      // Clear input after adding
+      setNumberCandleInput('');
+      return;
+    }
+    
+    // Regular addon handling
     setSelectedAddons(prev => {
       const existing = prev.find(item => item.addon.id === addon.id);
       if (existing) {
@@ -143,7 +175,10 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
                       >
                         {quantity > 0 && (
                           <Badge className="absolute -top-2 -right-2 bg-caramel text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-xs">
-                            {quantity}
+                            {addon.name === "Number Candles" ? 
+                              (selectedAddons.find(item => item.addon.id === addon.id)?.customInput || quantity) : 
+                              quantity
+                            }
                           </Badge>
                         )}
                         
@@ -160,29 +195,75 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
                         </h4>
                         
                         <div className="text-caramel font-bold text-xs sm:text-sm mb-2 sm:mb-3">
-                          {formatPrice(parseFloat(addon.price))} {addon.category === 'candles' && 'Per Candle'}
+                          {addon.name === "Number Candles" ? (
+                            <span>
+                              {formatPrice(parseFloat(addon.price))} Per Candle
+                              {quantity > 0 && (
+                                <div className="text-xs text-gray-600 mt-1">
+                                  {quantity} candles = {formatPrice(parseFloat(addon.price) * quantity)}
+                                </div>
+                              )}
+                            </span>
+                          ) : (
+                            <>
+                              {formatPrice(parseFloat(addon.price))} {addon.category === 'candles' && 'Per Candle'}
+                            </>
+                          )}
                         </div>
 
-                        <div className="flex items-center justify-center gap-1 sm:gap-2">
-                          {quantity > 0 && (
+                        {addon.name === "Number Candles" ? (
+                          <div className="space-y-2">
+                            <Input
+                              type="text"
+                              placeholder="Enter number (e.g., 25)"
+                              value={numberCandleInput}
+                              onChange={(e) => setNumberCandleInput(e.target.value.replace(/[^0-9]/g, ''))}
+                              className="h-6 sm:h-8 text-xs"
+                              maxLength={3}
+                            />
+                            <div className="flex items-center justify-center gap-1 sm:gap-2">
+                              {quantity > 0 && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="w-6 h-6 sm:w-8 sm:h-8 p-0 text-xs"
+                                  onClick={() => handleRemoveAddon(addon.id)}
+                                >
+                                  -
+                                </Button>
+                              )}
+                              
+                              <Button
+                                size="sm"
+                                className="bg-white border border-caramel text-caramel hover:bg-caramel hover:text-white text-xs px-2 sm:px-3 h-6 sm:h-8"
+                                onClick={() => handleAddAddon(addon)}
+                              >
+                                {quantity > 0 ? 'Update' : 'Add'}
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center gap-1 sm:gap-2">
+                            {quantity > 0 && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-6 h-6 sm:w-8 sm:h-8 p-0 text-xs"
+                                onClick={() => handleRemoveAddon(addon.id)}
+                              >
+                                -
+                              </Button>
+                            )}
+                            
                             <Button
                               size="sm"
-                              variant="outline"
-                              className="w-6 h-6 sm:w-8 sm:h-8 p-0 text-xs"
-                              onClick={() => handleRemoveAddon(addon.id)}
+                              className="bg-white border border-caramel text-caramel hover:bg-caramel hover:text-white text-xs px-2 sm:px-3 h-6 sm:h-8"
+                              onClick={() => handleAddAddon(addon)}
                             >
-                              -
+                              {quantity > 0 ? '+' : 'Add'}
                             </Button>
-                          )}
-                          
-                          <Button
-                            size="sm"
-                            className="bg-white border border-caramel text-caramel hover:bg-caramel hover:text-white text-xs px-2 sm:px-3 h-6 sm:h-8"
-                            onClick={() => handleAddAddon(addon)}
-                          >
-                            {quantity > 0 ? '+' : 'Add'}
-                          </Button>
-                        </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
