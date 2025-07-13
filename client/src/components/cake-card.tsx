@@ -100,6 +100,9 @@ export default function CakeCard({ cake }: CakeCardProps) {
               <span className="text-xl font-bold text-brown">
                 {formatPrice(price)}
               </span>
+              <div className="text-xs text-charcoal opacity-60">
+                (Inclusive of GST)
+              </div>
             </div>
             <div className="text-sm text-charcoal opacity-70">
               {cake.weights?.[0]?.weight}

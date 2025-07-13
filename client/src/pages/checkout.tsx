@@ -1226,6 +1226,9 @@ export default function CheckoutPage() {
                     <span className="text-charcoal">Total</span>
                     <span className="text-brown">{formatPrice(total)}</span>
                   </div>
+                  <div className="text-xs text-charcoal opacity-60 text-center mt-1">
+                    (Inclusive of GST)
+                  </div>
                 </CardContent>
               </Card>
 

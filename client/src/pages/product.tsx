@@ -317,6 +317,9 @@ export default function ProductPage() {
                     ({formatPrice(basePrice)} each)
                   </span>
                 )}
+                <span className="text-sm text-charcoal opacity-60 ml-2">
+                  (Inclusive of GST)
+                </span>
               </div>
             </div>
 
