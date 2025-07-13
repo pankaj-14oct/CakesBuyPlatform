@@ -494,7 +494,7 @@ export default function AdminOrders() {
                                               {item.addons && item.addons.length > 0 && (
                                                 <p>
                                                   Add-ons: {item.addons.map(addon => 
-                                                    `${addon.name} x${addon.quantity}`
+                                                    `${addon.name}${addon.customInput ? ` (${addon.customInput})` : ''} x${addon.quantity}`
                                                   ).join(', ')}
                                                 </p>
                                               )}
