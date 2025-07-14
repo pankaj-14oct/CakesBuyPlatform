@@ -195,19 +195,33 @@ app.use((req, res, next) => {
       log(`Port ${port} is already in use. Please try a different port.`);
       process.exit(1);
     } else if (error.code === 'ENOTSUP') {
-      log(`WebSocket not supported in this environment. Running in HTTP-only mode.`);
+      log(`Network operation not supported. Trying fallback configuration...`);
+      // Try to start with basic configuration
+      httpServer.listen(port, () => {
+        log(`serving on port ${port} (fallback mode)`);
+      });
     } else {
       log(`Server error: ${error.message}`);
     }
   });
 
-  httpServer.listen(port, "0.0.0.0", () => {
-    log(`serving on port ${port}`);
-    if (deliveryWss) {
-      log(`WebSocket server available at ws://localhost:${port}/ws/delivery`);
-    }
-    if (adminWss) {
-      log(`Admin WebSocket server available at ws://localhost:${port}/ws/admin`);
-    }
-  });
+  // Use different listening approach for better local compatibility
+  const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+  
+  try {
+    httpServer.listen(port, host, () => {
+      log(`serving on port ${port}`);
+      if (deliveryWss) {
+        log(`WebSocket server available at ws://localhost:${port}/ws/delivery`);
+      }
+      if (adminWss) {
+        log(`Admin WebSocket server available at ws://localhost:${port}/ws/admin`);
+      }
+    });
+  } catch (error: any) {
+    log(`Failed to bind to ${host}:${port}. Trying localhost only...`);
+    httpServer.listen(port, 'localhost', () => {
+      log(`serving on localhost:${port} (local only)`);
+    });
+  }
 })();
