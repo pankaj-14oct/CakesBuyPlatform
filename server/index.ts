@@ -51,13 +51,16 @@ app.use((req, res, next) => {
   // Create HTTP server
   const httpServer = createServer(app);
   
-  // Setup WebSocket server for delivery boy notifications
-  const deliveryWss = new WebSocketServer({ 
-    server: httpServer, 
-    path: '/ws/delivery' 
-  });
+  // Setup WebSocket server for delivery boy notifications with error handling
+  let deliveryWss: WebSocketServer | null = null;
+  if (!process.env.DISABLE_WEBSOCKET) {
+    try {
+      deliveryWss = new WebSocketServer({ 
+        server: httpServer, 
+        path: '/ws/delivery' 
+      });
 
-  deliveryWss.on('connection', (ws, req) => {
+    deliveryWss.on('connection', (ws, req) => {
     log('Delivery WebSocket connection established from:', req.url);
     
     // Authenticate delivery boy from query parameters or headers
@@ -92,15 +95,28 @@ app.use((req, res, next) => {
       log('Delivery WebSocket authentication failed:', error);
       ws.close(1008, 'Authentication failed');
     }
-  });
+    });
 
-  // Setup WebSocket server for admin notifications
-  const adminWss = new WebSocketServer({ 
-    server: httpServer, 
-    path: '/ws/admin' 
-  });
+    deliveryWss.on('error', (error) => {
+      log('Delivery WebSocket server error:', error.message);
+    });
+    } catch (error) {
+      log('Failed to setup delivery WebSocket server:', error);
+    }
+  } else {
+    log('WebSocket disabled for local development');
+  }
 
-  adminWss.on('connection', (ws, req) => {
+  // Setup WebSocket server for admin notifications with error handling
+  let adminWss: WebSocketServer | null = null;
+  if (!process.env.DISABLE_WEBSOCKET) {
+    try {
+      adminWss = new WebSocketServer({ 
+        server: httpServer, 
+        path: '/ws/admin' 
+      });
+
+    adminWss.on('connection', (ws, req) => {
     log('Admin WebSocket connection established from:', req.url);
     
     // Authenticate admin from query parameters or headers
@@ -137,7 +153,17 @@ app.use((req, res, next) => {
       log('Admin WebSocket authentication failed:', error);
       ws.close(1008, 'Authentication failed');
     }
-  });
+    });
+
+    adminWss.on('error', (error) => {
+      log('Admin WebSocket server error:', error.message);
+    });
+    } catch (error) {
+      log('Failed to setup admin WebSocket server:', error);
+    }
+  } else {
+    log('Admin WebSocket disabled for local development');
+  }
 
   const server = await registerRoutes(app, httpServer);
 
@@ -162,13 +188,26 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = 5000;
-  httpServer.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+  
+  // Add error handling for the HTTP server
+  httpServer.on('error', (error: any) => {
+    if (error.code === 'EADDRINUSE') {
+      log(`Port ${port} is already in use. Please try a different port.`);
+      process.exit(1);
+    } else if (error.code === 'ENOTSUP') {
+      log(`WebSocket not supported in this environment. Running in HTTP-only mode.`);
+    } else {
+      log(`Server error: ${error.message}`);
+    }
+  });
+
+  httpServer.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
-    log(`WebSocket server available at ws://localhost:${port}/ws/delivery`);
-    log(`Admin WebSocket server available at ws://localhost:${port}/ws/admin`);
+    if (deliveryWss) {
+      log(`WebSocket server available at ws://localhost:${port}/ws/delivery`);
+    }
+    if (adminWss) {
+      log(`Admin WebSocket server available at ws://localhost:${port}/ws/admin`);
+    }
   });
 })();

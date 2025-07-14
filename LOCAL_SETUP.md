@@ -70,6 +70,12 @@ npm run db:push
 # Development mode (includes hot reload)
 npm run dev
 
+# Alternative: If you get WebSocket errors, use this instead
+node start-local.js
+
+# Or set the environment variable manually
+DISABLE_WEBSOCKET=true npm run dev
+
 # Production build and start
 npm run build
 npm run start
@@ -136,6 +142,13 @@ cakesbuy/
 
 ## Troubleshooting
 
+**WebSocket Error (Error: listen ENOTSUP):**
+- This is a WebSocket compatibility issue in some local environments
+- The app will still work without WebSocket features (real-time notifications)
+- **Quick Fix Option 1**: Run `node start-local.js` instead of `npm run dev`
+- **Quick Fix Option 2**: Run `DISABLE_WEBSOCKET=true npm run dev`
+- **For Windows users**: Set the environment variable first: `set DISABLE_WEBSOCKET=true && npm run dev`
+
 **Database Connection Issues:**
 - Verify your DATABASE_URL is correct
 - Ensure PostgreSQL is running
@@ -144,6 +157,10 @@ cakesbuy/
 **Email Not Working:**
 - Gmail requires App Passwords (not regular password)
 - Enable 2FA and generate App Password in Google Account settings
+
+**Port Already in Use:**
+- Kill the process using port 5000: `lsof -ti:5000 | xargs kill -9`
+- Or change the port in server/index.ts
 
 **Build Errors:**
 - Clear node_modules: `rm -rf node_modules && npm install`
