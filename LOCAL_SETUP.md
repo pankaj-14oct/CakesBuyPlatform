@@ -145,10 +145,15 @@ cakesbuy/
 **WebSocket/Network Error (Error: listen ENOTSUP):**
 - This is a WebSocket or network binding compatibility issue in some local environments
 - The app will still work without WebSocket features (real-time notifications)
-- **Quick Fix Option 1**: Run `node start-local-simple.js` (recommended for local dev)
-- **Quick Fix Option 2**: Run `node start-local.js` instead of `npm run dev`
-- **Quick Fix Option 3**: Run `DISABLE_WEBSOCKET=true npm run dev`
+- **RECOMMENDED FIX**: Run `node start-localhost-only.js` (best for local development)
+- **Alternative Option 1**: Run `node start-local-simple.js`
+- **Alternative Option 2**: Run `node start-local.js` 
+- **Alternative Option 3**: Run `DISABLE_WEBSOCKET=true npm run dev`
 - **For Windows users**: Set the environment variable first: `set DISABLE_WEBSOCKET=true && npm run dev`
+
+**If the above still fails:**
+- Try: `BIND_HOST=127.0.0.1 node start-localhost-only.js`
+- Or: `LOCAL_DEV=true npm run dev`
 
 **Database Connection Issues:**
 - Verify your DATABASE_URL is correct

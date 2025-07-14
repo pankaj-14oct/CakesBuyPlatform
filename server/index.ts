@@ -205,23 +205,62 @@ app.use((req, res, next) => {
     }
   });
 
-  // Use different listening approach for better local compatibility
-  const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+  // Determine the best host binding strategy
+  let host: string;
+  
+  if (process.env.LOCAL_DEV === 'true' || process.env.BIND_HOST) {
+    host = process.env.BIND_HOST || 'localhost';
+  } else if (process.env.NODE_ENV === 'production') {
+    host = '0.0.0.0';
+  } else {
+    host = 'localhost';
+  }
+  
+  log(`Attempting to bind server to ${host}:${port}`);
+  
+  // Try multiple binding strategies with graceful fallbacks
+  const tryBind = (bindHost: string, fallbackHost?: string) => {
+    return new Promise<void>((resolve, reject) => {
+      const attempt = () => {
+        httpServer.listen(port, bindHost, () => {
+          log(`✅ Server successfully bound to ${bindHost}:${port}`);
+          if (deliveryWss && !process.env.DISABLE_WEBSOCKET) {
+            log(`WebSocket server available at ws://localhost:${port}/ws/delivery`);
+          }
+          if (adminWss && !process.env.DISABLE_WEBSOCKET) {
+            log(`Admin WebSocket server available at ws://localhost:${port}/ws/admin`);
+          }
+          resolve();
+        });
+      };
+      
+      httpServer.on('error', (error: any) => {
+        if (error.code === 'ENOTSUP' && fallbackHost) {
+          log(`❌ Failed to bind to ${bindHost}, trying ${fallbackHost}...`);
+          httpServer.removeAllListeners('error');
+          httpServer.listen(port, fallbackHost, () => {
+            log(`✅ Server successfully bound to ${fallbackHost}:${port} (fallback)`);
+            resolve();
+          });
+        } else {
+          reject(error);
+        }
+      });
+      
+      attempt();
+    });
+  };
   
   try {
-    httpServer.listen(port, host, () => {
-      log(`serving on port ${port}`);
-      if (deliveryWss) {
-        log(`WebSocket server available at ws://localhost:${port}/ws/delivery`);
-      }
-      if (adminWss) {
-        log(`Admin WebSocket server available at ws://localhost:${port}/ws/admin`);
-      }
-    });
+    if (host === '0.0.0.0') {
+      await tryBind('0.0.0.0', 'localhost');
+    } else {
+      await tryBind(host);
+    }
   } catch (error: any) {
-    log(`Failed to bind to ${host}:${port}. Trying localhost only...`);
-    httpServer.listen(port, 'localhost', () => {
-      log(`serving on localhost:${port} (local only)`);
+    log(`❌ All binding attempts failed. Trying basic listen() without host...`);
+    httpServer.listen(port, () => {
+      log(`✅ Server started on port ${port} (basic mode)`);
     });
   }
 })();
