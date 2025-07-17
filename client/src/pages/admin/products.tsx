@@ -18,7 +18,7 @@ import { Cake, Category } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { formatPrice } from '@/lib/utils';
-import { Pagination } from '@/components/pagination';
+import Pagination from '@/components/pagination';
 
 const productSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
