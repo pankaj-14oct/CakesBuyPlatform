@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Gift, Rocket, Star, Sparkles, Wallet } from 'lucide-react';
+import { Gift, Rocket, Star, Sparkles, Wallet, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface WelcomeCelebrationProps {
@@ -10,37 +10,58 @@ interface WelcomeCelebrationProps {
 export default function WelcomeCelebration({ isVisible, onClose }: WelcomeCelebrationProps) {
   const [showRockets, setShowRockets] = useState(false);
   const [showStars, setShowStars] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     if (isVisible) {
+      // Reset states
+      setIsClosing(false);
+      setShowRockets(false);
+      setShowStars(false);
+      
       // Start rocket animation immediately
-      setShowRockets(true);
+      setTimeout(() => setShowRockets(true), 100);
       
       // Start star animation after a slight delay
       const starTimer = setTimeout(() => {
         setShowStars(true);
-      }, 300);
+      }, 500);
 
-      // Auto-close after 4 seconds
+      // Auto-close after 5 seconds
       const autoCloseTimer = setTimeout(() => {
-        onClose();
-      }, 4000);
+        handleClose();
+      }, 5000);
 
       return () => {
         clearTimeout(starTimer);
         clearTimeout(autoCloseTimer);
       };
-    } else {
-      setShowRockets(false);
-      setShowStars(false);
     }
-  }, [isVisible, onClose]);
+  }, [isVisible]);
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+    }, 300);
+  };
 
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="relative bg-white rounded-2xl p-8 mx-4 max-w-md w-full text-center shadow-2xl">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 ${
+      isClosing ? 'bg-black bg-opacity-0' : 'bg-black bg-opacity-50'
+    }`}>
+      <div className={`relative bg-white rounded-2xl p-8 mx-4 max-w-md w-full text-center shadow-2xl transform transition-all duration-300 ${
+        isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
+      }`}>
+        {/* Close button */}
+        <button
+          onClick={handleClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <X size={20} />
+        </button>
         {/* Rocket animations */}
         {showRockets && (
           <>
@@ -107,8 +128,8 @@ export default function WelcomeCelebration({ isVisible, onClose }: WelcomeCelebr
           </div>
 
           <Button 
-            onClick={onClose}
-            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-3 rounded-xl shadow-lg"
+            onClick={handleClose}
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105"
           >
             Start Shopping Now! 🛒
           </Button>

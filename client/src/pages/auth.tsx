@@ -50,7 +50,7 @@ export default function AuthPage() {
         if (!showCelebration) {
           setLocation('/');
         }
-      }, 1000);
+      }, 2000);
     }
   }, [isAuthenticated, setLocation, showCelebration]);
 

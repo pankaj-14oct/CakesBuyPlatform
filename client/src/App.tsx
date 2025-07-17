@@ -54,6 +54,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import AdminNotifications from "@/components/AdminNotifications";
 import { useAuth } from "@/hooks/use-auth";
+import PageTransition from "@/components/page-transition";
 
 // Component to handle scroll restoration on route changes
 function ScrollRestoration() {
