@@ -72,10 +72,30 @@ export default function AuthPage() {
   const onRegister = (data: RegisterForm) => {
     registerMutation.mutate(data, {
       onSuccess: (response) => {
+        console.log('Registration mutation onSuccess called:', response);
         setShowCelebration(true);
+      },
+      onError: (error) => {
+        console.error('Registration mutation onError called:', error);
       }
     });
   };
+
+  // Monitor registration mutation state
+  useEffect(() => {
+    console.log('Registration mutation state:', {
+      isSuccess: registerMutation.isSuccess,
+      isError: registerMutation.isError,
+      isPending: registerMutation.isPending,
+      data: registerMutation.data
+    });
+    
+    // Trigger celebration when registration is successful
+    if (registerMutation.isSuccess && registerMutation.data && !showCelebration) {
+      console.log('Triggering celebration from mutation state change');
+      setShowCelebration(true);
+    }
+  }, [registerMutation.isSuccess, registerMutation.data, showCelebration]);
 
   // Don't render if user is authenticated (unless showing celebration)
   if (isAuthenticated && !showCelebration) {
@@ -375,6 +395,7 @@ export default function AuthPage() {
       <WelcomeCelebration 
         isVisible={showCelebration}
         onClose={() => {
+          console.log('Celebration modal closed');
           setShowCelebration(false);
           setLocation('/');
         }}
