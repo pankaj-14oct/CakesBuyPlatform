@@ -109,6 +109,644 @@ const seedData = {
         scheduled: true,
         minOrderTime: 4
       }
+    },
+    {
+      name: "Strawberry Delight Cake",
+      slug: "strawberry-delight-cake",
+      description: "Fresh strawberry cake with whipped cream and strawberry compote",
+      categoryId: 1,
+      basePrice: "1099",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Strawberry", "Fresh Strawberry", "Strawberry Vanilla"],
+      weights: [
+        { weight: "0.5kg", price: 899 },
+        { weight: "1kg", price: 1399 },
+        { weight: "1.5kg", price: 1899 },
+        { weight: "2kg", price: 2399 }
+      ],
+      isEggless: true,
+      isBestseller: true,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: true,
+        maxMessageLength: 40
+      },
+      deliveryOptions: {
+        sameDay: true,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 3
+      }
+    },
+    {
+      name: "Black Forest Cake",
+      slug: "black-forest-cake",
+      description: "Classic German cake with chocolate, cherries, and whipped cream",
+      categoryId: 1,
+      basePrice: "1299",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Chocolate Cherry", "Black Forest", "Cherry Chocolate"],
+      weights: [
+        { weight: "0.5kg", price: 999 },
+        { weight: "1kg", price: 1499 },
+        { weight: "1.5kg", price: 1999 },
+        { weight: "2kg", price: 2499 }
+      ],
+      isEggless: true,
+      isBestseller: true,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: false,
+        maxMessageLength: 35
+      },
+      deliveryOptions: {
+        sameDay: true,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 4
+      }
+    },
+    {
+      name: "Butterscotch Bliss Cake",
+      slug: "butterscotch-bliss-cake",
+      description: "Rich butterscotch cake with butterscotch chips and cream",
+      categoryId: 1,
+      basePrice: "1199",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Butterscotch", "Caramel Butterscotch", "Toffee Butterscotch"],
+      weights: [
+        { weight: "0.5kg", price: 899 },
+        { weight: "1kg", price: 1299 },
+        { weight: "1.5kg", price: 1799 },
+        { weight: "2kg", price: 2299 }
+      ],
+      isEggless: true,
+      isBestseller: false,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: true,
+        maxMessageLength: 45
+      },
+      deliveryOptions: {
+        sameDay: true,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 3
+      }
+    },
+    {
+      name: "Pineapple Upside Down Cake",
+      slug: "pineapple-upside-down-cake",
+      description: "Tropical pineapple cake with caramelized pineapple topping",
+      categoryId: 1,
+      basePrice: "1099",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Pineapple", "Tropical Pineapple", "Caramelized Pineapple"],
+      weights: [
+        { weight: "0.5kg", price: 799 },
+        { weight: "1kg", price: 1199 },
+        { weight: "1.5kg", price: 1699 },
+        { weight: "2kg", price: 2199 }
+      ],
+      isEggless: true,
+      isBestseller: false,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: false,
+        maxMessageLength: 30
+      },
+      deliveryOptions: {
+        sameDay: true,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 4
+      }
+    },
+    {
+      name: "Mango Masti Cake",
+      slug: "mango-masti-cake",
+      description: "Fresh mango cake with mango puree and cream layers",
+      categoryId: 1,
+      basePrice: "1299",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Mango", "Alphonso Mango", "Tropical Mango"],
+      weights: [
+        { weight: "0.5kg", price: 999 },
+        { weight: "1kg", price: 1399 },
+        { weight: "1.5kg", price: 1899 },
+        { weight: "2kg", price: 2399 }
+      ],
+      isEggless: true,
+      isBestseller: true,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: true,
+        maxMessageLength: 40
+      },
+      deliveryOptions: {
+        sameDay: true,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 3
+      }
+    },
+    {
+      name: "Coffee Mocha Cake",
+      slug: "coffee-mocha-cake",
+      description: "Rich coffee and chocolate cake with mocha frosting",
+      categoryId: 1,
+      basePrice: "1399",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Coffee", "Mocha", "Espresso"],
+      weights: [
+        { weight: "0.5kg", price: 1099 },
+        { weight: "1kg", price: 1599 },
+        { weight: "1.5kg", price: 2099 },
+        { weight: "2kg", price: 2599 }
+      ],
+      isEggless: true,
+      isBestseller: false,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: true,
+        maxMessageLength: 35
+      },
+      deliveryOptions: {
+        sameDay: false,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 4
+      }
+    },
+    {
+      name: "Oreo Crunch Cake",
+      slug: "oreo-crunch-cake",
+      description: "Chocolate cake with Oreo cookies and cream cheese frosting",
+      categoryId: 1,
+      basePrice: "1299",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Oreo", "Cookies & Cream", "Chocolate Oreo"],
+      weights: [
+        { weight: "0.5kg", price: 999 },
+        { weight: "1kg", price: 1499 },
+        { weight: "1.5kg", price: 1999 },
+        { weight: "2kg", price: 2499 }
+      ],
+      isEggless: true,
+      isBestseller: true,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: true,
+        maxMessageLength: 40
+      },
+      deliveryOptions: {
+        sameDay: true,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 3
+      }
+    },
+    {
+      name: "Lemon Zest Cake",
+      slug: "lemon-zest-cake",
+      description: "Refreshing lemon cake with citrus glaze and cream",
+      categoryId: 1,
+      basePrice: "1099",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Lemon", "Citrus Lemon", "Lemon Vanilla"],
+      weights: [
+        { weight: "0.5kg", price: 799 },
+        { weight: "1kg", price: 1199 },
+        { weight: "1.5kg", price: 1699 },
+        { weight: "2kg", price: 2199 }
+      ],
+      isEggless: true,
+      isBestseller: false,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: false,
+        maxMessageLength: 35
+      },
+      deliveryOptions: {
+        sameDay: true,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 3
+      }
+    },
+    {
+      name: "Ferrero Rocher Cake",
+      slug: "ferrero-rocher-cake",
+      description: "Luxurious chocolate hazelnut cake with Ferrero Rocher",
+      categoryId: 1,
+      basePrice: "1599",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Hazelnut Chocolate", "Ferrero", "Nutella"],
+      weights: [
+        { weight: "0.5kg", price: 1299 },
+        { weight: "1kg", price: 1899 },
+        { weight: "1.5kg", price: 2399 },
+        { weight: "2kg", price: 2899 }
+      ],
+      isEggless: true,
+      isBestseller: true,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: true,
+        maxMessageLength: 40
+      },
+      deliveryOptions: {
+        sameDay: false,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 4
+      }
+    },
+    {
+      name: "Tiramisu Cake",
+      slug: "tiramisu-cake",
+      description: "Italian-inspired coffee cake with mascarpone and cocoa",
+      categoryId: 1,
+      basePrice: "1499",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Tiramisu", "Coffee Mascarpone", "Italian Coffee"],
+      weights: [
+        { weight: "0.5kg", price: 1199 },
+        { weight: "1kg", price: 1699 },
+        { weight: "1.5kg", price: 2199 },
+        { weight: "2kg", price: 2699 }
+      ],
+      isEggless: true,
+      isBestseller: false,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: false,
+        maxMessageLength: 30
+      },
+      deliveryOptions: {
+        sameDay: false,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 5
+      }
+    },
+    {
+      name: "Funfetti Birthday Cake",
+      slug: "funfetti-birthday-cake",
+      description: "Colorful vanilla cake with rainbow sprinkles and buttercream",
+      categoryId: 1,
+      basePrice: "1199",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Vanilla Funfetti", "Rainbow", "Birthday Cake"],
+      weights: [
+        { weight: "0.5kg", price: 899 },
+        { weight: "1kg", price: 1299 },
+        { weight: "1.5kg", price: 1799 },
+        { weight: "2kg", price: 2299 }
+      ],
+      isEggless: true,
+      isBestseller: true,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: true,
+        maxMessageLength: 50
+      },
+      deliveryOptions: {
+        sameDay: true,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 2
+      }
+    },
+    {
+      name: "Carrot Walnut Cake",
+      slug: "carrot-walnut-cake",
+      description: "Moist carrot cake with walnuts and cream cheese frosting",
+      categoryId: 1,
+      basePrice: "1299",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Carrot", "Carrot Walnut", "Spiced Carrot"],
+      weights: [
+        { weight: "0.5kg", price: 999 },
+        { weight: "1kg", price: 1399 },
+        { weight: "1.5kg", price: 1899 },
+        { weight: "2kg", price: 2399 }
+      ],
+      isEggless: true,
+      isBestseller: false,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: false,
+        maxMessageLength: 40
+      },
+      deliveryOptions: {
+        sameDay: true,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 4
+      }
+    },
+    {
+      name: "Coconut Paradise Cake",
+      slug: "coconut-paradise-cake",
+      description: "Tropical coconut cake with coconut flakes and cream",
+      categoryId: 1,
+      basePrice: "1199",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Coconut", "Tropical Coconut", "Coconut Vanilla"],
+      weights: [
+        { weight: "0.5kg", price: 899 },
+        { weight: "1kg", price: 1299 },
+        { weight: "1.5kg", price: 1799 },
+        { weight: "2kg", price: 2299 }
+      ],
+      isEggless: true,
+      isBestseller: false,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: true,
+        maxMessageLength: 35
+      },
+      deliveryOptions: {
+        sameDay: true,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 3
+      }
+    },
+    {
+      name: "Choco Lava Cake",
+      slug: "choco-lava-cake",
+      description: "Warm chocolate cake with molten chocolate center",
+      categoryId: 1,
+      basePrice: "1399",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Chocolate Lava", "Molten Chocolate", "Dark Chocolate"],
+      weights: [
+        { weight: "0.5kg", price: 1099 },
+        { weight: "1kg", price: 1599 },
+        { weight: "1.5kg", price: 2099 },
+        { weight: "2kg", price: 2599 }
+      ],
+      isEggless: true,
+      isBestseller: true,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: false,
+        maxMessageLength: 30
+      },
+      deliveryOptions: {
+        sameDay: false,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 4
+      }
+    },
+    {
+      name: "Raspberry Cheesecake",
+      slug: "raspberry-cheesecake",
+      description: "Creamy cheesecake with fresh raspberry topping",
+      categoryId: 1,
+      basePrice: "1599",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Raspberry", "Berry Cheesecake", "Fresh Raspberry"],
+      weights: [
+        { weight: "0.5kg", price: 1299 },
+        { weight: "1kg", price: 1899 },
+        { weight: "1.5kg", price: 2399 },
+        { weight: "2kg", price: 2899 }
+      ],
+      isEggless: true,
+      isBestseller: false,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: true,
+        maxMessageLength: 35
+      },
+      deliveryOptions: {
+        sameDay: false,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 5
+      }
+    },
+    {
+      name: "Chocolate Truffle Cake",
+      slug: "chocolate-truffle-cake",
+      description: "Rich chocolate cake with chocolate truffle filling",
+      categoryId: 1,
+      basePrice: "1499",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Chocolate Truffle", "Dark Truffle", "Rich Chocolate"],
+      weights: [
+        { weight: "0.5kg", price: 1199 },
+        { weight: "1kg", price: 1699 },
+        { weight: "1.5kg", price: 2199 },
+        { weight: "2kg", price: 2699 }
+      ],
+      isEggless: true,
+      isBestseller: true,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: true,
+        maxMessageLength: 40
+      },
+      deliveryOptions: {
+        sameDay: false,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 4
+      }
+    },
+    {
+      name: "Banana Walnut Cake",
+      slug: "banana-walnut-cake",
+      description: "Moist banana cake with walnuts and cream cheese frosting",
+      categoryId: 1,
+      basePrice: "1199",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Banana", "Banana Walnut", "Spiced Banana"],
+      weights: [
+        { weight: "0.5kg", price: 899 },
+        { weight: "1kg", price: 1299 },
+        { weight: "1.5kg", price: 1799 },
+        { weight: "2kg", price: 2299 }
+      ],
+      isEggless: true,
+      isBestseller: false,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: false,
+        maxMessageLength: 40
+      },
+      deliveryOptions: {
+        sameDay: true,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 3
+      }
+    },
+    {
+      name: "Blueberry Muffin Cake",
+      slug: "blueberry-muffin-cake",
+      description: "Soft vanilla cake with fresh blueberries and streusel topping",
+      categoryId: 1,
+      basePrice: "1299",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Blueberry", "Berry Vanilla", "Fresh Blueberry"],
+      weights: [
+        { weight: "0.5kg", price: 999 },
+        { weight: "1kg", price: 1399 },
+        { weight: "1.5kg", price: 1899 },
+        { weight: "2kg", price: 2399 }
+      ],
+      isEggless: true,
+      isBestseller: false,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: true,
+        maxMessageLength: 35
+      },
+      deliveryOptions: {
+        sameDay: true,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 3
+      }
+    },
+    {
+      name: "Honey Almond Cake",
+      slug: "honey-almond-cake",
+      description: "Delicate almond cake with honey glaze and sliced almonds",
+      categoryId: 1,
+      basePrice: "1399",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Honey Almond", "Almond", "Honey Vanilla"],
+      weights: [
+        { weight: "0.5kg", price: 1099 },
+        { weight: "1kg", price: 1599 },
+        { weight: "1.5kg", price: 2099 },
+        { weight: "2kg", price: 2599 }
+      ],
+      isEggless: true,
+      isBestseller: false,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: false,
+        maxMessageLength: 30
+      },
+      deliveryOptions: {
+        sameDay: true,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 4
+      }
+    },
+    {
+      name: "Mint Chocolate Chip Cake",
+      slug: "mint-chocolate-chip-cake",
+      description: "Refreshing mint cake with chocolate chips and mint frosting",
+      categoryId: 1,
+      basePrice: "1299",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Mint Chocolate", "Peppermint", "Chocolate Mint"],
+      weights: [
+        { weight: "0.5kg", price: 999 },
+        { weight: "1kg", price: 1499 },
+        { weight: "1.5kg", price: 1999 },
+        { weight: "2kg", price: 2499 }
+      ],
+      isEggless: true,
+      isBestseller: false,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: true,
+        maxMessageLength: 35
+      },
+      deliveryOptions: {
+        sameDay: true,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 3
+      }
+    },
+    {
+      name: "Orange Citrus Cake",
+      slug: "orange-citrus-cake",
+      description: "Zesty orange cake with orange zest and citrus glaze",
+      categoryId: 1,
+      basePrice: "1199",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Orange", "Citrus Orange", "Orange Vanilla"],
+      weights: [
+        { weight: "0.5kg", price: 899 },
+        { weight: "1kg", price: 1299 },
+        { weight: "1.5kg", price: 1799 },
+        { weight: "2kg", price: 2299 }
+      ],
+      isEggless: true,
+      isBestseller: false,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: false,
+        maxMessageLength: 35
+      },
+      deliveryOptions: {
+        sameDay: true,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 3
+      }
+    },
+    {
+      name: "Caramel Apple Cake",
+      slug: "caramel-apple-cake",
+      description: "Spiced apple cake with caramel sauce and cinnamon",
+      categoryId: 1,
+      basePrice: "1299",
+      images: ["/api/placeholder/400/300"],
+      flavors: ["Caramel Apple", "Spiced Apple", "Apple Cinnamon"],
+      weights: [
+        { weight: "0.5kg", price: 999 },
+        { weight: "1kg", price: 1399 },
+        { weight: "1.5kg", price: 1899 },
+        { weight: "2kg", price: 2399 }
+      ],
+      isEggless: true,
+      isBestseller: false,
+      isAvailable: true,
+      customizationOptions: {
+        allowCustomMessage: true,
+        allowCustomImage: true,
+        maxMessageLength: 40
+      },
+      deliveryOptions: {
+        sameDay: true,
+        nextDay: true,
+        scheduled: true,
+        minOrderTime: 4
+      }
     }
   ],
 
@@ -400,21 +1038,47 @@ export async function seedDatabase() {
     const vanillaCategory = await db.select().from(categories).where(eq(categories.slug, "vanilla-cakes")).limit(1);
     const redVelvetCategory = await db.select().from(categories).where(eq(categories.slug, "red-velvet-cakes")).limit(1);
     
+    // Get all available categories for random assignment
+    const allCategories = await db.select().from(categories).where(eq(categories.parentId, parentId));
+    const availableCategories = allCategories.length > 0 ? allCategories : [{ id: parentId }];
+    
     // Update cake data with correct category IDs
-    const cakesWithCorrectIds = [
-      {
-        ...seedData.cakes[0],
-        categoryId: chocolateCategory[0]?.id || birthdayCategory[0]?.id || parentId
-      },
-      {
-        ...seedData.cakes[1],
-        categoryId: vanillaCategory[0]?.id || birthdayCategory[0]?.id || parentId
-      },
-      {
-        ...seedData.cakes[2],
-        categoryId: redVelvetCategory[0]?.id || anniversaryCategory[0]?.id || parentId
+    const cakesWithCorrectIds = seedData.cakes.map((cake, index) => {
+      let categoryId;
+      
+      // Assign specific categories to first few cakes
+      if (index === 0) {
+        categoryId = chocolateCategory[0]?.id || birthdayCategory[0]?.id || parentId;
+      } else if (index === 1) {
+        categoryId = vanillaCategory[0]?.id || birthdayCategory[0]?.id || parentId;
+      } else if (index === 2) {
+        categoryId = redVelvetCategory[0]?.id || anniversaryCategory[0]?.id || parentId;
+      } else {
+        // For remaining cakes, assign categories based on name patterns or randomly
+        const cakeName = cake.name.toLowerCase();
+        if (cakeName.includes('chocolate')) {
+          categoryId = chocolateCategory[0]?.id || birthdayCategory[0]?.id || parentId;
+        } else if (cakeName.includes('vanilla')) {
+          categoryId = vanillaCategory[0]?.id || birthdayCategory[0]?.id || parentId;
+        } else if (cakeName.includes('red velvet')) {
+          categoryId = redVelvetCategory[0]?.id || anniversaryCategory[0]?.id || parentId;
+        } else if (cakeName.includes('strawberry')) {
+          categoryId = availableCategories.find(cat => cat.id)?.id || birthdayCategory[0]?.id || parentId;
+        } else if (cakeName.includes('birthday') || cakeName.includes('funfetti')) {
+          categoryId = birthdayCategory[0]?.id || parentId;
+        } else if (cakeName.includes('anniversary') || cakeName.includes('romance')) {
+          categoryId = anniversaryCategory[0]?.id || parentId;
+        } else {
+          // Random assignment from available categories
+          categoryId = availableCategories[Math.floor(Math.random() * availableCategories.length)]?.id || parentId;
+        }
       }
-    ];
+      
+      return {
+        ...cake,
+        categoryId
+      };
+    });
     
     for (const cake of cakesWithCorrectIds) {
       await db.insert(cakes).values(cake).onConflictDoNothing();
