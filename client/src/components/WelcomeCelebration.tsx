@@ -11,6 +11,8 @@ export default function WelcomeCelebration({ isVisible, onClose }: WelcomeCelebr
   const [showRockets, setShowRockets] = useState(false);
   const [showStars, setShowStars] = useState(false);
 
+  console.log('WelcomeCelebration component rendered with isVisible:', isVisible);
+
   useEffect(() => {
     if (isVisible) {
       // Start rocket animation immediately

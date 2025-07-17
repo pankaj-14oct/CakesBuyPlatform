@@ -36,6 +36,12 @@ export default function AuthPage() {
   const { user, loginMutation, registerMutation, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
 
+  // Force celebration for debugging
+  const handleTestCelebration = () => {
+    console.log('Test celebration button clicked');
+    setShowCelebration(true);
+  };
+
 
 
 
@@ -391,6 +397,14 @@ export default function AuthPage() {
         </div>
       </div>
       
+      {/* Test Button for Celebration */}
+      <button 
+        onClick={handleTestCelebration}
+        className="fixed top-4 right-4 z-50 bg-red-500 text-white px-4 py-2 rounded"
+      >
+        Test Celebration
+      </button>
+
       {/* Welcome Celebration Modal */}
       <WelcomeCelebration 
         isVisible={showCelebration}
