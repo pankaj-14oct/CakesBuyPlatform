@@ -66,9 +66,14 @@ export default function AuthPage() {
   };
 
   const onRegister = (data: RegisterForm) => {
+    console.log('Registration form submitted:', data);
     registerMutation.mutate(data, {
-      onSuccess: () => {
+      onSuccess: (response) => {
+        console.log('Registration successful, showing celebration:', response);
         setShowCelebration(true);
+      },
+      onError: (error) => {
+        console.error('Registration failed:', error);
       }
     });
   };

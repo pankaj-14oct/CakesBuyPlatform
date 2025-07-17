@@ -13,6 +13,7 @@ export default function WelcomeCelebration({ isVisible, onClose }: WelcomeCelebr
 
   useEffect(() => {
     if (isVisible) {
+      console.log('WelcomeCelebration component is now visible');
       // Start rocket animation immediately
       setShowRockets(true);
       
