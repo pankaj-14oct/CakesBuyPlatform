@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Category } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import Pagination from '@/components/pagination';
 
 const categorySchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -35,10 +36,31 @@ export default function AdminCategories() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [searchTerm, setSearchTerm] = useState('');
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: categories = [], isLoading } = useQuery<Category[]>({
+  const { data: categoriesData, isLoading } = useQuery<{
+    categories: Category[];
+    total: number;
+    pages: number;
+    currentPage: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  }>({
+    queryKey: ['/api/admin/categories/paginated', { page: currentPage, limit: pageSize, search: searchTerm }],
+    queryFn: async () => {
+      const response = await apiRequest(`/api/admin/categories/paginated?page=${currentPage}&limit=${pageSize}&search=${searchTerm}`, 'GET');
+      return response.json();
+    },
+  });
+
+  const categories = categoriesData?.categories || [];
+  
+  // Also fetch all categories for parent selection dropdown
+  const { data: allCategories = [] } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
   });
 
@@ -62,6 +84,7 @@ export default function AdminCategories() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/categories/paginated'] });
       setEditingCategory(null);
       setUploadedImage(null);
       setIsCreateDialogOpen(false);
@@ -80,6 +103,7 @@ export default function AdminCategories() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/categories/paginated'] });
       setEditingCategory(null);
       setUploadedImage(null);
       setIsCreateDialogOpen(false);
@@ -98,6 +122,7 @@ export default function AdminCategories() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/categories/paginated'] });
       toast({ title: "Category deleted successfully!" });
     },
     onError: (error) => {
@@ -349,7 +374,7 @@ export default function AdminCategories() {
                     </SelectItem>
                     
                     {/* Parent Categories Section */}
-                    {categories
+                    {allCategories
                       .filter(cat => cat.id !== editingCategory?.id && !(cat as any).parentId)
                       .sort((a, b) => a.name.localeCompare(b.name))
                       .map((category) => (
@@ -364,12 +389,12 @@ export default function AdminCategories() {
                       ))}
                     
                     {/* Child Categories Section (if any exist) */}
-                    {categories.some(cat => (cat as any).parentId && cat.id !== editingCategory?.id) && (
+                    {allCategories.some(cat => (cat as any).parentId && cat.id !== editingCategory?.id) && (
                       <>
                         <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50">
                           Child Categories
                         </div>
-                        {categories
+                        {allCategories
                           .filter(cat => cat.id !== editingCategory?.id && (cat as any).parentId)
                           .sort((a, b) => a.name.localeCompare(b.name))
                           .map((category) => (
@@ -437,9 +462,22 @@ export default function AdminCategories() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <Package className="mr-2 h-5 w-5" />
-            All Categories ({categories.length})
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Package className="mr-2 h-5 w-5" />
+              All Categories ({categoriesData?.total || 0}) - Page {currentPage} of {categoriesData?.pages || 1}
+            </div>
+            <div className="flex items-center space-x-2">
+              <Input
+                placeholder="Search categories..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1); // Reset to first page when searching
+                }}
+                className="w-64"
+              />
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -477,7 +515,7 @@ export default function AdminCategories() {
                     return a.name.localeCompare(b.name);
                   })
                   .map((category) => {
-                  const parentCategory = categories.find(c => c.id === (category as any).parentId);
+                  const parentCategory = allCategories.find(c => c.id === (category as any).parentId);
                   const isChild = (category as any).parentId;
                   
                   return (
@@ -580,6 +618,20 @@ export default function AdminCategories() {
                 })}
               </TableBody>
             </Table>
+          )}
+          
+          {/* Pagination */}
+          {categoriesData && categoriesData.pages > 1 && (
+            <div className="mt-6">
+              <Pagination
+                currentPage={categoriesData.currentPage}
+                totalPages={categoriesData.pages}
+                onPageChange={setCurrentPage}
+                showingFrom={(categoriesData.currentPage - 1) * pageSize + 1}
+                showingTo={Math.min(categoriesData.currentPage * pageSize, categoriesData.total)}
+                totalItems={categoriesData.total}
+              />
+            </div>
           )}
         </CardContent>
       </Card>
