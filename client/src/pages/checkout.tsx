@@ -275,17 +275,41 @@ export default function CheckoutPage() {
       // Handle PhonePe payment
       if (paymentMethod === 'phonepe') {
         try {
-          const deliveryAddress = form.getValues('guestName') 
-            ? { name: form.getValues('guestName'), phone: form.getValues('guestPhone'), email: form.getValues('guestEmail') }
-            : selectedAddress;
+          let deliveryAddress;
+          let userPhone;
+          let userName;
+          let userEmail = '';
           
-          const phonepeResponse = await apiRequest('/api/payments/phonepe/initiate', 'POST', {
+          if (form.getValues('guestName')) {
+            // Guest checkout
+            deliveryAddress = { 
+              name: form.getValues('guestName'), 
+              phone: form.getValues('guestPhone'), 
+              email: form.getValues('guestEmail') 
+            };
+            userPhone = form.getValues('guestPhone');
+            userName = form.getValues('guestName');
+            userEmail = form.getValues('guestEmail') || '';
+          } else {
+            // Authenticated user - get profile data
+            const userResponse = await apiRequest('/api/profile', 'GET');
+            const userData = await userResponse.json();
+            
+            deliveryAddress = selectedAddress;
+            userPhone = selectedAddress?.phone || userData.phone || '';
+            userName = selectedAddress?.name || userData.name || '';
+            userEmail = userData.email || '';
+          }
+          
+          const phonepePayload = {
             orderId: data.id,
             amount: total,
-            userPhone: deliveryAddress?.phone || form.getValues('guestPhone'),
-            userName: deliveryAddress?.name || form.getValues('guestName'),
-            userEmail: deliveryAddress?.email || form.getValues('guestEmail') || ''
-          });
+            userPhone: userPhone,
+            userName: userName,
+            userEmail: userEmail
+          };
+          
+          const phonepeResponse = await apiRequest('/api/payments/phonepe/initiate', 'POST', phonepePayload);
           
           const phonepeData = await phonepeResponse.json();
           
