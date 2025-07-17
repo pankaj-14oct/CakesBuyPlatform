@@ -36,11 +36,7 @@ export default function AuthPage() {
   const { user, loginMutation, registerMutation, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
 
-  // Force celebration for debugging
-  const handleTestCelebration = () => {
-    console.log('Test celebration button clicked');
-    setShowCelebration(true);
-  };
+
 
 
 
@@ -49,14 +45,7 @@ export default function AuthPage() {
   // Redirect if already logged in (but not if showing celebration)
   useEffect(() => {
     if (isAuthenticated && !showCelebration) {
-      console.log('About to redirect to home page', { isAuthenticated, showCelebration });
-      // Add delay to ensure celebration has time to trigger
-      setTimeout(() => {
-        if (!showCelebration) {
-          console.log('Redirecting to home page now');
-          setLocation('/');
-        }
-      }, 500);
+      setLocation('/');
     }
   }, [isAuthenticated, setLocation, showCelebration]);
 
@@ -83,47 +72,18 @@ export default function AuthPage() {
   };
 
   const onRegister = (data: RegisterForm) => {
-    console.log('onRegister called with data:', data);
     registerMutation.mutate(data, {
       onSuccess: (response) => {
-        console.log('Registration mutation onSuccess called:', response);
-        console.log('About to set showCelebration to true');
-        // Set celebration immediately
+        // Show celebration modal immediately before any redirect
         setShowCelebration(true);
-        console.log('setShowCelebration(true) completed');
-      },
-      onError: (error) => {
-        console.error('Registration mutation onError called:', error);
       }
     });
   };
 
-  // Monitor registration mutation state
-  useEffect(() => {
-    console.log('Registration mutation state:', {
-      isSuccess: registerMutation.isSuccess,
-      isError: registerMutation.isError,
-      isPending: registerMutation.isPending,
-      data: registerMutation.data,
-      showCelebration
-    });
-    
-    // Trigger celebration when registration is successful
-    if (registerMutation.isSuccess && registerMutation.data && !showCelebration) {
-      console.log('Triggering celebration from mutation state change');
-      setShowCelebration(true);
-    }
-  }, [registerMutation.isSuccess, registerMutation.data, showCelebration]);
 
-  // Additional effect to monitor state changes
-  useEffect(() => {
-    console.log('showCelebration state:', showCelebration);
-    console.log('isAuthenticated state:', isAuthenticated);
-  }, [showCelebration, isAuthenticated]);
 
   // Don't render if user is authenticated (unless showing celebration)
   if (isAuthenticated && !showCelebration) {
-    console.log('Auth component returning null - user authenticated but no celebration');
     return null;
   }
 
@@ -422,7 +382,6 @@ export default function AuthPage() {
       <WelcomeCelebration 
         isVisible={showCelebration}
         onClose={() => {
-          console.log('Celebration modal closed');
           setShowCelebration(false);
           setLocation('/');
         }}
