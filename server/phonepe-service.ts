@@ -136,9 +136,11 @@ export async function initiatePhonePePayment(request: PhonePePaymentRequest): Pr
     };
 
     // Make API call
+    console.log('PhonePe API request:', options);
     const response = await axios.request(options);
+    console.log('PhonePe API response:', response.data);
     
-    if (response.data.success) {
+    if (response.data && response.data.success) {
       // Update transaction with checkout request ID
       await storage.updatePhonePeTransaction(merchantTransactionId, {
         checkoutRequestId: response.data.data.merchantTransactionId,
@@ -168,9 +170,15 @@ export async function initiatePhonePePayment(request: PhonePePaymentRequest): Pr
       };
     }
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('PhonePe payment initiation error:', error);
-    throw new Error('Failed to initiate PhonePe payment');
+    
+    // Return a proper error response instead of throwing
+    return {
+      success: false,
+      code: 'PAYMENT_ERROR',
+      message: error.response?.data?.message || error.message || 'Failed to initiate PhonePe payment'
+    };
   }
 }
 
