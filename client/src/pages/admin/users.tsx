@@ -102,8 +102,8 @@ export default function AdminUsers() {
     },
   });
 
-  const users = paginatedData?.items || [];
-  const totalPages = paginatedData?.totalPages || 1;
+  const users = paginatedData?.users || [];
+  const totalPages = paginatedData?.pages || 1;
   const totalItems = paginatedData?.total || 0;
 
   // Create new user
