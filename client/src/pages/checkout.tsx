@@ -269,7 +269,46 @@ export default function CheckoutPage() {
       }
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      const paymentMethod = form.getValues('paymentMethod');
+      
+      // Handle PhonePe payment
+      if (paymentMethod === 'phonepe') {
+        try {
+          const deliveryAddress = form.getValues('guestName') 
+            ? { name: form.getValues('guestName'), phone: form.getValues('guestPhone'), email: form.getValues('guestEmail') }
+            : selectedAddress;
+          
+          const phonepeResponse = await apiRequest('/api/payments/phonepe/initiate', 'POST', {
+            orderId: data.id,
+            amount: total,
+            userPhone: deliveryAddress?.phone || form.getValues('guestPhone'),
+            userName: deliveryAddress?.name || form.getValues('guestName'),
+            userEmail: deliveryAddress?.email || form.getValues('guestEmail') || ''
+          });
+          
+          const phonepeData = await phonepeResponse.json();
+          
+          if (phonepeData.success && phonepeData.data?.instrumentResponse?.redirectInfo?.url) {
+            // Clear cart and redirect to PhonePe
+            dispatch({ type: 'CLEAR_CART' });
+            window.location.href = phonepeData.data.instrumentResponse.redirectInfo.url;
+            return;
+          } else {
+            throw new Error(phonepeData.message || 'PhonePe payment initiation failed');
+          }
+        } catch (error) {
+          console.error('PhonePe payment error:', error);
+          toast({
+            title: "Payment initiation failed",
+            description: error.message || "Failed to initiate PhonePe payment. Please try again.",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+      
+      // Handle other payment methods (existing flow)
       setOrderNumber(data.orderNumber);
       setOrderPlaced(true);
       dispatch({ type: 'CLEAR_CART' });
