@@ -38,6 +38,9 @@ export default function VendorRegister() {
     setSuccessMessage("");
     
     try {
+      console.log("Submitting vendor registration data:", data);
+      console.log("Form errors:", form.formState.errors);
+      
       const response = await apiRequest("/api/vendors/register", {
         method: "POST",
         body: JSON.stringify(data)
@@ -45,6 +48,7 @@ export default function VendorRegister() {
       
       if (response.ok) {
         const result = await response.json();
+        console.log("Registration successful:", result);
         setSuccessMessage(result.message);
         toast({
           title: "Registration Successful",
@@ -53,6 +57,7 @@ export default function VendorRegister() {
         form.reset();
       } else {
         const error = await response.json();
+        console.error("Registration failed:", error);
         toast({
           title: "Registration Failed",
           description: error.message || "Failed to register vendor",
@@ -60,6 +65,7 @@ export default function VendorRegister() {
         });
       }
     } catch (error) {
+      console.error("Registration error:", error);
       toast({
         title: "Registration Failed",
         description: "An error occurred during registration",

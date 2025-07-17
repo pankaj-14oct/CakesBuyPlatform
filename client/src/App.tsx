@@ -260,7 +260,7 @@ function App() {
   const [location] = useLocation();
   const isAdminArea = location.startsWith('/admin');
   const isDeliveryArea = location.startsWith('/delivery');
-  const isVendorArea = location.startsWith('/vendor');
+  const isVendorArea = location.startsWith('/vendor') || location === '/vendor-register' || location === '/vendor-login';
 
   return (
     <QueryClientProvider client={queryClient}>
