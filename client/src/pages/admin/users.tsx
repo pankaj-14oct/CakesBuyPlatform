@@ -94,11 +94,21 @@ export default function AdminUsers() {
   const { data: paginatedData, isLoading } = useQuery({
     queryKey: ['/api/admin/users/paginated', currentPage, itemsPerPage, searchTerm],
     queryFn: async () => {
-      const response = await apiRequest(
+      const response = await fetch(
         `/api/admin/users/paginated?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`,
-        'GET'
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+            'Content-Type': 'application/json',
+          },
+        }
       );
-      return response;
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      
+      return response.json();
     },
   });
 
