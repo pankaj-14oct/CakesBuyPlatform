@@ -105,6 +105,11 @@ export default function AdminUsers() {
   const users = paginatedData?.users || [];
   const totalPages = paginatedData?.pages || 1;
   const totalItems = paginatedData?.total || 0;
+  
+  // Debug logging
+  console.log('Paginated data:', paginatedData);
+  console.log('Users array:', users);
+  console.log('Is loading:', isLoading);
 
   // Create new user
   const handleCreateUser = async (data: CreateUserFormData) => {
@@ -451,7 +456,16 @@ export default function AdminUsers() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
+                {filteredUsers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8">
+                      <div className="text-gray-500">
+                        {isLoading ? 'Loading users...' : 'No users found'}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredUsers.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">#{user.id}</TableCell>
                     <TableCell>{user.name || 'N/A'}</TableCell>
@@ -500,7 +514,8 @@ export default function AdminUsers() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
