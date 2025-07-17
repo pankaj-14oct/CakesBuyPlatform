@@ -49,7 +49,11 @@ export default function AuthPage() {
   // Redirect if already logged in (but not if showing celebration)
   useEffect(() => {
     if (isAuthenticated && !showCelebration) {
-      setLocation('/');
+      console.log('About to redirect to home page');
+      // Add small delay to ensure celebration has time to trigger
+      setTimeout(() => {
+        setLocation('/');
+      }, 100);
     }
   }, [isAuthenticated, setLocation, showCelebration]);
 
@@ -81,6 +85,7 @@ export default function AuthPage() {
       onSuccess: (response) => {
         console.log('Registration mutation onSuccess called:', response);
         console.log('About to set showCelebration to true');
+        // Set celebration immediately
         setShowCelebration(true);
         console.log('setShowCelebration(true) completed');
       },
@@ -109,10 +114,12 @@ export default function AuthPage() {
   // Additional effect to monitor state changes
   useEffect(() => {
     console.log('showCelebration state:', showCelebration);
-  }, [showCelebration]);
+    console.log('isAuthenticated state:', isAuthenticated);
+  }, [showCelebration, isAuthenticated]);
 
   // Don't render if user is authenticated (unless showing celebration)
   if (isAuthenticated && !showCelebration) {
+    console.log('Auth component returning null - user authenticated but no celebration');
     return null;
   }
 
