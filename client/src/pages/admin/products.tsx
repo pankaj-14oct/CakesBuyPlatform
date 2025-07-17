@@ -685,7 +685,7 @@ export default function AdminProducts() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Package className="mr-2 h-5 w-5" />
-            All Products ({productsData?.total || 0})
+            All Products ({productsData?.total || 0}) - Page {currentPage} of {productsData?.pages || 1}
           </CardTitle>
         </CardHeader>
         <CardContent>
