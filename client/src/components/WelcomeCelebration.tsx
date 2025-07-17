@@ -21,10 +21,10 @@ export default function WelcomeCelebration({ isVisible, onClose }: WelcomeCelebr
         setShowStars(true);
       }, 300);
 
-      // Auto-close after 5 seconds
+      // Auto-close after 4 seconds
       const autoCloseTimer = setTimeout(() => {
         onClose();
-      }, 5000);
+      }, 4000);
 
       return () => {
         clearTimeout(starTimer);

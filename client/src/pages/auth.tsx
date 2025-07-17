@@ -45,7 +45,12 @@ export default function AuthPage() {
   // Redirect if already logged in (but not if showing celebration)
   useEffect(() => {
     if (isAuthenticated && !showCelebration) {
-      setLocation('/');
+      // Delay redirect to allow celebration to show
+      setTimeout(() => {
+        if (!showCelebration) {
+          setLocation('/');
+        }
+      }, 1000);
     }
   }, [isAuthenticated, setLocation, showCelebration]);
 
@@ -75,7 +80,9 @@ export default function AuthPage() {
     registerMutation.mutate(data, {
       onSuccess: (response) => {
         // Show celebration modal immediately before any redirect
-        setShowCelebration(true);
+        setTimeout(() => {
+          setShowCelebration(true);
+        }, 100);
       }
     });
   };
