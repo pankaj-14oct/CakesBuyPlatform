@@ -13,7 +13,6 @@ export default function WelcomeCelebration({ isVisible, onClose }: WelcomeCelebr
 
   useEffect(() => {
     if (isVisible) {
-      console.log('WelcomeCelebration component is now visible');
       // Start rocket animation immediately
       setShowRockets(true);
       
@@ -37,12 +36,7 @@ export default function WelcomeCelebration({ isVisible, onClose }: WelcomeCelebr
     }
   }, [isVisible, onClose]);
 
-  if (!isVisible) {
-    console.log('WelcomeCelebration not visible, returning null');
-    return null;
-  }
-
-  console.log('WelcomeCelebration is rendering with isVisible:', isVisible);
+  if (!isVisible) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">

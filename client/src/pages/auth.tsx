@@ -36,19 +36,9 @@ export default function AuthPage() {
   const { user, loginMutation, registerMutation, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
 
-  // Debug celebration state
-  useEffect(() => {
-    console.log('showCelebration state changed:', showCelebration);
-  }, [showCelebration]);
 
-  // Test celebration on page load
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      console.log('Testing celebration after 3 seconds...');
-      setShowCelebration(true);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
+
+
 
   // Redirect if already logged in (but not if showing celebration)
   useEffect(() => {
@@ -80,21 +70,9 @@ export default function AuthPage() {
   };
 
   const onRegister = (data: RegisterForm) => {
-    console.log('Registration form submitted:', data);
-    
-    // Test celebration immediately
-    console.log('Testing celebration display...');
-    setShowCelebration(true);
-    
     registerMutation.mutate(data, {
       onSuccess: (response) => {
-        console.log('Registration successful, showing celebration:', response);
-        console.log('Current showCelebration state:', showCelebration);
         setShowCelebration(true);
-        console.log('setShowCelebration(true) called');
-      },
-      onError: (error) => {
-        console.error('Registration failed:', error);
       }
     });
   };
