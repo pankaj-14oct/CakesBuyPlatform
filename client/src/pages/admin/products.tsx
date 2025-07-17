@@ -61,9 +61,20 @@ export default function AdminProducts() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: products = [], isLoading } = useQuery<Cake[]>({
+  const { data: productsData, isLoading } = useQuery<{
+    cakes: Cake[];
+    total: number;
+    pages: number;
+  }>({
     queryKey: ['/api/cakes'],
+    queryFn: async () => {
+      const response = await fetch('/api/cakes?limit=1000'); // Get all products for admin
+      if (!response.ok) throw new Error('Failed to fetch products');
+      return response.json();
+    },
   });
+
+  const products = productsData?.cakes || [];
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
