@@ -37,7 +37,12 @@ export default function WelcomeCelebration({ isVisible, onClose }: WelcomeCelebr
     }
   }, [isVisible, onClose]);
 
-  if (!isVisible) return null;
+  if (!isVisible) {
+    console.log('WelcomeCelebration not visible, returning null');
+    return null;
+  }
+
+  console.log('WelcomeCelebration is rendering with isVisible:', isVisible);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
