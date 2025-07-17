@@ -3851,6 +3851,94 @@ CakesBuy
     }
   });
 
+  // ==========================================
+  // PAGINATED ADMIN API ROUTES
+  // ==========================================
+
+  // Paginated Users API
+  app.get("/api/admin/users/paginated", requireAdmin, async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = req.query.search as string || "";
+      
+      const result = await storage.getUsersPaginated(page, limit, search);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Paginated Categories API
+  app.get("/api/admin/categories/paginated", requireAdmin, async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = req.query.search as string || "";
+      
+      const result = await storage.getCategoriesPaginated(page, limit, search);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch categories" });
+    }
+  });
+
+  // Paginated Cakes API
+  app.get("/api/admin/cakes/paginated", requireAdmin, async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = req.query.search as string || "";
+      
+      const result = await storage.getCakesPaginated(page, limit, search);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch cakes" });
+    }
+  });
+
+  // Paginated Addons API
+  app.get("/api/admin/addons/paginated", requireAdmin, async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = req.query.search as string || "";
+      
+      const result = await storage.getAddonsPaginated(page, limit, search);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch addons" });
+    }
+  });
+
+  // Paginated Orders API
+  app.get("/api/admin/orders/paginated", requireAdmin, async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = req.query.search as string || "";
+      
+      const result = await storage.getOrdersPaginated(page, limit, search);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  // Paginated Pages API
+  app.get("/api/admin/pages/paginated", requireAdmin, async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = req.query.search as string || "";
+      
+      const result = await storage.getPagesPaginated(page, limit, search);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch pages" });
+    }
+  });
+
   // Setup WhatsApp admin routes
   setupWhatsAppAdminRoutes(app);
 

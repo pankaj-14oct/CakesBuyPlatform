@@ -24,6 +24,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByPhone(phone: string): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
+  getUsersPaginated(page: number, limit: number, search?: string): Promise<{ users: User[]; total: number; pages: number }>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User>;
   deleteUser(id: number): Promise<boolean>;
@@ -31,17 +32,20 @@ export interface IStorage {
 
   // Categories
   getCategories(): Promise<Category[]>;
+  getCategoriesPaginated(page: number, limit: number, search?: string): Promise<{ categories: Category[]; total: number; pages: number }>;
   getCategory(id: number): Promise<Category | undefined>;
   getCategoryBySlug(slug: string): Promise<Category | undefined>;
 
   // Cakes
   getCakes(filters?: { categoryId?: number; isEggless?: boolean; isBestseller?: boolean }): Promise<Cake[]>;
+  getCakesPaginated(page: number, limit: number, search?: string): Promise<{ cakes: Cake[]; total: number; pages: number }>;
   getCake(id: number): Promise<Cake | undefined>;
   getCakeBySlug(slug: string): Promise<Cake | undefined>;
   searchCakes(query: string, options?: { sort?: string; category?: string; priceRange?: string }): Promise<Cake[]>;
 
   // Addons
   getAddons(): Promise<Addon[]>;
+  getAddonsPaginated(page: number, limit: number, search?: string): Promise<{ addons: Addon[]; total: number; pages: number }>;
   getAddonsByCategory(category: string): Promise<Addon[]>;
 
   // Orders
@@ -49,6 +53,7 @@ export interface IStorage {
   getOrder(id: number): Promise<Order | undefined>;
   getOrderByNumber(orderNumber: string): Promise<Order | undefined>;
   getUserOrders(userId: number): Promise<Order[]>;
+  getOrdersPaginated(page: number, limit: number, search?: string): Promise<{ orders: Order[]; total: number; pages: number }>;
   updateOrder(id: number, updates: Partial<Order>): Promise<void>;
   updateOrderStatus(id: number, status: string): Promise<void>;
 
@@ -71,6 +76,9 @@ export interface IStorage {
   updateOrderRating(id: number, updates: Partial<OrderRating>): Promise<void>;
   getDeliveredOrdersWithoutRating(): Promise<Order[]>;
   updateOrderRatingEmailStatus(orderId: number, sent: boolean): Promise<void>;
+
+  // Pages
+  getPagesPaginated(page: number, limit: number, search?: string): Promise<{ pages: Page[]; total: number; totalPages: number }>;
 
   // Admin methods
   // Categories management
@@ -250,9 +258,63 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(users).orderBy(desc(users.createdAt));
   }
 
+  async getUsersPaginated(page: number, limit: number, search?: string): Promise<{ users: User[]; total: number; pages: number }> {
+    const offset = (page - 1) * limit;
+    
+    let query = db.select().from(users);
+    let countQuery = db.select({ count: db.count() }).from(users);
+    
+    if (search) {
+      const searchCondition = or(
+        like(users.name, `%${search}%`),
+        like(users.email, `%${search}%`),
+        like(users.phone, `%${search}%`)
+      );
+      query = query.where(searchCondition);
+      countQuery = countQuery.where(searchCondition);
+    }
+    
+    const [usersResult, countResult] = await Promise.all([
+      query.orderBy(desc(users.createdAt)).limit(limit).offset(offset),
+      countQuery
+    ]);
+    
+    const total = countResult[0].count;
+    const pages = Math.ceil(total / limit);
+    
+    return { users: usersResult, total, pages };
+  }
+
   // Categories
   async getCategories(): Promise<Category[]> {
     return await db.select().from(categories).orderBy(categories.name);
+  }
+
+  async getCategoriesPaginated(page: number, limit: number, search?: string): Promise<{ categories: Category[]; total: number; pages: number }> {
+    const offset = (page - 1) * limit;
+    
+    let query = db.select().from(categories);
+    let countQuery = db.select({ count: db.count() }).from(categories);
+    
+    if (search) {
+      const searchCondition = or(
+        like(categories.name, `%${search}%`),
+        like(categories.slug, `%${search}%`),
+        like(categories.description, `%${search}%`)
+      );
+      query = query.where(searchCondition);
+      countQuery = countQuery.where(searchCondition);
+    }
+    
+    const [categoriesResult, countResult] = await Promise.all([
+      query.orderBy(categories.name).limit(limit).offset(offset),
+      countQuery
+    ]);
+    
+    const total = countResult[0].count;
+    const pages = Math.ceil(total / limit);
+    
+    return { categories: categoriesResult, total, pages };
   }
 
   async getCategory(id: number): Promise<Category | undefined> {
@@ -287,6 +349,33 @@ export class DatabaseStorage implements IStorage {
     }
     
     return await query.orderBy(cakes.name);
+  }
+
+  async getCakesPaginated(page: number, limit: number, search?: string): Promise<{ cakes: Cake[]; total: number; pages: number }> {
+    const offset = (page - 1) * limit;
+    
+    let query = db.select().from(cakes);
+    let countQuery = db.select({ count: db.count() }).from(cakes);
+    
+    if (search) {
+      const searchCondition = or(
+        like(cakes.name, `%${search}%`),
+        like(cakes.description, `%${search}%`),
+        like(cakes.slug, `%${search}%`)
+      );
+      query = query.where(searchCondition);
+      countQuery = countQuery.where(searchCondition);
+    }
+    
+    const [cakesResult, countResult] = await Promise.all([
+      query.orderBy(cakes.name).limit(limit).offset(offset),
+      countQuery
+    ]);
+    
+    const total = countResult[0].count;
+    const pages = Math.ceil(total / limit);
+    
+    return { cakes: cakesResult, total, pages };
   }
 
   async getCake(id: number): Promise<Cake | undefined> {
@@ -356,6 +445,33 @@ export class DatabaseStorage implements IStorage {
   // Addons
   async getAddons(): Promise<Addon[]> {
     return await db.select().from(addons).orderBy(addons.name);
+  }
+
+  async getAddonsPaginated(page: number, limit: number, search?: string): Promise<{ addons: Addon[]; total: number; pages: number }> {
+    const offset = (page - 1) * limit;
+    
+    let query = db.select().from(addons);
+    let countQuery = db.select({ count: db.count() }).from(addons);
+    
+    if (search) {
+      const searchCondition = or(
+        like(addons.name, `%${search}%`),
+        like(addons.description, `%${search}%`),
+        like(addons.category, `%${search}%`)
+      );
+      query = query.where(searchCondition);
+      countQuery = countQuery.where(searchCondition);
+    }
+    
+    const [addonsResult, countResult] = await Promise.all([
+      query.orderBy(addons.name).limit(limit).offset(offset),
+      countQuery
+    ]);
+    
+    const total = countResult[0].count;
+    const pages = Math.ceil(total / limit);
+    
+    return { addons: addonsResult, total, pages };
   }
 
   async getAddonsByCategory(category: string): Promise<Addon[]> {
@@ -583,6 +699,33 @@ export class DatabaseStorage implements IStorage {
 
   async getAllOrders(): Promise<Order[]> {
     return await db.select().from(orders).orderBy(desc(orders.createdAt));
+  }
+
+  async getOrdersPaginated(page: number, limit: number, search?: string): Promise<{ orders: Order[]; total: number; pages: number }> {
+    const offset = (page - 1) * limit;
+    
+    let query = db.select().from(orders);
+    let countQuery = db.select({ count: db.count() }).from(orders);
+    
+    if (search) {
+      const searchCondition = or(
+        like(orders.orderNumber, `%${search}%`),
+        like(orders.status, `%${search}%`),
+        like(orders.paymentStatus, `%${search}%`)
+      );
+      query = query.where(searchCondition);
+      countQuery = countQuery.where(searchCondition);
+    }
+    
+    const [ordersResult, countResult] = await Promise.all([
+      query.orderBy(desc(orders.createdAt)).limit(limit).offset(offset),
+      countQuery
+    ]);
+    
+    const total = countResult[0].count;
+    const pages = Math.ceil(total / limit);
+    
+    return { orders: ordersResult, total, pages };
   }
 
   async getOrdersByStatus(status: string): Promise<Order[]> {
@@ -1135,6 +1278,33 @@ export class DatabaseStorage implements IStorage {
   // Pages Management
   async getPages(): Promise<Page[]> {
     return db.select().from(pages).orderBy(desc(pages.createdAt));
+  }
+
+  async getPagesPaginated(page: number, limit: number, search?: string): Promise<{ pages: Page[]; total: number; totalPages: number }> {
+    const offset = (page - 1) * limit;
+    
+    let query = db.select().from(pages);
+    let countQuery = db.select({ count: db.count() }).from(pages);
+    
+    if (search) {
+      const searchCondition = or(
+        like(pages.title, `%${search}%`),
+        like(pages.content, `%${search}%`),
+        like(pages.slug, `%${search}%`)
+      );
+      query = query.where(searchCondition);
+      countQuery = countQuery.where(searchCondition);
+    }
+    
+    const [pagesResult, countResult] = await Promise.all([
+      query.orderBy(desc(pages.createdAt)).limit(limit).offset(offset),
+      countQuery
+    ]);
+    
+    const total = countResult[0].count;
+    const totalPages = Math.ceil(total / limit);
+    
+    return { pages: pagesResult, total, totalPages };
   }
 
   async getPublishedPages(): Promise<Page[]> {

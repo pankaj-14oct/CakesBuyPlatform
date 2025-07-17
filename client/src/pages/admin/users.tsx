@@ -22,6 +22,7 @@ import {
 import { User, insertUserSchema } from '@shared/schema';
 import { formatPrice } from '@/lib/utils';
 import { apiRequest } from '@/lib/queryClient';
+import Pagination from '@/components/pagination';
 
 interface SafeUser extends Omit<User, 'password'> {
   password?: never;
@@ -58,6 +59,8 @@ export default function AdminUsers() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<SafeUser | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -88,9 +91,20 @@ export default function AdminUsers() {
     },
   });
 
-  const { data: users = [], isLoading } = useQuery<SafeUser[]>({
-    queryKey: ['/api/admin/users'],
+  const { data: paginatedData, isLoading } = useQuery({
+    queryKey: ['/api/admin/users/paginated', currentPage, itemsPerPage, searchTerm],
+    queryFn: async () => {
+      const response = await apiRequest(
+        `/api/admin/users/paginated?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`,
+        'GET'
+      );
+      return response;
+    },
   });
+
+  const users = paginatedData?.items || [];
+  const totalPages = paginatedData?.totalPages || 1;
+  const totalItems = paginatedData?.total || 0;
 
   // Create new user
   const handleCreateUser = async (data: CreateUserFormData) => {
@@ -98,7 +112,7 @@ export default function AdminUsers() {
       const userData = data;
       await apiRequest('/api/admin/users', 'POST', userData);
       
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users/paginated'] });
       toast({
         title: "User created successfully",
         description: `${userData.name || userData.email} has been added to the system.`,
@@ -123,7 +137,7 @@ export default function AdminUsers() {
       const userData = data;
       await apiRequest(`/api/admin/users/${userToEdit.id}`, 'PUT', userData);
       
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users/paginated'] });
       toast({
         title: "User updated successfully",
         description: `${userData.name || userData.email} has been updated.`,
@@ -163,7 +177,7 @@ export default function AdminUsers() {
     try {
       await apiRequest(`/api/admin/users/${userId}`, 'DELETE');
       
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users/paginated'] });
       toast({
         title: "User deleted successfully",
         description: `User ${userName || `#${userId}`} has been deleted.`,
@@ -189,15 +203,21 @@ export default function AdminUsers() {
     }
   };
 
-  // Filter users based on search term
-  const filteredUsers = users.filter(user => 
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.phone.includes(searchTerm) ||
-    (user.id.toString().includes(searchTerm))
-  );
+  // Search is now handled server-side
+  const filteredUsers = users;
 
-  // Calculate user stats
-  const totalUsers = users.length;
+  // Handle pagination
+  const showingFrom = (currentPage - 1) * itemsPerPage + 1;
+  const showingTo = Math.min(currentPage * itemsPerPage, totalItems);
+
+  // Search handler with debouncing
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1); // Reset to first page when searching
+  };
+
+  // Calculate user stats (for display purposes)
+  const totalUsers = totalItems;
   const loyaltyUsers = users.filter(user => (user.loyaltyPoints || 0) > 0).length;
   const goldUsers = users.filter(user => user.loyaltyTier?.toLowerCase() === 'gold').length;
   const platinumUsers = users.filter(user => user.loyaltyTier?.toLowerCase() === 'platinum').length;
@@ -409,7 +429,7 @@ export default function AdminUsers() {
                   placeholder="Search by email, phone, or ID..."
                   className="pl-8 w-80"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => handleSearchChange(e.target.value)}
                 />
               </div>
             </div>
@@ -484,6 +504,16 @@ export default function AdminUsers() {
               </TableBody>
             </Table>
           </div>
+          
+          {/* Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            showingFrom={showingFrom}
+            showingTo={showingTo}
+            totalItems={totalItems}
+          />
         </CardContent>
       </Card>
 
