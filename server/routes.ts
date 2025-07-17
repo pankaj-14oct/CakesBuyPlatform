@@ -238,25 +238,70 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
   // Cakes
   app.get("/api/cakes", async (req, res) => {
     try {
-      const { categoryId, isEggless, isBestseller, search, sort, category, price } = req.query;
+      const { 
+        categoryId, 
+        isEggless, 
+        isBestseller, 
+        search, 
+        sort, 
+        category, 
+        price,
+        page = "1",
+        limit = "12"
+      } = req.query;
       
-      if (search) {
+      // Parse pagination parameters
+      const pageNum = parseInt(page as string) || 1;
+      const limitNum = parseInt(limit as string) || 12;
+      
+      // If using advanced search with sort/category/price filters
+      if (search && (sort || category || price)) {
         const cakes = await storage.searchCakes(search as string, {
           sort: sort as string,
           category: category as string,
           priceRange: price as string
         });
-        return res.json(cakes);
+        
+        // Apply manual pagination to search results
+        const total = cakes.length;
+        const pages = Math.ceil(total / limitNum);
+        const offset = (pageNum - 1) * limitNum;
+        const paginatedCakes = cakes.slice(offset, offset + limitNum);
+        
+        return res.json({
+          cakes: paginatedCakes,
+          total,
+          pages,
+          currentPage: pageNum,
+          hasNextPage: pageNum < pages,
+          hasPrevPage: pageNum > 1
+        });
       }
 
+      // Build filters object
       const filters: any = {};
       if (categoryId) filters.categoryId = parseInt(categoryId as string);
       if (isEggless !== undefined) filters.isEggless = isEggless === 'true';
       if (isBestseller !== undefined) filters.isBestseller = isBestseller === 'true';
 
-      const cakes = await storage.getCakes(filters);
-      res.json(cakes);
+      // Use paginated method
+      const result = await storage.getCakesPaginated(
+        pageNum, 
+        limitNum, 
+        search as string, 
+        filters
+      );
+      
+      res.json({
+        cakes: result.cakes,
+        total: result.total,
+        pages: result.pages,
+        currentPage: pageNum,
+        hasNextPage: pageNum < result.pages,
+        hasPrevPage: pageNum > 1
+      });
     } catch (error) {
+      console.error("Error fetching cakes:", error);
       res.status(500).json({ message: "Failed to fetch cakes" });
     }
   });

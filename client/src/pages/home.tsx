@@ -17,14 +17,20 @@ export default function Home() {
     queryKey: ['/api/categories'],
   });
 
-  const { data: featuredCakes = [], isLoading: cakesLoading } = useQuery<Cake[]>({
+  const { data: featuredCakesData, isLoading: cakesLoading } = useQuery<{
+    cakes: Cake[];
+    total: number;
+    pages: number;
+  }>({
     queryKey: ['/api/cakes', { isBestseller: true }],
     queryFn: async () => {
-      const response = await fetch('/api/cakes?isBestseller=true');
+      const response = await fetch('/api/cakes?isBestseller=true&limit=8');
       if (!response.ok) throw new Error('Failed to fetch featured cakes');
       return response.json();
     },
   });
+
+  const featuredCakes = featuredCakesData?.cakes || [];
 
   return (
     <div className="bg-cream">

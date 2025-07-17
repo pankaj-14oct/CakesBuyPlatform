@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Star, Search, Filter, SortAsc } from 'lucide-react';
 import { Link } from 'wouter';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import Pagination from '@/components/pagination';
 // Define the Cake type locally
 interface Cake {
   id: number;
@@ -26,12 +27,24 @@ interface Cake {
   flavorOptions?: any;
 }
 
+// Define the paginated response type
+interface PaginatedResponse {
+  cakes: Cake[];
+  total: number;
+  pages: number;
+  currentPage: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
 export default function SearchPage() {
   const [location, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('relevance');
   const [filterCategory, setFilterCategory] = useState('all');
   const [priceRange, setPriceRange] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(12);
   
   // Get search query from URL params
   useEffect(() => {
@@ -43,14 +56,16 @@ export default function SearchPage() {
   }, [location]);
 
   // Fetch cakes based on search query
-  const { data: cakes, isLoading } = useQuery<Cake[]>({
-    queryKey: ['/api/cakes', searchQuery, sortBy, filterCategory, priceRange],
+  const { data: cakeData, isLoading } = useQuery<PaginatedResponse>({
+    queryKey: ['/api/cakes', searchQuery, sortBy, filterCategory, priceRange, currentPage, pageSize],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchQuery) params.append('search', searchQuery);
       if (sortBy !== 'relevance') params.append('sort', sortBy);
       if (filterCategory !== 'all') params.append('category', filterCategory);
       if (priceRange !== 'all') params.append('price', priceRange);
+      params.append('page', currentPage.toString());
+      params.append('limit', pageSize.toString());
       
       const response = await fetch(`/api/cakes?${params}`);
       if (!response.ok) throw new Error('Failed to fetch cakes');
@@ -58,6 +73,11 @@ export default function SearchPage() {
     },
     enabled: !!searchQuery
   });
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, sortBy, filterCategory, priceRange]);
 
   // Fetch categories for filter
   const { data: categories } = useQuery({
@@ -115,7 +135,7 @@ export default function SearchPage() {
               Search Results for "{searchQuery}"
             </h1>
             <p className="text-gray-600">
-              {cakes ? `${cakes.length} cakes found` : 'Searching...'}
+              {cakeData ? `${cakeData.total} cakes found` : 'Searching...'}
             </p>
           </div>
         )}
@@ -186,9 +206,10 @@ export default function SearchPage() {
               </Card>
             ))}
           </div>
-        ) : cakes && cakes.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {cakes.map((cake) => (
+        ) : cakeData && cakeData.cakes && cakeData.cakes.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {cakeData.cakes.map((cake) => (
               <Card key={cake.id} className="group overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="aspect-square overflow-hidden">
                   <img
@@ -237,8 +258,23 @@ export default function SearchPage() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
+              ))}
+            </div>
+            
+            {/* Pagination */}
+            {cakeData.pages > 1 && (
+              <div className="mt-8">
+                <Pagination
+                  currentPage={cakeData.currentPage}
+                  totalPages={cakeData.pages}
+                  onPageChange={setCurrentPage}
+                  showingFrom={(cakeData.currentPage - 1) * pageSize + 1}
+                  showingTo={Math.min(cakeData.currentPage * pageSize, cakeData.total)}
+                  totalItems={cakeData.total}
+                />
+              </div>
+            )}
+          </>
         ) : searchQuery ? (
           <div className="text-center py-12">
             <Search className="h-16 w-16 text-gray-400 mx-auto mb-4" />

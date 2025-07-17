@@ -1,6 +1,6 @@
 import { useParams } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,12 +8,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Filter, SlidersHorizontal } from 'lucide-react';
 import { Category, Cake } from '@shared/schema';
 import CakeCard from '@/components/cake-card';
+import Pagination from '@/components/pagination';
 
 export default function CategoryPage() {
   const { slug } = useParams<{ slug: string }>();
   const [sortBy, setSortBy] = useState('popular');
   const [filterEggless, setFilterEggless] = useState<boolean | undefined>();
   const [showFilters, setShowFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(12);
 
   const { data: category, isLoading: categoryLoading } = useQuery<Category>({
     queryKey: ['/api/categories', slug],
@@ -25,14 +28,23 @@ export default function CategoryPage() {
     enabled: !!slug,
   });
 
-  const { data: cakes = [], isLoading: cakesLoading } = useQuery<Cake[]>({
-    queryKey: ['/api/cakes', { categoryId: category?.id, isEggless: filterEggless }],
+  const { data: cakeData, isLoading: cakesLoading } = useQuery<{
+    cakes: Cake[];
+    total: number;
+    pages: number;
+    currentPage: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  }>({
+    queryKey: ['/api/cakes', { categoryId: category?.id, isEggless: filterEggless, page: currentPage, limit: pageSize }],
     queryFn: async () => {
       let url = '/api/cakes';
       const params = new URLSearchParams();
       
       if (category?.id) params.append('categoryId', category.id.toString());
       if (filterEggless !== undefined) params.append('isEggless', filterEggless.toString());
+      params.append('page', currentPage.toString());
+      params.append('limit', pageSize.toString());
       
       if (params.toString()) url += `?${params.toString()}`;
       
@@ -43,6 +55,12 @@ export default function CategoryPage() {
     enabled: !!category,
   });
 
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterEggless]);
+
+  const cakes = cakeData?.cakes || [];
   const sortedCakes = [...cakes].sort((a, b) => {
     switch (sortBy) {
       case 'price-low':
@@ -151,7 +169,7 @@ export default function CategoryPage() {
             
             <div className="flex items-center space-x-4">
               <span className="text-sm text-charcoal opacity-70">
-                {sortedCakes.length} cakes found
+                {cakeData?.total || 0} cakes found
               </span>
               
               <Select value={sortBy} onValueChange={setSortBy}>
@@ -199,6 +217,20 @@ export default function CategoryPage() {
               {sortedCakes.map((cake) => (
                 <CakeCard key={cake.id} cake={cake} />
               ))}
+            </div>
+          )}
+          
+          {/* Pagination */}
+          {cakeData && cakeData.pages > 1 && (
+            <div className="mt-8">
+              <Pagination
+                currentPage={cakeData.currentPage}
+                totalPages={cakeData.pages}
+                onPageChange={setCurrentPage}
+                showingFrom={(cakeData.currentPage - 1) * pageSize + 1}
+                showingTo={Math.min(cakeData.currentPage * pageSize, cakeData.total)}
+                totalItems={cakeData.total}
+              />
             </div>
           )}
         </div>

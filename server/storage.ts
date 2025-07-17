@@ -38,7 +38,7 @@ export interface IStorage {
 
   // Cakes
   getCakes(filters?: { categoryId?: number; isEggless?: boolean; isBestseller?: boolean }): Promise<Cake[]>;
-  getCakesPaginated(page: number, limit: number, search?: string): Promise<{ cakes: Cake[]; total: number; pages: number }>;
+  getCakesPaginated(page: number, limit: number, search?: string, filters?: { categoryId?: number; isEggless?: boolean; isBestseller?: boolean }): Promise<{ cakes: Cake[]; total: number; pages: number }>;
   getCake(id: number): Promise<Cake | undefined>;
   getCakeBySlug(slug: string): Promise<Cake | undefined>;
   searchCakes(query: string, options?: { sort?: string; category?: string; priceRange?: string }): Promise<Cake[]>;
@@ -351,20 +351,43 @@ export class DatabaseStorage implements IStorage {
     return await query.orderBy(cakes.name);
   }
 
-  async getCakesPaginated(page: number, limit: number, search?: string): Promise<{ cakes: Cake[]; total: number; pages: number }> {
+  async getCakesPaginated(page: number, limit: number, search?: string, filters?: { categoryId?: number; isEggless?: boolean; isBestseller?: boolean }): Promise<{ cakes: Cake[]; total: number; pages: number }> {
     const offset = (page - 1) * limit;
     
     let query = db.select().from(cakes);
     let countQuery = db.select({ count: count() }).from(cakes);
     
+    // Build conditions array
+    const conditions = [];
+    
+    // Add search condition if provided
     if (search) {
       const searchCondition = or(
         like(cakes.name, `%${search}%`),
         like(cakes.description, `%${search}%`),
         like(cakes.slug, `%${search}%`)
       );
-      query = query.where(searchCondition);
-      countQuery = countQuery.where(searchCondition);
+      conditions.push(searchCondition);
+    }
+    
+    // Add filter conditions
+    if (filters) {
+      if (filters.categoryId) {
+        conditions.push(eq(cakes.categoryId, filters.categoryId));
+      }
+      if (filters.isEggless !== undefined) {
+        conditions.push(eq(cakes.isEggless, filters.isEggless));
+      }
+      if (filters.isBestseller !== undefined) {
+        conditions.push(eq(cakes.isBestseller, filters.isBestseller));
+      }
+    }
+    
+    // Apply conditions if any exist
+    if (conditions.length > 0) {
+      const whereCondition = conditions.length === 1 ? conditions[0] : and(...conditions);
+      query = query.where(whereCondition);
+      countQuery = countQuery.where(whereCondition);
     }
     
     const [cakesResult, countResult] = await Promise.all([
