@@ -49,11 +49,14 @@ export default function AuthPage() {
   // Redirect if already logged in (but not if showing celebration)
   useEffect(() => {
     if (isAuthenticated && !showCelebration) {
-      console.log('About to redirect to home page');
-      // Add small delay to ensure celebration has time to trigger
+      console.log('About to redirect to home page', { isAuthenticated, showCelebration });
+      // Add delay to ensure celebration has time to trigger
       setTimeout(() => {
-        setLocation('/');
-      }, 100);
+        if (!showCelebration) {
+          console.log('Redirecting to home page now');
+          setLocation('/');
+        }
+      }, 500);
     }
   }, [isAuthenticated, setLocation, showCelebration]);
 
@@ -101,7 +104,8 @@ export default function AuthPage() {
       isSuccess: registerMutation.isSuccess,
       isError: registerMutation.isError,
       isPending: registerMutation.isPending,
-      data: registerMutation.data
+      data: registerMutation.data,
+      showCelebration
     });
     
     // Trigger celebration when registration is successful
