@@ -4,12 +4,13 @@ import { storage } from './storage';
 
 // PhonePe Configuration
 const PHONEPE_CONFIG = {
-  // Test environment
-  MERCHANT_ID: process.env.PHONEPE_MERCHANT_ID || 'PGTESTPAYUAT',
-  SALT_KEY: process.env.PHONEPE_SALT_KEY || '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399',
+  // Test environment - Use demo mode if no credentials provided
+  MERCHANT_ID: process.env.PHONEPE_MERCHANT_ID || 'DEMO_MERCHANT',
+  SALT_KEY: process.env.PHONEPE_SALT_KEY || 'demo-salt-key',
   KEY_INDEX: process.env.PHONEPE_KEY_INDEX || '1',
   BASE_URL: process.env.PHONEPE_BASE_URL || 'https://api-preprod.phonepe.com/apis/pg-sandbox',
   IS_PRODUCTION: process.env.NODE_ENV === 'production',
+  DEMO_MODE: !process.env.PHONEPE_MERCHANT_ID || process.env.PHONEPE_MERCHANT_ID === 'DEMO_MERCHANT',
 };
 
 // Generate unique transaction ID
@@ -88,6 +89,41 @@ export interface PhonePeStatusResponse {
 export async function initiatePhonePePayment(request: PhonePePaymentRequest): Promise<PhonePePaymentResponse> {
   try {
     const merchantTransactionId = generateTransactionId();
+    
+    // Demo mode for testing without real PhonePe credentials
+    if (PHONEPE_CONFIG.DEMO_MODE) {
+      console.log('🧪 PhonePe Demo Mode: Simulating payment gateway');
+      
+      // Save demo transaction to database
+      await storage.createPhonePeTransaction({
+        orderId: request.orderId,
+        merchantTransactionId: merchantTransactionId,
+        amount: request.amount.toString(),
+        status: 'demo_initiated',
+        redirectUrl: request.redirectUrl,
+        callbackUrl: request.callbackUrl,
+      });
+
+      // Create demo payment URL
+      const demoPaymentUrl = `${request.redirectUrl.split('/payment')[0]}/payment/phonepe/demo?merchantTransactionId=${merchantTransactionId}&amount=${request.amount}`;
+      
+      return {
+        success: true,
+        code: 'PAYMENT_INITIATED',
+        message: 'Demo payment initiated successfully',
+        data: {
+          merchantId: PHONEPE_CONFIG.MERCHANT_ID,
+          merchantTransactionId: merchantTransactionId,
+          instrumentResponse: {
+            type: 'PAY_PAGE',
+            redirectInfo: {
+              url: demoPaymentUrl,
+              method: 'GET'
+            }
+          }
+        }
+      };
+    }
     
     // Payment payload
     const paymentData = {
@@ -185,6 +221,39 @@ export async function initiatePhonePePayment(request: PhonePePaymentRequest): Pr
 // Check payment status
 export async function checkPhonePePaymentStatus(merchantTransactionId: string): Promise<PhonePeStatusResponse> {
   try {
+    // Demo mode status check
+    if (PHONEPE_CONFIG.DEMO_MODE) {
+      const transaction = await storage.getPhonePeTransactionByMerchantId(merchantTransactionId);
+      
+      if (!transaction) {
+        return {
+          success: false,
+          code: 'TRANSACTION_NOT_FOUND',
+          message: 'Transaction not found'
+        };
+      }
+
+      const demoState = transaction.status === 'success' ? 'COMPLETED' : 
+                       transaction.status === 'failed' ? 'FAILED' : 'PENDING';
+
+      return {
+        success: true,
+        code: 'PAYMENT_STATUS',
+        message: 'Demo payment status retrieved',
+        data: {
+          merchantId: PHONEPE_CONFIG.MERCHANT_ID,
+          merchantTransactionId: merchantTransactionId,
+          transactionId: transaction.phonepeTransactionId || 'DEMO_TXN_' + Date.now(),
+          amount: parseFloat(transaction.amount) * 100,
+          state: demoState,
+          responseCode: transaction.responseCode || 'DEMO_SUCCESS',
+          paymentInstrument: {
+            type: 'UPI',
+            utr: 'DEMO_UTR_' + Date.now()
+          }
+        }
+      };
+    }
     // Generate checksum for status check
     const statusEndpoint = `/pg/v1/status/${PHONEPE_CONFIG.MERCHANT_ID}/${merchantTransactionId}`;
     const string = statusEndpoint + PHONEPE_CONFIG.SALT_KEY;

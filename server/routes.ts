@@ -3098,6 +3098,109 @@ CakesBuy
     `);
   });
 
+  // PhonePe Demo Payment Page
+  app.get("/payment/phonepe/demo", async (req, res) => {
+    const { merchantTransactionId, amount } = req.query;
+    
+    res.send(`
+      <html>
+        <head>
+          <title>PhonePe Demo Payment - CakesBuy</title>
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; margin: 50px; background: #5f2584; color: white; }
+            .container { max-width: 600px; margin: 0 auto; background: white; color: #333; padding: 30px; border-radius: 10px; }
+            .phonepe-logo { color: #5f2584; font-size: 24px; font-weight: bold; margin-bottom: 20px; }
+            .amount { font-size: 36px; font-weight: bold; color: #5f2584; margin: 20px 0; }
+            .btn { background: #5f2584; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 10px; display: inline-block; border: none; font-size: 16px; cursor: pointer; }
+            .btn-success { background: #4caf50; }
+            .btn-danger { background: #f44336; }
+            .merchant-info { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: left; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="phonepe-logo">📱 PhonePe Demo</div>
+            <h2>Payment Gateway Simulation</h2>
+            <div class="merchant-info">
+              <strong>Merchant:</strong> CakesBuy<br>
+              <strong>Transaction ID:</strong> ${merchantTransactionId}<br>
+              <strong>Order Amount:</strong> ₹${amount}
+            </div>
+            <div class="amount">₹${amount}</div>
+            <p>This is a demo payment gateway for testing purposes.</p>
+            <p>Click one of the buttons below to simulate payment result:</p>
+            
+            <button class="btn btn-success" onclick="processPayment('success')">
+              ✅ Simulate Success
+            </button>
+            <button class="btn btn-danger" onclick="processPayment('failure')">
+              ❌ Simulate Failure
+            </button>
+            
+            <script>
+              function processPayment(result) {
+                if (result === 'success') {
+                  // Simulate successful payment
+                  fetch('/api/payments/phonepe/demo-callback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      merchantTransactionId: '${merchantTransactionId}',
+                      status: 'COMPLETED'
+                    })
+                  }).then(() => {
+                    window.location.href = '/payment/phonepe/callback?merchantTransactionId=${merchantTransactionId}';
+                  });
+                } else {
+                  // Simulate failed payment
+                  fetch('/api/payments/phonepe/demo-callback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      merchantTransactionId: '${merchantTransactionId}',
+                      status: 'FAILED'
+                    })
+                  }).then(() => {
+                    window.location.href = '/payment/failure?transactionId=${merchantTransactionId}&error=demo_payment_failed';
+                  });
+                }
+              }
+            </script>
+          </div>
+        </body>
+      </html>
+    `);
+  });
+
+  // Demo callback handler
+  app.post("/api/payments/phonepe/demo-callback", async (req, res) => {
+    try {
+      const { merchantTransactionId, status } = req.body;
+      
+      // Update transaction status
+      await storage.updatePhonePeTransaction(merchantTransactionId, {
+        status: status === 'COMPLETED' ? 'success' : 'failed',
+        phonepeTransactionId: 'DEMO_TXN_' + Date.now(),
+        responseCode: status === 'COMPLETED' ? 'PAYMENT_SUCCESS' : 'PAYMENT_FAILED'
+      });
+
+      // Get transaction to update order
+      const transaction = await storage.getPhonePeTransactionByMerchantId(merchantTransactionId);
+      if (transaction) {
+        if (status === 'COMPLETED') {
+          await storage.updateOrderPaymentStatus(transaction.orderId, 'paid', 'phonepe');
+        } else {
+          await storage.updateOrderPaymentStatus(transaction.orderId, 'failed', 'phonepe');
+        }
+      }
+
+      res.json({ success: true, status });
+    } catch (error) {
+      console.error('Demo callback error:', error);
+      res.status(500).json({ error: 'Demo callback failed' });
+    }
+  });
+
   // Order Assignment Routes
   app.post("/api/admin/orders/:orderId/assign", requireAdmin, async (req: AuthRequest, res) => {
     try {
