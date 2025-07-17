@@ -36,12 +36,17 @@ export default function AuthPage() {
   const { user, loginMutation, registerMutation, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
 
-  // Redirect if already logged in
+  // Debug celebration state
   useEffect(() => {
-    if (isAuthenticated) {
+    console.log('showCelebration state changed:', showCelebration);
+  }, [showCelebration]);
+
+  // Redirect if already logged in (but not if showing celebration)
+  useEffect(() => {
+    if (isAuthenticated && !showCelebration) {
       setLocation('/');
     }
-  }, [isAuthenticated, setLocation]);
+  }, [isAuthenticated, setLocation, showCelebration]);
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -78,8 +83,8 @@ export default function AuthPage() {
     });
   };
 
-  // Don't render if user is authenticated
-  if (isAuthenticated) {
+  // Don't render if user is authenticated (unless showing celebration)
+  if (isAuthenticated && !showCelebration) {
     return null;
   }
 
