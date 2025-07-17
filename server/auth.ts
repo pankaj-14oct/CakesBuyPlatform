@@ -23,12 +23,25 @@ export interface DeliveryBoyAuthRequest extends Request {
   };
 }
 
+export interface VendorAuthRequest extends Request {
+  vendor?: {
+    id: number;
+    phone: string;
+    email: string;
+    name: string;
+  };
+}
+
 export const generateToken = (userId: number, phone: string, email: string, role?: string): string => {
   return jwt.sign({ userId, phone, email, role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
 
 export const generateDeliveryBoyToken = (deliveryBoyId: number, phone: string, name: string): string => {
   return jwt.sign({ deliveryBoyId, phone, name, type: 'delivery_boy' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+};
+
+export const generateVendorToken = (vendorId: number, phone: string, email: string, name: string): string => {
+  return jwt.sign({ vendorId, phone, email, name, type: 'vendor' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
 
 export const hashPassword = async (password: string): Promise<string> => {
@@ -126,6 +139,45 @@ export const authenticateDeliveryBoy = async (req: DeliveryBoyAuthRequest, res: 
     return res.status(403).json({ message: 'Invalid or expired token' });
   }
 };
+
+export const authenticateVendor = async (req: VendorAuthRequest, res: Response, next: NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).json({ message: 'Access token required' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    
+    if (decoded.type !== 'vendor') {
+      return res.status(401).json({ message: 'Invalid vendor token' });
+    }
+    
+    const vendor = await storage.getVendor(decoded.vendorId);
+    
+    if (!vendor) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+    
+    if (!vendor.isActive) {
+      return res.status(401).json({ message: 'Vendor account is not active' });
+    }
+
+    req.vendor = {
+      id: vendor.id,
+      phone: vendor.phone,
+      email: vendor.email,
+      name: vendor.name
+    };
+    
+    next();
+  } catch (error) {
+    return res.status(403).json({ message: 'Invalid or expired token' });
+  }
+};
+
 /**
  * Authenticate delivery boy token and return delivery boy info (for WebSocket)
  */

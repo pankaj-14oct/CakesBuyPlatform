@@ -8,7 +8,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   phone: text("phone").notNull().unique(),
   name: text("name"), // User's display name
-  role: text("role").default("customer"), // customer, admin
+  role: text("role").default("customer"), // customer, admin, vendor
   birthday: text("birthday"), // Format: MM-DD
   anniversary: text("anniversary"), // Format: MM-DD
   addresses: jsonb("addresses").$type<Array<{
@@ -130,6 +130,7 @@ export const orders = pgTable("orders", {
   assignedAt: timestamp("assigned_at"), // when delivery boy was assigned
   pickedUpAt: timestamp("picked_up_at"), // when delivery boy picked up the order
   deliveredAt: timestamp("delivered_at"), // when order was delivered
+  vendorId: integer("vendor_id").references(() => vendors.id), // assigned vendor for order processing
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -361,6 +362,37 @@ export const walletTransactions = pgTable("wallet_transactions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Vendors
+export const vendors = pgTable("vendors", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  phone: text("phone").notNull().unique(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  businessName: text("business_name"),
+  businessAddress: text("business_address"),
+  businessLicense: text("business_license"),
+  gstNumber: text("gst_number"),
+  panNumber: text("pan_number"),
+  bankDetails: jsonb("bank_details").$type<{
+    accountNumber: string;
+    ifscCode: string;
+    bankName: string;
+    branchName: string;
+    accountHolderName: string;
+  }>(),
+  isActive: boolean("is_active").default(false), // Admin approval required
+  isVerified: boolean("is_verified").default(false), // Document verification
+  approvedBy: integer("approved_by").references(() => users.id), // Admin who approved
+  approvedAt: timestamp("approved_at"),
+  totalOrdersProcessed: integer("total_orders_processed").default(0),
+  totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0"),
+  rating: decimal("rating", { precision: 3, scale: 2 }).default("5.00"),
+  commission: decimal("commission", { precision: 5, scale: 2 }).default("10.00"), // Commission percentage
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Delivery Boys
 export const deliveryBoys = pgTable("delivery_boys", {
   id: serial("id").primaryKey(),
@@ -497,6 +529,7 @@ export const insertOrderRatingSchema = createInsertSchema(orderRatings).omit({ i
 export const insertEventReminderSchema = createInsertSchema(eventReminders).omit({ id: true, createdAt: true });
 export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).omit({ id: true, createdAt: true });
 export const insertDeliveryBoySchema = createInsertSchema(deliveryBoys).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertVendorSchema = createInsertSchema(vendors).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions).omit({ id: true, createdAt: true, updatedAt: true });
 
 // Loyalty Program insert schemas
@@ -564,6 +597,32 @@ export const resetPasswordSchema = z.object({
 }).refine((data) => data.newPassword === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"]
+});
+
+// Vendor schemas
+export const vendorRegisterSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string(),
+  businessName: z.string().min(2, 'Business name is required').optional(),
+  businessAddress: z.string().min(10, 'Business address is required').optional(),
+  businessLicense: z.string().optional(),
+  gstNumber: z.string().regex(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/, 'Invalid GST number').optional(),
+  panNumber: z.string().regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN number').optional(),
+  address: z.string().optional(),
+  description: z.string().optional(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"]
+});
+
+export type VendorRegisterRequest = z.infer<typeof vendorRegisterSchema>;
+
+export const vendorLoginSchema = z.object({
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
+  password: z.string().min(6, 'Password must be at least 6 characters')
 });
 
 // Delivery Boy schemas
@@ -683,6 +742,9 @@ export type WalletTransaction = typeof walletTransactions.$inferSelect;
 export type InsertWalletTransaction = z.infer<typeof insertWalletTransactionSchema>;
 export type DeliveryBoy = typeof deliveryBoys.$inferSelect;
 export type InsertDeliveryBoy = z.infer<typeof insertDeliveryBoySchema>;
+
+export type Vendor = typeof vendors.$inferSelect;
+export type InsertVendor = z.infer<typeof insertVendorSchema>;
 
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;
 export type InsertPushSubscription = z.infer<typeof insertPushSubscriptionSchema>;

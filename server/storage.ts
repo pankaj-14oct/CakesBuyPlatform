@@ -1,7 +1,7 @@
 import {
   users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews, eventReminders, otpVerifications,
   loyaltyTransactions, loyaltyRewards, userRewards, invoices, walletTransactions, adminConfigs, deliveryBoys,
-  orderRatings, navigationItems, pages, phonepeTransactions,
+  orderRatings, navigationItems, pages, phonepeTransactions, vendors,
   type User, type InsertUser, type Category, type InsertCategory,
   type Cake, type InsertCake, type Addon, type InsertAddon,
   type Order, type InsertOrder, type DeliveryArea, type InsertDeliveryArea,
@@ -12,7 +12,7 @@ import {
   type WalletTransaction, type InsertWalletTransaction, type AdminConfig, type InsertAdminConfig,
   type DeliveryBoy, type InsertDeliveryBoy, type OrderRating, type InsertOrderRating,
   type NavigationItem, type InsertNavigationItem, type Page, type InsertPage,
-  type PhonePeTransaction, type InsertPhonePeTransaction
+  type PhonePeTransaction, type InsertPhonePeTransaction, type Vendor, type InsertVendor
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, and, desc, isNotNull, or, gte, lte, count } from "drizzle-orm";
@@ -173,6 +173,20 @@ export interface IStorage {
   // Navigation Items management
   getNavigationItems(): Promise<NavigationItem[]>;
   getNavigationItem(id: number): Promise<NavigationItem | undefined>;
+
+  // Vendors
+  getVendor(id: number): Promise<Vendor | undefined>;
+  getVendorByPhone(phone: string): Promise<Vendor | undefined>;
+  getVendorByEmail(email: string): Promise<Vendor | undefined>;
+  getAllVendors(): Promise<Vendor[]>;
+  createVendor(vendor: InsertVendor): Promise<Vendor>;
+  updateVendor(id: number, updates: Partial<Vendor>): Promise<Vendor>;
+  deleteVendor(id: number): Promise<boolean>;
+  getVendorsPaginated(page: number, limit: number, search?: string): Promise<{ vendors: Vendor[]; total: number; pages: number }>;
+  getVendorOrders(vendorId: number, page: number, limit: number): Promise<{ orders: Order[]; total: number; pages: number }>;
+  assignOrderToVendor(orderId: number, vendorId: number): Promise<void>;
+  approveVendor(vendorId: number, adminId: number): Promise<void>;
+  deactivateVendor(vendorId: number): Promise<void>;
   createNavigationItem(item: InsertNavigationItem): Promise<NavigationItem>;
   updateNavigationItem(id: number, updates: Partial<NavigationItem>): Promise<void>;
   deleteNavigationItem(id: number): Promise<void>;
@@ -1403,6 +1417,124 @@ export class DatabaseStorage implements IStorage {
     await db.update(orders)
       .set(updateData)
       .where(eq(orders.id, orderId));
+  }
+
+  // Vendors
+  async getVendor(id: number): Promise<Vendor | undefined> {
+    const [vendor] = await db.select().from(vendors).where(eq(vendors.id, id));
+    return vendor || undefined;
+  }
+
+  async getVendorByPhone(phone: string): Promise<Vendor | undefined> {
+    const [vendor] = await db.select().from(vendors).where(eq(vendors.phone, phone));
+    return vendor || undefined;
+  }
+
+  async getVendorByEmail(email: string): Promise<Vendor | undefined> {
+    const [vendor] = await db.select().from(vendors).where(eq(vendors.email, email));
+    return vendor || undefined;
+  }
+
+  async getAllVendors(): Promise<Vendor[]> {
+    return await db.select().from(vendors).orderBy(desc(vendors.createdAt));
+  }
+
+  async createVendor(insertVendor: InsertVendor): Promise<Vendor> {
+    const vendorData = {
+      ...insertVendor,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    const [vendor] = await db.insert(vendors).values(vendorData).returning();
+    return vendor;
+  }
+
+  async updateVendor(id: number, updates: Partial<Vendor>): Promise<Vendor> {
+    const [updatedVendor] = await db.update(vendors)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(vendors.id, id))
+      .returning();
+    return updatedVendor;
+  }
+
+  async deleteVendor(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(vendors).where(eq(vendors.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error("Error deleting vendor:", error);
+      return false;
+    }
+  }
+
+  async getVendorsPaginated(page: number, limit: number, search?: string): Promise<{ vendors: Vendor[]; total: number; pages: number }> {
+    const offset = (page - 1) * limit;
+    
+    let query = db.select().from(vendors);
+    let countQuery = db.select({ count: count() }).from(vendors);
+    
+    if (search) {
+      const searchCondition = or(
+        like(vendors.name, `%${search}%`),
+        like(vendors.email, `%${search}%`),
+        like(vendors.phone, `%${search}%`),
+        like(vendors.businessName, `%${search}%`)
+      );
+      query = query.where(searchCondition);
+      countQuery = countQuery.where(searchCondition);
+    }
+    
+    const vendorsList = await query.offset(offset).limit(limit).orderBy(desc(vendors.createdAt));
+    const [{ count: totalCount }] = await countQuery;
+    
+    return {
+      vendors: vendorsList,
+      total: totalCount,
+      pages: Math.ceil(totalCount / limit)
+    };
+  }
+
+  async getVendorOrders(vendorId: number, page: number, limit: number): Promise<{ orders: Order[]; total: number; pages: number }> {
+    const offset = (page - 1) * limit;
+    
+    const ordersList = await db.select().from(orders)
+      .where(eq(orders.vendorId, vendorId))
+      .offset(offset)
+      .limit(limit)
+      .orderBy(desc(orders.createdAt));
+    
+    const [{ count: totalCount }] = await db.select({ count: count() }).from(orders)
+      .where(eq(orders.vendorId, vendorId));
+    
+    return {
+      orders: ordersList,
+      total: totalCount,
+      pages: Math.ceil(totalCount / limit)
+    };
+  }
+
+  async assignOrderToVendor(orderId: number, vendorId: number): Promise<void> {
+    await db.update(orders)
+      .set({ vendorId, updatedAt: new Date() })
+      .where(eq(orders.id, orderId));
+  }
+
+  async approveVendor(vendorId: number, adminId: number): Promise<void> {
+    await db.update(vendors)
+      .set({ 
+        isActive: true, 
+        isVerified: true, 
+        approvedBy: adminId, 
+        approvedAt: new Date(),
+        updatedAt: new Date() 
+      })
+      .where(eq(vendors.id, vendorId));
+  }
+
+  async deactivateVendor(vendorId: number): Promise<void> {
+    await db.update(vendors)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(vendors.id, vendorId));
   }
 
 }

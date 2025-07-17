@@ -32,18 +32,23 @@ import {
   resetPasswordSchema,
   deliveryBoyLoginSchema,
   deliveryBoyRegisterSchema,
-  orderRatingSchema
+  orderRatingSchema,
+  vendorRegisterSchema,
+  vendorLoginSchema
 } from "@shared/schema";
 import { 
   generateToken, 
   generateDeliveryBoyToken,
+  generateVendorToken,
   hashPassword, 
   comparePasswords, 
   authenticateToken, 
   authenticateDeliveryBoy,
+  authenticateVendor,
   optionalAuth, 
   type AuthRequest,
-  type DeliveryBoyAuthRequest
+  type DeliveryBoyAuthRequest,
+  type VendorAuthRequest
 } from "./auth";
 import { sendReminderEmail, type ReminderEmailData, sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, type OrderEmailData, sendWelcomeEmail, type WelcomeEmailData } from "./email-service";
 import { whatsAppService, type WhatsAppOrderData } from "./whatsapp-service";
@@ -3986,6 +3991,232 @@ CakesBuy
 
   // Setup WhatsApp admin routes
   setupWhatsAppAdminRoutes(app);
+
+  // Vendor Registration
+  app.post("/api/vendors/register", async (req, res) => {
+    try {
+      const vendorData = vendorRegisterSchema.parse(req.body);
+      
+      // Check if vendor already exists
+      const existingVendorByEmail = await storage.getVendorByEmail(vendorData.email);
+      if (existingVendorByEmail) {
+        return res.status(400).json({ message: "Email already registered" });
+      }
+      
+      const existingVendorByPhone = await storage.getVendorByPhone(vendorData.phone);
+      if (existingVendorByPhone) {
+        return res.status(400).json({ message: "Phone number already registered" });
+      }
+      
+      // Hash password
+      const hashedPassword = await hashPassword(vendorData.password);
+      
+      // Create vendor
+      const newVendor = await storage.createVendor({
+        ...vendorData,
+        password: hashedPassword,
+        isActive: false, // Vendors need admin approval
+        isVerified: false
+      });
+      
+      res.status(201).json({
+        message: "Vendor registration successful. Please wait for admin approval.",
+        vendor: {
+          id: newVendor.id,
+          name: newVendor.name,
+          email: newVendor.email,
+          phone: newVendor.phone,
+          businessName: newVendor.businessName,
+          isActive: newVendor.isActive,
+          isVerified: newVendor.isVerified
+        }
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid registration data", errors: error.errors });
+      }
+      console.error("Vendor registration error:", error);
+      res.status(500).json({ message: "Failed to register vendor" });
+    }
+  });
+
+  // Vendor Login
+  app.post("/api/vendors/login", async (req, res) => {
+    try {
+      const { phone, password } = vendorLoginSchema.parse(req.body);
+      
+      const vendor = await storage.getVendorByPhone(phone);
+      if (!vendor) {
+        return res.status(401).json({ message: "Invalid phone or password" });
+      }
+      
+      if (!vendor.isActive) {
+        return res.status(401).json({ message: "Vendor account is not active. Please contact admin." });
+      }
+      
+      const isPasswordValid = await comparePasswords(password, vendor.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid phone or password" });
+      }
+      
+      const token = generateVendorToken(vendor.id, vendor.phone, vendor.email, vendor.name);
+      
+      res.json({
+        message: "Login successful",
+        vendor: {
+          id: vendor.id,
+          name: vendor.name,
+          email: vendor.email,
+          phone: vendor.phone,
+          businessName: vendor.businessName,
+          isActive: vendor.isActive,
+          isVerified: vendor.isVerified
+        },
+        token
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid login data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to login vendor" });
+    }
+  });
+
+  // Vendor Dashboard - Get vendor info
+  app.get("/api/vendors/me", authenticateVendor, async (req: VendorAuthRequest, res) => {
+    try {
+      if (!req.vendor) {
+        return res.status(401).json({ message: "Vendor not authenticated" });
+      }
+      
+      const vendor = await storage.getVendor(req.vendor.id);
+      if (!vendor) {
+        return res.status(404).json({ message: "Vendor not found" });
+      }
+      
+      res.json({
+        vendor: {
+          id: vendor.id,
+          name: vendor.name,
+          email: vendor.email,
+          phone: vendor.phone,
+          businessName: vendor.businessName,
+          address: vendor.address,
+          description: vendor.description,
+          isActive: vendor.isActive,
+          isVerified: vendor.isVerified
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch vendor info" });
+    }
+  });
+
+  // Vendor Orders - Get orders assigned to vendor
+  app.get("/api/vendors/orders", authenticateVendor, async (req: VendorAuthRequest, res) => {
+    try {
+      if (!req.vendor) {
+        return res.status(401).json({ message: "Vendor not authenticated" });
+      }
+      
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      
+      const result = await storage.getVendorOrders(req.vendor.id, page, limit);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch vendor orders" });
+    }
+  });
+
+  // Vendor Update Order Status
+  app.patch("/api/vendors/orders/:id/status", authenticateVendor, async (req: VendorAuthRequest, res) => {
+    try {
+      if (!req.vendor) {
+        return res.status(401).json({ message: "Vendor not authenticated" });
+      }
+      
+      const orderId = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      if (!status || !["confirmed", "preparing", "ready", "delivered"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+      
+      // Verify order belongs to vendor
+      const order = await storage.getOrder(orderId);
+      if (!order || order.vendorId !== req.vendor.id) {
+        return res.status(404).json({ message: "Order not found or not assigned to you" });
+      }
+      
+      // Update order status
+      await storage.updateOrderStatus(orderId, status);
+      
+      res.json({ message: "Order status updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update order status" });
+    }
+  });
+
+  // Admin Vendor Management
+  app.get("/api/admin/vendors", requireAdmin, async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = req.query.search as string || "";
+      
+      const result = await storage.getVendorsPaginated(page, limit, search);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch vendors" });
+    }
+  });
+
+  // Admin Approve Vendor
+  app.patch("/api/admin/vendors/:id/approve", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Admin not authenticated" });
+      }
+      
+      const vendorId = parseInt(req.params.id);
+      await storage.approveVendor(vendorId, req.user.id);
+      
+      res.json({ message: "Vendor approved successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to approve vendor" });
+    }
+  });
+
+  // Admin Deactivate Vendor
+  app.patch("/api/admin/vendors/:id/deactivate", requireAdmin, async (req, res) => {
+    try {
+      const vendorId = parseInt(req.params.id);
+      await storage.deactivateVendor(vendorId);
+      
+      res.json({ message: "Vendor deactivated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to deactivate vendor" });
+    }
+  });
+
+  // Admin Assign Order to Vendor
+  app.patch("/api/admin/orders/:id/assign-vendor", requireAdmin, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { vendorId } = req.body;
+      
+      if (!vendorId) {
+        return res.status(400).json({ message: "Vendor ID is required" });
+      }
+      
+      await storage.assignOrderToVendor(orderId, vendorId);
+      
+      res.json({ message: "Order assigned to vendor successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to assign order to vendor" });
+    }
+  });
 
   const server = httpServer || createServer(app);
   return server;

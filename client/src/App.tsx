@@ -40,16 +40,20 @@ import AdminDelivery from "@/pages/admin/delivery";
 import AdminNavigation from "@/pages/admin/navigation";
 import AdminPages from "@/pages/admin/pages";
 import AdminReminders from "@/pages/AdminReminders";
+import AdminVendors from "@/pages/admin/vendors";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminProtected from "@/components/AdminProtected";
 import DeliveryLogin from "@/pages/DeliveryLogin";
 import DeliveryDashboard from "@/pages/DeliveryDashboard";
+import VendorRegister from "@/pages/VendorRegister";
+import VendorLogin from "@/pages/VendorLogin";
+import VendorDashboard from "@/pages/VendorDashboard";
 import RateOrder from "@/pages/RateOrder";
 import PageView from "@/pages/page-view";
 import NotFound from "@/pages/not-found";
 
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, ShoppingCart, Tags, Percent, Settings, Plus, Mail, Users, FileText, Wallet, Truck, LogOut, Menu } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Tags, Percent, Settings, Plus, Mail, Users, FileText, Wallet, Truck, LogOut, Menu, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import AdminNotifications from "@/components/AdminNotifications";
@@ -82,6 +86,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
     { path: "/admin/invoices", label: "Invoices", icon: FileText },
     { path: "/admin/wallet", label: "Wallet Management", icon: Wallet },
     { path: "/admin/delivery", label: "Delivery Management", icon: Truck },
+    { path: "/admin/vendors", label: "Vendor Management", icon: Store },
     { path: "/admin/navigation", label: "Navigation", icon: Menu },
     { path: "/admin/pages", label: "Pages", icon: FileText },
     { path: "/admin/reminders", label: "Email Reminders", icon: Mail },
@@ -203,6 +208,7 @@ function Router() {
             <Route path="/admin/invoices" component={AdminInvoices} />
             <Route path="/admin/wallet" component={AdminWallet} />
             <Route path="/admin/delivery" component={AdminDelivery} />
+            <Route path="/admin/vendors" component={AdminVendors} />
             <Route path="/admin/navigation" component={AdminNavigation} />
             <Route path="/admin/pages" component={AdminPages} />
             <Route path="/admin/reminders" component={AdminReminders} />
@@ -230,6 +236,9 @@ function Router() {
         <Route path="/otp-register" component={OtpAuthPage} />
         <Route path="/forgot-password" component={ForgotPassword} />
         <Route path="/admin-login" component={AdminLogin} />
+        <Route path="/vendor-register" component={VendorRegister} />
+        <Route path="/vendor-login" component={VendorLogin} />
+        <Route path="/vendor-dashboard" component={VendorDashboard} />
         <Route path="/occasions" component={OccasionReminder} />
         <Route path="/occasion-reminder" component={OccasionReminder} />
         <Route path="/profile" component={ProfilePage} />
@@ -251,13 +260,14 @@ function App() {
   const [location] = useLocation();
   const isAdminArea = location.startsWith('/admin');
   const isDeliveryArea = location.startsWith('/delivery');
+  const isVendorArea = location.startsWith('/vendor');
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
           <CartProvider>
-            {isAdminArea || isDeliveryArea ? (
+            {isAdminArea || isDeliveryArea || isVendorArea ? (
               <Router />
             ) : (
               <div className="min-h-screen flex flex-col">
