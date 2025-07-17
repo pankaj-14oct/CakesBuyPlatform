@@ -18,6 +18,7 @@ import { Cake, Category } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { formatPrice } from '@/lib/utils';
+import { Pagination } from '@/components/pagination';
 
 const productSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -57,6 +58,8 @@ export default function AdminProducts() {
   const [flavorInput, setFlavorInput] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -65,10 +68,13 @@ export default function AdminProducts() {
     cakes: Cake[];
     total: number;
     pages: number;
+    currentPage: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
   }>({
-    queryKey: ['/api/cakes'],
+    queryKey: ['/api/cakes', { page: currentPage, limit: pageSize }],
     queryFn: async () => {
-      const response = await fetch('/api/cakes?limit=1000'); // Get all products for admin
+      const response = await fetch(`/api/cakes?page=${currentPage}&limit=${pageSize}`);
       if (!response.ok) throw new Error('Failed to fetch products');
       return response.json();
     },
@@ -679,7 +685,7 @@ export default function AdminProducts() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Package className="mr-2 h-5 w-5" />
-            All Products ({products.length})
+            All Products ({productsData?.total || 0})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -777,6 +783,20 @@ export default function AdminProducts() {
                 })}
               </TableBody>
             </Table>
+          )}
+          
+          {/* Pagination */}
+          {productsData && productsData.pages > 1 && (
+            <div className="mt-6">
+              <Pagination
+                currentPage={productsData.currentPage}
+                totalPages={productsData.pages}
+                onPageChange={setCurrentPage}
+                showingFrom={(productsData.currentPage - 1) * pageSize + 1}
+                showingTo={Math.min(productsData.currentPage * pageSize, productsData.total)}
+                totalItems={productsData.total}
+              />
+            </div>
           )}
         </CardContent>
       </Card>
