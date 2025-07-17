@@ -298,6 +298,60 @@ export async function seedDatabase() {
     };
     await db.insert(users).values(adminUser).onConflictDoNothing();
 
+    // Seed 25 dummy users for pagination testing
+    console.log("👤 Seeding dummy users...");
+    const dummyUsers = [];
+    const firstNames = ["John", "Jane", "Michael", "Sarah", "David", "Lisa", "Robert", "Emily", "James", "Emma", "William", "Olivia", "Alexander", "Sophia", "Benjamin", "Isabella", "Daniel", "Mia", "Matthew", "Charlotte", "Andrew", "Amelia", "Christopher", "Harper", "Anthony"];
+    const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White", "Harris"];
+    const loyaltyTiers = ["Bronze", "Silver", "Gold", "Platinum"];
+    
+    for (let i = 1; i <= 25; i++) {
+      const userPassword = await hashPassword(`password${i}`);
+      const firstName = firstNames[i - 1];
+      const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+      const phone = `98765${String(10000 + i).slice(-5)}`;
+      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i}@example.com`;
+      const totalSpent = Math.floor(Math.random() * 10000);
+      const loyaltyPoints = Math.floor(totalSpent / 10); // 1 point per ₹10
+      const orderCount = Math.floor(Math.random() * 20) + 1;
+      const walletBalance = Math.floor(Math.random() * 1000);
+      const loyaltyTier = loyaltyTiers[Math.floor(totalSpent / 2500)]; // Bronze: 0-2499, Silver: 2500-4999, Gold: 5000-7499, Platinum: 7500+
+      
+      const dummyUser = {
+        phone,
+        email,
+        password: userPassword,
+        name: `${firstName} ${lastName}`,
+        role: "customer" as const,
+        walletBalance: walletBalance.toString(),
+        loyaltyPoints,
+        loyaltyTier,
+        totalSpent: totalSpent.toString(),
+        orderCount,
+        birthday: Math.random() > 0.5 ? `${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}` : null,
+        anniversary: Math.random() > 0.7 ? `${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}` : null,
+        addresses: Math.random() > 0.3 ? [
+          {
+            id: `addr_${i}_1`,
+            name: `${firstName} ${lastName}`,
+            type: "Home",
+            address: `${Math.floor(Math.random() * 999) + 1} ${["MG Road", "Sector 14", "DLF Phase 1", "Cyber City", "Golf Course Road", "Sohna Road"][Math.floor(Math.random() * 6)]}`,
+            pincode: ["122001", "122002", "122003", "122004", "122005"][Math.floor(Math.random() * 5)],
+            city: "Gurgaon",
+            landmark: Math.random() > 0.5 ? ["Near Metro Station", "Opposite Mall", "Behind Hospital", "Near Park"][Math.floor(Math.random() * 4)] : null,
+            isDefault: true
+          }
+        ] : []
+      };
+      
+      dummyUsers.push(dummyUser);
+    }
+    
+    // Insert dummy users in batches
+    for (const user of dummyUsers) {
+      await db.insert(users).values(user).onConflictDoNothing();
+    }
+
     // Seed categories with hierarchy
     console.log("📂 Seeding categories...");
     
