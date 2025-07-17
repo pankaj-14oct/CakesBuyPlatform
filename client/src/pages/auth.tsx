@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/use-auth';
 import { useLocation, Link } from 'wouter';
 import { Cake, User, Mail, Lock, Phone, ArrowLeft, Wallet, Gift, Star } from 'lucide-react';
-import { useEffect } from 'react';
+import WelcomeCelebration from '@/components/WelcomeCelebration';
 
 const loginSchema = z.object({
   phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
@@ -32,6 +32,7 @@ type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState('login');
+  const [showCelebration, setShowCelebration] = useState(false);
   const { user, loginMutation, registerMutation, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -65,7 +66,11 @@ export default function AuthPage() {
   };
 
   const onRegister = (data: RegisterForm) => {
-    registerMutation.mutate(data);
+    registerMutation.mutate(data, {
+      onSuccess: () => {
+        setShowCelebration(true);
+      }
+    });
   };
 
   // Don't render if user is authenticated
@@ -361,6 +366,15 @@ export default function AuthPage() {
           </div>
         </div>
       </div>
+      
+      {/* Welcome Celebration Modal */}
+      <WelcomeCelebration 
+        isVisible={showCelebration}
+        onClose={() => {
+          setShowCelebration(false);
+          setLocation('/');
+        }}
+      />
     </div>
   );
 }
