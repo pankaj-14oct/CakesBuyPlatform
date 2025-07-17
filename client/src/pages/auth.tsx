@@ -76,10 +76,13 @@ export default function AuthPage() {
   };
 
   const onRegister = (data: RegisterForm) => {
+    console.log('onRegister called with data:', data);
     registerMutation.mutate(data, {
       onSuccess: (response) => {
         console.log('Registration mutation onSuccess called:', response);
+        console.log('About to set showCelebration to true');
         setShowCelebration(true);
+        console.log('setShowCelebration(true) completed');
       },
       onError: (error) => {
         console.error('Registration mutation onError called:', error);
@@ -102,6 +105,11 @@ export default function AuthPage() {
       setShowCelebration(true);
     }
   }, [registerMutation.isSuccess, registerMutation.data, showCelebration]);
+
+  // Additional effect to monitor state changes
+  useEffect(() => {
+    console.log('showCelebration state:', showCelebration);
+  }, [showCelebration]);
 
   // Don't render if user is authenticated (unless showing celebration)
   if (isAuthenticated && !showCelebration) {
@@ -397,13 +405,7 @@ export default function AuthPage() {
         </div>
       </div>
       
-      {/* Test Button for Celebration */}
-      <button 
-        onClick={handleTestCelebration}
-        className="fixed top-4 right-4 z-50 bg-red-500 text-white px-4 py-2 rounded"
-      >
-        Test Celebration
-      </button>
+
 
       {/* Welcome Celebration Modal */}
       <WelcomeCelebration 
