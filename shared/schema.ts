@@ -109,7 +109,7 @@ export const orders = pgTable("orders", {
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
   status: text("status").notNull().default("pending"), // pending, confirmed, preparing, out_for_delivery, delivered, cancelled
   paymentStatus: text("payment_status").notNull().default("pending"), // pending, paid, failed, refunded
-  paymentMethod: text("payment_method"), // upi, card, cod
+  paymentMethod: text("payment_method"), // upi, card, cod, phonepe
   deliveryAddress: jsonb("delivery_address").$type<{
     name: string;
     phone: string;
@@ -305,7 +305,7 @@ export const invoices = pgTable("invoices", {
   // Invoice Status
   status: text("status").notNull().default("draft"), // draft, sent, paid, cancelled
   paymentStatus: text("payment_status").notNull().default("pending"), // pending, paid, partially_paid, overdue
-  paymentMethod: text("payment_method"), // upi, card, cod, bank_transfer
+  paymentMethod: text("payment_method"), // upi, card, cod, bank_transfer, phonepe
   
   // Dates
   invoiceDate: timestamp("invoice_date").defaultNow(),
@@ -316,6 +316,34 @@ export const invoices = pgTable("invoices", {
   notes: text("notes"),
   terms: text("terms"),
   
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// PhonePe Transactions
+export const phonepeTransactions = pgTable("phonepe_transactions", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").references(() => orders.id).notNull(),
+  merchantTransactionId: text("merchant_transaction_id").notNull().unique(),
+  phonepeTransactionId: text("phonepe_transaction_id"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").notNull().default("pending"), // pending, success, failed, cancelled
+  responseCode: text("response_code"),
+  responseMessage: text("response_message"),
+  paymentMethod: text("payment_method"), // UPI, CARD, NET_BANKING, WALLET
+  paymentInstrument: jsonb("payment_instrument").$type<{
+    type: string;
+    utr?: string;
+    maskedAccountNumber?: string;
+    maskedMobileNumber?: string;
+    bankId?: string;
+    pgTransactionId?: string;
+    pgAuthorizationCode?: string;
+    arn?: string;
+  }>(),
+  checkoutRequestId: text("checkout_request_id"),
+  redirectUrl: text("redirect_url"),
+  callbackUrl: text("callback_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -451,6 +479,8 @@ export type NavigationItem = typeof navigationItems.$inferSelect;
 export type InsertNavigationItem = typeof insertNavigationItemSchema._type;
 export type Page = typeof pages.$inferSelect;
 export type InsertPage = typeof insertPageSchema._type;
+export type PhonePeTransaction = typeof phonepeTransactions.$inferSelect;
+export type InsertPhonePeTransaction = typeof insertPhonePeTransactionSchema._type;
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, updatedAt: true });
@@ -482,6 +512,7 @@ export const insertWalletTransactionSchema = createInsertSchema(walletTransactio
 export const insertAdminConfigSchema = createInsertSchema(adminConfigs).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertNavigationItemSchema = createInsertSchema(navigationItems).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertPageSchema = createInsertSchema(pages).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertPhonePeTransactionSchema = createInsertSchema(phonepeTransactions).omit({ id: true, createdAt: true, updatedAt: true });
 
 // Auth schemas
 export const loginSchema = z.object({

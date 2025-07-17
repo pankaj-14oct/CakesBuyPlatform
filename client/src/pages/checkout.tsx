@@ -411,7 +411,7 @@ export default function CheckoutPage() {
       paymentMethod: useWalletPayment && walletAmountUsed > 0 ? 'partial_wallet' : data.paymentMethod,
       specialInstructions: data.specialInstructions,
       status: 'pending',
-      paymentStatus: data.paymentMethod === 'cod' ? 'pending' : 'paid',
+      paymentStatus: data.paymentMethod === 'cod' ? 'pending' : (data.paymentMethod === 'phonepe' ? 'pending' : 'paid'),
       walletAmountUsed: walletAmountUsed.toString(),
       remainingAmount: remainingAmount.toString()
     };
@@ -1004,10 +1004,18 @@ export default function CheckoutPage() {
                     className="space-y-3"
                   >
                     <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                      <RadioGroupItem value="phonepe" id="phonepe" />
+                      <Label htmlFor="phonepe" className="flex items-center space-x-2 cursor-pointer flex-1">
+                        <Smartphone className="h-4 w-4 text-caramel" />
+                        <span>PhonePe Payment Gateway</span>
+                      </Label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-3 border rounded-lg">
                       <RadioGroupItem value="upi" id="upi" />
                       <Label htmlFor="upi" className="flex items-center space-x-2 cursor-pointer flex-1">
                         <Smartphone className="h-4 w-4 text-caramel" />
-                        <span>UPI Payment (PhonePe, GPay, Paytm)</span>
+                        <span>UPI Payment (Other Apps)</span>
                       </Label>
                     </div>
                     

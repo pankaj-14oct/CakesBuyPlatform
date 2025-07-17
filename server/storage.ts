@@ -1,7 +1,7 @@
 import {
   users, categories, cakes, addons, orders, deliveryAreas, promoCodes, reviews, eventReminders, otpVerifications,
   loyaltyTransactions, loyaltyRewards, userRewards, invoices, walletTransactions, adminConfigs, deliveryBoys,
-  orderRatings, navigationItems, pages,
+  orderRatings, navigationItems, pages, phonepeTransactions,
   type User, type InsertUser, type Category, type InsertCategory,
   type Cake, type InsertCake, type Addon, type InsertAddon,
   type Order, type InsertOrder, type DeliveryArea, type InsertDeliveryArea,
@@ -11,7 +11,8 @@ import {
   type UserReward, type InsertUserReward, type Invoice, type InsertInvoice,
   type WalletTransaction, type InsertWalletTransaction, type AdminConfig, type InsertAdminConfig,
   type DeliveryBoy, type InsertDeliveryBoy, type OrderRating, type InsertOrderRating,
-  type NavigationItem, type InsertNavigationItem, type Page, type InsertPage
+  type NavigationItem, type InsertNavigationItem, type Page, type InsertPage,
+  type PhonePeTransaction, type InsertPhonePeTransaction
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, and, desc, isNotNull, or, gte, lte } from "drizzle-orm";
@@ -177,6 +178,14 @@ export interface IStorage {
   createPage(page: InsertPage): Promise<Page>;
   updatePage(id: number, updates: Partial<Page>): Promise<void>;
   deletePage(id: number): Promise<void>;
+
+  // PhonePe Transactions
+  createPhonePeTransaction(transaction: InsertPhonePeTransaction): Promise<PhonePeTransaction>;
+  getPhonePeTransaction(id: number): Promise<PhonePeTransaction | undefined>;
+  getPhonePeTransactionByMerchantId(merchantTransactionId: string): Promise<PhonePeTransaction | undefined>;
+  getPhonePeTransactionsByOrderId(orderId: number): Promise<PhonePeTransaction[]>;
+  updatePhonePeTransaction(merchantTransactionId: string, updates: Partial<PhonePeTransaction>): Promise<void>;
+  updateOrderPaymentStatus(orderId: number, paymentStatus: string, paymentMethod?: string): Promise<void>;
 
 }
 
@@ -1165,6 +1174,42 @@ export class DatabaseStorage implements IStorage {
 
   async deletePage(id: number): Promise<void> {
     await db.delete(pages).where(eq(pages.id, id));
+  }
+
+  // PhonePe Transactions
+  async createPhonePeTransaction(transaction: InsertPhonePeTransaction): Promise<PhonePeTransaction> {
+    const [phonepeTransaction] = await db.insert(phonepeTransactions).values(transaction).returning();
+    return phonepeTransaction;
+  }
+
+  async getPhonePeTransaction(id: number): Promise<PhonePeTransaction | undefined> {
+    const [transaction] = await db.select().from(phonepeTransactions).where(eq(phonepeTransactions.id, id));
+    return transaction || undefined;
+  }
+
+  async getPhonePeTransactionByMerchantId(merchantTransactionId: string): Promise<PhonePeTransaction | undefined> {
+    const [transaction] = await db.select().from(phonepeTransactions).where(eq(phonepeTransactions.merchantTransactionId, merchantTransactionId));
+    return transaction || undefined;
+  }
+
+  async getPhonePeTransactionsByOrderId(orderId: number): Promise<PhonePeTransaction[]> {
+    return await db.select().from(phonepeTransactions).where(eq(phonepeTransactions.orderId, orderId));
+  }
+
+  async updatePhonePeTransaction(merchantTransactionId: string, updates: Partial<PhonePeTransaction>): Promise<void> {
+    await db.update(phonepeTransactions)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(phonepeTransactions.merchantTransactionId, merchantTransactionId));
+  }
+
+  async updateOrderPaymentStatus(orderId: number, paymentStatus: string, paymentMethod?: string): Promise<void> {
+    const updateData: any = { paymentStatus, updatedAt: new Date() };
+    if (paymentMethod) {
+      updateData.paymentMethod = paymentMethod;
+    }
+    await db.update(orders)
+      .set(updateData)
+      .where(eq(orders.id, orderId));
   }
 
 }

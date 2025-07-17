@@ -52,6 +52,7 @@ import { sendRatingRequestEmail } from "./rating-service";
 import { createInvoiceForOrder, updateInvoiceStatus, getInvoiceByOrderId, getInvoiceByNumber, getUserInvoices, getInvoiceWithOrder, getInvoiceDisplayData } from "./invoice-service";
 import { processPhotoCakeItems } from "./photo-cake-service";
 import { notifyOrderAssignment, notifyNewOrder } from "./notification-service.js";
+import { initiatePhonePePayment, checkPhonePePaymentStatus, handlePhonePeCallback } from "./phonepe-service";
 import type { User } from "@shared/schema";
 
 // Helper function to create event reminders
@@ -2925,6 +2926,176 @@ CakesBuy
     } catch (error) {
       res.status(500).json({ message: "Failed to delete delivery boy" });
     }
+  });
+
+  // PhonePe Payment Routes
+  app.post("/api/payments/phonepe/initiate", async (req, res) => {
+    try {
+      const { orderId, amount, userPhone, userName, userEmail } = req.body;
+      
+      // Validate required fields
+      if (!orderId || !amount || !userPhone || !userName) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing required fields: orderId, amount, userPhone, userName" 
+        });
+      }
+
+      // Validate order exists
+      const order = await storage.getOrder(orderId);
+      if (!order) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Order not found" 
+        });
+      }
+
+      // Generate redirect and callback URLs
+      const baseUrl = req.protocol + '://' + req.get('host');
+      const redirectUrl = `${baseUrl}/payment/phonepe/callback`;
+      const callbackUrl = `${baseUrl}/api/payments/phonepe/callback`;
+
+      // Initiate PhonePe payment
+      const paymentResponse = await initiatePhonePePayment({
+        orderId,
+        amount,
+        userId: order.userId,
+        userPhone,
+        userName,
+        userEmail,
+        redirectUrl,
+        callbackUrl
+      });
+
+      res.json(paymentResponse);
+    } catch (error) {
+      console.error('PhonePe payment initiation error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to initiate PhonePe payment" 
+      });
+    }
+  });
+
+  app.get("/api/payments/phonepe/status/:merchantTransactionId", async (req, res) => {
+    try {
+      const { merchantTransactionId } = req.params;
+      
+      const statusResponse = await checkPhonePePaymentStatus(merchantTransactionId);
+      res.json(statusResponse);
+    } catch (error) {
+      console.error('PhonePe status check error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to check PhonePe payment status" 
+      });
+    }
+  });
+
+  app.post("/api/payments/phonepe/callback", async (req, res) => {
+    try {
+      const { merchantTransactionId, checksum } = req.body;
+      
+      if (!merchantTransactionId) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing merchantTransactionId" 
+        });
+      }
+
+      const callbackResponse = await handlePhonePeCallback(merchantTransactionId, checksum);
+      res.json(callbackResponse);
+    } catch (error) {
+      console.error('PhonePe callback error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to handle PhonePe callback" 
+      });
+    }
+  });
+
+  // PhonePe payment success/failure redirect pages
+  app.get("/payment/phonepe/callback", async (req, res) => {
+    try {
+      const { merchantTransactionId } = req.query;
+      
+      if (!merchantTransactionId) {
+        return res.redirect('/payment/failure?error=invalid_transaction');
+      }
+
+      // Check payment status
+      const statusResponse = await checkPhonePePaymentStatus(merchantTransactionId as string);
+      
+      if (statusResponse.success && statusResponse.data?.state === 'COMPLETED') {
+        // Payment successful
+        const transaction = await storage.getPhonePeTransactionByMerchantId(merchantTransactionId as string);
+        if (transaction) {
+          res.redirect(`/payment/success?transactionId=${merchantTransactionId}&orderId=${transaction.orderId}`);
+        } else {
+          res.redirect(`/payment/success?transactionId=${merchantTransactionId}`);
+        }
+      } else {
+        // Payment failed
+        res.redirect(`/payment/failure?transactionId=${merchantTransactionId}&error=payment_failed`);
+      }
+    } catch (error) {
+      console.error('PhonePe callback redirect error:', error);
+      res.redirect('/payment/failure?error=callback_error');
+    }
+  });
+
+  app.get("/payment/success", (req, res) => {
+    const { transactionId, orderId } = req.query;
+    res.send(`
+      <html>
+        <head>
+          <title>Payment Successful - CakesBuy</title>
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+            .success { color: #2e7d32; }
+            .container { max-width: 600px; margin: 0 auto; }
+            .btn { background: #ff6b35; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1 class="success">🎉 Payment Successful!</h1>
+            <p>Thank you for your payment. Your order has been confirmed.</p>
+            <p><strong>Transaction ID:</strong> ${transactionId || 'N/A'}</p>
+            ${orderId ? `<p><strong>Order ID:</strong> ${orderId}</p>` : ''}
+            <p>You will receive a confirmation email shortly.</p>
+            <a href="/" class="btn">Continue Shopping</a>
+          </div>
+        </body>
+      </html>
+    `);
+  });
+
+  app.get("/payment/failure", (req, res) => {
+    const { transactionId, error } = req.query;
+    res.send(`
+      <html>
+        <head>
+          <title>Payment Failed - CakesBuy</title>
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+            .failure { color: #d32f2f; }
+            .container { max-width: 600px; margin: 0 auto; }
+            .btn { background: #ff6b35; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1 class="failure">❌ Payment Failed</h1>
+            <p>We're sorry, but your payment could not be processed.</p>
+            <p><strong>Transaction ID:</strong> ${transactionId || 'N/A'}</p>
+            <p><strong>Error:</strong> ${error || 'Payment was not successful'}</p>
+            <p>Please try again or contact support if the problem persists.</p>
+            <a href="/" class="btn">Try Again</a>
+          </div>
+        </body>
+      </html>
+    `);
   });
 
   // Order Assignment Routes
