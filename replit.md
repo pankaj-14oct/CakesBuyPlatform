@@ -55,6 +55,7 @@ The application uses a comprehensive database schema with the following main ent
 - **User Data Enhancement**: Added 25 dummy users with realistic data for pagination testing
 - **User Profiles**: Dummy users include varied loyalty tiers (Bronze/Silver/Gold/Platinum), wallet balances, order counts, and addresses
 - **Data Diversity**: Users have randomized birthdays, anniversaries, spending patterns, and loyalty points
+- **Pagination System Fixed**: Fixed admin panel pagination by correctly importing count function from drizzle-orm
 - **Testing Ready**: Application now has sufficient user data to test pagination, filtering, and user management features
 
 ### Image Upload & Photo Cake Enhancement

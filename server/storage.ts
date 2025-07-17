@@ -15,7 +15,7 @@ import {
   type PhonePeTransaction, type InsertPhonePeTransaction
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, like, and, desc, isNotNull, or, gte, lte } from "drizzle-orm";
+import { eq, like, and, desc, isNotNull, or, gte, lte, count } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -262,7 +262,7 @@ export class DatabaseStorage implements IStorage {
     const offset = (page - 1) * limit;
     
     let query = db.select().from(users);
-    let countQuery = db.select({ count: db.count() }).from(users);
+    let countQuery = db.select({ count: count() }).from(users);
     
     if (search) {
       const searchCondition = or(
@@ -294,7 +294,7 @@ export class DatabaseStorage implements IStorage {
     const offset = (page - 1) * limit;
     
     let query = db.select().from(categories);
-    let countQuery = db.select({ count: db.count() }).from(categories);
+    let countQuery = db.select({ count: count() }).from(categories);
     
     if (search) {
       const searchCondition = or(
@@ -355,7 +355,7 @@ export class DatabaseStorage implements IStorage {
     const offset = (page - 1) * limit;
     
     let query = db.select().from(cakes);
-    let countQuery = db.select({ count: db.count() }).from(cakes);
+    let countQuery = db.select({ count: count() }).from(cakes);
     
     if (search) {
       const searchCondition = or(
@@ -451,7 +451,7 @@ export class DatabaseStorage implements IStorage {
     const offset = (page - 1) * limit;
     
     let query = db.select().from(addons);
-    let countQuery = db.select({ count: db.count() }).from(addons);
+    let countQuery = db.select({ count: count() }).from(addons);
     
     if (search) {
       const searchCondition = or(
@@ -705,7 +705,7 @@ export class DatabaseStorage implements IStorage {
     const offset = (page - 1) * limit;
     
     let query = db.select().from(orders);
-    let countQuery = db.select({ count: db.count() }).from(orders);
+    let countQuery = db.select({ count: count() }).from(orders);
     
     if (search) {
       const searchCondition = or(
@@ -1284,7 +1284,7 @@ export class DatabaseStorage implements IStorage {
     const offset = (page - 1) * limit;
     
     let query = db.select().from(pages);
-    let countQuery = db.select({ count: db.count() }).from(pages);
+    let countQuery = db.select({ count: count() }).from(pages);
     
     if (search) {
       const searchCondition = or(
