@@ -129,18 +129,20 @@ export default function CheckoutPage() {
       return true;
     }
     
-    // For same-day delivery, check current time (3-hour slots from 9am to 9pm)
+    // For same-day delivery, check current time (3-hour slots from 9am to 11pm)
     switch (timeSlot) {
-      case 'slot1': // 9 AM - 12 PM
+      case '9am-12pm': // 9:00 AM - 12:00 PM
         return currentHour < 9;
-      case 'slot2': // 12 PM - 3 PM  
+      case '12pm-3pm': // 12:00 PM - 3:00 PM  
         return currentHour < 12;
-      case 'slot3': // 3 PM - 6 PM
+      case '3pm-6pm': // 3:00 PM - 6:00 PM
         return currentHour < 15;
-      case 'slot4': // 6 PM - 9 PM
+      case '6pm-9pm': // 6:00 PM - 9:00 PM
         return currentHour < 18;
-      case 'midnight': // 11:30 PM - 12:30 AM (₹250 charge)
-        return currentHour < 21; // Allow midnight only if before 9 PM (2.5 hours advance)
+      case '9pm-11pm': // 9:00 PM - 11:00 PM
+        return currentHour < 21;
+      case '11:30pm-12:30am': // 11:30 PM - 12:30 AM (₹250 charge)
+        return currentHour < 22; // Allow midnight only if before 10 PM (1.5 hours advance)
       default:
         return true;
     }
@@ -165,7 +167,7 @@ export default function CheckoutPage() {
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       deliveryDate: getMinDeliveryDate(),
-      deliveryTime: 'slot3',
+      deliveryTime: '3pm-6pm',
       deliveryOccasion: '',
       relation: '',
       senderName: '',
@@ -185,7 +187,7 @@ export default function CheckoutPage() {
   
   // Auto-select first available time slot when date changes
   useEffect(() => {
-    const timeSlots = ['slot1', 'slot2', 'slot3', 'slot4', 'midnight'];
+    const timeSlots = ['9am-12pm', '12pm-3pm', '3pm-6pm', '6pm-9pm', '9pm-11pm', '11:30pm-12:30am'];
     const currentTimeSlot = form.getValues('deliveryTime');
     
     // If current time slot is not available for selected date, pick first available
@@ -892,47 +894,56 @@ export default function CheckoutPage() {
                         </SelectTrigger>
                         <SelectContent className="max-h-60 overflow-y-auto">
                           <SelectItem 
-                            value="slot1" 
-                            disabled={!isTimeSlotAvailable(selectedDate, 'slot1')}
+                            value="9am-12pm" 
+                            disabled={!isTimeSlotAvailable(selectedDate, '9am-12pm')}
                           >
-                            9 AM - 12 PM
-                            {!isTimeSlotAvailable(selectedDate, 'slot1') && (
+                            9:00 AM - 12:00 PM
+                            {!isTimeSlotAvailable(selectedDate, '9am-12pm') && (
                               <span className="text-red-500 text-xs ml-2">(Not available)</span>
                             )}
                           </SelectItem>
                           <SelectItem 
-                            value="slot2" 
-                            disabled={!isTimeSlotAvailable(selectedDate, 'slot2')}
+                            value="12pm-3pm" 
+                            disabled={!isTimeSlotAvailable(selectedDate, '12pm-3pm')}
                           >
-                            12 PM - 3 PM
-                            {!isTimeSlotAvailable(selectedDate, 'slot2') && (
+                            12:00 PM - 3:00 PM
+                            {!isTimeSlotAvailable(selectedDate, '12pm-3pm') && (
                               <span className="text-red-500 text-xs ml-2">(Not available)</span>
                             )}
                           </SelectItem>
                           <SelectItem 
-                            value="slot3" 
-                            disabled={!isTimeSlotAvailable(selectedDate, 'slot3')}
+                            value="3pm-6pm" 
+                            disabled={!isTimeSlotAvailable(selectedDate, '3pm-6pm')}
                           >
-                            3 PM - 6 PM
-                            {!isTimeSlotAvailable(selectedDate, 'slot3') && (
+                            3:00 PM - 6:00 PM
+                            {!isTimeSlotAvailable(selectedDate, '3pm-6pm') && (
                               <span className="text-red-500 text-xs ml-2">(Not available)</span>
                             )}
                           </SelectItem>
                           <SelectItem 
-                            value="slot4" 
-                            disabled={!isTimeSlotAvailable(selectedDate, 'slot4')}
+                            value="6pm-9pm" 
+                            disabled={!isTimeSlotAvailable(selectedDate, '6pm-9pm')}
                           >
-                            6 PM - 9 PM
-                            {!isTimeSlotAvailable(selectedDate, 'slot4') && (
+                            6:00 PM - 9:00 PM
+                            {!isTimeSlotAvailable(selectedDate, '6pm-9pm') && (
                               <span className="text-red-500 text-xs ml-2">(Not available)</span>
                             )}
                           </SelectItem>
                           <SelectItem 
-                            value="midnight" 
-                            disabled={!isTimeSlotAvailable(selectedDate, 'midnight')}
+                            value="9pm-11pm" 
+                            disabled={!isTimeSlotAvailable(selectedDate, '9pm-11pm')}
+                          >
+                            9:00 PM - 11:00 PM
+                            {!isTimeSlotAvailable(selectedDate, '9pm-11pm') && (
+                              <span className="text-red-500 text-xs ml-2">(Not available)</span>
+                            )}
+                          </SelectItem>
+                          <SelectItem 
+                            value="11:30pm-12:30am" 
+                            disabled={!isTimeSlotAvailable(selectedDate, '11:30pm-12:30am')}
                           >
                             11:30 PM - 12:30 AM (₹250 delivery charge)
-                            {!isTimeSlotAvailable(selectedDate, 'midnight') && (
+                            {!isTimeSlotAvailable(selectedDate, '11:30pm-12:30am') && (
                               <span className="text-red-500 text-xs ml-2">(Not available)</span>
                             )}
                           </SelectItem>

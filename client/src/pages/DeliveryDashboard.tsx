@@ -546,6 +546,13 @@ export default function DeliveryDashboard() {
 
   const formatDeliverySlot = (slot: string) => {
     switch (slot) {
+      case '9am-12pm': return '9:00 AM - 12:00 PM';
+      case '12pm-3pm': return '12:00 PM - 3:00 PM';
+      case '3pm-6pm': return '3:00 PM - 6:00 PM';
+      case '6pm-9pm': return '6:00 PM - 9:00 PM';
+      case '9pm-11pm': return '9:00 PM - 11:00 PM';
+      case '11:30pm-12:30am': return '11:30 PM - 12:30 AM';
+      // Legacy support for old slot names
       case 'slot1': return '9:00 AM - 12:00 PM';
       case 'slot2': return '12:00 PM - 3:00 PM';
       case 'slot3': return '3:00 PM - 6:00 PM';
