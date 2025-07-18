@@ -49,7 +49,7 @@ The application uses a comprehensive database schema with the following main ent
 
 ## Recent Changes
 
-### Vendor Order Assignment System (Latest - July 18, 2025)
+### Vendor Order Assignment System with Image Popup Functionality (Latest - July 18, 2025)
 - **Admin Order Management**: Enhanced admin orders page with vendor assignment functionality
 - **Custom Pricing**: Admins can set custom vendor prices when assigning orders different from the original order total
 - **Database Schema**: Added vendorPrice field to orders table for tracking vendor-specific pricing
@@ -59,6 +59,10 @@ The application uses a comprehensive database schema with the following main ent
 - **Visual Indicators**: Orders show vendor assignment status with purple badges and pricing information
 - **Vendor Filtering**: Only active and verified vendors are shown in assignment dropdown
 - **Reassignment**: Admins can reassign orders to different vendors with updated pricing
+- **Image Popup System**: Added full-size image viewing for product images and customer photos in vendor dashboard
+- **Enhanced Product Images**: Vendors can click product images to view full-size reference photos with zoom functionality
+- **Photo Cake Support**: Customer uploaded photos display in popup with custom text overlay for photo cakes
+- **Visual Feedback**: Hover effects with zoom and eye icons indicate clickable images with smooth transitions
 
 ### Product Pagination Implementation (January 17, 2025)
 - **Pagination System**: Successfully implemented comprehensive pagination for all product listings
