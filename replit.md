@@ -10,6 +10,7 @@ A full-stack cake ordering platform built with React frontend and Express backen
 - **2025-01-18**: Removed attached_assets folder as requested by user
 - **2025-01-18**: Imported dummy data seed with categories, cakes, addons, users, and sample content
 - **2025-01-18**: Synchronized order status values between vendor and admin panels (changed "ready" to "out_for_delivery")
+- **2025-01-18**: Fixed addon display in vendor panel - addons now show with name, quantity, and price
 
 ## Project Architecture
 - **Frontend**: React with TypeScript, Vite, TailwindCSS, shadcn/ui components

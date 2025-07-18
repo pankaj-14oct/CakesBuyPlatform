@@ -466,6 +466,19 @@ export default function VendorDashboard() {
                                       </span>
                                     </div>
                                   )}
+                                  {item.addons && item.addons.length > 0 && (
+                                    <div className="mt-2">
+                                      <span className="font-medium text-gray-600 text-xs">Addons:</span>
+                                      <div className="mt-1 space-y-1">
+                                        {item.addons.map((addon: any, addonIndex: number) => (
+                                          <div key={addonIndex} className="flex justify-between items-center bg-blue-50 px-2 py-1 rounded text-xs">
+                                            <span>{addon.name} x{addon.quantity}</span>
+                                            <span className="font-medium text-blue-700">₹{addon.price}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               ))
                             ) : (
