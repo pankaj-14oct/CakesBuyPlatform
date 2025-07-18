@@ -271,16 +271,20 @@ export default function VendorDashboard() {
                         <div className="flex justify-between items-start mb-2">
                           <div>
                             <h3 className="font-medium">Order #{order.orderNumber}</h3>
-                            <p className="text-sm text-gray-600">{order.customerName} • {order.customerPhone}</p>
+                            <div className="text-sm text-gray-600">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">Customer:</span>
+                                <span>{order.customerName}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">Phone:</span>
+                                <span>{order.customerPhone}</span>
+                              </div>
+                            </div>
                           </div>
                           <div className="text-right">
                             <div className="text-lg font-bold text-green-600">₹{order.vendorPrice || order.totalAmount}</div>
-                            {order.vendorPrice && order.vendorPrice !== order.totalAmount && (
-                              <div className="text-sm text-gray-500 line-through">₹{order.totalAmount}</div>
-                            )}
-                            <div className="text-xs text-gray-500">
-                              {order.vendorPrice ? 'Your Price' : 'Order Total'}
-                            </div>
+                            <div className="text-xs text-gray-500">Your Price</div>
                             <div className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</div>
                           </div>
                         </div>
