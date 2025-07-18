@@ -317,9 +317,16 @@ export default function VendorDashboard() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-lg font-bold text-green-600">₹{order.vendorPrice || order.totalAmount}</div>
-                            <div className="text-xs text-gray-500">Your Price</div>
-                            <div className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</div>
+                            <div className="space-y-1">
+                              <div className="text-lg font-bold text-green-600">₹{order.vendorPrice || order.totalAmount}</div>
+                              <div className="text-xs text-gray-500">Your Price</div>
+                              {order.totalAmount && order.vendorPrice && order.totalAmount !== order.vendorPrice && (
+                                <div className="text-xs text-gray-400">
+                                  Customer Total: ₹{order.totalAmount}
+                                </div>
+                              )}
+                              <div className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</div>
+                            </div>
                           </div>
                         </div>
                         
@@ -528,6 +535,46 @@ export default function VendorDashboard() {
                                 <span>{formatDeliveryTime(order.deliveryTime)}</span>
                               </div>
                             )}
+                          </div>
+                        </div>
+
+                        {/* Order Total Summary */}
+                        <div className="mb-3 bg-gray-100 p-3 rounded-lg">
+                          <h4 className="font-medium text-sm mb-2">Order Summary</h4>
+                          <div className="space-y-1 text-sm">
+                            {order.items && order.items.length > 0 && (
+                              <div className="space-y-1">
+                                {order.items.map((item: any, index: number) => {
+                                  const basePrice = parseFloat(item.price || 0);
+                                  const addonTotal = item.addons?.reduce((sum: number, addon: any) => {
+                                    const addonPrice = addon.vendorPrice !== undefined ? parseFloat(addon.vendorPrice) : parseFloat(addon.price || 0);
+                                    return sum + (addonPrice * parseInt(addon.quantity || 1));
+                                  }, 0) || 0;
+                                  const itemTotal = basePrice + addonTotal;
+                                  
+                                  return (
+                                    <div key={index} className="flex justify-between items-center text-xs">
+                                      <span className="text-gray-600">
+                                        {item.name} {item.addons && item.addons.length > 0 && `(+${item.addons.length} addon${item.addons.length > 1 ? 's' : ''})`}
+                                      </span>
+                                      <span className="font-medium">₹{itemTotal.toFixed(2)}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                            <div className="border-t pt-2 mt-2">
+                              <div className="flex justify-between items-center font-medium">
+                                <span>Total Amount You'll Receive:</span>
+                                <span className="text-green-600 text-lg">₹{order.vendorPrice || order.totalAmount}</span>
+                              </div>
+                              {order.totalAmount && order.vendorPrice && order.totalAmount !== order.vendorPrice && (
+                                <div className="flex justify-between items-center text-xs text-gray-500 mt-1">
+                                  <span>Customer Paid:</span>
+                                  <span>₹{order.totalAmount}</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                         
