@@ -1497,7 +1497,25 @@ export class DatabaseStorage implements IStorage {
   async getVendorOrders(vendorId: number, page: number, limit: number): Promise<{ orders: Order[]; total: number; pages: number }> {
     const offset = (page - 1) * limit;
     
-    const ordersList = await db.select().from(orders)
+    const ordersList = await db.select({
+      id: orders.id,
+      userId: orders.userId,
+      orderNumber: orders.orderNumber,
+      totalAmount: orders.totalAmount,
+      vendorPrice: orders.vendorPrice,
+      status: orders.status,
+      paymentStatus: orders.paymentStatus,
+      createdAt: orders.createdAt,
+      deliveryDate: orders.deliveryDate,
+      deliveryTime: orders.deliveryTime,
+      deliveryAddress: orders.deliveryAddress,
+      items: orders.items,
+      customerName: users.name,
+      customerPhone: users.phone,
+      customerEmail: users.email,
+      vendorId: orders.vendorId
+    }).from(orders)
+      .leftJoin(users, eq(orders.userId, users.id))
       .where(eq(orders.vendorId, vendorId))
       .offset(offset)
       .limit(limit)
