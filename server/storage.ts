@@ -1503,11 +1503,43 @@ export class DatabaseStorage implements IStorage {
       .limit(limit)
       .orderBy(desc(orders.createdAt));
     
+    // Enrich orders with cake images
+    const enrichedOrders = await Promise.all(
+      ordersList.map(async (order) => {
+        const enrichedItems = await Promise.all(
+          order.items.map(async (item: any) => {
+            if (item.cakeId) {
+              const cake = await db.select({ 
+                images: cakes.images, 
+                name: cakes.name,
+                description: cakes.description 
+              }).from(cakes)
+                .where(eq(cakes.id, item.cakeId))
+                .limit(1);
+              
+              return {
+                ...item,
+                images: cake[0]?.images || [],
+                cakeName: cake[0]?.name || item.name,
+                cakeDescription: cake[0]?.description
+              };
+            }
+            return item;
+          })
+        );
+        
+        return {
+          ...order,
+          items: enrichedItems
+        };
+      })
+    );
+    
     const [{ count: totalCount }] = await db.select({ count: count() }).from(orders)
       .where(eq(orders.vendorId, vendorId));
     
     return {
-      orders: ordersList,
+      orders: enrichedOrders,
       total: totalCount,
       pages: Math.ceil(totalCount / limit)
     };

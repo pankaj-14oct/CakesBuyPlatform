@@ -296,9 +296,41 @@ export default function VendorDashboard() {
                             {order.items && order.items.length > 0 ? (
                               order.items.map((item: any, index: number) => (
                                 <div key={index} className="bg-gray-50 p-3 rounded-lg">
-                                  <div className="flex justify-between items-start mb-1">
-                                    <h4 className="font-medium text-sm">{item.cakeName || item.name}</h4>
-                                    <span className="text-sm font-semibold">₹{item.price}</span>
+                                  <div className="flex gap-3 mb-2">
+                                    {/* Product Image */}
+                                    <div className="flex-shrink-0">
+                                      {item.images && item.images.length > 0 ? (
+                                        <img 
+                                          src={item.images[0]} 
+                                          alt={item.cakeName || item.name}
+                                          className="w-16 h-16 object-cover rounded-lg border"
+                                        />
+                                      ) : (
+                                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                                          <span className="text-gray-400 text-xl">🎂</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                    
+                                    {/* Product Details */}
+                                    <div className="flex-1">
+                                      <div className="flex justify-between items-start mb-1">
+                                        <h4 className="font-medium text-sm">{item.cakeName || item.name}</h4>
+                                        <span className="text-sm font-semibold">₹{item.price}</span>
+                                      </div>
+                                      
+                                      {/* Photo Cake Customer Image */}
+                                      {item.photoCustomization?.uploadedImage && (
+                                        <div className="mt-2">
+                                          <p className="text-xs text-gray-600 mb-1">Customer's Photo:</p>
+                                          <img 
+                                            src={item.photoCustomization.uploadedImage} 
+                                            alt="Customer uploaded photo"
+                                            className="w-12 h-12 object-cover rounded border"
+                                          />
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
                                   <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
                                     {item.weight && (
