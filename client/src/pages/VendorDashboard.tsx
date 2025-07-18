@@ -57,6 +57,7 @@ export default function VendorDashboard() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [dateFilter, setDateFilter] = useState<string>('all');
 
   const formatDeliveryTime = (slot: string) => {
     switch (slot) {
@@ -107,7 +108,7 @@ export default function VendorDashboard() {
   });
 
   const { data: ordersData, isLoading: ordersLoading } = useQuery({
-    queryKey: ["/api/vendors/orders"],
+    queryKey: ["/api/vendors/orders", dateFilter],
     queryFn: async () => {
       const response = await apiRequest("/api/vendors/orders", "GET", undefined, {
         "Authorization": `Bearer ${localStorage.getItem("vendor_token")}`
@@ -156,6 +157,45 @@ export default function VendorDashboard() {
     navigate("/vendor-login");
   };
 
+  // Date filtering function
+  const filterOrdersByDate = (orders: OrderInfo[]) => {
+    if (!orders || dateFilter === 'all') return orders;
+    
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    return orders.filter(order => {
+      const orderDate = new Date(order.deliveryDate);
+      const orderDateString = orderDate.toDateString();
+      
+      switch (dateFilter) {
+        case 'today':
+          return orderDateString === today.toDateString();
+        case 'tomorrow':
+          return orderDateString === tomorrow.toDateString();
+        case 'custom':
+          // For custom date, we'll need to implement date picker
+          return true;
+        default:
+          return true;
+      }
+    });
+  };
+
+  const getDateFilterLabel = () => {
+    switch (dateFilter) {
+      case 'today':
+        return 'Today\'s Orders';
+      case 'tomorrow':
+        return 'Tomorrow\'s Orders';
+      case 'custom':
+        return 'Custom Date Orders';
+      default:
+        return 'All Orders';
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending": return "bg-yellow-100 text-yellow-800";
@@ -183,9 +223,10 @@ export default function VendorDashboard() {
   }
 
   const orders = ordersData?.orders || [];
+  const filteredOrders = filterOrdersByDate(orders);
   const totalOrders = ordersData?.total || 0;
-  const completedOrders = orders.filter((order: Order) => order.status === "delivered").length;
-  const pendingOrders = orders.filter((order: Order) => order.status !== "delivered").length;
+  const completedOrders = filteredOrders.filter((order: Order) => order.status === "delivered").length;
+  const pendingOrders = filteredOrders.filter((order: Order) => order.status !== "delivered").length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -202,6 +243,20 @@ export default function VendorDashboard() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              {/* Date Filter */}
+              <div className="flex items-center space-x-2">
+                <label className="text-sm font-medium text-gray-700">Filter:</label>
+                <select 
+                  value={dateFilter} 
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Orders</option>
+                  <option value="today">Today</option>
+                  <option value="tomorrow">Tomorrow</option>
+                </select>
+              </div>
+              
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-900">{vendor.name}</p>
                 <p className="text-xs text-gray-500">{vendor.email}</p>
@@ -284,20 +339,32 @@ export default function VendorDashboard() {
           <TabsContent value="orders" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>My Orders</CardTitle>
-                <CardDescription>Orders assigned to your business</CardDescription>
+                <CardTitle className="flex items-center justify-between">
+                  <span>My Orders</span>
+                  <span className="text-sm font-normal text-gray-500">({getDateFilterLabel()})</span>
+                </CardTitle>
+                <CardDescription>
+                  Orders assigned to your business
+                  {dateFilter !== 'all' && (
+                    <span className="ml-2 text-blue-600 font-medium">
+                      - Showing {filteredOrders.length} of {orders.length} orders
+                    </span>
+                  )}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {ordersLoading ? (
                   <div>Loading orders...</div>
-                ) : orders.length === 0 ? (
+                ) : filteredOrders.length === 0 ? (
                   <div className="text-center py-8">
                     <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">No orders assigned yet</p>
+                    <p className="text-gray-500">
+                      {dateFilter === 'all' ? 'No orders assigned yet' : `No orders found for ${getDateFilterLabel().toLowerCase()}`}
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {orders.map((order: Order) => (
+                    {filteredOrders.map((order: Order) => (
                       <div key={order.id} className="border rounded-lg p-4">
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex-1">
