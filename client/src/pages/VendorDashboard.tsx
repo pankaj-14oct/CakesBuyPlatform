@@ -467,15 +467,28 @@ export default function VendorDashboard() {
                                     </div>
                                   )}
                                   {item.addons && item.addons.length > 0 && (
-                                    <div className="mt-2">
-                                      <span className="font-medium text-gray-600 text-xs">Addons:</span>
-                                      <div className="mt-1 space-y-1">
-                                        {item.addons.map((addon: any, addonIndex: number) => (
-                                          <div key={addonIndex} className="flex justify-between items-center bg-blue-50 px-2 py-1 rounded text-xs">
-                                            <span>{addon.name} x{addon.quantity}</span>
-                                            <span className="font-medium text-blue-700">₹{addon.price}</span>
-                                          </div>
-                                        ))}
+                                    <div className="mt-3 border-t pt-2">
+                                      <div className="bg-green-50 p-2 rounded-lg">
+                                        <div className="flex items-center justify-between mb-2">
+                                          <span className="font-medium text-green-800 text-xs">Addons - Your Pricing</span>
+                                          <span className="text-xs text-green-600">({item.addons.length} item{item.addons.length > 1 ? 's' : ''})</span>
+                                        </div>
+                                        <div className="space-y-1">
+                                          {item.addons.map((addon: any, addonIndex: number) => (
+                                            <div key={addonIndex} className="flex justify-between items-center bg-white px-2 py-1 rounded text-xs">
+                                              <div className="flex-1">
+                                                <span className="font-medium text-gray-900">{addon.name}</span>
+                                                <span className="text-gray-600 ml-2">x{addon.quantity}</span>
+                                              </div>
+                                              <div className="text-right">
+                                                <div className="font-medium text-green-700">
+                                                  ₹{addon.vendorPrice !== undefined ? addon.vendorPrice : addon.price}
+                                                </div>
+                                                <div className="text-xs text-gray-500">Your Price</div>
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
                                       </div>
                                     </div>
                                   )}
