@@ -161,8 +161,7 @@ export default function VendorDashboard() {
       case "pending": return "bg-yellow-100 text-yellow-800";
       case "confirmed": return "bg-blue-100 text-blue-800";
       case "preparing": return "bg-orange-100 text-orange-800";
-      case "ready": return "bg-purple-100 text-purple-800";
-      case "out_for_delivery": return "bg-indigo-100 text-indigo-800";
+      case "out_for_delivery": return "bg-purple-100 text-purple-800";
       case "delivered": return "bg-green-100 text-green-800";
       default: return "bg-gray-100 text-gray-800";
     }
@@ -173,7 +172,6 @@ export default function VendorDashboard() {
       case "pending": return <Clock className="h-4 w-4" />;
       case "confirmed": return <CheckCircle className="h-4 w-4" />;
       case "preparing": return <Package className="h-4 w-4" />;
-      case "ready": return <AlertCircle className="h-4 w-4" />;
       case "out_for_delivery": return <Truck className="h-4 w-4" />;
       case "delivered": return <CheckCircle className="h-4 w-4" />;
       default: return <Clock className="h-4 w-4" />;
@@ -529,7 +527,7 @@ export default function VendorDashboard() {
                             <SelectContent>
                               <SelectItem value="confirmed">Confirmed</SelectItem>
                               <SelectItem value="preparing">Preparing</SelectItem>
-                              <SelectItem value="ready">Ready</SelectItem>
+                              <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
                               <SelectItem value="delivered">Delivered</SelectItem>
                             </SelectContent>
                           </Select>

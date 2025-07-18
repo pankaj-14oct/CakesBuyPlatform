@@ -4140,7 +4140,7 @@ CakesBuy
       const orderId = parseInt(req.params.id);
       const { status } = req.body;
       
-      if (!status || !["confirmed", "preparing", "ready", "delivered"].includes(status)) {
+      if (!status || !["confirmed", "preparing", "out_for_delivery", "delivered"].includes(status)) {
         return res.status(400).json({ message: "Invalid status" });
       }
       
