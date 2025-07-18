@@ -272,16 +272,19 @@ export default function VendorDashboard() {
                     {orders.map((order: Order) => (
                       <div key={order.id} className="border rounded-lg p-4">
                         <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h3 className="font-medium">Order #{order.orderNumber}</h3>
-                            <div className="text-sm text-gray-600">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">Customer:</span>
-                                <span>{order.customerName}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">Phone:</span>
-                                <span>{order.customerPhone}</span>
+                          <div className="flex-1">
+                            <h3 className="font-medium text-lg mb-2">Order #{order.orderNumber}</h3>
+                            <div className="bg-blue-50 p-3 rounded-lg">
+                              <h4 className="font-semibold text-blue-900 mb-1">Customer Information</h4>
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-blue-700">Name:</span>
+                                  <span className="text-blue-900">{order.customerName}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-blue-700">Phone:</span>
+                                  <span className="text-blue-900 font-mono">{order.customerPhone}</span>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -350,9 +353,8 @@ export default function VendorDashboard() {
                                     
                                     {/* Product Details */}
                                     <div className="flex-1">
-                                      <div className="flex justify-between items-start mb-1">
+                                      <div className="mb-1">
                                         <h4 className="font-medium text-sm">{item.cakeName || item.name}</h4>
-                                        <span className="text-sm font-semibold">₹{item.price}</span>
                                       </div>
                                       
                                       {/* Photo Cake Customer Image */}
