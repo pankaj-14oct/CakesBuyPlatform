@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { 
@@ -17,7 +18,9 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  Truck
+  Truck,
+  ZoomIn,
+  Eye
 } from "lucide-react";
 
 interface VendorInfo {
@@ -300,11 +303,44 @@ export default function VendorDashboard() {
                                     {/* Product Image */}
                                     <div className="flex-shrink-0">
                                       {item.images && item.images.length > 0 ? (
-                                        <img 
-                                          src={item.images[0]} 
-                                          alt={item.cakeName || item.name}
-                                          className="w-16 h-16 object-cover rounded-lg border"
-                                        />
+                                        <Dialog>
+                                          <DialogTrigger asChild>
+                                            <div className="relative cursor-pointer group">
+                                              <img 
+                                                src={item.images[0]} 
+                                                alt={item.cakeName || item.name}
+                                                className="w-16 h-16 object-cover rounded-lg border hover:opacity-90 transition-opacity"
+                                              />
+                                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg flex items-center justify-center transition-all">
+                                                <ZoomIn className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                              </div>
+                                            </div>
+                                          </DialogTrigger>
+                                          <DialogContent className="max-w-2xl">
+                                            <DialogHeader>
+                                              <DialogTitle>Product Image - {item.cakeName || item.name}</DialogTitle>
+                                            </DialogHeader>
+                                            <div className="space-y-4">
+                                              <img 
+                                                src={item.images[0]} 
+                                                alt={item.cakeName || item.name}
+                                                className="w-full max-h-96 object-contain rounded-lg"
+                                              />
+                                              {item.images.length > 1 && (
+                                                <div className="grid grid-cols-4 gap-2">
+                                                  {item.images.slice(1).map((image: string, imgIndex: number) => (
+                                                    <img 
+                                                      key={imgIndex}
+                                                      src={image} 
+                                                      alt={`${item.cakeName || item.name} view ${imgIndex + 2}`}
+                                                      className="w-full h-16 object-cover rounded border"
+                                                    />
+                                                  ))}
+                                                </div>
+                                              )}
+                                            </div>
+                                          </DialogContent>
+                                        </Dialog>
                                       ) : (
                                         <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
                                           <span className="text-gray-400 text-xl">🎂</span>
@@ -323,11 +359,38 @@ export default function VendorDashboard() {
                                       {item.photoCustomization?.uploadedImage && (
                                         <div className="mt-2">
                                           <p className="text-xs text-gray-600 mb-1">Customer's Photo:</p>
-                                          <img 
-                                            src={item.photoCustomization.uploadedImage} 
-                                            alt="Customer uploaded photo"
-                                            className="w-12 h-12 object-cover rounded border"
-                                          />
+                                          <Dialog>
+                                            <DialogTrigger asChild>
+                                              <div className="relative cursor-pointer group inline-block">
+                                                <img 
+                                                  src={item.photoCustomization.uploadedImage} 
+                                                  alt="Customer uploaded photo"
+                                                  className="w-12 h-12 object-cover rounded border hover:opacity-90 transition-opacity"
+                                                />
+                                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded flex items-center justify-center transition-all">
+                                                  <Eye className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                </div>
+                                              </div>
+                                            </DialogTrigger>
+                                            <DialogContent className="max-w-2xl">
+                                              <DialogHeader>
+                                                <DialogTitle>Customer's Photo for Photo Cake</DialogTitle>
+                                              </DialogHeader>
+                                              <div className="space-y-4">
+                                                <img 
+                                                  src={item.photoCustomization.uploadedImage} 
+                                                  alt="Customer uploaded photo"
+                                                  className="w-full max-h-96 object-contain rounded-lg"
+                                                />
+                                                {item.photoCustomization.customText && (
+                                                  <div className="bg-gray-50 p-3 rounded-lg">
+                                                    <p className="text-sm font-medium text-gray-700 mb-1">Custom Text:</p>
+                                                    <p className="text-sm text-gray-600 italic">"{item.photoCustomization.customText}"</p>
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </DialogContent>
+                                          </Dialog>
                                         </div>
                                       )}
                                     </div>
