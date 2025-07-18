@@ -49,7 +49,18 @@ The application uses a comprehensive database schema with the following main ent
 
 ## Recent Changes
 
-### Product Pagination Implementation (Latest - January 17, 2025)
+### Vendor Order Assignment System (Latest - July 18, 2025)
+- **Admin Order Management**: Enhanced admin orders page with vendor assignment functionality
+- **Custom Pricing**: Admins can set custom vendor prices when assigning orders different from the original order total
+- **Database Schema**: Added vendorPrice field to orders table for tracking vendor-specific pricing
+- **Assignment Interface**: Added vendor assignment dialog with vendor selection dropdown and price input
+- **Vendor Column**: Added vendor information column to admin orders table showing assigned vendor ID and price
+- **API Endpoints**: Enhanced /api/admin/orders/:id/assign-vendor endpoint to accept vendorPrice parameter
+- **Visual Indicators**: Orders show vendor assignment status with purple badges and pricing information
+- **Vendor Filtering**: Only active and verified vendors are shown in assignment dropdown
+- **Reassignment**: Admins can reassign orders to different vendors with updated pricing
+
+### Product Pagination Implementation (January 17, 2025)
 - **Pagination System**: Successfully implemented comprehensive pagination for all product listings
 - **Backend Enhancement**: Enhanced `/api/cakes` endpoint with page and limit parameters, returns paginated response with metadata
 - **Frontend Integration**: Updated search page, category page, and home page to handle paginated responses
@@ -179,6 +190,7 @@ Successfully migrated from Replit Agent to standard Replit environment on July 1
 - ✅ Fixed vendor login to use phone number authentication instead of email
 - ✅ Vendor registration and approval system working correctly
 - ✅ All authentication flows tested and functional
+- ✅ Vendor order assignment system with custom pricing implemented (July 18, 2025)
 - ✅ Fixed API request errors in vendor components (VendorRegister, VendorDashboard, admin/vendors)
 
 ## Changelog

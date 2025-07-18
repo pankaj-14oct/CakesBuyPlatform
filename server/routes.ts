@@ -4204,13 +4204,17 @@ CakesBuy
   app.patch("/api/admin/orders/:id/assign-vendor", requireAdmin, async (req, res) => {
     try {
       const orderId = parseInt(req.params.id);
-      const { vendorId } = req.body;
+      const { vendorId, vendorPrice } = req.body;
       
       if (!vendorId) {
         return res.status(400).json({ message: "Vendor ID is required" });
       }
       
-      await storage.assignOrderToVendor(orderId, vendorId);
+      if (!vendorPrice || isNaN(parseFloat(vendorPrice))) {
+        return res.status(400).json({ message: "Valid vendor price is required" });
+      }
+      
+      await storage.assignOrderToVendor(orderId, vendorId, parseFloat(vendorPrice));
       
       res.json({ message: "Order assigned to vendor successfully" });
     } catch (error) {

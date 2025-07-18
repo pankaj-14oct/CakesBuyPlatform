@@ -131,6 +131,7 @@ export const orders = pgTable("orders", {
   pickedUpAt: timestamp("picked_up_at"), // when delivery boy picked up the order
   deliveredAt: timestamp("delivered_at"), // when order was delivered
   vendorId: integer("vendor_id").references(() => vendors.id), // assigned vendor for order processing
+  vendorPrice: decimal("vendor_price", { precision: 10, scale: 2 }), // price set by admin for vendor
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

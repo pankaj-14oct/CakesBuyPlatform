@@ -1513,9 +1513,13 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async assignOrderToVendor(orderId: number, vendorId: number): Promise<void> {
+  async assignOrderToVendor(orderId: number, vendorId: number, vendorPrice?: number): Promise<void> {
+    const updateData: any = { vendorId, updatedAt: new Date() };
+    if (vendorPrice !== undefined) {
+      updateData.vendorPrice = vendorPrice.toString();
+    }
     await db.update(orders)
-      .set({ vendorId, updatedAt: new Date() })
+      .set(updateData)
       .where(eq(orders.id, orderId));
   }
 

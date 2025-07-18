@@ -23,10 +23,14 @@ export default function AdminOrders() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [reassignDialogOpen, setReassignDialogOpen] = useState(false);
+  const [vendorAssignDialogOpen, setVendorAssignDialogOpen] = useState(false);
   const [orderToAssign, setOrderToAssign] = useState<Order | null>(null);
   const [orderToReassign, setOrderToReassign] = useState<Order | null>(null);
+  const [orderToAssignVendor, setOrderToAssignVendor] = useState<Order | null>(null);
   const [deliveryPrice, setDeliveryPrice] = useState<string>('');
+  const [vendorPrice, setVendorPrice] = useState<string>('');
   const [selectedDeliveryBoyId, setSelectedDeliveryBoyId] = useState<string>('');
+  const [selectedVendorId, setSelectedVendorId] = useState<string>('');
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -37,6 +41,17 @@ export default function AdminOrders() {
   // Fetch delivery boys for assignment
   const { data: deliveryBoys = [] } = useQuery<DeliveryBoy[]>({
     queryKey: ['/api/admin/delivery-boys'],
+  });
+
+  // Fetch vendors for assignment
+  const { data: vendorsData } = useQuery({
+    queryKey: ['/api/admin/vendors'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/admin/vendors?page=1&limit=100', "GET", undefined, {
+        "Authorization": `Bearer ${localStorage.getItem("admin_token")}`
+      });
+      return response.json();
+    }
   });
 
   const updateOrderMutation = useMutation({
@@ -96,6 +111,31 @@ export default function AdminOrders() {
     }
   });
 
+  const assignVendorMutation = useMutation({
+    mutationFn: async ({ orderId, vendorId, vendorPrice }: { orderId: number; vendorId: number; vendorPrice: string }) => {
+      const response = await apiRequest(`/api/admin/orders/${orderId}/assign-vendor`, 'PATCH', {
+        vendorId,
+        vendorPrice: parseFloat(vendorPrice)
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
+      toast({ title: "Vendor assigned successfully!" });
+      setVendorAssignDialogOpen(false);
+      setOrderToAssignVendor(null);
+      setVendorPrice('');
+      setSelectedVendorId('');
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Failed to assign vendor", 
+        description: error.message || "Please try again later.",
+        variant: "destructive" 
+      });
+    }
+  });
+
   const handleStatusChange = (orderId: number, newStatus: string) => {
     updateOrderMutation.mutate({ id: orderId, status: newStatus });
   };
@@ -133,6 +173,23 @@ export default function AdminOrders() {
       });
       setReassignDialogOpen(false);
       setOrderToReassign(null);
+    }
+  };
+
+  const handleAssignVendor = (order: Order) => {
+    setOrderToAssignVendor(order);
+    setVendorPrice(order.total || '');
+    setSelectedVendorId('');
+    setVendorAssignDialogOpen(true);
+  };
+
+  const handleVendorAssignmentSubmit = () => {
+    if (orderToAssignVendor && selectedVendorId && vendorPrice) {
+      assignVendorMutation.mutate({
+        orderId: orderToAssignVendor.id,
+        vendorId: parseInt(selectedVendorId),
+        vendorPrice: vendorPrice
+      });
     }
   };
 
@@ -263,6 +320,7 @@ export default function AdminOrders() {
                   <TableHead>Amount</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Delivery</TableHead>
+                  <TableHead>Vendor</TableHead>
                   <TableHead>Delivery Boy</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -302,6 +360,38 @@ export default function AdminOrders() {
                       <div>
                         <p className="text-sm">{new Date(order.deliveryDate).toLocaleDateString()}</p>
                         <p className="text-xs text-charcoal opacity-60">{order.deliveryTime}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        {order.vendorId ? (
+                          <div className="space-y-1">
+                            <p className="text-sm text-purple-600 font-medium">Assigned</p>
+                            <p className="text-xs text-charcoal opacity-60">ID: {order.vendorId}</p>
+                            {order.vendorPrice && (
+                              <p className="text-xs text-brown font-medium">Price: {formatPrice(order.vendorPrice)}</p>
+                            )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs h-6"
+                              onClick={() => handleAssignVendor(order)}
+                            >
+                              <Package className="h-3 w-3 mr-1" />
+                              Change
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs"
+                            onClick={() => handleAssignVendor(order)}
+                          >
+                            <Package className="h-3 w-3 mr-1" />
+                            Assign
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -719,6 +809,82 @@ export default function AdminOrders() {
                 </p>
               )}
             </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Vendor Assignment Dialog */}
+      <Dialog open={vendorAssignDialogOpen} onOpenChange={setVendorAssignDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Assign Order to Vendor</DialogTitle>
+          </DialogHeader>
+          
+          {orderToAssignVendor && (
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h3 className="font-medium">Order Details</h3>
+                <p className="text-sm text-gray-600">Order: {orderToAssignVendor.orderNumber}</p>
+                <p className="text-sm text-gray-600">Total: {formatPrice(orderToAssignVendor.total)}</p>
+                <p className="text-sm text-gray-600">Customer: {orderToAssignVendor.deliveryAddress.name}</p>
+              </div>
+              
+              <div>
+                <Label htmlFor="vendor-select">Select Vendor</Label>
+                <Select value={selectedVendorId} onValueChange={setSelectedVendorId}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Choose a vendor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {vendorsData?.vendors?.filter((vendor: any) => vendor.isActive && vendor.isVerified).map((vendor: any) => (
+                      <SelectItem key={vendor.id} value={vendor.id.toString()}>
+                        {vendor.name} - {vendor.businessName} ({vendor.phone})
+                      </SelectItem>
+                    )) || []}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="vendor-price">Vendor Price (₹)</Label>
+                <Input
+                  id="vendor-price"
+                  type="number"
+                  value={vendorPrice}
+                  onChange={(e) => setVendorPrice(e.target.value)}
+                  placeholder="Enter price for vendor"
+                  className="mt-1"
+                  min="0"
+                  step="0.01"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  This is the price the vendor will receive for this order
+                </p>
+              </div>
+              
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setVendorAssignDialogOpen(false)}
+                  disabled={assignVendorMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleVendorAssignmentSubmit}
+                  disabled={assignVendorMutation.isPending || !selectedVendorId || !vendorPrice}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  {assignVendorMutation.isPending ? 'Assigning...' : 'Assign Vendor'}
+                </Button>
+              </div>
+            </div>
+          )}
+          
+          {(!vendorsData?.vendors || vendorsData.vendors.filter((vendor: any) => vendor.isActive && vendor.isVerified).length === 0) && (
+            <p className="text-sm text-red-600">
+              No active and verified vendors available. Please activate and verify vendors first.
+            </p>
           )}
         </DialogContent>
       </Dialog>
