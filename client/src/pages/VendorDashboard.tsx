@@ -39,6 +39,7 @@ interface Order {
   customerPhone: string;
   deliveryAddress: string;
   totalAmount: string;
+  vendorPrice?: string;
   status: string;
   paymentStatus: string;
   createdAt: string;
@@ -271,7 +272,13 @@ export default function VendorDashboard() {
                             <p className="text-sm text-gray-600">{order.customerName} • {order.customerPhone}</p>
                           </div>
                           <div className="text-right">
-                            <div className="text-lg font-bold">₹{order.totalAmount}</div>
+                            <div className="text-lg font-bold text-green-600">₹{order.vendorPrice || order.totalAmount}</div>
+                            {order.vendorPrice && order.vendorPrice !== order.totalAmount && (
+                              <div className="text-sm text-gray-500 line-through">₹{order.totalAmount}</div>
+                            )}
+                            <div className="text-xs text-gray-500">
+                              {order.vendorPrice ? 'Your Price' : 'Order Total'}
+                            </div>
                             <div className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</div>
                           </div>
                         </div>
