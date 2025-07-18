@@ -278,7 +278,12 @@ export default function VendorDashboard() {
                         
                         <div className="mb-3">
                           <p className="text-sm text-gray-600 mb-1">Delivery Address:</p>
-                          <p className="text-sm">{order.deliveryAddress}</p>
+                          <p className="text-sm">
+                            {typeof order.deliveryAddress === 'string' 
+                              ? order.deliveryAddress 
+                              : `${order.deliveryAddress.name} - ${order.deliveryAddress.address}, ${order.deliveryAddress.city} - ${order.deliveryAddress.pincode}`
+                            }
+                          </p>
                         </div>
                         
                         <div className="flex justify-between items-center">
