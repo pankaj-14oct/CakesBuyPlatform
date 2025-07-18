@@ -8,6 +8,7 @@ A full-stack cake ordering platform built with React frontend and Express backen
 - **2025-01-18**: Set up PostgreSQL database with all required tables
 - **2025-01-18**: Configured environment variables and verified all dependencies
 - **2025-01-18**: Removed attached_assets folder as requested by user
+- **2025-01-18**: Imported dummy data seed with categories, cakes, addons, users, and sample content
 
 ## Project Architecture
 - **Frontend**: React with TypeScript, Vite, TailwindCSS, shadcn/ui components
