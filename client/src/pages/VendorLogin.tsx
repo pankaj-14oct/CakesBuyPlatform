@@ -19,7 +19,7 @@ export default function VendorLogin() {
   const form = useForm<VendorLoginRequest>({
     resolver: zodResolver(vendorLoginSchema),
     defaultValues: {
-      email: "",
+      phone: "",
       password: ""
     }
   });
@@ -28,10 +28,7 @@ export default function VendorLogin() {
     setIsSubmitting(true);
     
     try {
-      const response = await apiRequest("/api/vendors/login", {
-        method: "POST",
-        body: JSON.stringify(data)
-      });
+      const response = await apiRequest("/api/vendors/login", "POST", data);
       
       if (response.ok) {
         const result = await response.json();
@@ -98,12 +95,12 @@ export default function VendorLogin() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Phone Number</FormLabel>
                       <FormControl>
-                        <Input {...field} type="email" placeholder="your@email.com" />
+                        <Input {...field} type="tel" placeholder="Enter 10-digit phone number" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
