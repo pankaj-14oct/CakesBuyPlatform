@@ -84,10 +84,8 @@ export default function VendorDashboard() {
   const { data: ordersData, isLoading: ordersLoading } = useQuery({
     queryKey: ["/api/vendors/orders"],
     queryFn: async () => {
-      const response = await apiRequest("/api/vendors/orders", {
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("vendor_token")}`
-        }
+      const response = await apiRequest("/api/vendors/orders", "GET", undefined, {
+        "Authorization": `Bearer ${localStorage.getItem("vendor_token")}`
       });
       
       if (!response.ok) {
@@ -101,12 +99,8 @@ export default function VendorDashboard() {
 
   const updateOrderStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
-      const response = await apiRequest(`/api/vendors/orders/${orderId}/status`, {
-        method: "PATCH",
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("vendor_token")}`
-        },
-        body: JSON.stringify({ status })
+      const response = await apiRequest(`/api/vendors/orders/${orderId}/status`, "PATCH", { status }, {
+        "Authorization": `Bearer ${localStorage.getItem("vendor_token")}`
       });
       
       if (!response.ok) {

@@ -50,10 +50,8 @@ export default function AdminVendors() {
   const { data: vendorsData, isLoading } = useQuery({
     queryKey: ["/api/admin/vendors", currentPage, searchTerm],
     queryFn: async () => {
-      const response = await apiRequest(`/api/admin/vendors?page=${currentPage}&limit=10&search=${searchTerm}`, {
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("admin_token")}`
-        }
+      const response = await apiRequest(`/api/admin/vendors?page=${currentPage}&limit=10&search=${searchTerm}`, "GET", undefined, {
+        "Authorization": `Bearer ${localStorage.getItem("admin_token")}`
       });
       
       if (!response.ok) {
@@ -66,11 +64,8 @@ export default function AdminVendors() {
 
   const approveVendorMutation = useMutation({
     mutationFn: async (vendorId: number) => {
-      const response = await apiRequest(`/api/admin/vendors/${vendorId}/approve`, {
-        method: "PATCH",
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("admin_token")}`
-        }
+      const response = await apiRequest(`/api/admin/vendors/${vendorId}/approve`, "PATCH", undefined, {
+        "Authorization": `Bearer ${localStorage.getItem("admin_token")}`
       });
       
       if (!response.ok) {
@@ -97,11 +92,8 @@ export default function AdminVendors() {
 
   const deactivateVendorMutation = useMutation({
     mutationFn: async (vendorId: number) => {
-      const response = await apiRequest(`/api/admin/vendors/${vendorId}/deactivate`, {
-        method: "PATCH",
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("admin_token")}`
-        }
+      const response = await apiRequest(`/api/admin/vendors/${vendorId}/deactivate`, "PATCH", undefined, {
+        "Authorization": `Bearer ${localStorage.getItem("admin_token")}`
       });
       
       if (!response.ok) {

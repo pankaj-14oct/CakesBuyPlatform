@@ -41,10 +41,7 @@ export default function VendorRegister() {
       console.log("Submitting vendor registration data:", data);
       console.log("Form errors:", form.formState.errors);
       
-      const response = await apiRequest("/api/vendors/register", {
-        method: "POST",
-        body: JSON.stringify(data)
-      });
+      const response = await apiRequest("/api/vendors/register", "POST", data);
       
       if (response.ok) {
         const result = await response.json();
