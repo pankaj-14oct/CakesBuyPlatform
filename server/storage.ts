@@ -1497,33 +1497,25 @@ export class DatabaseStorage implements IStorage {
   async getVendorOrders(vendorId: number, page: number, limit: number): Promise<{ orders: Order[]; total: number; pages: number }> {
     const offset = (page - 1) * limit;
     
-    const ordersList = await db.select({
-      id: orders.id,
-      userId: orders.userId,
-      orderNumber: orders.orderNumber,
-      totalAmount: orders.totalAmount,
-      vendorPrice: orders.vendorPrice,
-      status: orders.status,
-      paymentStatus: orders.paymentStatus,
-      createdAt: orders.createdAt,
-      deliveryDate: orders.deliveryDate,
-      deliveryTime: orders.deliveryTime,
-      deliveryAddress: orders.deliveryAddress,
-      items: orders.items,
-      customerName: users.name,
-      customerPhone: users.phone,
-      customerEmail: users.email,
-      vendorId: orders.vendorId
-    }).from(orders)
-      .leftJoin(users, eq(orders.userId, users.id))
+    const ordersList = await db.select().from(orders)
       .where(eq(orders.vendorId, vendorId))
       .offset(offset)
       .limit(limit)
       .orderBy(desc(orders.createdAt));
     
-    // Enrich orders with cake images
+    // Enrich orders with customer information and cake images
     const enrichedOrders = await Promise.all(
       ordersList.map(async (order) => {
+        // Get customer information
+        const customer = await db.select({
+          name: users.name,
+          phone: users.phone,
+          email: users.email
+        }).from(users)
+          .where(eq(users.id, order.userId))
+          .limit(1);
+        
+        // Enrich items with cake images
         const enrichedItems = await Promise.all(
           order.items.map(async (item: any) => {
             if (item.cakeId) {
@@ -1548,6 +1540,9 @@ export class DatabaseStorage implements IStorage {
         
         return {
           ...order,
+          customerName: customer[0]?.name || 'Unknown',
+          customerPhone: customer[0]?.phone || 'Unknown',
+          customerEmail: customer[0]?.email || 'Unknown',
           items: enrichedItems
         };
       })

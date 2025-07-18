@@ -4125,7 +4125,8 @@ CakesBuy
       const result = await storage.getVendorOrders(req.vendor.id, page, limit);
       res.json(result);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch vendor orders" });
+      console.error("Error fetching vendor orders:", error);
+      res.status(500).json({ message: "Failed to fetch vendor orders", error: error.message });
     }
   });
 
