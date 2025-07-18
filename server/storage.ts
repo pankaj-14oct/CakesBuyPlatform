@@ -1568,6 +1568,49 @@ export class DatabaseStorage implements IStorage {
       .where(eq(orders.id, orderId));
   }
 
+  async updateOrderAddonPrices(orderId: number, addonPrices: {[key: string]: number}): Promise<void> {
+    // Get the current order with its items
+    const order = await db.query.orders.findFirst({
+      where: eq(orders.id, orderId)
+    });
+
+    if (!order || !order.items) {
+      throw new Error('Order not found');
+    }
+
+    // Update addon prices in the items jsonb field
+    const updatedItems = order.items.map((item: any, itemIndex: number) => {
+      if (!item.addons || !Array.isArray(item.addons)) {
+        return item;
+      }
+
+      const updatedAddons = item.addons.map((addon: any, addonIndex: number) => {
+        const key = `${itemIndex}-${addonIndex}`;
+        
+        if (addonPrices[key] !== undefined) {
+          return {
+            ...addon,
+            vendorPrice: addonPrices[key]
+          };
+        }
+        return addon;
+      });
+
+      return {
+        ...item,
+        addons: updatedAddons
+      };
+    });
+
+    // Update the order with new addon prices
+    await db.update(orders)
+      .set({ 
+        items: updatedItems,
+        updatedAt: new Date()
+      })
+      .where(eq(orders.id, orderId));
+  }
+
   async approveVendor(vendorId: number, adminId: number): Promise<void> {
     await db.update(vendors)
       .set({ 

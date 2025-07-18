@@ -31,6 +31,7 @@ export default function AdminOrders() {
   const [vendorPrice, setVendorPrice] = useState<string>('');
   const [selectedDeliveryBoyId, setSelectedDeliveryBoyId] = useState<string>('');
   const [selectedVendorId, setSelectedVendorId] = useState<string>('');
+  const [addonPrices, setAddonPrices] = useState<{[key: string]: string}>({});
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -130,10 +131,13 @@ export default function AdminOrders() {
   });
 
   const assignVendorMutation = useMutation({
-    mutationFn: async ({ orderId, vendorId, vendorPrice }: { orderId: number; vendorId: number; vendorPrice: string }) => {
+    mutationFn: async ({ orderId, vendorId, vendorPrice, addonPrices }: { orderId: number; vendorId: number; vendorPrice: string; addonPrices?: {[key: string]: string} }) => {
       const response = await apiRequest(`/api/admin/orders/${orderId}/assign-vendor`, 'PATCH', {
         vendorId,
-        vendorPrice: parseFloat(vendorPrice)
+        vendorPrice: parseFloat(vendorPrice),
+        addonPrices: addonPrices ? Object.fromEntries(
+          Object.entries(addonPrices).map(([key, value]) => [key, parseFloat(value)])
+        ) : {}
       });
       return response.json();
     },
@@ -144,6 +148,7 @@ export default function AdminOrders() {
       setOrderToAssignVendor(null);
       setVendorPrice('');
       setSelectedVendorId('');
+      setAddonPrices({});
     },
     onError: (error: any) => {
       toast({ 
@@ -198,6 +203,20 @@ export default function AdminOrders() {
     setOrderToAssignVendor(order);
     setVendorPrice(order.total || '');
     setSelectedVendorId('');
+    
+    // Initialize addon prices from order items
+    const initialAddonPrices: {[key: string]: string} = {};
+    if (order.items && order.items.length > 0) {
+      order.items.forEach((item, itemIndex) => {
+        if (item.addons && item.addons.length > 0) {
+          item.addons.forEach((addon, addonIndex) => {
+            const key = `${itemIndex}-${addonIndex}`;
+            initialAddonPrices[key] = addon.price?.toString() || '0';
+          });
+        }
+      });
+    }
+    setAddonPrices(initialAddonPrices);
     setVendorAssignDialogOpen(true);
   };
 
@@ -206,7 +225,8 @@ export default function AdminOrders() {
       assignVendorMutation.mutate({
         orderId: orderToAssignVendor.id,
         vendorId: parseInt(selectedVendorId),
-        vendorPrice: vendorPrice
+        vendorPrice: vendorPrice,
+        addonPrices: addonPrices
       });
     }
   };
@@ -847,7 +867,7 @@ export default function AdminOrders() {
 
       {/* Vendor Assignment Dialog */}
       <Dialog open={vendorAssignDialogOpen} onOpenChange={setVendorAssignDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Assign Order to Vendor</DialogTitle>
           </DialogHeader>
@@ -893,6 +913,54 @@ export default function AdminOrders() {
                   This is the price the vendor will receive for this order
                 </p>
               </div>
+
+              {/* Addon Pricing Section */}
+              {orderToAssignVendor && orderToAssignVendor.items && orderToAssignVendor.items.some(item => item.addons && item.addons.length > 0) && (
+                <div className="border-t pt-4">
+                  <Label className="text-sm font-medium">Addon Prices</Label>
+                  <div className="mt-2 space-y-3">
+                    {orderToAssignVendor.items.map((item, itemIndex) => (
+                      item.addons && item.addons.length > 0 && (
+                        <div key={itemIndex} className="bg-gray-50 p-3 rounded-lg">
+                          <p className="text-sm font-medium text-gray-700 mb-2">
+                            {item.name || `Item ${itemIndex + 1}`}
+                          </p>
+                          <div className="space-y-2">
+                            {item.addons.map((addon, addonIndex) => {
+                              const key = `${itemIndex}-${addonIndex}`;
+                              return (
+                                <div key={key} className="flex items-center space-x-2">
+                                  <span className="text-sm text-gray-600 flex-1">
+                                    {addon.name} x{addon.quantity}
+                                  </span>
+                                  <div className="flex items-center space-x-1">
+                                    <span className="text-sm text-gray-500">₹</span>
+                                    <Input
+                                      type="number"
+                                      value={addonPrices[key] || '0'}
+                                      onChange={(e) => setAddonPrices(prev => ({
+                                        ...prev,
+                                        [key]: e.target.value
+                                      }))}
+                                      placeholder="0"
+                                      className="w-20 h-8 text-sm"
+                                      min="0"
+                                      step="0.01"
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Set individual prices for each addon that the vendor will receive
+                  </p>
+                </div>
+              )}
               
               <div className="flex justify-end space-x-2 pt-4">
                 <Button

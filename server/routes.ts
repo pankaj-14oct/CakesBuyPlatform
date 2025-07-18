@@ -4205,7 +4205,7 @@ CakesBuy
   app.patch("/api/admin/orders/:id/assign-vendor", requireAdmin, async (req, res) => {
     try {
       const orderId = parseInt(req.params.id);
-      const { vendorId, vendorPrice } = req.body;
+      const { vendorId, vendorPrice, addonPrices } = req.body;
       
       if (!vendorId) {
         return res.status(400).json({ message: "Vendor ID is required" });
@@ -4215,10 +4215,17 @@ CakesBuy
         return res.status(400).json({ message: "Valid vendor price is required" });
       }
       
+      // Update order with vendor assignment and pricing
       await storage.assignOrderToVendor(orderId, vendorId, parseFloat(vendorPrice));
+      
+      // If addon prices are provided, update the order items with vendor addon prices
+      if (addonPrices && Object.keys(addonPrices).length > 0) {
+        await storage.updateOrderAddonPrices(orderId, addonPrices);
+      }
       
       res.json({ message: "Order assigned to vendor successfully" });
     } catch (error) {
+      console.error('Error assigning order to vendor:', error);
       res.status(500).json({ message: "Failed to assign order to vendor" });
     }
   });
