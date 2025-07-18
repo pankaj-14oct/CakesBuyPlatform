@@ -43,6 +43,8 @@ interface Order {
   status: string;
   paymentStatus: string;
   createdAt: string;
+  deliveryDate?: string;
+  deliveryTime?: string;
   items: any[];
 }
 
@@ -283,6 +285,67 @@ export default function VendorDashboard() {
                           </div>
                         </div>
                         
+                        {/* Order Items Details */}
+                        <div className="mb-3">
+                          <p className="text-sm text-gray-600 mb-2">Order Items:</p>
+                          <div className="space-y-2">
+                            {order.items && order.items.length > 0 ? (
+                              order.items.map((item: any, index: number) => (
+                                <div key={index} className="bg-gray-50 p-3 rounded-lg">
+                                  <div className="flex justify-between items-start mb-1">
+                                    <h4 className="font-medium text-sm">{item.cakeName || item.name}</h4>
+                                    <span className="text-sm font-semibold">₹{item.price}</span>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                                    {item.weight && (
+                                      <div>
+                                        <span className="font-medium">Weight:</span> {item.weight}
+                                      </div>
+                                    )}
+                                    {item.flavor && (
+                                      <div>
+                                        <span className="font-medium">Flavor:</span> {item.flavor}
+                                      </div>
+                                    )}
+                                    {item.eggless !== undefined && (
+                                      <div>
+                                        <span className="font-medium">Type:</span> {item.eggless ? 'Eggless' : 'Regular'}
+                                      </div>
+                                    )}
+                                    {item.quantity && (
+                                      <div>
+                                        <span className="font-medium">Qty:</span> {item.quantity}
+                                      </div>
+                                    )}
+                                  </div>
+                                  {item.customMessage && (
+                                    <div className="mt-2 text-xs">
+                                      <span className="font-medium text-gray-600">Message:</span>
+                                      <p className="text-gray-700 italic">"{item.customMessage}"</p>
+                                    </div>
+                                  )}
+                                  {item.deliveryInstructions && (
+                                    <div className="mt-2 text-xs">
+                                      <span className="font-medium text-gray-600">Instructions:</span>
+                                      <p className="text-gray-700">{item.deliveryInstructions}</p>
+                                    </div>
+                                  )}
+                                  {item.isPhotoCake && (
+                                    <div className="mt-2">
+                                      <span className="inline-block bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded">
+                                        Photo Cake
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              ))
+                            ) : (
+                              <p className="text-sm text-gray-500">No item details available</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Delivery Information */}
                         <div className="mb-3">
                           <p className="text-sm text-gray-600 mb-1">Delivery Address:</p>
                           <p className="text-sm">
@@ -291,6 +354,26 @@ export default function VendorDashboard() {
                               : `${order.deliveryAddress.name} - ${order.deliveryAddress.address}, ${order.deliveryAddress.city} - ${order.deliveryAddress.pincode}`
                             }
                           </p>
+                        </div>
+
+                        {/* Delivery Schedule */}
+                        <div className="mb-3">
+                          <div className="flex items-center gap-4 text-sm">
+                            {order.deliveryDate && (
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-4 w-4 text-gray-500" />
+                                <span className="font-medium">Date:</span>
+                                <span>{new Date(order.deliveryDate).toLocaleDateString()}</span>
+                              </div>
+                            )}
+                            {order.deliveryTime && (
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-4 w-4 text-gray-500" />
+                                <span className="font-medium">Time:</span>
+                                <span>{order.deliveryTime}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                         
                         <div className="flex justify-between items-center">
