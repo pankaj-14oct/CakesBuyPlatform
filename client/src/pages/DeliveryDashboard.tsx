@@ -34,7 +34,8 @@ import {
   Award,
   Target,
   Download,
-  Smartphone
+  Smartphone,
+  RefreshCw
 } from "lucide-react";
 import { useDeliveryNotifications } from "@/hooks/useDeliveryNotifications";
 import { testNotificationSound } from "@/utils/testSound";
@@ -692,6 +693,19 @@ export default function DeliveryDashboard() {
                   </Button>
                 )}
               </div>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  queryClient.invalidateQueries({ queryKey: ['/api/delivery/orders'] });
+                  toast({ title: "Orders refreshed!" });
+                }}
+                className="text-white border-white/30 bg-white/10 hover:bg-white/20 hover:text-white w-full sm:w-auto"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Reload
+              </Button>
               
               <Button 
                 variant="secondary" 

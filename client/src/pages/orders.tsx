@@ -195,6 +195,15 @@ export default function OrdersPage() {
             <h1 className="text-3xl font-bold text-charcoal">My Orders</h1>
             <p className="text-charcoal opacity-70">View and track your order history</p>
           </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => window.location.reload()} 
+            className="ml-4"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Reload
+          </Button>
         </div>
 
         {/* Filters */}

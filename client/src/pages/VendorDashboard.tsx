@@ -20,7 +20,8 @@ import {
   AlertCircle,
   Truck,
   ZoomIn,
-  Eye
+  Eye,
+  RefreshCw
 } from "lucide-react";
 
 interface VendorInfo {
@@ -207,6 +208,17 @@ export default function VendorDashboard() {
                 <p className="text-sm font-medium text-gray-900">{vendor.name}</p>
                 <p className="text-xs text-gray-500">{vendor.email}</p>
               </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  queryClient.invalidateQueries({ queryKey: ["/api/vendors/orders"] });
+                  toast({ title: "Orders refreshed!" });
+                }}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Reload
+              </Button>
               <Button onClick={handleLogout} variant="outline" size="sm">
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout

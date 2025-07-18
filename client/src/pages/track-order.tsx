@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { 
   Package, Search, MapPin, Clock, CheckCircle, 
-  Truck, User, Phone, Calendar, ArrowLeft 
+  Truck, User, Phone, Calendar, ArrowLeft, RefreshCw 
 } from 'lucide-react';
 import { Order } from '@shared/schema';
 import { formatPrice } from '@/lib/utils';
@@ -18,6 +18,7 @@ export default function TrackOrderPage() {
   const [orderNumber, setOrderNumber] = useState('');
   const [searchClicked, setSearchClicked] = useState(false);
   const { isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
 
   // Check for order number in URL parameters
   useEffect(() => {
@@ -202,9 +203,21 @@ export default function TrackOrderPage() {
                     {getStatusIcon(order.status)}
                     Order #{order.orderNumber}
                   </span>
-                  <Badge className={getStatusColor(order.status)}>
-                    {formatStatus(order.status)}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        queryClient.invalidateQueries({ queryKey: ['/api/orders', orderNumber] });
+                      }}
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Refresh
+                    </Button>
+                    <Badge className={getStatusColor(order.status)}>
+                      {formatStatus(order.status)}
+                    </Badge>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>

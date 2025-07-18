@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ShoppingCart, Eye, Package, Truck, CheckCircle, 
-  Clock, XCircle, MapPin, Phone, Calendar, UserPlus, Mail, Star
+  Clock, XCircle, MapPin, Phone, Calendar, UserPlus, Mail, Star, RefreshCw
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -252,20 +252,34 @@ export default function AdminOrders() {
           <p className="text-charcoal opacity-70">Manage customer orders</p>
         </div>
         
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Orders</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="confirmed">Confirmed</SelectItem>
-            <SelectItem value="preparing">Preparing</SelectItem>
-            <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
-            <SelectItem value="delivered">Delivered</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-3">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Orders</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="confirmed">Confirmed</SelectItem>
+              <SelectItem value="preparing">Preparing</SelectItem>
+              <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
+              <SelectItem value="delivered">Delivered</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => {
+              queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
+              toast({ title: "Orders refreshed!" });
+            }}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Reload
+          </Button>
+        </div>
       </div>
 
       {/* Order Stats */}
