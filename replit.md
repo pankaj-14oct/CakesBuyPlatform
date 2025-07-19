@@ -5,6 +5,8 @@ A full-stack cake ordering platform built with React frontend and Express backen
 
 ## Recent Changes
 - **2025-01-19**: Added image field to addons table for single primary image support (in addition to existing images array)
+- **2025-01-19**: Added image column to admin addon table - admins can now see uploaded images in the management interface
+- **2025-01-19**: Fixed addon image display in customer selection modal - uploaded images now display instead of placeholder
 - **2025-01-19**: Fixed form validation for addon images - now properly accepts both URLs and media library file paths
 - **2025-01-19**: Added complete media management system - admins can upload, browse, and manage images through dedicated media library
 - **2025-01-19**: Enhanced addon forms with media picker - admins can select images from media library or enter URLs directly

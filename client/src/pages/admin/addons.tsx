@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Package, Image, Check } from "lucide-react";
+import { Plus, Edit, Trash2, Package, Image, Check, Image as ImageIcon } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 
 interface MediaFile {
@@ -514,6 +514,7 @@ export default function AdminAddons() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Image</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Description</TableHead>
@@ -524,6 +525,21 @@ export default function AdminAddons() {
               <TableBody>
                 {addons.map((addon) => (
                   <TableRow key={addon.id}>
+                    <TableCell>
+                      {addon.image ? (
+                        <div className="w-12 h-12 border rounded overflow-hidden">
+                          <img 
+                            src={addon.image} 
+                            alt={addon.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 border rounded bg-gray-50 flex items-center justify-center">
+                          <ImageIcon className="h-4 w-4 text-gray-400" />
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell className="font-medium">{addon.name}</TableCell>
                     <TableCell>
                       <Badge variant="secondary" className="capitalize">

@@ -198,7 +198,7 @@ export default function AddonSelectionModal({ isOpen, onClose, onContinue }: Add
                         
                         <div className="mb-2 sm:mb-3">
                           <img
-                            src="/api/placeholder/120/120"
+                            src={addon.image || "/api/placeholder/120/120"}
                             alt={addon.name}
                             className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-lg object-cover"
                           />
