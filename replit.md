@@ -4,6 +4,7 @@
 A full-stack cake ordering platform built with React frontend and Express backend, featuring customizable cakes, photo cake options, admin dashboard, and delivery management.
 
 ## Recent Changes
+- **2025-01-19**: Added image field to addons table for single primary image support (in addition to existing images array)
 - **2025-01-19**: Migration to Replit completed successfully - all services operational with database connectivity
 - **2025-01-19**: Added 3 sample orders with various addon combinations for testing and demonstration
 - **2025-01-19**: Updated vendor dashboard to full width display with admin-set vendor pricing - vendors now see their assigned prices instead of original customer prices, with proper addon pricing calculations

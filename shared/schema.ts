@@ -73,6 +73,7 @@ export const cakes = pgTable("cakes", {
 export const addons = pgTable("addons", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  image: text("image"),
   description: text("description"),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   category: text("category"), // balloons, candles, cards, flowers
