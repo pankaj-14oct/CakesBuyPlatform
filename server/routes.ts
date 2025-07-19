@@ -4238,8 +4238,10 @@ CakesBuy
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       const search = req.query.search as string || "";
+      const sortBy = req.query.sortBy as string || "createdAt";
+      const sortOrder = (req.query.sortOrder as string || "desc") as 'asc' | 'desc';
       
-      const result = await storage.getOrdersPaginated(page, limit, search);
+      const result = await storage.getOrdersPaginated(page, limit, search, sortBy, sortOrder);
       res.json(result);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch orders" });

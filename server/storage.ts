@@ -15,7 +15,7 @@ import {
   type PhonePeTransaction, type InsertPhonePeTransaction, type Vendor, type InsertVendor
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, like, and, desc, isNotNull, or, gte, lte, count } from "drizzle-orm";
+import { eq, like, and, desc, asc, isNotNull, or, gte, lte, count } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -740,7 +740,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(orders).orderBy(desc(orders.createdAt));
   }
 
-  async getOrdersPaginated(page: number, limit: number, search?: string): Promise<{ orders: Order[]; total: number; pages: number }> {
+  async getOrdersPaginated(page: number, limit: number, search?: string, sortBy?: string, sortOrder?: 'asc' | 'desc'): Promise<{ orders: Order[]; total: number; pages: number }> {
     const offset = (page - 1) * limit;
     
     let query = db.select().from(orders);
@@ -756,8 +756,31 @@ export class DatabaseStorage implements IStorage {
       countQuery = countQuery.where(searchCondition);
     }
     
+    // Apply sorting
+    const sortColumn = sortBy || 'createdAt';
+    const sortDirection = sortOrder || 'desc';
+    
+    let orderByClause;
+    switch (sortColumn) {
+      case 'deliveryDate':
+        orderByClause = sortDirection === 'asc' ? asc(orders.deliveryDate) : desc(orders.deliveryDate);
+        break;
+      case 'total':
+        orderByClause = sortDirection === 'asc' ? asc(orders.total) : desc(orders.total);
+        break;
+      case 'status':
+        orderByClause = sortDirection === 'asc' ? asc(orders.status) : desc(orders.status);
+        break;
+      case 'orderNumber':
+        orderByClause = sortDirection === 'asc' ? asc(orders.orderNumber) : desc(orders.orderNumber);
+        break;
+      default: // createdAt
+        orderByClause = sortDirection === 'asc' ? asc(orders.createdAt) : desc(orders.createdAt);
+        break;
+    }
+    
     const [ordersResult, countResult] = await Promise.all([
-      query.orderBy(desc(orders.createdAt)).limit(limit).offset(offset),
+      query.orderBy(orderByClause).limit(limit).offset(offset),
       countQuery
     ]);
     

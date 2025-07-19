@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ShoppingCart, Eye, Package, Truck, CheckCircle, 
-  Clock, XCircle, MapPin, Phone, Calendar, UserPlus, Mail, Star, RefreshCw, Search
+  Clock, XCircle, MapPin, Phone, Calendar, UserPlus, Mail, Star, RefreshCw, Search, ArrowUpDown, ArrowUp, ArrowDown
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,10 +34,12 @@ export default function AdminOrders() {
   const [selectedVendorId, setSelectedVendorId] = useState<string>('');
   const [addonPrices, setAddonPrices] = useState<{[key: string]: string}>({});
   
-  // Pagination state
+  // Pagination and sorting state
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [pageSize] = useState(10);
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -62,12 +64,14 @@ export default function AdminOrders() {
 
   // Fetch paginated orders
   const { data: ordersData, isLoading } = useQuery({
-    queryKey: ['/api/admin/orders/paginated', currentPage, pageSize, searchQuery],
+    queryKey: ['/api/admin/orders/paginated', currentPage, pageSize, searchQuery, sortBy, sortOrder],
     queryFn: async () => {
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: pageSize.toString(),
-        search: searchQuery
+        search: searchQuery,
+        sortBy,
+        sortOrder
       });
       const response = await apiRequest(`/api/admin/orders/paginated?${params}`, "GET", undefined, {
         "Authorization": `Bearer ${localStorage.getItem("admin_token")}`
@@ -338,6 +342,38 @@ export default function AdminOrders() {
               <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
+
+          <Select value={sortBy} onValueChange={(value) => {
+            setSortBy(value);
+            setCurrentPage(1); // Reset to first page when sorting changes
+          }}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="createdAt">Order Date</SelectItem>
+              <SelectItem value="deliveryDate">Delivery Date</SelectItem>
+              <SelectItem value="total">Amount</SelectItem>
+              <SelectItem value="status">Status</SelectItem>
+              <SelectItem value="orderNumber">Order Number</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+              setCurrentPage(1); // Reset to first page when sort order changes
+            }}
+            className="px-3"
+          >
+            {sortOrder === 'asc' ? (
+              <ArrowUp className="h-4 w-4" />
+            ) : (
+              <ArrowDown className="h-4 w-4" />
+            )}
+          </Button>
           
           <Button 
             variant="outline" 
@@ -418,11 +454,91 @@ export default function AdminOrders() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Order</TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (sortBy === 'orderNumber') {
+                          setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                        } else {
+                          setSortBy('orderNumber');
+                          setSortOrder('asc');
+                        }
+                        setCurrentPage(1);
+                      }}
+                      className="p-0 h-auto font-medium text-left justify-start"
+                    >
+                      Order
+                      {sortBy === 'orderNumber' && (
+                        sortOrder === 'asc' ? <ArrowUp className="ml-1 h-3 w-3" /> : <ArrowDown className="ml-1 h-3 w-3" />
+                      )}
+                    </Button>
+                  </TableHead>
                   <TableHead>Customer</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Delivery</TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (sortBy === 'total') {
+                          setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                        } else {
+                          setSortBy('total');
+                          setSortOrder('desc');
+                        }
+                        setCurrentPage(1);
+                      }}
+                      className="p-0 h-auto font-medium text-left justify-start"
+                    >
+                      Amount
+                      {sortBy === 'total' && (
+                        sortOrder === 'asc' ? <ArrowUp className="ml-1 h-3 w-3" /> : <ArrowDown className="ml-1 h-3 w-3" />
+                      )}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (sortBy === 'status') {
+                          setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                        } else {
+                          setSortBy('status');
+                          setSortOrder('asc');
+                        }
+                        setCurrentPage(1);
+                      }}
+                      className="p-0 h-auto font-medium text-left justify-start"
+                    >
+                      Status
+                      {sortBy === 'status' && (
+                        sortOrder === 'asc' ? <ArrowUp className="ml-1 h-3 w-3" /> : <ArrowDown className="ml-1 h-3 w-3" />
+                      )}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (sortBy === 'deliveryDate') {
+                          setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                        } else {
+                          setSortBy('deliveryDate');
+                          setSortOrder('asc');
+                        }
+                        setCurrentPage(1);
+                      }}
+                      className="p-0 h-auto font-medium text-left justify-start"
+                    >
+                      Delivery
+                      {sortBy === 'deliveryDate' && (
+                        sortOrder === 'asc' ? <ArrowUp className="ml-1 h-3 w-3" /> : <ArrowDown className="ml-1 h-3 w-3" />
+                      )}
+                    </Button>
+                  </TableHead>
                   <TableHead>Vendor</TableHead>
                   <TableHead>Delivery Boy</TableHead>
                   <TableHead>Actions</TableHead>
