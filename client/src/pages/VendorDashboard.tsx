@@ -517,32 +517,71 @@ export default function VendorDashboard() {
                                             </div>
                                           </div>
                                           
-                                          <div className="text-sm text-gray-600 space-y-2 bg-gray-50 p-3 rounded mb-3">
-                                            <div className="flex items-center gap-2">
-                                              <Package className="h-4 w-4 text-blue-500" />
-                                              <span>Qty: <strong>{item.quantity}</strong></span>
-                                            </div>
-                                            {item.weight && (
-                                              <div className="flex items-center gap-2">
-                                                <span className="w-4 h-4 bg-green-500 rounded-full"></span>
-                                                <span>Weight: <strong>{item.weight}</strong></span>
+                                          <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded mb-3">
+                                            <div className="flex gap-3">
+                                              {/* Specifications */}
+                                              <div className="flex-1 space-y-2">
+                                                <div className="flex items-center gap-2">
+                                                  <Package className="h-4 w-4 text-blue-500" />
+                                                  <span>Qty: <strong>{item.quantity}</strong></span>
+                                                </div>
+                                                {item.weight && (
+                                                  <div className="flex items-center gap-2">
+                                                    <span className="w-4 h-4 bg-green-500 rounded-full"></span>
+                                                    <span>Weight: <strong>{item.weight}</strong></span>
+                                                  </div>
+                                                )}
+                                                {item.flavor && (
+                                                  <div className="flex items-center gap-2">
+                                                    <span className="w-4 h-4 bg-purple-500 rounded-full"></span>
+                                                    <span>Flavor: <strong>{item.flavor}</strong></span>
+                                                  </div>
+                                                )}
+                                                {item.customMessage && (
+                                                  <div className="flex items-center gap-2">
+                                                    <span className="w-4 h-4 bg-pink-500 rounded-full"></span>
+                                                    <span>Message: <em>"{item.customMessage}"</em></span>
+                                                  </div>
+                                                )}
+                                                <div className="flex items-center gap-2">
+                                                  <span className="w-4 h-4 bg-yellow-500 rounded-full"></span>
+                                                  <span>Your Price: <strong>₹{itemVendorPrice.toFixed(2)}</strong></span>
+                                                </div>
                                               </div>
-                                            )}
-                                            {item.flavor && (
-                                              <div className="flex items-center gap-2">
-                                                <span className="w-4 h-4 bg-purple-500 rounded-full"></span>
-                                                <span>Flavor: <strong>{item.flavor}</strong></span>
+                                              
+                                              {/* Product Image - Inside Specifications */}
+                                              <div className="flex-shrink-0">
+                                                {item.images && item.images.length > 0 ? (
+                                                  <Dialog>
+                                                    <DialogTrigger asChild>
+                                                      <div className="relative cursor-pointer group">
+                                                        <img 
+                                                          src={item.images[0]} 
+                                                          alt={item.cakeName || item.name}
+                                                          className="w-16 h-16 object-cover rounded border hover:opacity-90 transition-opacity"
+                                                        />
+                                                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded flex items-center justify-center transition-all">
+                                                          <ZoomIn className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                        </div>
+                                                      </div>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="max-w-2xl">
+                                                      <DialogHeader>
+                                                        <DialogTitle>Product Image - {item.cakeName || item.name}</DialogTitle>
+                                                      </DialogHeader>
+                                                      <img 
+                                                        src={item.images[0]} 
+                                                        alt={item.cakeName || item.name}
+                                                        className="w-full max-h-96 object-contain rounded-lg"
+                                                      />
+                                                    </DialogContent>
+                                                  </Dialog>
+                                                ) : (
+                                                  <div className="w-16 h-16 bg-gray-200 rounded border flex items-center justify-center">
+                                                    <Package className="h-6 w-6 text-gray-400" />
+                                                  </div>
+                                                )}
                                               </div>
-                                            )}
-                                            {item.customMessage && (
-                                              <div className="flex items-center gap-2">
-                                                <span className="w-4 h-4 bg-pink-500 rounded-full"></span>
-                                                <span>Message: <em>"{item.customMessage}"</em></span>
-                                              </div>
-                                            )}
-                                            <div className="flex items-center gap-2">
-                                              <span className="w-4 h-4 bg-yellow-500 rounded-full"></span>
-                                              <span>Your Price: <strong>₹{itemVendorPrice.toFixed(2)}</strong></span>
                                             </div>
                                           </div>
                                           
@@ -612,40 +651,6 @@ export default function VendorDashboard() {
                                                   </div>
                                                 ))}
                                               </div>
-                                            </div>
-                                          )}
-                                        </div>
-                                        
-                                        {/* Product Image - Moved to Right */}
-                                        <div className="flex-shrink-0">
-                                          {item.images && item.images.length > 0 ? (
-                                            <Dialog>
-                                              <DialogTrigger asChild>
-                                                <div className="relative cursor-pointer group">
-                                                  <img 
-                                                    src={item.images[0]} 
-                                                    alt={item.cakeName || item.name}
-                                                    className="w-16 h-16 object-cover rounded border hover:opacity-90 transition-opacity"
-                                                  />
-                                                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded flex items-center justify-center transition-all">
-                                                    <ZoomIn className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                  </div>
-                                                </div>
-                                              </DialogTrigger>
-                                              <DialogContent className="max-w-2xl">
-                                                <DialogHeader>
-                                                  <DialogTitle>Product Image - {item.cakeName || item.name}</DialogTitle>
-                                                </DialogHeader>
-                                                <img 
-                                                  src={item.images[0]} 
-                                                  alt={item.cakeName || item.name}
-                                                  className="w-full max-h-96 object-contain rounded-lg"
-                                                />
-                                              </DialogContent>
-                                            </Dialog>
-                                          ) : (
-                                            <div className="w-16 h-16 bg-gray-200 rounded border flex items-center justify-center">
-                                              <Package className="h-6 w-6 text-gray-400" />
                                             </div>
                                           )}
                                         </div>
