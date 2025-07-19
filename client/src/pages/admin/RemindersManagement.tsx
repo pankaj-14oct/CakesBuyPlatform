@@ -116,7 +116,9 @@ export default function RemindersManagement() {
     }
   };
 
-  const getEventIcon = (eventType: string) => {
+  const getEventIcon = (eventType: string | null | undefined) => {
+    if (!eventType) return <Calendar className="h-4 w-4" />;
+    
     switch (eventType.toLowerCase()) {
       case 'birthday':
         return <Gift className="h-4 w-4" />;
@@ -127,7 +129,9 @@ export default function RemindersManagement() {
     }
   };
 
-  const getEventColor = (eventType: string) => {
+  const getEventColor = (eventType: string | null | undefined) => {
+    if (!eventType) return 'bg-gray-100 text-gray-800';
+    
     switch (eventType.toLowerCase()) {
       case 'birthday':
         return 'bg-blue-100 text-blue-800';
