@@ -210,12 +210,21 @@ export default function OccasionReminderSimple() {
       alertDateForInput = `${currentYear}-${parts[0]}-${parts[1]}`;
     }
     
+    // Debug log to check reminder data
+    console.log('Editing reminder:', reminder);
+    
     form.reset({
-      reminderTitle: reminder.title || reminder.relationshipType, // Use title if available, fallback to relationshipType
+      reminderTitle: reminder.title || `${reminder.relationshipType}'s ${reminder.eventType}`, // Better fallback format
       alertDate: alertDateForInput,
       eventType: reminder.eventType,
       relationshipType: reminder.relationshipType,
     });
+    
+    // Force form update
+    setTimeout(() => {
+      form.setValue('reminderTitle', reminder.title || `${reminder.relationshipType}'s ${reminder.eventType}`);
+    }, 100);
+    
     setIsDialogOpen(true);
   };
 
@@ -367,8 +376,9 @@ export default function OccasionReminderSimple() {
                           <FormControl>
                             <Input
                               {...field}
-                              placeholder="Enter reminder title (e.g., Mom's Birthday)"
+                              placeholder="Enter reminder title (e.g., Mom's Birthday, daughter's bday)"
                               className="h-12 text-base"
+                              disabled={createReminderMutation.isPending || updateReminderMutation.isPending}
                             />
                           </FormControl>
                           <FormMessage />
