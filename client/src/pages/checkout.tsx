@@ -1194,11 +1194,6 @@ export default function CheckoutPage() {
                           <p className="text-xs text-charcoal opacity-70">
                             {item.weight} • {item.flavor} • Qty: {item.quantity}
                           </p>
-                          {item.addons.length > 0 && (
-                            <p className="text-xs text-charcoal opacity-60">
-                              + {item.addons.length} add-on{item.addons.length > 1 ? 's' : ''}
-                            </p>
-                          )}
                         </div>
                         <div className="text-sm font-medium text-brown">
                           {formatPrice((item.price + item.addons.reduce((sum, addon) => 
@@ -1206,6 +1201,39 @@ export default function CheckoutPage() {
                           )) * item.quantity)}
                         </div>
                       </div>
+                      
+                      {/* Addon Details */}
+                      {item.addons && item.addons.length > 0 && (
+                        <div className="ml-15 p-3 bg-caramel/5 border border-caramel/20 rounded-lg">
+                          <div className="flex items-center mb-2">
+                            <span className="text-sm text-caramel font-medium">Add-ons Selected:</span>
+                          </div>
+                          <div className="space-y-1">
+                            {item.addons.map((addonItem, addonIndex) => (
+                              <div key={addonIndex} className="flex justify-between items-center text-xs">
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-charcoal">•</span>
+                                  <span className="text-charcoal font-medium">
+                                    {addonItem.addon.name}
+                                  </span>
+                                  {addonItem.customInput && (
+                                    <span className="text-charcoal opacity-70 italic">
+                                      ({addonItem.customInput})
+                                    </span>
+                                  )}
+                                  <span className="text-charcoal opacity-60">
+                                    x{addonItem.quantity}
+                                  </span>
+                                </div>
+                                <div className="text-caramel font-medium">
+                                  {formatPrice(parseFloat(addonItem.addon.price) * addonItem.quantity)}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
                       {/* Personalization Summary */}
                       {item.customImage && (
                         <div className="ml-15 p-2 bg-red-50 border border-red-200 rounded text-xs">
