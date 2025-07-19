@@ -1515,9 +1515,12 @@ export class DatabaseStorage implements IStorage {
           .where(eq(users.id, order.userId))
           .limit(1);
         
-        // Enrich items with cake images
+        // Enrich items with cake images and addon images
         const enrichedItems = await Promise.all(
           order.items.map(async (item: any) => {
+            let enrichedItem = { ...item };
+            
+            // Get cake information
             if (item.cakeId) {
               const cake = await db.select({ 
                 images: cakes.images, 
@@ -1527,14 +1530,41 @@ export class DatabaseStorage implements IStorage {
                 .where(eq(cakes.id, item.cakeId))
                 .limit(1);
               
-              return {
-                ...item,
+              enrichedItem = {
+                ...enrichedItem,
                 images: cake[0]?.images || [],
                 cakeName: cake[0]?.name || item.name,
                 cakeDescription: cake[0]?.description
               };
             }
-            return item;
+            
+            // Enrich addons with images
+            if (item.addons && item.addons.length > 0) {
+              const enrichedAddons = await Promise.all(
+                item.addons.map(async (addon: any) => {
+                  if (addon.id) {
+                    const addonData = await db.select({
+                      images: addons.images,
+                      name: addons.name,
+                      description: addons.description
+                    }).from(addons)
+                      .where(eq(addons.id, addon.id))
+                      .limit(1);
+                    
+                    return {
+                      ...addon,
+                      images: addonData[0]?.images || [],
+                      description: addonData[0]?.description
+                    };
+                  }
+                  return addon;
+                })
+              );
+              
+              enrichedItem.addons = enrichedAddons;
+            }
+            
+            return enrichedItem;
           })
         );
         

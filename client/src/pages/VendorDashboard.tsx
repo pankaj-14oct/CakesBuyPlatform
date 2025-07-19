@@ -496,7 +496,7 @@ export default function VendorDashboard() {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                               {order.items && order.items.length > 0 ? (
                                 order.items.map((item: any, index: number) => (
-                                  <div key={index} className="bg-gray-50 p-3 rounded-lg border">
+                                  <div key={index} className="bg-white p-4 rounded-lg border-2 border-gray-200 hover:border-blue-300 transition-colors shadow-sm">
                                     <div className="flex gap-3">
                                       {/* Product Image */}
                                       <div className="flex-shrink-0">
@@ -534,26 +534,99 @@ export default function VendorDashboard() {
 
                                       {/* Product Details */}
                                       <div className="flex-1 min-w-0">
-                                        <h5 className="font-medium text-sm text-gray-900 truncate">
+                                        <h5 className="font-semibold text-sm text-gray-900 truncate mb-1">
                                           {item.cakeName || item.name}
                                         </h5>
-                                        <div className="text-xs text-gray-600 space-y-1 mt-1">
-                                          <div>Qty: {item.quantity}</div>
-                                          {item.weight && <div>Weight: {item.weight}</div>}
-                                          {item.flavor && <div>Flavor: {item.flavor}</div>}
-                                          {item.addons && item.addons.length > 0 && (
-                                            <div>
-                                              <span className="font-medium">Addons:</span>
-                                              <div className="mt-1">
-                                                {item.addons.map((addon: any, addonIndex: number) => (
-                                                  <div key={addonIndex} className="text-xs">
-                                                    • {addon.name} {addon.quantity > 1 ? `(${addon.quantity})` : ''}
-                                                  </div>
-                                                ))}
-                                              </div>
+                                        <div className="text-xs text-gray-600 space-y-1 bg-gray-50 p-2 rounded">
+                                          <div className="flex items-center gap-2">
+                                            <Package className="h-3 w-3 text-blue-500" />
+                                            <span>Qty: <strong>{item.quantity}</strong></span>
+                                          </div>
+                                          {item.weight && (
+                                            <div className="flex items-center gap-2">
+                                              <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                                              <span>Weight: <strong>{item.weight}</strong></span>
+                                            </div>
+                                          )}
+                                          {item.flavor && (
+                                            <div className="flex items-center gap-2">
+                                              <span className="w-3 h-3 bg-purple-500 rounded-full"></span>
+                                              <span>Flavor: <strong>{item.flavor}</strong></span>
+                                            </div>
+                                          )}
+                                          {item.customMessage && (
+                                            <div className="flex items-center gap-2">
+                                              <span className="w-3 h-3 bg-pink-500 rounded-full"></span>
+                                              <span>Message: <em>"{item.customMessage}"</em></span>
                                             </div>
                                           )}
                                         </div>
+                                        
+                                        {item.addons && item.addons.length > 0 && (
+                                          <div className="mt-2">
+                                            <span className="font-medium text-amber-700">Addons Required:</span>
+                                            <div className="mt-2 space-y-2">
+                                              {item.addons.map((addon: any, addonIndex: number) => (
+                                                <div key={addonIndex} className="flex items-center gap-2 bg-amber-50 p-2 rounded border border-amber-200">
+                                                  {/* Addon Image */}
+                                                  <div className="flex-shrink-0">
+                                                    {addon.images && addon.images.length > 0 ? (
+                                                      <Dialog>
+                                                        <DialogTrigger asChild>
+                                                          <div className="relative cursor-pointer group">
+                                                            <img 
+                                                              src={addon.images[0]} 
+                                                              alt={addon.name}
+                                                              className="w-8 h-8 object-cover rounded border hover:opacity-90 transition-opacity"
+                                                            />
+                                                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded flex items-center justify-center transition-all">
+                                                              <ZoomIn className="h-3 w-3 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                            </div>
+                                                          </div>
+                                                        </DialogTrigger>
+                                                        <DialogContent className="max-w-md">
+                                                          <DialogHeader>
+                                                            <DialogTitle>Addon Image - {addon.name}</DialogTitle>
+                                                          </DialogHeader>
+                                                          <img 
+                                                            src={addon.images[0]} 
+                                                            alt={addon.name}
+                                                            className="w-full max-h-64 object-contain rounded-lg"
+                                                          />
+                                                        </DialogContent>
+                                                      </Dialog>
+                                                    ) : (
+                                                      <div className="w-8 h-8 bg-amber-200 rounded border flex items-center justify-center">
+                                                        <Package className="h-4 w-4 text-amber-600" />
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                  
+                                                  {/* Addon Details */}
+                                                  <div className="flex-1 min-w-0">
+                                                    <div className="text-xs font-medium text-amber-900">
+                                                      {addon.name}
+                                                    </div>
+                                                    <div className="text-xs text-amber-700 flex items-center gap-1">
+                                                      <span>Qty: {addon.quantity}</span>
+                                                      {addon.customInput && (
+                                                        <>
+                                                          <span>•</span>
+                                                          <span className="italic">"{addon.customInput}"</span>
+                                                        </>
+                                                      )}
+                                                    </div>
+                                                  </div>
+                                                  
+                                                  {/* Addon Price */}
+                                                  <div className="text-xs font-medium text-amber-900">
+                                                    ₹{addon.price}
+                                                  </div>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                   </div>

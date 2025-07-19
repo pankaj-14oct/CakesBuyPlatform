@@ -4,6 +4,10 @@
 A full-stack cake ordering platform built with React frontend and Express backend, featuring customizable cakes, photo cake options, admin dashboard, and delivery management.
 
 ## Recent Changes
+- **2025-01-19**: Enhanced vendor dashboard with addon images and improved layout - vendors can now see visual references for all addons
+- **2025-01-19**: Added images field to addons schema and enriched order data to include addon images from database
+- **2025-01-19**: Improved order item cards with better visual design, color-coded details, and enhanced addon display sections
+- **2025-01-19**: Fixed vendor panel accordion React error - delivery address object now properly formatted as text
 - **2025-01-19**: Fixed email layout to display cake price next to product name instead of at bottom for better clarity
 - **2025-01-19**: Enhanced order confirmation emails to include complete addon details (name, quantity, custom input, prices)
 - **2025-01-19**: Fixed user registration welcome email issue by updating remaining static sendWelcomeEmail imports to dynamic imports

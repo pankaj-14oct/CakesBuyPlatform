@@ -76,6 +76,7 @@ export const addons = pgTable("addons", {
   description: text("description"),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   category: text("category"), // balloons, candles, cards, flowers
+  images: jsonb("images").$type<string[]>().default([]),
   isAvailable: boolean("is_available").default(true),
 });
 
@@ -101,7 +102,7 @@ export const orders = pgTable("orders", {
       compositeImage?: string; // Generated final image combining background + user photo + text
     };
     price: number;
-    addons?: Array<{ id: number; name: string; price: number; quantity: number; customInput?: string }>;
+    addons?: Array<{ id: number; name: string; price: number; quantity: number; customInput?: string; images?: string[] }>;
   }>>().notNull(),
   subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
   deliveryFee: decimal("delivery_fee", { precision: 10, scale: 2 }).default("0"),
