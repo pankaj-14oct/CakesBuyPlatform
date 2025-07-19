@@ -1005,13 +1005,14 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
         bodyData.reminderDate = new Date(bodyData.reminderDate);
       }
       
-      const { eventType, eventDate, reminderDate, relationshipType } = insertEventReminderSchema.omit({ userId: true }).parse(bodyData);
+      const { eventType, eventDate, reminderDate, relationshipType, title } = insertEventReminderSchema.omit({ userId: true }).parse(bodyData);
       
       await storage.updateEventReminder(id, {
         eventType,
         eventDate,
         reminderDate: new Date(reminderDate),
-        relationshipType
+        relationshipType,
+        title
       });
       
       // Fetch the updated reminder to return it
