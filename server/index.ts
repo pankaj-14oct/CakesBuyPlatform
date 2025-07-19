@@ -43,6 +43,12 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Seed database on startup in development
+  // Temporarily disabled for faster startup
+  // if (app.get("env") === "development") {
+  //   await seedDatabase().catch(console.error);
+  // }
+
   // Create HTTP server
   const httpServer = createServer(app);
   
