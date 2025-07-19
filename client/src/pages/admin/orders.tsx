@@ -440,7 +440,11 @@ export default function AdminOrders() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <ShoppingCart className="mr-2 h-5 w-5" />
-            Orders ({totalOrders} total)
+            {orders.length > 0 ? (
+              `Orders - Showing ${startIndex} to ${endIndex} of ${totalOrders}`
+            ) : (
+              `Orders (${totalOrders} total)`
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>

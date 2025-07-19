@@ -4,6 +4,7 @@
 A full-stack cake ordering platform built with React frontend and Express backend, featuring customizable cakes, photo cake options, admin dashboard, and delivery management.
 
 ## Recent Changes
+- **2025-01-19**: Added comprehensive sorting logic for delivery date and other columns - implemented dropdown controls for sorting by Order Date/Delivery Date/Amount/Status/Order Number, added ascending/descending toggle button with arrow indicators, made column headers clickable with visual sort indicators, backend supports all sorting parameters with proper database queries, pagination display updated to show "Showing X to Y of Z" format in title
 - **2025-01-19**: Implemented pagination in admin orders section - added search functionality by order number/status/payment status, paginated display with 10 orders per page, uses dedicated paginated API endpoint for better performance, includes navigation controls and result count display
 - **2025-01-19**: Added 25 dummy orders for pagination testing - created comprehensive test data with various order statuses, payment methods, delivery dates, and random customer information to validate pagination functionality in admin dashboard
 - **2025-01-19**: Enhanced reminder email functionality - fixed database sent count increment error, improved date formatting to show "20 July" instead of "07-20", added event title support for personalized messages like "daughter's bday", updated email subjects and content to include "Don't forget" messaging for better user engagement
