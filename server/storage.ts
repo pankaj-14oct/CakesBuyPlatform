@@ -825,6 +825,11 @@ export class DatabaseStorage implements IStorage {
       ));
   }
 
+  async getEventReminder(id: number): Promise<EventReminder | undefined> {
+    const [reminder] = await db.select().from(eventReminders).where(eq(eventReminders.id, id));
+    return reminder;
+  }
+
   async updateEventReminder(id: number, updates: Partial<EventReminder>): Promise<void> {
     await db.update(eventReminders).set(updates).where(eq(eventReminders.id, id));
   }

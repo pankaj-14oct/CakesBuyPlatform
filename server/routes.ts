@@ -1739,6 +1739,60 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
+  // Admin: Test email service
+  app.post("/api/admin/test-email", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email address is required" });
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Invalid email address format" });
+      }
+
+      const { sendEmail } = await import("./email-service");
+      
+      const subject = "🧪 Email Service Test - CakesBuy";
+      const text = "This is a test email to verify the email service is working correctly.";
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2>🧪 Email Service Test</h2>
+          <p>This is a test email to verify the email service is working correctly.</p>
+          <p>If you receive this email, the Gmail SMTP configuration is working properly!</p>
+          <hr>
+          <small>CakesBuy Email Service Test</small>
+        </div>
+      `;
+      
+      const emailSent = await sendEmail(email, subject, text, html);
+      
+      if (emailSent) {
+        res.json({ 
+          message: "Test email sent successfully",
+          details: {
+            email,
+            timestamp: new Date().toISOString()
+          }
+        });
+      } else {
+        res.status(500).json({ 
+          message: "Email sending failed",
+          error: "Check server logs for Gmail SMTP connection details"
+        });
+      }
+    } catch (error) {
+      console.error("Test email error:", error);
+      res.status(500).json({ 
+        message: "Test email failed", 
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Admin: Test welcome email
   app.post("/api/admin/test-welcome-email", requireAdmin, async (req: AuthRequest, res) => {
     try {
@@ -2707,6 +2761,8 @@ CakesBuy
           };
 
           console.log(`Sending reminder email for user ${user.email}, event: ${reminder.eventType}, date: ${reminder.eventDate}`);
+          console.log(`Email data:`, JSON.stringify(emailData, null, 2));
+          
           const { sendReminderEmail } = await import("./email-service");
           const emailSent = await sendReminderEmail(emailData);
           
@@ -2714,13 +2770,15 @@ CakesBuy
             // Increment sent count instead of marking as processed
             await storage.incrementReminderSentCount(reminderId);
             results.push({ reminderId, success: true });
-            console.log(`Reminder email sent successfully for user ${user.email}`);
+            console.log(`✅ Reminder email sent successfully for user ${user.email}`);
           } else {
-            results.push({ reminderId, success: false, error: "Email sending failed - check server logs for details" });
-            console.error(`Failed to send reminder email for user ${user.email}`);
+            results.push({ reminderId, success: false, error: "Email sending failed - check Gmail credentials and server logs" });
+            console.error(`❌ Failed to send reminder email for user ${user.email} - check Gmail configuration`);
           }
         } catch (error) {
-          results.push({ reminderId, success: false, error: error instanceof Error ? error.message : 'Unknown error' });
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.error(`Error processing reminder ${reminderId}:`, errorMessage);
+          results.push({ reminderId, success: false, error: errorMessage });
         }
       }
 
@@ -2731,7 +2789,11 @@ CakesBuy
         totalFailed: results.filter(r => !r.success).length
       });
     } catch (error) {
-      res.status(500).json({ message: "Failed to send reminder emails" });
+      console.error('Reminder email sending error:', error);
+      res.status(500).json({ 
+        message: "Failed to send reminder emails",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
