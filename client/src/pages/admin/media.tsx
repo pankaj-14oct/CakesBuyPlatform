@@ -38,14 +38,19 @@ export default function AdminMedia() {
         formData.append('images', file);
       });
       
+      const token = localStorage.getItem('admin_token');
       const response = await fetch('/api/admin/media/upload', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
         body: formData,
         credentials: 'include',
       });
       
       if (!response.ok) {
-        throw new Error('Failed to upload files');
+        const error = await response.json().catch(() => ({ message: 'Failed to upload files' }));
+        throw new Error(error.message || 'Failed to upload files');
       }
       
       return response.json();
