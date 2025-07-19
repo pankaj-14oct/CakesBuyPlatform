@@ -23,6 +23,7 @@ const addonFormSchema = z.object({
   description: z.string().optional(),
   category: z.string().min(1, "Category is required"),
   price: z.string().min(1, "Price is required"),
+  image: z.string().optional(),
 });
 
 type AddonForm = z.infer<typeof addonFormSchema>;
@@ -33,6 +34,7 @@ interface Addon {
   description: string | null;
   price: string;
   category: string | null;
+  image: string | null;
   isAvailable: boolean | null;
 }
 
@@ -124,6 +126,7 @@ export default function AdminAddons() {
       description: "",
       category: "",
       price: "",
+      image: "",
     },
   });
 
@@ -134,6 +137,7 @@ export default function AdminAddons() {
       description: "",
       category: "",
       price: "",
+      image: "",
     },
   });
 
@@ -154,6 +158,7 @@ export default function AdminAddons() {
       description: addon.description || "",
       category: addon.category || "",
       price: addon.price.toString(),
+      image: addon.image || "",
     });
   };
 
@@ -276,6 +281,24 @@ export default function AdminAddons() {
                           type="number" 
                           step="0.01" 
                           placeholder="50.00" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="image"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Image URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="url" 
+                          placeholder="https://example.com/image.jpg" 
                           {...field} 
                         />
                       </FormControl>
@@ -504,6 +527,24 @@ export default function AdminAddons() {
                         type="number" 
                         step="0.01" 
                         placeholder="50.00" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={editForm.control}
+                name="image"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Image URL</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="url" 
+                        placeholder="https://example.com/image.jpg" 
                         {...field} 
                       />
                     </FormControl>
