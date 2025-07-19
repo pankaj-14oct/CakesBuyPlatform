@@ -6,6 +6,8 @@ A full-stack cake ordering platform built with React frontend and Express backen
 ## Recent Changes
 - **2025-01-19**: Migration to Replit completed successfully - all services operational with database connectivity
 - **2025-01-19**: Added 3 sample orders with various addon combinations for testing and demonstration
+- **2025-01-19**: Updated vendor dashboard to full width display with admin-set vendor pricing - vendors now see their assigned prices instead of original customer prices, with proper addon pricing calculations
+- **2025-01-19**: Successfully completed migration from Replit Agent to standard Replit environment - all services operational
 - **2025-01-19**: Enhanced vendor dashboard with addon images and improved layout - vendors can now see visual references for all addons
 - **2025-01-19**: Added images field to addons schema and enriched order data to include addon images from database
 - **2025-01-19**: Improved order item cards with better visual design, color-coded details, and enhanced addon display sections

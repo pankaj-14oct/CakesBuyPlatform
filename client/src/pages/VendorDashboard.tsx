@@ -493,144 +493,166 @@ export default function VendorDashboard() {
                           {/* Order Items */}
                           <div className="mt-4">
                             <h4 className="font-semibold text-gray-900 mb-3">Order Items ({order.items?.length || 0})</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 gap-3">
                               {order.items && order.items.length > 0 ? (
-                                order.items.map((item: any, index: number) => (
-                                  <div key={index} className="bg-white p-4 rounded-lg border-2 border-gray-200 hover:border-blue-300 transition-colors shadow-sm">
-                                    <div className="flex gap-3">
-                                      {/* Product Image */}
-                                      <div className="flex-shrink-0">
-                                        {item.images && item.images.length > 0 ? (
-                                          <Dialog>
-                                            <DialogTrigger asChild>
-                                              <div className="relative cursor-pointer group">
+                                order.items.map((item: any, index: number) => {
+                                  // Calculate vendor price for item (if vendorPrice exists for the addon)
+                                  const itemVendorPrice = order.vendorPrice || item.vendorPrice || item.price;
+                                  const addonsVendorTotal = item.addons?.reduce((total: number, addon: any) => {
+                                    return total + ((addon.vendorPrice || addon.price) * addon.quantity);
+                                  }, 0) || 0;
+                                  const totalItemPrice = itemVendorPrice + addonsVendorTotal;
+                                  
+                                  return (
+                                    <div key={index} className="bg-white p-4 rounded-lg border-2 border-gray-200 hover:border-blue-300 transition-colors shadow-sm w-full">
+                                      <div className="flex gap-3">
+                                        {/* Product Image */}
+                                        <div className="flex-shrink-0">
+                                          {item.images && item.images.length > 0 ? (
+                                            <Dialog>
+                                              <DialogTrigger asChild>
+                                                <div className="relative cursor-pointer group">
+                                                  <img 
+                                                    src={item.images[0]} 
+                                                    alt={item.cakeName || item.name}
+                                                    className="w-16 h-16 object-cover rounded border hover:opacity-90 transition-opacity"
+                                                  />
+                                                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded flex items-center justify-center transition-all">
+                                                    <ZoomIn className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                  </div>
+                                                </div>
+                                              </DialogTrigger>
+                                              <DialogContent className="max-w-2xl">
+                                                <DialogHeader>
+                                                  <DialogTitle>Product Image - {item.cakeName || item.name}</DialogTitle>
+                                                </DialogHeader>
                                                 <img 
                                                   src={item.images[0]} 
                                                   alt={item.cakeName || item.name}
-                                                  className="w-12 h-12 object-cover rounded border hover:opacity-90 transition-opacity"
+                                                  className="w-full max-h-96 object-contain rounded-lg"
                                                 />
-                                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded flex items-center justify-center transition-all">
-                                                  <ZoomIn className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                </div>
-                                              </div>
-                                            </DialogTrigger>
-                                            <DialogContent className="max-w-2xl">
-                                              <DialogHeader>
-                                                <DialogTitle>Product Image - {item.cakeName || item.name}</DialogTitle>
-                                              </DialogHeader>
-                                              <img 
-                                                src={item.images[0]} 
-                                                alt={item.cakeName || item.name}
-                                                className="w-full max-h-96 object-contain rounded-lg"
-                                              />
-                                            </DialogContent>
-                                          </Dialog>
-                                        ) : (
-                                          <div className="w-12 h-12 bg-gray-200 rounded border flex items-center justify-center">
-                                            <Package className="h-5 w-5 text-gray-400" />
-                                          </div>
-                                        )}
-                                      </div>
-
-                                      {/* Product Details */}
-                                      <div className="flex-1 min-w-0">
-                                        <h5 className="font-semibold text-sm text-gray-900 truncate mb-1">
-                                          {item.cakeName || item.name}
-                                        </h5>
-                                        <div className="text-xs text-gray-600 space-y-1 bg-gray-50 p-2 rounded">
-                                          <div className="flex items-center gap-2">
-                                            <Package className="h-3 w-3 text-blue-500" />
-                                            <span>Qty: <strong>{item.quantity}</strong></span>
-                                          </div>
-                                          {item.weight && (
-                                            <div className="flex items-center gap-2">
-                                              <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-                                              <span>Weight: <strong>{item.weight}</strong></span>
-                                            </div>
-                                          )}
-                                          {item.flavor && (
-                                            <div className="flex items-center gap-2">
-                                              <span className="w-3 h-3 bg-purple-500 rounded-full"></span>
-                                              <span>Flavor: <strong>{item.flavor}</strong></span>
-                                            </div>
-                                          )}
-                                          {item.customMessage && (
-                                            <div className="flex items-center gap-2">
-                                              <span className="w-3 h-3 bg-pink-500 rounded-full"></span>
-                                              <span>Message: <em>"{item.customMessage}"</em></span>
+                                              </DialogContent>
+                                            </Dialog>
+                                          ) : (
+                                            <div className="w-16 h-16 bg-gray-200 rounded border flex items-center justify-center">
+                                              <Package className="h-6 w-6 text-gray-400" />
                                             </div>
                                           )}
                                         </div>
-                                        
-                                        {item.addons && item.addons.length > 0 && (
-                                          <div className="mt-2">
-                                            <span className="font-medium text-amber-700">Addons Required:</span>
-                                            <div className="mt-2 space-y-2">
-                                              {item.addons.map((addon: any, addonIndex: number) => (
-                                                <div key={addonIndex} className="flex items-center gap-2 bg-amber-50 p-2 rounded border border-amber-200">
-                                                  {/* Addon Image */}
-                                                  <div className="flex-shrink-0">
-                                                    {addon.images && addon.images.length > 0 ? (
-                                                      <Dialog>
-                                                        <DialogTrigger asChild>
-                                                          <div className="relative cursor-pointer group">
+
+                                        {/* Product Details */}
+                                        <div className="flex-1 min-w-0">
+                                          <div className="flex justify-between items-start mb-2">
+                                            <h5 className="font-semibold text-lg text-gray-900">
+                                              {item.cakeName || item.name}
+                                            </h5>
+                                            <div className="text-lg font-bold text-green-600">
+                                              ₹{totalItemPrice.toFixed(2)}
+                                            </div>
+                                          </div>
+                                          
+                                          <div className="text-sm text-gray-600 space-y-2 bg-gray-50 p-3 rounded mb-3">
+                                            <div className="flex items-center gap-2">
+                                              <Package className="h-4 w-4 text-blue-500" />
+                                              <span>Qty: <strong>{item.quantity}</strong></span>
+                                            </div>
+                                            {item.weight && (
+                                              <div className="flex items-center gap-2">
+                                                <span className="w-4 h-4 bg-green-500 rounded-full"></span>
+                                                <span>Weight: <strong>{item.weight}</strong></span>
+                                              </div>
+                                            )}
+                                            {item.flavor && (
+                                              <div className="flex items-center gap-2">
+                                                <span className="w-4 h-4 bg-purple-500 rounded-full"></span>
+                                                <span>Flavor: <strong>{item.flavor}</strong></span>
+                                              </div>
+                                            )}
+                                            {item.customMessage && (
+                                              <div className="flex items-center gap-2">
+                                                <span className="w-4 h-4 bg-pink-500 rounded-full"></span>
+                                                <span>Message: <em>"{item.customMessage}"</em></span>
+                                              </div>
+                                            )}
+                                            <div className="flex items-center gap-2">
+                                              <span className="w-4 h-4 bg-yellow-500 rounded-full"></span>
+                                              <span>Your Price: <strong>₹{itemVendorPrice}</strong></span>
+                                            </div>
+                                          </div>
+                                          
+                                          {item.addons && item.addons.length > 0 && (
+                                            <div className="mt-3">
+                                              <div className="flex justify-between items-center mb-2">
+                                                <span className="font-medium text-amber-700">Addons Required:</span>
+                                                <span className="text-sm font-medium text-amber-800">Total: ₹{addonsVendorTotal.toFixed(2)}</span>
+                                              </div>
+                                              <div className="space-y-2">
+                                                {item.addons.map((addon: any, addonIndex: number) => (
+                                                  <div key={addonIndex} className="flex items-center gap-3 bg-amber-50 p-3 rounded border border-amber-200">
+                                                    {/* Addon Image */}
+                                                    <div className="flex-shrink-0">
+                                                      {addon.images && addon.images.length > 0 ? (
+                                                        <Dialog>
+                                                          <DialogTrigger asChild>
+                                                            <div className="relative cursor-pointer group">
+                                                              <img 
+                                                                src={addon.images[0]} 
+                                                                alt={addon.name}
+                                                                className="w-10 h-10 object-cover rounded border hover:opacity-90 transition-opacity"
+                                                              />
+                                                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded flex items-center justify-center transition-all">
+                                                                <ZoomIn className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                              </div>
+                                                            </div>
+                                                          </DialogTrigger>
+                                                          <DialogContent className="max-w-md">
+                                                            <DialogHeader>
+                                                              <DialogTitle>Addon Image - {addon.name}</DialogTitle>
+                                                            </DialogHeader>
                                                             <img 
                                                               src={addon.images[0]} 
                                                               alt={addon.name}
-                                                              className="w-8 h-8 object-cover rounded border hover:opacity-90 transition-opacity"
+                                                              className="w-full max-h-64 object-contain rounded-lg"
                                                             />
-                                                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded flex items-center justify-center transition-all">
-                                                              <ZoomIn className="h-3 w-3 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                            </div>
-                                                          </div>
-                                                        </DialogTrigger>
-                                                        <DialogContent className="max-w-md">
-                                                          <DialogHeader>
-                                                            <DialogTitle>Addon Image - {addon.name}</DialogTitle>
-                                                          </DialogHeader>
-                                                          <img 
-                                                            src={addon.images[0]} 
-                                                            alt={addon.name}
-                                                            className="w-full max-h-64 object-contain rounded-lg"
-                                                          />
-                                                        </DialogContent>
-                                                      </Dialog>
-                                                    ) : (
-                                                      <div className="w-8 h-8 bg-amber-200 rounded border flex items-center justify-center">
-                                                        <Package className="h-4 w-4 text-amber-600" />
-                                                      </div>
-                                                    )}
-                                                  </div>
-                                                  
-                                                  {/* Addon Details */}
-                                                  <div className="flex-1 min-w-0">
-                                                    <div className="text-xs font-medium text-amber-900">
-                                                      {addon.name}
-                                                    </div>
-                                                    <div className="text-xs text-amber-700 flex items-center gap-1">
-                                                      <span>Qty: {addon.quantity}</span>
-                                                      {addon.customInput && (
-                                                        <>
-                                                          <span>•</span>
-                                                          <span className="italic">"{addon.customInput}"</span>
-                                                        </>
+                                                          </DialogContent>
+                                                        </Dialog>
+                                                      ) : (
+                                                        <div className="w-10 h-10 bg-amber-200 rounded border flex items-center justify-center">
+                                                          <Package className="h-5 w-5 text-amber-600" />
+                                                        </div>
                                                       )}
                                                     </div>
+                                                    
+                                                    {/* Addon Details */}
+                                                    <div className="flex-1 min-w-0">
+                                                      <div className="text-sm font-medium text-amber-900">
+                                                        {addon.name}
+                                                      </div>
+                                                      <div className="text-sm text-amber-700 flex items-center gap-2">
+                                                        <span>Qty: <strong>{addon.quantity}</strong></span>
+                                                        {addon.customInput && (
+                                                          <>
+                                                            <span>•</span>
+                                                            <span className="italic">"{addon.customInput}"</span>
+                                                          </>
+                                                        )}
+                                                      </div>
+                                                    </div>
+                                                    
+                                                    {/* Addon Vendor Price */}
+                                                    <div className="text-sm font-bold text-amber-900">
+                                                      ₹{(addon.vendorPrice || addon.price) * addon.quantity}
+                                                    </div>
                                                   </div>
-                                                  
-                                                  {/* Addon Price */}
-                                                  <div className="text-xs font-medium text-amber-900">
-                                                    ₹{addon.price}
-                                                  </div>
-                                                </div>
-                                              ))}
+                                                ))}
+                                              </div>
                                             </div>
-                                          </div>
-                                        )}
+                                          )}
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                ))
+                                  );
+                                })
                               ) : (
                                 <div className="col-span-full text-center text-gray-500 py-4">
                                   No items found for this order
