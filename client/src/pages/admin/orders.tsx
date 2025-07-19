@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ShoppingCart, Eye, Package, Truck, CheckCircle, 
-  Clock, XCircle, MapPin, Phone, Calendar, UserPlus, Mail, Star, RefreshCw
+  Clock, XCircle, MapPin, Phone, Calendar, UserPlus, Mail, Star, RefreshCw, Search
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,6 +17,7 @@ import { Order, DeliveryBoy } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { formatPrice } from '@/lib/utils';
+import Pagination from '@/components/pagination';
 
 export default function AdminOrders() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -32,6 +33,12 @@ export default function AdminOrders() {
   const [selectedDeliveryBoyId, setSelectedDeliveryBoyId] = useState<string>('');
   const [selectedVendorId, setSelectedVendorId] = useState<string>('');
   const [addonPrices, setAddonPrices] = useState<{[key: string]: string}>({});
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [pageSize] = useState(10);
+  
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -53,9 +60,25 @@ export default function AdminOrders() {
     }
   };
 
-  const { data: orders = [], isLoading } = useQuery<Order[]>({
-    queryKey: ['/api/admin/orders', statusFilter],
+  // Fetch paginated orders
+  const { data: ordersData, isLoading } = useQuery({
+    queryKey: ['/api/admin/orders/paginated', currentPage, pageSize, searchQuery],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: pageSize.toString(),
+        search: searchQuery
+      });
+      const response = await apiRequest(`/api/admin/orders/paginated?${params}`, "GET", undefined, {
+        "Authorization": `Bearer ${localStorage.getItem("admin_token")}`
+      });
+      return response.json();
+    }
   });
+
+  const orders = ordersData?.orders || [];
+  const totalOrders = ordersData?.total || 0;
+  const totalPages = ordersData?.pages || 0;
 
   // Fetch delivery boys for assignment
   const { data: deliveryBoys = [] } = useQuery<DeliveryBoy[]>({
@@ -79,7 +102,7 @@ export default function AdminOrders() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/orders/paginated'] });
       toast({ title: "Order status updated successfully!" });
     },
     onError: () => {
@@ -97,7 +120,7 @@ export default function AdminOrders() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/orders/paginated'] });
       toast({ title: "Delivery boy assigned successfully!" });
       setAssignDialogOpen(false);
       setOrderToAssign(null);
@@ -142,7 +165,7 @@ export default function AdminOrders() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/orders/paginated'] });
       toast({ title: "Vendor assigned successfully!" });
       setVendorAssignDialogOpen(false);
       setOrderToAssignVendor(null);
@@ -254,14 +277,25 @@ export default function AdminOrders() {
     return <Icon className="h-4 w-4" />;
   };
 
+  // Fetch order stats separately for accurate counts
+  const { data: orderStatsData } = useQuery({
+    queryKey: ['/api/admin/orders', 'all'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/admin/orders', "GET", undefined, {
+        "Authorization": `Bearer ${localStorage.getItem("admin_token")}`
+      });
+      return response.json();
+    }
+  });
+
   const orderStats = {
-    total: orders.length,
-    pending: orders.filter(o => o.status === 'pending').length,
-    confirmed: orders.filter(o => o.status === 'confirmed').length,
-    preparing: orders.filter(o => o.status === 'preparing').length,
-    out_for_delivery: orders.filter(o => o.status === 'out_for_delivery').length,
-    delivered: orders.filter(o => o.status === 'delivered').length,
-    cancelled: orders.filter(o => o.status === 'cancelled').length,
+    total: orderStatsData?.length || 0,
+    pending: orderStatsData?.filter((o: any) => o.status === 'pending').length || 0,
+    confirmed: orderStatsData?.filter((o: any) => o.status === 'confirmed').length || 0,
+    preparing: orderStatsData?.filter((o: any) => o.status === 'preparing').length || 0,
+    out_for_delivery: orderStatsData?.filter((o: any) => o.status === 'out_for_delivery').length || 0,
+    delivered: orderStatsData?.filter((o: any) => o.status === 'delivered').length || 0,
+    cancelled: orderStatsData?.filter((o: any) => o.status === 'cancelled').length || 0,
   };
 
   return (
@@ -273,6 +307,19 @@ export default function AdminOrders() {
         </div>
         
         <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Input
+              placeholder="Search orders..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1); // Reset to first page when searching
+              }}
+              className="pl-10 w-64"
+            />
+          </div>
+          
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Filter by status" />
@@ -292,7 +339,7 @@ export default function AdminOrders() {
             variant="outline" 
             size="sm" 
             onClick={() => {
-              queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/admin/orders/paginated'] });
               toast({ title: "Orders refreshed!" });
             }}
           >
@@ -353,7 +400,7 @@ export default function AdminOrders() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <ShoppingCart className="mr-2 h-5 w-5" />
-            Orders ({orders.length})
+            Orders ({totalOrders} total)
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -690,6 +737,18 @@ export default function AdminOrders() {
                 ))}
               </TableBody>
             </Table>
+          )}
+          
+          {/* Pagination */}
+          {!isLoading && totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              showingFrom={(currentPage - 1) * pageSize + 1}
+              showingTo={Math.min(currentPage * pageSize, totalOrders)}
+              totalItems={totalOrders}
+            />
           )}
         </CardContent>
       </Card>
