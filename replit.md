@@ -5,6 +5,8 @@ A full-stack cake ordering platform built with React frontend and Express backen
 
 ## Recent Changes
 - **2025-01-19**: Added image field to addons table for single primary image support (in addition to existing images array)
+- **2025-01-19**: Added complete media management system - admins can upload, browse, and manage images through dedicated media library
+- **2025-01-19**: Enhanced addon forms with media picker - admins can select images from media library or enter URLs directly
 - **2025-01-19**: Added image field to addon schema and admin forms - admins can now add image URLs when creating/editing addons
 - **2025-01-19**: Migration to Replit completed successfully - all services operational with database connectivity
 - **2025-01-19**: Added 3 sample orders with various addon combinations for testing and demonstration

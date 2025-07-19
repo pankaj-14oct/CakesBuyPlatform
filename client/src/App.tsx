@@ -34,6 +34,7 @@ import AdminUsers from "@/pages/admin/users";
 import AdminCoupons from "@/pages/admin/coupons";
 import AdminSettings from "@/pages/admin/settings";
 import AdminAddons from "@/pages/admin/addons";
+import AdminMedia from "@/pages/admin/media";
 import AdminInvoices from "@/pages/admin/invoices";
 import AdminWallet from "@/pages/admin/wallet";
 import AdminDelivery from "@/pages/admin/delivery";
@@ -53,7 +54,7 @@ import PageView from "@/pages/page-view";
 import NotFound from "@/pages/not-found";
 
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, ShoppingCart, Tags, Percent, Settings, Plus, Mail, Users, FileText, Wallet, Truck, LogOut, Menu, Store } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Tags, Percent, Settings, Plus, Mail, Users, FileText, Wallet, Truck, LogOut, Menu, Store, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import AdminNotifications from "@/components/AdminNotifications";
@@ -80,6 +81,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
     { path: "/admin/categories", label: "Categories", icon: Tags },
     { path: "/admin/products", label: "Products", icon: Package },
     { path: "/admin/addons", label: "Addons", icon: Plus },
+    { path: "/admin/media", label: "Media", icon: Image },
     { path: "/admin/orders", label: "Orders", icon: ShoppingCart },
     { path: "/admin/users", label: "Users", icon: Users },
     { path: "/admin/coupons", label: "Coupons", icon: Percent },
@@ -202,6 +204,7 @@ function Router() {
             <Route path="/admin/categories" component={AdminCategories} />
             <Route path="/admin/products" component={AdminProducts} />
             <Route path="/admin/addons" component={AdminAddons} />
+            <Route path="/admin/media" component={AdminMedia} />
             <Route path="/admin/orders" component={AdminOrders} />
             <Route path="/admin/users" component={AdminUsers} />
             <Route path="/admin/coupons" component={AdminCoupons} />

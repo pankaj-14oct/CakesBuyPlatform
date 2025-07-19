@@ -1201,6 +1201,89 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
     }
   });
 
+  // Media Management Routes
+  app.get("/api/admin/media", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const uploadsDir = path.join(process.cwd(), 'uploads');
+      
+      if (!fs.existsSync(uploadsDir)) {
+        return res.json([]);
+      }
+      
+      const files = fs.readdirSync(uploadsDir);
+      const mediaFiles = files
+        .filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file))
+        .map(filename => {
+          const filePath = path.join(uploadsDir, filename);
+          const stats = fs.statSync(filePath);
+          
+          return {
+            id: filename,
+            filename,
+            originalName: filename,
+            url: `/uploads/${filename}`,
+            size: stats.size,
+            mimeType: path.extname(filename).toLowerCase() === '.jpg' || path.extname(filename).toLowerCase() === '.jpeg' ? 'image/jpeg' : 
+                     path.extname(filename).toLowerCase() === '.png' ? 'image/png' :
+                     path.extname(filename).toLowerCase() === '.gif' ? 'image/gif' :
+                     path.extname(filename).toLowerCase() === '.webp' ? 'image/webp' : 'image/unknown',
+            uploadedAt: stats.mtime.toISOString(),
+          };
+        })
+        .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+      
+      res.json(mediaFiles);
+    } catch (error) {
+      console.error('Media fetch error:', error);
+      res.status(500).json({ message: "Failed to fetch media files" });
+    }
+  });
+
+  app.post("/api/admin/media/upload", requireAdmin, upload.array('images', 10), async (req: AuthRequest, res) => {
+    try {
+      const files = req.files as Express.Multer.File[];
+      
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: "No files uploaded" });
+      }
+
+      const uploadedFiles = files.map(file => ({
+        id: file.filename,
+        filename: file.filename,
+        originalName: file.originalname,
+        url: `/uploads/${file.filename}`,
+        size: file.size,
+        mimeType: file.mimetype,
+        uploadedAt: new Date().toISOString(),
+      }));
+
+      res.status(201).json({
+        message: "Files uploaded successfully",
+        files: uploadedFiles
+      });
+    } catch (error) {
+      console.error('Media upload error:', error);
+      res.status(500).json({ message: "Failed to upload files" });
+    }
+  });
+
+  app.delete("/api/admin/media/:filename", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { filename } = req.params;
+      const filePath = path.join(process.cwd(), 'uploads', filename);
+      
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: "File not found" });
+      }
+      
+      fs.unlinkSync(filePath);
+      res.json({ message: "File deleted successfully" });
+    } catch (error) {
+      console.error('Media delete error:', error);
+      res.status(500).json({ message: "Failed to delete file" });
+    }
+  });
+
 
 
   // Admin Invoice Management

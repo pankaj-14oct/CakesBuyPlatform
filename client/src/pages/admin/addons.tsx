@@ -15,8 +15,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Package } from "lucide-react";
+import { Plus, Edit, Trash2, Package, Image, Check } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+
+interface MediaFile {
+  id: string;
+  filename: string;
+  originalName: string;
+  url: string;
+  size: number;
+  mimeType: string;
+  uploadedAt: string;
+}
 
 const addonFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -41,10 +51,17 @@ interface Addon {
 export default function AdminAddons() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingAddon, setEditingAddon] = useState<Addon | null>(null);
+  const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false);
+  const [isEditMediaDialogOpen, setIsEditMediaDialogOpen] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState("");
   const { toast } = useToast();
 
   const { data: addons = [], isLoading } = useQuery<Addon[]>({
     queryKey: ["/api/addons"],
+  });
+
+  const { data: mediaFiles = [] } = useQuery<MediaFile[]>({
+    queryKey: ["/api/admin/media"],
   });
 
   const createAddonMutation = useMutation({
@@ -167,6 +184,77 @@ export default function AdminAddons() {
       deleteAddonMutation.mutate(id);
     }
   };
+
+  const handleImageSelect = (url: string, isEdit = false) => {
+    if (isEdit) {
+      editForm.setValue('image', url);
+      setIsEditMediaDialogOpen(false);
+    } else {
+      form.setValue('image', url);
+      setIsMediaDialogOpen(false);
+    }
+    setSelectedImageUrl(url);
+  };
+
+  const MediaPickerDialog = ({ 
+    isOpen, 
+    onClose, 
+    onSelect, 
+    currentValue 
+  }: { 
+    isOpen: boolean; 
+    onClose: () => void; 
+    onSelect: (url: string) => void;
+    currentValue?: string;
+  }) => (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Select Image</DialogTitle>
+          <DialogDescription>
+            Choose an image from your media library or upload a new one.
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="grid grid-cols-4 gap-4">
+          {mediaFiles.map((file) => (
+            <div 
+              key={file.id} 
+              className={`relative group cursor-pointer border-2 rounded-lg overflow-hidden ${
+                currentValue === file.url ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+              }`}
+              onClick={() => onSelect(file.url)}
+            >
+              <div className="aspect-square">
+                <img
+                  src={file.url}
+                  alt={file.originalName}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              {currentValue === file.url && (
+                <div className="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center">
+                  <Check className="h-6 w-6 text-blue-600" />
+                </div>
+              )}
+              <div className="p-2">
+                <p className="text-xs truncate" title={file.originalName}>
+                  {file.originalName}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {mediaFiles.length === 0 && (
+          <div className="text-center py-8">
+            <Image className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500">No media files found. Upload some images first.</p>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
 
   const resetCreateForm = () => {
     form.reset({
@@ -294,14 +382,35 @@ export default function AdminAddons() {
                   name="image"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Image URL</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="url" 
-                          placeholder="https://example.com/image.jpg" 
-                          {...field} 
-                        />
-                      </FormControl>
+                      <FormLabel>Image</FormLabel>
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <FormControl>
+                            <Input 
+                              type="url" 
+                              placeholder="Enter image URL or select from media..." 
+                              {...field} 
+                            />
+                          </FormControl>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setIsMediaDialogOpen(true)}
+                          >
+                            <Image className="h-4 w-4 mr-2" />
+                            Browse Media
+                          </Button>
+                        </div>
+                        {field.value && (
+                          <div className="w-20 h-20 border rounded overflow-hidden">
+                            <img 
+                              src={field.value} 
+                              alt="Preview" 
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -540,14 +649,35 @@ export default function AdminAddons() {
                 name="image"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Image URL</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="url" 
-                        placeholder="https://example.com/image.jpg" 
-                        {...field} 
-                      />
-                    </FormControl>
+                    <FormLabel>Image</FormLabel>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <FormControl>
+                          <Input 
+                            type="url" 
+                            placeholder="Enter image URL or select from media..." 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setIsEditMediaDialogOpen(true)}
+                        >
+                          <Image className="h-4 w-4 mr-2" />
+                          Browse Media
+                        </Button>
+                      </div>
+                      {field.value && (
+                        <div className="w-20 h-20 border rounded overflow-hidden">
+                          <img 
+                            src={field.value} 
+                            alt="Preview" 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -572,6 +702,21 @@ export default function AdminAddons() {
           </Form>
         </DialogContent>
       </Dialog>
+
+      {/* Media Picker Dialogs */}
+      <MediaPickerDialog
+        isOpen={isMediaDialogOpen}
+        onClose={() => setIsMediaDialogOpen(false)}
+        onSelect={(url) => handleImageSelect(url, false)}
+        currentValue={form.watch('image')}
+      />
+      
+      <MediaPickerDialog
+        isOpen={isEditMediaDialogOpen}
+        onClose={() => setIsEditMediaDialogOpen(false)}
+        onSelect={(url) => handleImageSelect(url, true)}
+        currentValue={editForm.watch('image')}
+      />
     </div>
   );
 }
