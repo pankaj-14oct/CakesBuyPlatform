@@ -40,7 +40,7 @@ import AdminWallet from "@/pages/admin/wallet";
 import AdminDelivery from "@/pages/admin/delivery";
 import AdminNavigation from "@/pages/admin/navigation";
 import AdminPages from "@/pages/admin/pages";
-import AdminReminders from "@/pages/AdminReminders";
+import AdminReminders from "@/pages/admin/RemindersManagement";
 import AdminVendors from "@/pages/admin/vendors";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminProtected from "@/components/AdminProtected";
