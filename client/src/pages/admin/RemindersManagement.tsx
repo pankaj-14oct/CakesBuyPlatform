@@ -213,7 +213,7 @@ export default function RemindersManagement() {
         <div className="flex items-center space-x-4">
           <Badge variant="secondary" className="text-sm">
             <Bell className="h-4 w-4 mr-1" />
-            {allReminders.length} Total Reminders
+            {allReminders.length} Upcoming (Next 15 Days)
           </Badge>
           <Badge variant="outline" className="text-sm">
             <Users className="h-4 w-4 mr-1" />
@@ -319,7 +319,7 @@ export default function RemindersManagement() {
                 <span>Upcoming Reminders</span>
               </CardTitle>
               <CardDescription>
-                Sorted by upcoming event date - click to select reminders to send
+                Showing events in next 15 days - sorted by upcoming event date
               </CardDescription>
             </div>
             <div className="flex space-x-2">
@@ -346,7 +346,7 @@ export default function RemindersManagement() {
           ) : sortedReminders.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <Bell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p>No reminders found</p>
+              <p>No upcoming events in the next 15 days</p>
             </div>
           ) : (
             <div className="space-y-3">

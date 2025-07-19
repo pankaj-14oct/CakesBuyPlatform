@@ -830,6 +830,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllReminders(): Promise<any[]> {
+    // Calculate date 15 days from now for filtering upcoming events
+    const today = new Date();
+    const fifteenDaysFromNow = new Date(today);
+    fifteenDaysFromNow.setDate(today.getDate() + 15);
+    
     const remindersWithUsers = await db
       .select({
         id: eventReminders.id,
@@ -849,8 +854,28 @@ export class DatabaseStorage implements IStorage {
       .from(eventReminders)
       .leftJoin(users, eq(eventReminders.userId, users.id))
       .orderBy(desc(eventReminders.createdAt));
+    
+    // Filter reminders to show only events upcoming in next 15 days
+    const filteredReminders = remindersWithUsers.filter(reminder => {
+      if (!reminder.event_date) return false;
       
-    return remindersWithUsers;
+      // Parse event date (format: MM-DD)
+      const [month, day] = reminder.event_date.split('-').map(Number);
+      const currentYear = today.getFullYear();
+      
+      // Create event date for current year
+      let eventDate = new Date(currentYear, month - 1, day);
+      
+      // If event already passed this year, check next year
+      if (eventDate < today) {
+        eventDate = new Date(currentYear + 1, month - 1, day);
+      }
+      
+      // Check if event is within next 15 days
+      return eventDate >= today && eventDate <= fifteenDaysFromNow;
+    });
+      
+    return filteredReminders;
   }
 
   async incrementReminderSentCount(id: number): Promise<void> {
