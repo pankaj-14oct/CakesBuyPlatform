@@ -96,7 +96,11 @@ export default function RemindersManagement() {
     );
   };
 
-  const formatEventDate = (dateStr: string) => {
+  const formatEventDate = (dateStr: string | null | undefined) => {
+    if (!dateStr) {
+      return "No date";
+    }
+    
     try {
       // Handle MM-DD format
       if (dateStr.includes('-') && dateStr.length <= 5) {
@@ -136,7 +140,11 @@ export default function RemindersManagement() {
 
   // Sort reminders by upcoming date
   const sortedReminders = [...pendingReminders].sort((a, b) => {
-    const getDateForSorting = (dateStr: string) => {
+    const getDateForSorting = (dateStr: string | null | undefined) => {
+      if (!dateStr) {
+        return new Date(); // Default to current date if no date provided
+      }
+      
       if (dateStr.includes('-') && dateStr.length <= 5) {
         const [month, day] = dateStr.split('-');
         const currentYear = new Date().getFullYear();
