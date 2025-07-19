@@ -21,7 +21,9 @@ import {
   Truck,
   ZoomIn,
   Eye,
-  RefreshCw
+  RefreshCw,
+  Calendar,
+  CalendarDays
 } from "lucide-react";
 
 interface VendorInfo {
@@ -228,6 +230,26 @@ export default function VendorDashboard() {
   const completedOrders = filteredOrders.filter((order: Order) => order.status === "delivered").length;
   const pendingOrders = filteredOrders.filter((order: Order) => order.status !== "delivered").length;
 
+  // Calculate date-based statistics
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const todaysOrders = orders.filter(order => {
+    const orderDate = new Date(order.deliveryDate);
+    return orderDate.toDateString() === today.toDateString();
+  });
+
+  const tomorrowsOrders = orders.filter(order => {
+    const orderDate = new Date(order.deliveryDate);
+    return orderDate.toDateString() === tomorrow.toDateString();
+  });
+
+  // Calculate revenue
+  const todaysRevenue = todaysOrders.reduce((sum, order) => sum + parseFloat(order.vendorPrice || order.totalAmount || 0), 0);
+  const tomorrowsRevenue = tomorrowsOrders.reduce((sum, order) => sum + parseFloat(order.vendorPrice || order.totalAmount || 0), 0);
+  const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.vendorPrice || order.totalAmount || 0), 0);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white shadow">
@@ -282,6 +304,49 @@ export default function VendorDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Date-based Order Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-blue-800">Today's Orders</CardTitle>
+              <Calendar className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-900">{todaysOrders.length}</div>
+              <p className="text-xs text-blue-700 mt-1">
+                Revenue: ₹{todaysRevenue.toFixed(0)}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-green-800">Tomorrow's Orders</CardTitle>
+              <CalendarDays className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-900">{tomorrowsOrders.length}</div>
+              <p className="text-xs text-green-700 mt-1">
+                Revenue: ₹{tomorrowsRevenue.toFixed(0)}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-purple-800">Total Revenue</CardTitle>
+              <TrendingUp className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-900">₹{totalRevenue.toFixed(0)}</div>
+              <p className="text-xs text-purple-700 mt-1">
+                From {totalOrders} orders
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Status Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
