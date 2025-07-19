@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { apiRequest } from "@/lib/queryClient";
 import { Bell, Calendar, Mail, Users, Gift, Heart, Clock, Trash2, Send } from "lucide-react";
 import { format, parseISO } from "date-fns";
@@ -42,6 +43,11 @@ export default function RemindersManagement() {
   // Fetch users with upcoming events
   const { data: upcomingEvents = [] } = useQuery<any[]>({
     queryKey: ["/api/admin/users/upcoming-events"],
+  });
+
+  // Fetch available coupons
+  const { data: coupons = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/promo-codes"],
   });
 
   // Send reminder emails mutation
@@ -228,9 +234,42 @@ export default function RemindersManagement() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="discountCode">Discount Code (Optional)</Label>
+              <Label htmlFor="couponSelect">Select Existing Coupon</Label>
+              <Select 
+                value={discountCode} 
+                onValueChange={(value) => {
+                  const selectedCoupon = coupons.find(c => c.code === value);
+                  setDiscountCode(value);
+                  if (selectedCoupon) {
+                    setDiscountPercentage(
+                      selectedCoupon.discount_type === 'percentage' 
+                        ? selectedCoupon.discount_value 
+                        : Math.round((selectedCoupon.discount_value / 500) * 100) // Assume ₹500 base for amount conversion
+                    );
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose from existing coupons" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No coupon</SelectItem>
+                  {coupons.map((coupon) => (
+                    <SelectItem key={coupon.code} value={coupon.code}>
+                      {coupon.code} - {coupon.description} 
+                      ({coupon.discount_type === 'percentage' 
+                        ? `${coupon.discount_value}% off` 
+                        : `₹${coupon.discount_value} off`}
+                      {coupon.min_order_value > 0 && ` on orders ₹${coupon.min_order_value}+`})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="discountCode">Or Enter Custom Code</Label>
               <Input
                 id="discountCode"
                 placeholder="e.g., BIRTHDAY20"
@@ -250,6 +289,18 @@ export default function RemindersManagement() {
               />
             </div>
           </div>
+          {discountCode && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                  {discountCode}
+                </Badge>
+                <span className="text-sm text-gray-600">
+                  {discountPercentage}% discount will be included in reminder emails
+                </span>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
