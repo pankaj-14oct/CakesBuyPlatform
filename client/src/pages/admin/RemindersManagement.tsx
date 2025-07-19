@@ -102,15 +102,19 @@ export default function RemindersManagement() {
     }
     
     try {
-      // Handle MM-DD format
-      if (dateStr.includes('-') && dateStr.length <= 5) {
+      // Handle MM-DD format (e.g., "08-25")
+      if (dateStr.match(/^\d{2}-\d{2}$/)) {
         const [month, day] = dateStr.split('-');
         const currentYear = new Date().getFullYear();
         const date = new Date(currentYear, parseInt(month) - 1, parseInt(day));
         return format(date, "MMMM dd");
       }
-      // Handle full date
-      return format(parseISO(dateStr), "MMMM dd, yyyy");
+      // Handle full date (e.g., "2001-07-19")
+      if (dateStr.includes('-') && dateStr.length > 5) {
+        return format(parseISO(dateStr), "MMMM dd, yyyy");
+      }
+      // Fallback for other formats
+      return format(new Date(dateStr), "MMMM dd, yyyy");
     } catch {
       return dateStr;
     }
@@ -149,7 +153,8 @@ export default function RemindersManagement() {
         return new Date(); // Default to current date if no date provided
       }
       
-      if (dateStr.includes('-') && dateStr.length <= 5) {
+      // Handle MM-DD format (e.g., "08-25")
+      if (dateStr.match(/^\d{2}-\d{2}$/)) {
         const [month, day] = dateStr.split('-');
         const currentYear = new Date().getFullYear();
         const date = new Date(currentYear, parseInt(month) - 1, parseInt(day));
