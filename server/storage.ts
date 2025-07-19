@@ -859,8 +859,21 @@ export class DatabaseStorage implements IStorage {
     const filteredReminders = remindersWithUsers.filter(reminder => {
       if (!reminder.event_date) return false;
       
-      // Parse event date (format: MM-DD)
-      const [month, day] = reminder.event_date.split('-').map(Number);
+      let month: number, day: number;
+      const dateParts = reminder.event_date.split('-');
+      
+      if (dateParts.length === 3) {
+        // Format: YYYY-MM-DD
+        month = parseInt(dateParts[1]);
+        day = parseInt(dateParts[2]);
+      } else if (dateParts.length === 2) {
+        // Format: MM-DD
+        month = parseInt(dateParts[0]);
+        day = parseInt(dateParts[1]);
+      } else {
+        return false; // Invalid format
+      }
+      
       const currentYear = today.getFullYear();
       
       // Create event date for current year
