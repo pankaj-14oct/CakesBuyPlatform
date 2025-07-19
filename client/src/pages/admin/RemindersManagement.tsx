@@ -345,7 +345,7 @@ export default function RemindersManagement() {
                   <div className="flex items-center space-x-4">
                     <Checkbox 
                       checked={selectedReminders.includes(reminder.id)}
-                      onChange={() => handleSelectReminder(reminder.id)}
+                      onCheckedChange={() => handleSelectReminder(reminder.id)}
                     />
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
