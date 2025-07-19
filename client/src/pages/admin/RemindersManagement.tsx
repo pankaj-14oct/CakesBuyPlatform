@@ -289,7 +289,7 @@ export default function RemindersManagement() {
                 type="number"
                 min="0"
                 max="100"
-                value={discountPercentage}
+                value={discountPercentage.toString()}
                 onChange={(e) => setDiscountPercentage(parseInt(e.target.value) || 0)}
               />
             </div>
