@@ -830,65 +830,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllReminders(): Promise<any[]> {
-    // Calculate date 15 days from now for filtering upcoming events
-    const today = new Date();
-    const fifteenDaysFromNow = new Date(today);
-    fifteenDaysFromNow.setDate(today.getDate() + 15);
-    
     const remindersWithUsers = await db
       .select({
         id: eventReminders.id,
-        user_id: eventReminders.userId,
-        event_type: eventReminders.eventType,
-        event_date: eventReminders.eventDate,
-        relationship_type: eventReminders.relationshipType,
+        userId: eventReminders.userId,
+        eventType: eventReminders.eventType,
+        eventDate: eventReminders.eventDate,
+        relationshipType: eventReminders.relationshipType,
         title: eventReminders.title,
-        reminder_date: eventReminders.reminderDate,
-        is_processed: eventReminders.isProcessed,
-        notification_sent: eventReminders.notificationSent,
-        sent_count: eventReminders.sentCount,
-        created_at: eventReminders.createdAt,
+        reminderDate: eventReminders.reminderDate,
+        isProcessed: eventReminders.isProcessed,
+        notificationSent: eventReminders.notificationSent,
+        sentCount: eventReminders.sentCount,
+        createdAt: eventReminders.createdAt,
         email: users.email,
         name: users.name,
       })
       .from(eventReminders)
       .leftJoin(users, eq(eventReminders.userId, users.id))
       .orderBy(desc(eventReminders.createdAt));
-    
-    // Filter reminders to show only events upcoming in next 15 days
-    const filteredReminders = remindersWithUsers.filter(reminder => {
-      if (!reminder.event_date) return false;
       
-      let month: number, day: number;
-      const dateParts = reminder.event_date.split('-');
-      
-      if (dateParts.length === 3) {
-        // Format: YYYY-MM-DD
-        month = parseInt(dateParts[1]);
-        day = parseInt(dateParts[2]);
-      } else if (dateParts.length === 2) {
-        // Format: MM-DD
-        month = parseInt(dateParts[0]);
-        day = parseInt(dateParts[1]);
-      } else {
-        return false; // Invalid format
-      }
-      
-      const currentYear = today.getFullYear();
-      
-      // Create event date for current year
-      let eventDate = new Date(currentYear, month - 1, day);
-      
-      // If event already passed this year, check next year
-      if (eventDate < today) {
-        eventDate = new Date(currentYear + 1, month - 1, day);
-      }
-      
-      // Check if event is within next 15 days
-      return eventDate >= today && eventDate <= fifteenDaysFromNow;
-    });
-      
-    return filteredReminders;
+    return remindersWithUsers;
   }
 
   async incrementReminderSentCount(id: number): Promise<void> {

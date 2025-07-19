@@ -60,7 +60,11 @@ export default function OccasionReminderSimple() {
   const createReminderMutation = useMutation({
     mutationFn: async (data: ReminderFormData) => {
       const alertDate = new Date(data.alertDate);
-      const alertDateStr = alertDate.toISOString().split('T')[0];
+      
+      // Convert to MM-DD format
+      const month = String(alertDate.getMonth() + 1).padStart(2, '0');
+      const day = String(alertDate.getDate()).padStart(2, '0');
+      const eventDateStr = `${month}-${day}`;
       
       // Calculate reminder date (7 days before the event)
       const reminderDate = new Date(alertDate);
@@ -74,7 +78,7 @@ export default function OccasionReminderSimple() {
       
       const requestData = {
         eventType: data.eventType,
-        eventDate: alertDateStr,
+        eventDate: eventDateStr,
         relationshipType: data.relationshipType,
         title: data.reminderTitle,
         reminderDate: reminderDate.toISOString(),
@@ -110,7 +114,11 @@ export default function OccasionReminderSimple() {
   const updateReminderMutation = useMutation({
     mutationFn: async (data: ReminderFormData & { id: number }) => {
       const alertDate = new Date(data.alertDate);
-      const alertDateStr = alertDate.toISOString().split('T')[0];
+      
+      // Convert to MM-DD format
+      const month = String(alertDate.getMonth() + 1).padStart(2, '0');
+      const day = String(alertDate.getDate()).padStart(2, '0');
+      const eventDateStr = `${month}-${day}`;
       
       // Calculate reminder date (7 days before the event)
       const reminderDate = new Date(alertDate);
@@ -124,7 +132,7 @@ export default function OccasionReminderSimple() {
       
       const requestData = {
         eventType: data.eventType,
-        eventDate: alertDateStr,
+        eventDate: eventDateStr,
         relationshipType: data.relationshipType,
         title: data.reminderTitle,
         reminderDate: reminderDate.toISOString(),
@@ -191,9 +199,20 @@ export default function OccasionReminderSimple() {
 
   const handleEditReminder = (reminder: EventReminder) => {
     setEditingReminder(reminder);
+    
+    // Convert MM-DD to YYYY-MM-DD for date input
+    let alertDateForInput = reminder.eventDate;
+    const parts = reminder.eventDate.split('-');
+    
+    if (parts.length === 2) {
+      // MM-DD format, convert to current year YYYY-MM-DD
+      const currentYear = new Date().getFullYear();
+      alertDateForInput = `${currentYear}-${parts[0]}-${parts[1]}`;
+    }
+    
     form.reset({
-      reminderTitle: reminder.relationshipType, // Use relationship as title for backward compatibility
-      alertDate: reminder.eventDate,
+      reminderTitle: reminder.title || reminder.relationshipType, // Use title if available, fallback to relationshipType
+      alertDate: alertDateForInput,
       eventType: reminder.eventType,
       relationshipType: reminder.relationshipType,
     });

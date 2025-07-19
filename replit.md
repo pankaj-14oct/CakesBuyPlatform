@@ -4,6 +4,7 @@
 A full-stack cake ordering platform built with React frontend and Express backend, featuring customizable cakes, photo cake options, admin dashboard, and delivery management.
 
 ## Recent Changes
+- **2025-01-19**: Fixed upcoming reminder display issue - corrected date format inconsistency from YYYY-MM-DD to MM-DD format, updated admin panel to show all reminders, improved calendar date picker to properly convert between formats for editing, resolved reminder filtering logic that was preventing proper display
 - **2025-01-19**: Fixed admin reminder management - corrected date parsing logic to handle both YYYY-MM-DD and MM-DD formats, upcoming reminders now display correctly in admin panel for events within next 15 days
 - **2025-01-19**: Successfully migrated project from Replit Agent to standard Replit environment - database connectivity established, schema migrated, application running on localhost:5000
 - **2025-01-19**: Enhanced reminder management system - added sent counter tracking, manual delete options, integrated existing discount coupons from coupons section, improved UI with coupon selection dropdown and preview, filtered to show only events upcoming in next 15 days for focused management, sorted occasions by nearest date first in both admin and customer interfaces
