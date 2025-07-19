@@ -179,20 +179,22 @@ export default function RemindersManagement() {
     }
   };
 
-  // Sort reminders by upcoming date
+  // Sort reminders by upcoming date (nearest events first)
   const sortedReminders = [...allReminders].sort((a, b) => {
     const getDateForSorting = (dateStr: string | null | undefined) => {
       if (!dateStr) {
-        return new Date(); // Default to current date if no date provided
+        return new Date(9999, 11, 31); // Far future date for undefined dates to sort them last
       }
       
-      // Handle MM-DD format (e.g., "08-25")
+      // Handle MM-DD format (e.g., "07-30", "08-15")
       if (dateStr.match(/^\d{2}-\d{2}$/)) {
         const [month, day] = dateStr.split('-');
         const currentYear = new Date().getFullYear();
+        const today = new Date();
         const date = new Date(currentYear, parseInt(month) - 1, parseInt(day));
+        
         // If the date has passed this year, consider it next year
-        if (date < new Date()) {
+        if (date < today) {
           date.setFullYear(currentYear + 1);
         }
         return date;
@@ -200,6 +202,7 @@ export default function RemindersManagement() {
       return new Date(dateStr);
     };
     
+    // Sort ascending (nearest dates first)
     return getDateForSorting(a.event_date).getTime() - getDateForSorting(b.event_date).getTime();
   });
 
@@ -319,7 +322,7 @@ export default function RemindersManagement() {
                 <span>Upcoming Reminders</span>
               </CardTitle>
               <CardDescription>
-                Showing events in next 15 days - sorted by upcoming event date
+                Showing events in next 15 days - sorted by nearest date first
               </CardDescription>
             </div>
             <div className="flex space-x-2">

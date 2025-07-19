@@ -238,6 +238,37 @@ export default function OccasionReminder() {
     return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
   };
 
+  // Sort reminders by nearest upcoming date
+  const sortedReminders = [...reminders].sort((a, b) => {
+    const getDateForSorting = (dateStr: string) => {
+      const parts = dateStr.split('-');
+      let month: number, day: number;
+      
+      if (parts.length === 3) {
+        // YYYY-MM-DD format
+        month = parseInt(parts[1]);
+        day = parseInt(parts[2]);
+      } else {
+        // MM-DD format
+        month = parseInt(parts[0]);
+        day = parseInt(parts[1]);
+      }
+      
+      const currentYear = new Date().getFullYear();
+      const today = new Date();
+      const eventDate = new Date(currentYear, month - 1, day);
+      
+      // If the date has passed this year, use next year
+      if (eventDate < today) {
+        eventDate.setFullYear(currentYear + 1);
+      }
+      
+      return eventDate;
+    };
+    
+    return getDateForSorting(a.eventDate).getTime() - getDateForSorting(b.eventDate).getTime();
+  });
+
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center p-4">
@@ -554,7 +585,7 @@ export default function OccasionReminder() {
             <div>
               <CardTitle>Your Occasion Reminders</CardTitle>
               <CardDescription>
-                Manage your saved special dates and get notified with exclusive offers
+                Manage your saved special dates and get notified with exclusive offers (sorted by nearest date)
               </CardDescription>
             </div>
             <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
@@ -711,7 +742,7 @@ export default function OccasionReminder() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {reminders.map((reminder: EventReminder) => (
+                {sortedReminders.map((reminder: EventReminder) => (
                   <Card key={reminder.id} className="border-l-4 border-l-red-500">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
