@@ -171,7 +171,7 @@ export default function CheckoutPage() {
       deliveryOccasion: '',
       relation: '',
       senderName: '',
-      paymentMethod: 'upi',
+      paymentMethod: 'phonepe',
       guestCity: 'Gurgaon',
       guestName: '',
       guestPhone: '',
@@ -1063,66 +1063,35 @@ export default function CheckoutPage() {
                 </CardContent>
               </Card>
 
-              {/* Payment Method */}
+              {/* Payment Method - Default to PhonePe (Hidden Selection) */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <CreditCard className="mr-2 h-5 w-5 text-caramel" />
+                    <Smartphone className="mr-2 h-5 w-5 text-caramel" />
                     Payment Method
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <RadioGroup 
-                    onValueChange={(value) => form.setValue('paymentMethod', value)}
-                    defaultValue="upi"
-                    className="space-y-3"
-                  >
-                    <div className="flex items-center space-x-3 p-3 border rounded-lg">
-                      <RadioGroupItem value="phonepe" id="phonepe" />
-                      <Label htmlFor="phonepe" className="flex items-center space-x-2 cursor-pointer flex-1">
-                        <Smartphone className="h-4 w-4 text-caramel" />
-                        <span>PhonePe Payment Gateway</span>
-                      </Label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-3 p-3 border rounded-lg">
-                      <RadioGroupItem value="upi" id="upi" />
-                      <Label htmlFor="upi" className="flex items-center space-x-2 cursor-pointer flex-1">
-                        <Smartphone className="h-4 w-4 text-caramel" />
-                        <span>UPI Payment (Other Apps)</span>
-                      </Label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-3 p-3 border rounded-lg">
-                      <RadioGroupItem value="card" id="card" />
-                      <Label htmlFor="card" className="flex items-center space-x-2 cursor-pointer flex-1">
-                        <CreditCard className="h-4 w-4 text-caramel" />
-                        <span>Credit/Debit Card</span>
-                      </Label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-3 p-3 border rounded-lg">
-                      <RadioGroupItem value="cod" id="cod" />
-                      <Label htmlFor="cod" className="flex items-center space-x-2 cursor-pointer flex-1">
-                        <Wallet className="h-4 w-4 text-caramel" />
-                        <span>Cash on Delivery</span>
-                      </Label>
-                    </div>
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg bg-caramel/5 border-caramel/20">
+                    <Smartphone className="h-4 w-4 text-caramel" />
+                    <span className="font-medium">PhonePe Payment Gateway</span>
+                    <Badge className="ml-auto bg-caramel text-white">Default</Badge>
+                  </div>
 
-                    {/* Partial Wallet Payment Option - Only show for authenticated users */}
-                    {isAuthenticated && walletBalance > 0 && (
-                      <div className="space-y-3 p-3 border rounded-lg bg-pink-50 border-pink-200">
-                        <div className="flex items-center space-x-3">
-                          <input
-                            type="checkbox"
-                            id="use-wallet"
-                            checked={useWalletPayment}
-                            onChange={(e) => setUseWalletPayment(e.target.checked)}
-                            className="rounded border-gray-300 text-caramel focus:ring-caramel"
-                          />
-                          <Label htmlFor="use-wallet" className="flex items-center space-x-2 cursor-pointer flex-1">
-                            <Wallet className="h-4 w-4 text-caramel" />
-                            <span className="font-medium">Use Wallet Credits</span>
+                  {/* Partial Wallet Payment Option - Only show for authenticated users */}
+                  {isAuthenticated && walletBalance > 0 && (
+                    <div className="space-y-3 p-3 border rounded-lg bg-pink-50 border-pink-200 mt-3">
+                      <div className="flex items-center space-x-3">
+                        <input
+                          type="checkbox"
+                          id="use-wallet"
+                          checked={useWalletPayment}
+                          onChange={(e) => setUseWalletPayment(e.target.checked)}
+                          className="rounded border-gray-300 text-caramel focus:ring-caramel"
+                        />
+                        <Label htmlFor="use-wallet" className="flex items-center space-x-2 cursor-pointer flex-1">
+                          <Wallet className="h-4 w-4 text-caramel" />
+                          <span className="font-medium">Use Wallet Credits</span>
                           </Label>
                         </div>
                         
@@ -1145,13 +1114,6 @@ export default function CheckoutPage() {
                         )}
                       </div>
                     )}
-                  </RadioGroup>
-                  
-                  {form.formState.errors.paymentMethod && (
-                    <p className="text-sm text-red-500 mt-2">
-                      {form.formState.errors.paymentMethod.message}
-                    </p>
-                  )}
                 </CardContent>
               </Card>
 
@@ -1329,9 +1291,9 @@ export default function CheckoutPage() {
                 }}
               >
                 {isPlacingOrder || createOrderMutation.isPending ? (
-                  'Placing Order...'
+                  'Processing Payment...'
                 ) : (
-                  `Place Order - ${formatPrice(total)}`
+                  `Make Payment - ${formatPrice(total)}`
                 )}
               </Button>
 
