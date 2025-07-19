@@ -497,11 +497,11 @@ export default function VendorDashboard() {
                               {order.items && order.items.length > 0 ? (
                                 order.items.map((item: any, index: number) => {
                                   // Calculate vendor price for item (if vendorPrice exists for the addon)
-                                  const itemVendorPrice = order.vendorPrice || item.vendorPrice || item.price;
+                                  const itemVendorPrice = Number(order.vendorPrice || item.vendorPrice || item.price || 0);
                                   const addonsVendorTotal = item.addons?.reduce((total: number, addon: any) => {
-                                    return total + ((addon.vendorPrice || addon.price) * addon.quantity);
+                                    return total + (Number(addon.vendorPrice || addon.price || 0) * Number(addon.quantity || 1));
                                   }, 0) || 0;
-                                  const totalItemPrice = itemVendorPrice + addonsVendorTotal;
+                                  const totalItemPrice = Number(itemVendorPrice + addonsVendorTotal);
                                   
                                   return (
                                     <div key={index} className="bg-white p-4 rounded-lg border-2 border-gray-200 hover:border-blue-300 transition-colors shadow-sm w-full">
@@ -576,7 +576,7 @@ export default function VendorDashboard() {
                                             )}
                                             <div className="flex items-center gap-2">
                                               <span className="w-4 h-4 bg-yellow-500 rounded-full"></span>
-                                              <span>Your Price: <strong>₹{itemVendorPrice}</strong></span>
+                                              <span>Your Price: <strong>₹{itemVendorPrice.toFixed(2)}</strong></span>
                                             </div>
                                           </div>
                                           
@@ -641,7 +641,7 @@ export default function VendorDashboard() {
                                                     
                                                     {/* Addon Vendor Price */}
                                                     <div className="text-sm font-bold text-amber-900">
-                                                      ₹{(addon.vendorPrice || addon.price) * addon.quantity}
+                                                      ₹{(Number(addon.vendorPrice || addon.price || 0) * Number(addon.quantity || 1)).toFixed(2)}
                                                     </div>
                                                   </div>
                                                 ))}
