@@ -247,7 +247,10 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
           <h3 style="color: #8B4513; margin: 0 0 15px 0;">🍰 Order Items</h3>
           ${order.items.map(item => `
             <div style="border-bottom: 1px solid #eee; padding: 10px 0; margin-bottom: 10px;">
-              <div style="font-weight: bold; color: #333; margin-bottom: 5px;">${item.name}</div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <div style="font-weight: bold; color: #333;">${item.name}</div>
+                <div style="color: #8B4513; font-weight: bold; font-size: 16px;">${formatPrice(item.price)}</div>
+              </div>
               <div style="color: #666; font-size: 14px;">
                 Weight: ${item.weight} | Flavor: ${item.flavor} | Qty: ${item.quantity}
               </div>
@@ -267,7 +270,6 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
                   `).join('')}
                 </div>
               ` : ''}
-              <div style="text-align: right; color: #8B4513; font-weight: bold;">${formatPrice(item.price)}</div>
             </div>
           `).join('')}
         </div>
