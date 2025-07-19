@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { 
@@ -428,320 +429,168 @@ export default function VendorDashboard() {
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <Accordion type="single" collapsible className="space-y-2">
                     {filteredOrders.map((order: Order) => (
-                      <div key={order.id} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div className="flex-1">
-                            <h3 className="font-medium text-lg mb-2">Order #{order.orderNumber}</h3>
-                            <div className="bg-blue-50 p-3 rounded-lg">
-                              <h4 className="font-semibold text-blue-900 mb-1">Customer Information</h4>
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-blue-700">Name:</span>
-                                  <span className="text-blue-900">{order.customerName}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-blue-700">Phone:</span>
-                                  <span className="text-blue-900 font-mono">{order.customerPhone}</span>
+                      <AccordionItem key={order.id} value={`order-${order.id}`} className="border rounded-lg">
+                        <AccordionTrigger className="hover:no-underline px-4 py-3">
+                          <div className="flex items-center justify-between w-full mr-4">
+                            <div className="flex items-center space-x-4">
+                              <div className="flex items-center space-x-2">
+                                {getStatusIcon(order.status)}
+                                <span className="font-medium">#{order.orderNumber}</span>
+                              </div>
+                              <Badge className={getStatusColor(order.status)}>
+                                {order.status.replace('_', ' ').toUpperCase()}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center space-x-6 text-sm">
+                              <div className="text-right">
+                                <div className="font-medium">{order.customerName}</div>
+                                <div className="text-gray-500">{order.customerPhone}</div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-bold text-green-600">₹{order.vendorPrice || order.totalAmount}</div>
+                                <div className="text-gray-500 text-xs">Revenue</div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-gray-600">{new Date(order.deliveryDate || order.createdAt).toLocaleDateString()}</div>
+                                <div className="text-gray-500 text-xs">
+                                  {order.deliveryTime ? formatDeliveryTime(order.deliveryTime) : 'Standard'}
                                 </div>
                               </div>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="space-y-1">
-                              <div className="text-lg font-bold text-green-600">₹{order.vendorPrice || order.totalAmount}</div>
-                              <div className="text-xs text-gray-500">Your Receivable Amount</div>
-                              <div className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</div>
+                        </AccordionTrigger>
+                        <AccordionContent className="px-4 pb-4">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            {/* Customer Information */}
+                            <div className="bg-blue-50 p-3 rounded-lg">
+                              <h4 className="font-semibold text-blue-900 mb-2">Customer Details</h4>
+                              <div className="space-y-1 text-sm">
+                                <div><span className="font-medium">Name:</span> {order.customerName}</div>
+                                <div><span className="font-medium">Phone:</span> {order.customerPhone}</div>
+                                <div><span className="font-medium">Order Date:</span> {new Date(order.createdAt).toLocaleDateString()}</div>
+                              </div>
+                            </div>
+
+                            {/* Delivery Information */}
+                            <div className="bg-green-50 p-3 rounded-lg">
+                              <h4 className="font-semibold text-green-900 mb-2">Delivery Info</h4>
+                              <div className="space-y-1 text-sm">
+                                <div><span className="font-medium">Date:</span> {new Date(order.deliveryDate || order.createdAt).toLocaleDateString()}</div>
+                                <div><span className="font-medium">Time:</span> {order.deliveryTime ? formatDeliveryTime(order.deliveryTime) : 'Standard Delivery'}</div>
+                                <div><span className="font-medium">Address:</span> {order.deliveryAddress}</div>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        
-                        {/* Order Items Details */}
-                        <div className="mb-3">
-                          <p className="text-sm text-gray-600 mb-2">Order Items:</p>
-                          <div className="space-y-2">
-                            {order.items && order.items.length > 0 ? (
-                              order.items.map((item: any, index: number) => (
-                                <div key={index} className="bg-gray-50 p-3 rounded-lg">
-                                  <div className="flex gap-3 mb-2">
-                                    {/* Product Image */}
-                                    <div className="flex-shrink-0">
-                                      {item.images && item.images.length > 0 ? (
-                                        <Dialog>
-                                          <DialogTrigger asChild>
-                                            <div className="relative cursor-pointer group">
-                                              <img 
-                                                src={item.images[0]} 
-                                                alt={item.cakeName || item.name}
-                                                className="w-16 h-16 object-cover rounded-lg border hover:opacity-90 transition-opacity"
-                                              />
-                                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg flex items-center justify-center transition-all">
-                                                <ZoomIn className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                                              </div>
-                                            </div>
-                                          </DialogTrigger>
-                                          <DialogContent className="max-w-2xl">
-                                            <DialogHeader>
-                                              <DialogTitle>Product Image - {item.cakeName || item.name}</DialogTitle>
-                                            </DialogHeader>
-                                            <div className="space-y-4">
-                                              <img 
-                                                src={item.images[0]} 
-                                                alt={item.cakeName || item.name}
-                                                className="w-full max-h-96 object-contain rounded-lg"
-                                              />
-                                              {item.images.length > 1 && (
-                                                <div className="grid grid-cols-4 gap-2">
-                                                  {item.images.slice(1).map((image: string, imgIndex: number) => (
-                                                    <img 
-                                                      key={imgIndex}
-                                                      src={image} 
-                                                      alt={`${item.cakeName || item.name} view ${imgIndex + 2}`}
-                                                      className="w-full h-16 object-cover rounded border"
-                                                    />
-                                                  ))}
-                                                </div>
-                                              )}
-                                            </div>
-                                          </DialogContent>
-                                        </Dialog>
-                                      ) : (
-                                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
-                                          <span className="text-gray-400 text-xl">🎂</span>
-                                        </div>
-                                      )}
-                                    </div>
-                                    
-                                    {/* Product Details */}
-                                    <div className="flex-1">
-                                      <div className="mb-1">
-                                        <h4 className="font-medium text-sm">{item.cakeName || item.name}</h4>
-                                      </div>
-                                      
-                                      {/* Photo Cake Customer Image */}
-                                      {item.photoCustomization?.uploadedImage && (
-                                        <div className="mt-2">
-                                          <p className="text-xs text-gray-600 mb-1">Customer's Photo:</p>
+
+                          {/* Order Items */}
+                          <div className="mt-4">
+                            <h4 className="font-semibold text-gray-900 mb-3">Order Items ({order.items?.length || 0})</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                              {order.items && order.items.length > 0 ? (
+                                order.items.map((item: any, index: number) => (
+                                  <div key={index} className="bg-gray-50 p-3 rounded-lg border">
+                                    <div className="flex gap-3">
+                                      {/* Product Image */}
+                                      <div className="flex-shrink-0">
+                                        {item.images && item.images.length > 0 ? (
                                           <Dialog>
                                             <DialogTrigger asChild>
-                                              <div className="relative cursor-pointer group inline-block">
+                                              <div className="relative cursor-pointer group">
                                                 <img 
-                                                  src={item.photoCustomization.uploadedImage} 
-                                                  alt="Customer uploaded photo"
+                                                  src={item.images[0]} 
+                                                  alt={item.cakeName || item.name}
                                                   className="w-12 h-12 object-cover rounded border hover:opacity-90 transition-opacity"
                                                 />
                                                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded flex items-center justify-center transition-all">
-                                                  <Eye className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                  <ZoomIn className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                                                 </div>
                                               </div>
                                             </DialogTrigger>
                                             <DialogContent className="max-w-2xl">
                                               <DialogHeader>
-                                                <DialogTitle>Customer's Photo for Photo Cake</DialogTitle>
+                                                <DialogTitle>Product Image - {item.cakeName || item.name}</DialogTitle>
                                               </DialogHeader>
-                                              <div className="space-y-4">
-                                                <img 
-                                                  src={item.photoCustomization.uploadedImage} 
-                                                  alt="Customer uploaded photo"
-                                                  className="w-full max-h-96 object-contain rounded-lg"
-                                                />
-                                                {item.photoCustomization.customText && (
-                                                  <div className="bg-gray-50 p-3 rounded-lg">
-                                                    <p className="text-sm font-medium text-gray-700 mb-1">Custom Text:</p>
-                                                    <p className="text-sm text-gray-600 italic">"{item.photoCustomization.customText}"</p>
-                                                  </div>
-                                                )}
-                                              </div>
+                                              <img 
+                                                src={item.images[0]} 
+                                                alt={item.cakeName || item.name}
+                                                className="w-full max-h-96 object-contain rounded-lg"
+                                              />
                                             </DialogContent>
                                           </Dialog>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                                    {item.weight && (
-                                      <div>
-                                        <span className="font-medium">Weight:</span> {item.weight}
+                                        ) : (
+                                          <div className="w-12 h-12 bg-gray-200 rounded border flex items-center justify-center">
+                                            <Package className="h-5 w-5 text-gray-400" />
+                                          </div>
+                                        )}
                                       </div>
-                                    )}
-                                    {item.flavor && (
-                                      <div>
-                                        <span className="font-medium">Flavor:</span> {item.flavor}
-                                      </div>
-                                    )}
-                                    {item.eggless !== undefined && (
-                                      <div>
-                                        <span className="font-medium">Type:</span> {item.eggless ? 'Eggless' : 'Regular'}
-                                      </div>
-                                    )}
-                                    {item.quantity && (
-                                      <div>
-                                        <span className="font-medium">Qty:</span> {item.quantity}
-                                      </div>
-                                    )}
-                                  </div>
-                                  {item.customMessage && (
-                                    <div className="mt-2 text-xs">
-                                      <span className="font-medium text-gray-600">Message:</span>
-                                      <p className="text-gray-700 italic">"{item.customMessage}"</p>
-                                    </div>
-                                  )}
-                                  {item.deliveryInstructions && (
-                                    <div className="mt-2 text-xs">
-                                      <span className="font-medium text-gray-600">Instructions:</span>
-                                      <p className="text-gray-700">{item.deliveryInstructions}</p>
-                                    </div>
-                                  )}
-                                  {item.isPhotoCake && (
-                                    <div className="mt-2">
-                                      <span className="inline-block bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded">
-                                        Photo Cake
-                                      </span>
-                                    </div>
-                                  )}
-                                  {item.addons && item.addons.length > 0 && (
-                                    <div className="mt-3 border-t pt-2">
-                                      <div className="bg-green-50 p-2 rounded-lg">
-                                        <div className="flex items-center justify-between mb-2">
-                                          <span className="font-medium text-green-800 text-xs">Addons</span>
-                                          <span className="text-xs text-green-600">({item.addons.length} item{item.addons.length > 1 ? 's' : ''})</span>
-                                        </div>
-                                        <div className="space-y-1">
-                                          {item.addons.map((addon: any, addonIndex: number) => (
-                                            <div key={addonIndex} className="flex justify-between items-center bg-white px-2 py-1 rounded text-xs">
-                                              <div className="flex-1">
-                                                <span className="font-medium text-gray-900">{addon.name}</span>
-                                                <span className="text-gray-600 ml-2">x{addon.quantity}</span>
-                                              </div>
-                                              <div className="text-right">
-                                                <div className="font-medium text-green-700">
-                                                  ₹{addon.vendorPrice !== undefined ? addon.vendorPrice : addon.price}
-                                                </div>
+
+                                      {/* Product Details */}
+                                      <div className="flex-1 min-w-0">
+                                        <h5 className="font-medium text-sm text-gray-900 truncate">
+                                          {item.cakeName || item.name}
+                                        </h5>
+                                        <div className="text-xs text-gray-600 space-y-1 mt-1">
+                                          <div>Qty: {item.quantity}</div>
+                                          {item.weight && <div>Weight: {item.weight}</div>}
+                                          {item.flavor && <div>Flavor: {item.flavor}</div>}
+                                          {item.addons && item.addons.length > 0 && (
+                                            <div>
+                                              <span className="font-medium">Addons:</span>
+                                              <div className="mt-1">
+                                                {item.addons.map((addon: any, addonIndex: number) => (
+                                                  <div key={addonIndex} className="text-xs">
+                                                    • {addon.name} {addon.quantity > 1 ? `(${addon.quantity})` : ''}
+                                                  </div>
+                                                ))}
                                               </div>
                                             </div>
-                                          ))}
+                                          )}
                                         </div>
                                       </div>
                                     </div>
-                                  )}
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="col-span-full text-center text-gray-500 py-4">
+                                  No items found for this order
                                 </div>
-                              ))
-                            ) : (
-                              <p className="text-sm text-gray-500">No item details available</p>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Delivery Information */}
-                        <div className="mb-3">
-                          <p className="text-sm text-gray-600 mb-1">Delivery Address:</p>
-                          <p className="text-sm">
-                            {typeof order.deliveryAddress === 'string' 
-                              ? order.deliveryAddress 
-                              : `${order.deliveryAddress.name} - ${order.deliveryAddress.address}, ${order.deliveryAddress.city} - ${order.deliveryAddress.pincode}`
-                            }
-                          </p>
-                        </div>
-
-                        {/* Delivery Schedule */}
-                        <div className="mb-3">
-                          <div className="flex items-center gap-4 text-sm">
-                            {order.deliveryDate && (
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-4 w-4 text-gray-500" />
-                                <span className="font-medium">Date:</span>
-                                <span>{new Date(order.deliveryDate).toLocaleDateString()}</span>
-                              </div>
-                            )}
-                            {order.deliveryTime && (
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-4 w-4 text-gray-500" />
-                                <span className="font-medium">Time:</span>
-                                <span>{formatDeliveryTime(order.deliveryTime)}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Order Total Summary */}
-                        <div className="mb-3 bg-gray-100 p-3 rounded-lg">
-                          <h4 className="font-medium text-sm mb-2">Your Earnings Breakdown</h4>
-                          <div className="space-y-1 text-sm">
-                            {order.items && order.items.length > 0 && (
-                              <div className="space-y-2">
-                                {order.items.map((item: any, index: number) => {
-                                  // Calculate vendor-specific pricing only
-                                  const vendorBasePrice = order.vendorPrice && order.items.length === 1 
-                                    ? parseFloat(order.vendorPrice) 
-                                    : parseFloat(item.price || 0);
-                                  
-                                  return (
-                                    <div key={index} className="space-y-1">
-                                      <div className="flex justify-between items-center">
-                                        <span className="text-gray-700 font-medium">{item.name}</span>
-                                        <span className="font-medium">₹{vendorBasePrice.toFixed(0)}</span>
-                                      </div>
-                                      
-                                      {item.addons && item.addons.length > 0 && (
-                                        <div className="ml-4 space-y-1">
-                                          {item.addons.map((addon: any, addonIndex: number) => {
-                                            const addonPrice = addon.vendorPrice !== undefined ? parseFloat(addon.vendorPrice) : parseFloat(addon.price || 0);
-                                            const addonTotal = addonPrice * parseInt(addon.quantity || 1);
-                                            return (
-                                              <div key={addonIndex} className="flex justify-between items-center text-xs">
-                                                <span className="text-gray-600">
-                                                  {addon.name} x{addon.quantity}
-                                                </span>
-                                                <span className="font-medium">₹{addonTotal.toFixed(0)}</span>
-                                              </div>
-                                            );
-                                          })}
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
-                            <div className="border-t pt-2 mt-2">
-                              <div className="flex justify-between items-center font-medium text-green-700">
-                                <span>₹{order.vendorPrice || order.totalAmount} will be your receivable amount</span>
-                              </div>
+                              )}
                             </div>
                           </div>
-                        </div>
-                        
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center space-x-2">
-                            <Badge className={getStatusColor(order.status)}>
+
+                          {/* Status Update Section */}
+                          <div className="mt-4 pt-4 border-t flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
                               {getStatusIcon(order.status)}
-                              <span className="ml-1 capitalize">{order.status.replace("_", " ")}</span>
-                            </Badge>
-                            <Badge variant="outline">
-                              {order.paymentStatus}
-                            </Badge>
+                              <span className="text-sm font-medium">Current Status:</span>
+                              <Badge className={getStatusColor(order.status)}>
+                                {order.status.replace('_', ' ').toUpperCase()}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Select
+                                value={order.status}
+                                onValueChange={(newStatus) => updateOrderStatus.mutate({ orderId: order.id, status: newStatus })}
+                              >
+                                <SelectTrigger className="w-40">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="pending">Pending</SelectItem>
+                                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                                  <SelectItem value="preparing">Preparing</SelectItem>
+                                  <SelectItem value="out_for_delivery">Ready for Delivery</SelectItem>
+                                  <SelectItem value="delivered">Delivered</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
-                          
-                          <Select
-                            value={order.status}
-                            onValueChange={(status) => updateOrderStatusMutation.mutate({ orderId: order.id, status })}
-                            disabled={updateOrderStatusMutation.isPending}
-                          >
-                            <SelectTrigger className="w-40">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="confirmed">Confirmed</SelectItem>
-                              <SelectItem value="preparing">Preparing</SelectItem>
-                              <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
-                              <SelectItem value="delivered">Delivered</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+                        </AccordionContent>
+                      </AccordionItem>
                     ))}
-                  </div>
+                  </Accordion>
                 )}
               </CardContent>
             </Card>
