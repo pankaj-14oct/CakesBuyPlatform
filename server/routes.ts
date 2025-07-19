@@ -1788,6 +1788,101 @@ CakesBuy
     }
   });
 
+  // Test order confirmation email
+  app.post("/api/admin/test-order-email", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { orderNumber } = req.body;
+      
+      if (!orderNumber) {
+        return res.status(400).json({ message: "Order number is required" });
+      }
+      
+      // Get order details
+      const order = await storage.getOrderByNumber(orderNumber);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      // Get user details
+      const user = await storage.getUserById(order.userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Import email service dynamically
+      const { sendOrderConfirmationEmail } = await import("./email-service");
+      
+      const emailData = {
+        customerEmail: user.email,
+        customerName: user.email.split("@")[0], // Use email prefix as name
+        order: order
+      };
+      
+      const success = await sendOrderConfirmationEmail(emailData);
+      
+      if (success) {
+        res.json({ 
+          message: "Order confirmation email sent successfully",
+          orderNumber: orderNumber,
+          customerEmail: user.email,
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        res.status(500).json({ message: "Failed to send order confirmation email" });
+      }
+    } catch (error) {
+      console.error("Test order email error:", error);
+      res.status(500).json({ message: "Failed to send test order email", error: error.message });
+    }
+  });
+
+  // Resend order confirmation email (public endpoint for testing)
+  app.post("/api/orders/:orderNumber/resend-email", async (req, res) => {
+    try {
+      const { orderNumber } = req.params;
+      
+      // Get order details
+      const order = await storage.getOrderByNumber(orderNumber);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      // Get user details
+      const user = await storage.getUser(order.userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Import email service dynamically
+      const { sendOrderConfirmationEmail } = await import("./email-service");
+      
+      const emailData = {
+        customerEmail: user.email,
+        customerName: user.email.split("@")[0],
+        order: order
+      };
+      
+      console.log("Resending order confirmation email for:", orderNumber);
+      console.log("Email data:", JSON.stringify(emailData, null, 2));
+      
+      const success = await sendOrderConfirmationEmail(emailData);
+      
+      if (success) {
+        res.json({ 
+          message: "Order confirmation email resent successfully",
+          orderNumber: orderNumber,
+          customerEmail: user.email,
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        res.status(500).json({ message: "Failed to resend order confirmation email" });
+      }
+    } catch (error) {
+      console.error("Resend order email error:", error);
+      res.status(500).json({ message: "Failed to resend order email", error: error.message });
+    }
+  });
+
   // Rating email test
   app.post('/api/test-rating-email', async (req, res) => {
     try {
