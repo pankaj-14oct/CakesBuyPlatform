@@ -49,7 +49,7 @@ export const dummyData = {
   users: [
     {
       name: "Admin User",
-      email: "admin@cakesbuy.com",
+      email: "online.cakesbuy@gmail.com",
       phone: "1111111111",
       passwordHash: "",
       role: "admin",

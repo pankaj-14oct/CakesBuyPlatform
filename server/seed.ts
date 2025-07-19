@@ -926,7 +926,7 @@ export async function seedDatabase() {
     const adminPassword = await hashPassword("password123");
     const adminUser = {
       phone: "1111111111",
-      email: "admin@cakesbuy.com",
+      email: "online.cakesbuy@gmail.com",
       password: adminPassword,
       name: "Admin User",
       role: "admin" as const,

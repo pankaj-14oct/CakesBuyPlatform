@@ -12,7 +12,7 @@ const vapidKeys = {
 // Configure web-push
 if (vapidKeys.publicKey && vapidKeys.privateKey) {
   webpush.setVapidDetails(
-    'mailto:support@cakesbuy.com',
+    'mailto:online.cakesbuy@gmail.com',
     vapidKeys.publicKey,
     vapidKeys.privateKey
   );
