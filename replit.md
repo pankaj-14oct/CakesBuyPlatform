@@ -4,6 +4,7 @@
 A full-stack cake ordering platform built with React frontend and Express backend, featuring customizable cakes, photo cake options, admin dashboard, and delivery management.
 
 ## Recent Changes
+- **2025-01-19**: Added 25 dummy orders for pagination testing - created comprehensive test data with various order statuses, payment methods, delivery dates, and random customer information to validate pagination functionality in admin dashboard
 - **2025-01-19**: Enhanced reminder email functionality - fixed database sent count increment error, improved date formatting to show "20 July" instead of "07-20", added event title support for personalized messages like "daughter's bday", updated email subjects and content to include "Don't forget" messaging for better user engagement
 - **2025-01-19**: Fixed admin reminder display and coupon selection - corrected backend filtering to show only upcoming events within 15 days sorted by nearest date first, resolved field name mapping issues between frontend and backend, fixed NaN discount percentage issue by properly parsing coupon discount values and types, admin panel now displays complete event information correctly
 - **2025-01-19**: Fixed admin reminder management - corrected date parsing logic to handle both YYYY-MM-DD and MM-DD formats, upcoming reminders now display correctly in admin panel for events within next 15 days
