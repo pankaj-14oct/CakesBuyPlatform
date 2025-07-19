@@ -673,7 +673,7 @@ export default function VendorDashboard() {
                             <div className="flex items-center space-x-2">
                               <Select
                                 value={order.status}
-                                onValueChange={(newStatus) => updateOrderStatus.mutate({ orderId: order.id, status: newStatus })}
+                                onValueChange={(newStatus) => updateOrderStatusMutation.mutate({ orderId: order.id, status: newStatus })}
                               >
                                 <SelectTrigger className="w-40">
                                   <SelectValue />
