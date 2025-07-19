@@ -506,40 +506,6 @@ export default function VendorDashboard() {
                                   return (
                                     <div key={index} className="bg-white p-4 rounded-lg border-2 border-gray-200 hover:border-blue-300 transition-colors shadow-sm w-full">
                                       <div className="flex gap-3">
-                                        {/* Product Image */}
-                                        <div className="flex-shrink-0">
-                                          {item.images && item.images.length > 0 ? (
-                                            <Dialog>
-                                              <DialogTrigger asChild>
-                                                <div className="relative cursor-pointer group">
-                                                  <img 
-                                                    src={item.images[0]} 
-                                                    alt={item.cakeName || item.name}
-                                                    className="w-16 h-16 object-cover rounded border hover:opacity-90 transition-opacity"
-                                                  />
-                                                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded flex items-center justify-center transition-all">
-                                                    <ZoomIn className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                  </div>
-                                                </div>
-                                              </DialogTrigger>
-                                              <DialogContent className="max-w-2xl">
-                                                <DialogHeader>
-                                                  <DialogTitle>Product Image - {item.cakeName || item.name}</DialogTitle>
-                                                </DialogHeader>
-                                                <img 
-                                                  src={item.images[0]} 
-                                                  alt={item.cakeName || item.name}
-                                                  className="w-full max-h-96 object-contain rounded-lg"
-                                                />
-                                              </DialogContent>
-                                            </Dialog>
-                                          ) : (
-                                            <div className="w-16 h-16 bg-gray-200 rounded border flex items-center justify-center">
-                                              <Package className="h-6 w-6 text-gray-400" />
-                                            </div>
-                                          )}
-                                        </div>
-
                                         {/* Product Details */}
                                         <div className="flex-1 min-w-0">
                                           <div className="flex justify-between items-start mb-2">
@@ -646,6 +612,40 @@ export default function VendorDashboard() {
                                                   </div>
                                                 ))}
                                               </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                        
+                                        {/* Product Image - Moved to Right */}
+                                        <div className="flex-shrink-0">
+                                          {item.images && item.images.length > 0 ? (
+                                            <Dialog>
+                                              <DialogTrigger asChild>
+                                                <div className="relative cursor-pointer group">
+                                                  <img 
+                                                    src={item.images[0]} 
+                                                    alt={item.cakeName || item.name}
+                                                    className="w-16 h-16 object-cover rounded border hover:opacity-90 transition-opacity"
+                                                  />
+                                                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded flex items-center justify-center transition-all">
+                                                    <ZoomIn className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                  </div>
+                                                </div>
+                                              </DialogTrigger>
+                                              <DialogContent className="max-w-2xl">
+                                                <DialogHeader>
+                                                  <DialogTitle>Product Image - {item.cakeName || item.name}</DialogTitle>
+                                                </DialogHeader>
+                                                <img 
+                                                  src={item.images[0]} 
+                                                  alt={item.cakeName || item.name}
+                                                  className="w-full max-h-96 object-contain rounded-lg"
+                                                />
+                                              </DialogContent>
+                                            </Dialog>
+                                          ) : (
+                                            <div className="w-16 h-16 bg-gray-200 rounded border flex items-center justify-center">
+                                              <Package className="h-6 w-6 text-gray-400" />
                                             </div>
                                           )}
                                         </div>
