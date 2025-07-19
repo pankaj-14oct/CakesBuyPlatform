@@ -99,6 +99,7 @@ export default function AdminAddons() {
         description: data.description,
         category: data.category,
         price: parseFloat(data.price),
+        image: data.image,
       };
       return apiRequest(`/api/admin/addons/${data.id}`, 'PUT', addonData);
     },
@@ -391,7 +392,7 @@ export default function AdminAddons() {
                         <div className="flex gap-2">
                           <FormControl>
                             <Input 
-                              type="url" 
+                              type="text" 
                               placeholder="Enter image URL or select from media..." 
                               {...field} 
                             />
@@ -658,7 +659,7 @@ export default function AdminAddons() {
                       <div className="flex gap-2">
                         <FormControl>
                           <Input 
-                            type="url" 
+                            type="text" 
                             placeholder="Enter image URL or select from media..." 
                             {...field} 
                           />
