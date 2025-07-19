@@ -92,19 +92,40 @@ export interface ReminderEmailData {
   userName: string;
   eventType: 'birthday' | 'anniversary';
   eventDate: string;
+  title?: string;
   discountCode?: string;
   discountPercentage?: number;
+}
+
+// Helper function to format MM-DD to readable date
+function formatEventDate(dateStr: string): string {
+  if (!dateStr || !dateStr.match(/^\d{2}-\d{2}$/)) {
+    return dateStr;
+  }
+  
+  const [month, day] = dateStr.split('-');
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  
+  const monthName = monthNames[parseInt(month) - 1];
+  const dayNum = parseInt(day);
+  
+  return `${dayNum} ${monthName}`;
 }
 
 export async function sendReminderEmail(data: ReminderEmailData): Promise<boolean> {
   console.log('Preparing reminder email with data:', JSON.stringify(data, null, 2));
   
   const eventTypeText = data.eventType === 'birthday' ? 'Birthday' : 'Anniversary';
+  const formattedDate = formatEventDate(data.eventDate);
+  const eventTitle = data.title ? ` - ${data.title}` : '';
   const discountText = data.discountCode && data.discountPercentage 
     ? `Get ${data.discountPercentage}% off with code ${data.discountCode}!` 
     : 'Special discount available!';
 
-  const subject = `🎉 ${eventTypeText} Reminder - ${discountText}`;
+  const subject = `🎉 ${eventTypeText} Reminder - Don't forget ${formattedDate}${eventTitle}!`;
   
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
@@ -115,7 +136,7 @@ export async function sendReminderEmail(data: ReminderEmailData): Promise<boolea
         </div>
         
         <h2 style="color: #8B4513; text-align: center; margin-bottom: 20px;">
-          🎉 ${eventTypeText} Reminder!
+          🎉 ${eventTypeText} Reminder${eventTitle}!
         </h2>
         
         <p style="font-size: 16px; line-height: 1.6; color: #333;">
@@ -123,7 +144,7 @@ export async function sendReminderEmail(data: ReminderEmailData): Promise<boolea
         </p>
         
         <p style="font-size: 16px; line-height: 1.6; color: #333;">
-          A special ${data.eventType} is coming up on <strong>${data.eventDate}</strong>! 
+          Don't forget - ${data.title ? `${data.title}` : `a special ${data.eventType}`} is coming up on <strong>${formattedDate}</strong>! 
           Make it memorable with our delicious 100% eggless cakes.
         </p>
         
@@ -161,11 +182,11 @@ export async function sendReminderEmail(data: ReminderEmailData): Promise<boolea
   `;
 
   const text = `
-    ${eventTypeText} Reminder!
+    ${eventTypeText} Reminder - Don't forget ${formattedDate}${eventTitle}!
     
     Dear ${data.userName || 'Valued Customer'},
     
-    A special ${data.eventType} is coming up on ${data.eventDate}! 
+    Don't forget - ${data.title ? `${data.title}` : `a special ${data.eventType}`} is coming up on ${formattedDate}! 
     Make it memorable with our delicious 100% eggless cakes.
     
     ${data.discountCode && data.discountPercentage ? 

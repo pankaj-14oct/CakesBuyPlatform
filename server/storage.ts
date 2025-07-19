@@ -899,13 +899,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async incrementReminderSentCount(id: number): Promise<void> {
-    await db
-      .update(eventReminders)
-      .set({ 
-        sentCount: eventReminders.sentCount + 1,
-        notificationSent: true 
-      })
-      .where(eq(eventReminders.id, id));
+    // First get the current reminder to increment sent count properly
+    const currentReminder = await this.getEventReminder(id);
+    if (currentReminder) {
+      await db
+        .update(eventReminders)
+        .set({ 
+          sentCount: (currentReminder.sentCount || 0) + 1,
+          notificationSent: true 
+        })
+        .where(eq(eventReminders.id, id));
+    }
   }
 
   async deleteEventReminder(id: number): Promise<void> {

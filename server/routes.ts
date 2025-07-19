@@ -2756,6 +2756,7 @@ CakesBuy
             userName: user.email.split('@')[0], // Use email prefix as name fallback
             eventType: reminder.eventType as 'birthday' | 'anniversary',
             eventDate: reminder.eventDate,
+            title: reminder.title,
             discountCode,
             discountPercentage
           };
