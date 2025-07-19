@@ -4,6 +4,7 @@
 A full-stack cake ordering platform built with React frontend and Express backend, featuring customizable cakes, photo cake options, admin dashboard, and delivery management.
 
 ## Recent Changes
+- **2025-01-19**: Enhanced order confirmation emails to include complete addon details (name, quantity, custom input, prices)
 - **2025-01-19**: Fixed user registration welcome email issue by updating remaining static sendWelcomeEmail imports to dynamic imports
 - **2025-01-19**: User registration now fully functional with proper welcome email delivery and ₹50 wallet bonus
 - **2025-01-19**: Fixed Gmail service configuration by installing dotenv and configuring proper environment variable loading

@@ -252,6 +252,21 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
                 Weight: ${item.weight} | Flavor: ${item.flavor} | Qty: ${item.quantity}
               </div>
               ${item.customMessage ? `<div style="color: #666; font-size: 14px; font-style: italic;">Message: "${item.customMessage}"</div>` : ''}
+              ${item.addons && item.addons.length > 0 ? `
+                <div style="margin: 10px 0; padding: 10px; background-color: #fff5f5; border-radius: 5px;">
+                  <div style="font-weight: bold; color: #8B4513; font-size: 14px; margin-bottom: 5px;">🎁 Add-ons:</div>
+                  ${item.addons.map(addon => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                      <span style="color: #666; font-size: 13px;">
+                        ${addon.name}${addon.quantity > 1 ? ` (x${addon.quantity})` : ''}${addon.customInput ? ` - ${addon.customInput}` : ''}
+                      </span>
+                      <span style="color: #8B4513; font-size: 13px; font-weight: bold;">
+                        ${formatPrice(addon.price * addon.quantity)}
+                      </span>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
               <div style="text-align: right; color: #8B4513; font-weight: bold;">${formatPrice(item.price)}</div>
             </div>
           `).join('')}
@@ -301,6 +316,12 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
     - Total: ${formatPrice(parseFloat(order.total || '0'))}
     - Delivery Date: ${new Date(order.deliveryDate).toLocaleDateString('en-IN')}
     - Payment Status: ${order.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
+    
+    Order Items:
+    ${order.items.map(item => `
+    - ${item.name} (${item.weight}, ${item.flavor}) x${item.quantity} - ${formatPrice(item.price)}
+    ${item.addons && item.addons.length > 0 ? `  Add-ons: ${item.addons.map(addon => `${addon.name}${addon.quantity > 1 ? ` x${addon.quantity}` : ''}${addon.customInput ? ` (${addon.customInput})` : ''} - ${formatPrice(addon.price * addon.quantity)}`).join(', ')}` : ''}
+    `).join('')}
     
     Delivery Address:
     ${order.deliveryAddress.name}
