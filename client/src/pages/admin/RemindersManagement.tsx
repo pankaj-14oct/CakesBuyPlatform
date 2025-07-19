@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { apiRequest } from "@/lib/queryClient";
-import { Bell, Calendar, Mail, Users, Gift, Heart, Clock } from "lucide-react";
+import { Bell, Calendar, Mail, Users, Gift, Heart, Clock, Trash2, Send } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
 interface EventReminder {
@@ -21,6 +21,7 @@ interface EventReminder {
   reminder_date: string;
   is_processed: boolean;
   notification_sent: boolean;
+  sent_count: number;
   created_at: string;
   email: string;
   name?: string;
@@ -33,9 +34,9 @@ export default function RemindersManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch pending reminders
-  const { data: pendingReminders = [], isLoading } = useQuery<EventReminder[]>({
-    queryKey: ["/api/admin/reminders/pending"],
+  // Fetch all reminders (not just pending)
+  const { data: allReminders = [], isLoading } = useQuery<EventReminder[]>({
+    queryKey: ["/api/admin/reminders/all"],
   });
 
   // Fetch users with upcoming events
@@ -68,7 +69,7 @@ export default function RemindersManagement() {
         title: "Reminders Sent!",
         description: `Successfully sent ${data.totalSent} reminder emails. ${data.totalFailed} failed.`,
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/reminders/pending"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reminders/all"] });
       setSelectedReminders([]);
     },
     onError: (error: Error) => {
@@ -80,11 +81,37 @@ export default function RemindersManagement() {
     },
   });
 
+  // Delete reminder mutation
+  const deleteReminderMutation = useMutation({
+    mutationFn: async (reminderId: number) => {
+      const response = await apiRequest(`/api/admin/reminders/${reminderId}`, "DELETE");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete reminder");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Reminder Deleted",
+        description: "Reminder has been deleted successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reminders/all"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSelectAll = () => {
-    if (selectedReminders.length === pendingReminders.length) {
+    if (selectedReminders.length === allReminders.length) {
       setSelectedReminders([]);
     } else {
-      setSelectedReminders(pendingReminders.map(r => r.id));
+      setSelectedReminders(allReminders.map(r => r.id));
     }
   };
 
@@ -147,7 +174,7 @@ export default function RemindersManagement() {
   };
 
   // Sort reminders by upcoming date
-  const sortedReminders = [...pendingReminders].sort((a, b) => {
+  const sortedReminders = [...allReminders].sort((a, b) => {
     const getDateForSorting = (dateStr: string | null | undefined) => {
       if (!dateStr) {
         return new Date(); // Default to current date if no date provided
@@ -180,7 +207,7 @@ export default function RemindersManagement() {
         <div className="flex items-center space-x-4">
           <Badge variant="secondary" className="text-sm">
             <Bell className="h-4 w-4 mr-1" />
-            {pendingReminders.length} Pending
+            {allReminders.length} Total Reminders
           </Badge>
           <Badge variant="outline" className="text-sm">
             <Users className="h-4 w-4 mr-1" />
@@ -245,7 +272,7 @@ export default function RemindersManagement() {
                 size="sm"
                 onClick={handleSelectAll}
               >
-                {selectedReminders.length === pendingReminders.length ? "Deselect All" : "Select All"}
+                {selectedReminders.length === allReminders.length ? "Deselect All" : "Select All"}
               </Button>
               <Button 
                 onClick={() => sendRemindersMutation.mutate()}
@@ -263,19 +290,18 @@ export default function RemindersManagement() {
           ) : sortedReminders.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <Bell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p>No pending reminders found</p>
+              <p>No reminders found</p>
             </div>
           ) : (
             <div className="space-y-3">
               {sortedReminders.map((reminder) => (
                 <div 
                   key={reminder.id}
-                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                  className={`p-4 border rounded-lg transition-colors ${
                     selectedReminders.includes(reminder.id)
                       ? 'bg-blue-50 border-blue-200'
                       : 'bg-white border-gray-200 hover:bg-gray-50'
                   }`}
-                  onClick={() => handleSelectReminder(reminder.id)}
                 >
                   <div className="flex items-center space-x-4">
                     <Checkbox 
@@ -283,17 +309,37 @@ export default function RemindersManagement() {
                       onChange={() => handleSelectReminder(reminder.id)}
                     />
                     <div className="flex-1">
-                      <div className="flex items-center space-x-3">
-                        <Badge className={`${getEventColor(reminder.event_type)} flex items-center space-x-1`}>
-                          {getEventIcon(reminder.event_type)}
-                          <span className="capitalize">{reminder.event_type}</span>
-                        </Badge>
-                        <span className="font-medium text-gray-900">
-                          {reminder.email}
-                        </span>
-                        {reminder.name && (
-                          <span className="text-gray-600">({reminder.name})</span>
-                        )}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <Badge className={`${getEventColor(reminder.event_type)} flex items-center space-x-1`}>
+                            {getEventIcon(reminder.event_type)}
+                            <span className="capitalize">{reminder.event_type}</span>
+                          </Badge>
+                          <span className="font-medium text-gray-900">
+                            {reminder.email}
+                          </span>
+                          {reminder.name && (
+                            <span className="text-gray-600">({reminder.name})</span>
+                          )}
+                          {reminder.sent_count > 0 && (
+                            <Badge variant="outline" className="text-xs">
+                              <Send className="h-3 w-3 mr-1" />
+                              Sent {reminder.sent_count} time{reminder.sent_count !== 1 ? 's' : ''}
+                            </Badge>
+                          )}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteReminderMutation.mutate(reminder.id);
+                          }}
+                          disabled={deleteReminderMutation.isPending}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                       <div className="mt-2 flex items-center space-x-4 text-sm text-gray-600">
                         <span className="flex items-center space-x-1">

@@ -2651,6 +2651,27 @@ CakesBuy
     }
   });
 
+  // Get all reminders (including sent ones)
+  app.get("/api/admin/reminders/all", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const allReminders = await storage.getAllReminders();
+      res.json(allReminders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch reminders" });
+    }
+  });
+
+  // Delete a specific reminder
+  app.delete("/api/admin/reminders/:id", requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const reminderId = parseInt(req.params.id);
+      await storage.deleteEventReminder(reminderId);
+      res.json({ message: "Reminder deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete reminder" });
+    }
+  });
+
   // Send reminder emails manually
   app.post("/api/admin/reminders/send", requireAdmin, async (req: AuthRequest, res) => {
     try {
@@ -2690,10 +2711,8 @@ CakesBuy
           const emailSent = await sendReminderEmail(emailData);
           
           if (emailSent) {
-            await storage.updateEventReminder(reminderId, { 
-              notificationSent: true, 
-              isProcessed: true 
-            });
+            // Increment sent count instead of marking as processed
+            await storage.incrementReminderSentCount(reminderId);
             results.push({ reminderId, success: true });
             console.log(`Reminder email sent successfully for user ${user.email}`);
           } else {

@@ -219,6 +219,7 @@ export const eventReminders = pgTable("event_reminders", {
   reminderDate: timestamp("reminder_date").notNull(),
   isProcessed: boolean("is_processed").default(false),
   notificationSent: boolean("notification_sent").default(false),
+  sentCount: integer("sent_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

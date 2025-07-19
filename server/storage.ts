@@ -111,7 +111,9 @@ export interface IStorage {
   getEventReminder(id: number): Promise<EventReminder | undefined>;
   getUserEventReminders(userId: number): Promise<EventReminder[]>;
   getPendingReminders(): Promise<EventReminder[]>;
+  getAllReminders(): Promise<any[]>;
   updateEventReminder(id: number, updates: Partial<EventReminder>): Promise<void>;
+  incrementReminderSentCount(id: number): Promise<void>;
   deleteEventReminder(id: number): Promise<void>;
   getUsersWithUpcomingEvents(): Promise<User[]>;
   getUsersWithEventDates(): Promise<User[]>;
@@ -825,6 +827,40 @@ export class DatabaseStorage implements IStorage {
 
   async updateEventReminder(id: number, updates: Partial<EventReminder>): Promise<void> {
     await db.update(eventReminders).set(updates).where(eq(eventReminders.id, id));
+  }
+
+  async getAllReminders(): Promise<any[]> {
+    const remindersWithUsers = await db
+      .select({
+        id: eventReminders.id,
+        user_id: eventReminders.userId,
+        event_type: eventReminders.eventType,
+        event_date: eventReminders.eventDate,
+        relationship_type: eventReminders.relationshipType,
+        title: eventReminders.title,
+        reminder_date: eventReminders.reminderDate,
+        is_processed: eventReminders.isProcessed,
+        notification_sent: eventReminders.notificationSent,
+        sent_count: eventReminders.sentCount,
+        created_at: eventReminders.createdAt,
+        email: users.email,
+        name: users.name,
+      })
+      .from(eventReminders)
+      .leftJoin(users, eq(eventReminders.userId, users.id))
+      .orderBy(desc(eventReminders.createdAt));
+      
+    return remindersWithUsers;
+  }
+
+  async incrementReminderSentCount(id: number): Promise<void> {
+    await db
+      .update(eventReminders)
+      .set({ 
+        sentCount: eventReminders.sentCount + 1,
+        notificationSent: true 
+      })
+      .where(eq(eventReminders.id, id));
   }
 
   async deleteEventReminder(id: number): Promise<void> {
