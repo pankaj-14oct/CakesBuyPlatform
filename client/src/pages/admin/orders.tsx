@@ -80,6 +80,10 @@ export default function AdminOrders() {
   const totalOrders = ordersData?.total || 0;
   const totalPages = ordersData?.pages || 0;
 
+  // Calculate correct pagination values
+  const startIndex = orders.length > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+  const endIndex = orders.length > 0 ? (currentPage - 1) * pageSize + orders.length : 0;
+
   // Fetch delivery boys for assignment
   const { data: deliveryBoys = [] } = useQuery<DeliveryBoy[]>({
     queryKey: ['/api/admin/delivery-boys'],
@@ -740,13 +744,13 @@ export default function AdminOrders() {
           )}
           
           {/* Pagination */}
-          {!isLoading && totalPages > 1 && (
+          {!isLoading && totalPages > 0 && (
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={setCurrentPage}
-              showingFrom={(currentPage - 1) * pageSize + 1}
-              showingTo={Math.min(currentPage * pageSize, totalOrders)}
+              showingFrom={startIndex}
+              showingTo={endIndex}
               totalItems={totalOrders}
             />
           )}
