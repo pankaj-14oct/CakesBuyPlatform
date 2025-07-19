@@ -4,6 +4,9 @@
 A full-stack cake ordering platform built with React frontend and Express backend, featuring customizable cakes, photo cake options, admin dashboard, and delivery management.
 
 ## Recent Changes
+- **2025-01-19**: Fixed Gmail service configuration by installing dotenv and configuring proper environment variable loading
+- **2025-01-19**: Converted all static email-service imports to dynamic imports to prevent premature module loading
+- **2025-01-19**: Gmail credentials now loading correctly from .env file - email notifications fully operational
 - **2025-01-19**: Implemented Gmail notification for vendor order assignments - vendors automatically receive detailed email notifications when orders are assigned to them
 - **2025-01-19**: Created comprehensive vendor assignment email template with order details, items, delivery information, and call-to-action buttons
 - **2025-01-19**: Added email notification integration to admin vendor assignment route - emails sent automatically upon successful assignment

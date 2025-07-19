@@ -1,3 +1,12 @@
+import dotenv from "dotenv";
+import path from "path";
+
+// Load environment variables from root .env file
+dotenv.config({ path: path.join(process.cwd(), '.env') });
+
+// Debug environment loading
+console.log('Environment loaded. GMAIL_USER:', process.env.GMAIL_USER ? 'SET' : 'NOT SET');
+
 import express, { type Request, Response, NextFunction } from "express";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";

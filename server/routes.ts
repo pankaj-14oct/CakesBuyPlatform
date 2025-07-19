@@ -50,7 +50,7 @@ import {
   type DeliveryBoyAuthRequest,
   type VendorAuthRequest
 } from "./auth";
-import { sendReminderEmail, type ReminderEmailData, sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, type OrderEmailData, sendWelcomeEmail, type WelcomeEmailData, sendVendorOrderAssignmentEmail, type VendorOrderAssignmentData, testVendorAssignmentEmail, sendEmail } from "./email-service";
+import type { ReminderEmailData, OrderEmailData, WelcomeEmailData, VendorOrderAssignmentData } from "./email-service";
 import { whatsAppService, type WhatsAppOrderData } from "./whatsapp-service";
 import { setupWhatsAppAdminRoutes } from "./whatsapp-admin";
 import { sendRatingRequestEmail } from "./rating-service";
@@ -512,6 +512,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
             order
           };
           
+          const { sendOrderConfirmationEmail } = await import("./email-service");
           await sendOrderConfirmationEmail(emailData);
           console.log(`Order confirmation email sent to ${customerEmail} for order ${order.orderNumber}`);
         }
@@ -651,6 +652,7 @@ export async function registerRoutes(app: Express, httpServer?: any): Promise<Se
               order
             };
             
+            const { sendOrderStatusUpdateEmail } = await import("./email-service");
             await sendOrderStatusUpdateEmail(emailData);
             console.log(`Order status email sent to ${customerEmail} for order ${order.orderNumber} (${status})`);
           }
@@ -2498,6 +2500,7 @@ CakesBuy
           };
 
           console.log(`Sending reminder email for user ${user.email}, event: ${reminder.eventType}, date: ${reminder.eventDate}`);
+          const { sendReminderEmail } = await import("./email-service");
           const emailSent = await sendReminderEmail(emailData);
           
           if (emailSent) {
@@ -4251,6 +4254,7 @@ CakesBuy
           };
           
           // Send vendor assignment email notification
+          const { sendVendorOrderAssignmentEmail } = await import("./email-service");
           await sendVendorOrderAssignmentEmail(emailData);
           console.log(`Vendor assignment email sent to ${vendor.email} for order ${order.orderNumber}`);
         }
@@ -4269,6 +4273,7 @@ CakesBuy
   // Test vendor assignment email endpoint
   app.post("/api/test-vendor-assignment-email", async (req, res) => {
     try {
+      const { testVendorAssignmentEmail } = await import("./email-service");
       const success = await testVendorAssignmentEmail();
       if (success) {
         res.json({ 
@@ -4288,6 +4293,7 @@ CakesBuy
   app.post("/api/test-email", async (req, res) => {
     try {
       const { to, subject, message } = req.body;
+      const { sendEmail } = await import("./email-service");
       const success = await sendEmail(to, subject, message);
       if (success) {
         res.json({ message: "Test email sent successfully" });

@@ -1,4 +1,3 @@
-import { sendEmail } from "./email-service";
 import { OrderRating, Order, User } from "@shared/schema";
 
 interface RatingEmailData {
@@ -81,6 +80,7 @@ export async function sendRatingRequestEmail(orderId: number, customerEmail: str
 
     const emailContent = generateRatingEmailTemplate(emailData);
 
+    const { sendEmail } = await import("./email-service");
     const result = await sendEmail(
       customerEmail,
       'How was your CakesBuy experience? Share your feedback!',

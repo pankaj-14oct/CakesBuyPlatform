@@ -1,5 +1,4 @@
 import { WebSocket } from 'ws';
-import { sendEmail } from './email-service.js';
 import { sendOrderAssignmentPush } from './push-service.js';
 import type { Order, DeliveryBoy } from '../shared/schema.js';
 
@@ -159,6 +158,7 @@ export async function sendOrderAssignmentEmail(
   `;
 
   try {
+    const { sendEmail } = await import('./email-service.js');
     return await sendEmail(deliveryBoy.email, subject, '', html);
   } catch (error) {
     console.error('Failed to send order assignment email:', error);
