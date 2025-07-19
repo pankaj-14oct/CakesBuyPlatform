@@ -479,7 +479,13 @@ export default function VendorDashboard() {
                               <div className="space-y-1 text-sm">
                                 <div><span className="font-medium">Date:</span> {new Date(order.deliveryDate || order.createdAt).toLocaleDateString()}</div>
                                 <div><span className="font-medium">Time:</span> {order.deliveryTime ? formatDeliveryTime(order.deliveryTime) : 'Standard Delivery'}</div>
-                                <div><span className="font-medium">Address:</span> {order.deliveryAddress}</div>
+                                <div><span className="font-medium">Address:</span> 
+                                  {typeof order.deliveryAddress === 'string' 
+                                    ? order.deliveryAddress 
+                                    : `${order.deliveryAddress.address}, ${order.deliveryAddress.city} - ${order.deliveryAddress.pincode}`
+                                  }
+                                </div>
+                                <div><span className="font-medium">Contact:</span> {order.deliveryAddress.name} - {order.deliveryAddress.phone}</div>
                               </div>
                             </div>
                           </div>
