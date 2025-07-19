@@ -228,11 +228,14 @@ export default function RemindersManagement() {
                   const selectedCoupon = coupons.find(c => c.code === value);
                   setDiscountCode(value);
                   if (selectedCoupon) {
-                    setDiscountPercentage(
-                      selectedCoupon.discount_type === 'percentage' 
-                        ? selectedCoupon.discount_value 
-                        : Math.round((selectedCoupon.discount_value / 500) * 100) // Assume ₹500 base for amount conversion
-                    );
+                    const discountValue = parseFloat(selectedCoupon.discount_value) || 0;
+                    if (selectedCoupon.discount_type === 'percentage') {
+                      setDiscountPercentage(discountValue);
+                    } else {
+                      // For fixed amount discounts, calculate percentage based on minimum order value
+                      const minOrder = parseFloat(selectedCoupon.min_order_value) || 500;
+                      setDiscountPercentage(Math.round((discountValue / minOrder) * 100));
+                    }
                   }
                 }}
               >
@@ -245,9 +248,9 @@ export default function RemindersManagement() {
                     <SelectItem key={coupon.code} value={coupon.code}>
                       {coupon.code} - {coupon.description} 
                       ({coupon.discount_type === 'percentage' 
-                        ? `${coupon.discount_value}% off` 
-                        : `₹${coupon.discount_value} off`}
-                      {coupon.min_order_value > 0 && ` on orders ₹${coupon.min_order_value}+`})
+                        ? `${parseFloat(coupon.discount_value) || 0}% off` 
+                        : `₹${parseFloat(coupon.discount_value) || 0} off`}
+                      {parseFloat(coupon.min_order_value) > 0 && ` on orders ₹${parseFloat(coupon.min_order_value)}+`})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -281,7 +284,7 @@ export default function RemindersManagement() {
                   {discountCode}
                 </Badge>
                 <span className="text-sm text-gray-600">
-                  {discountPercentage}% discount will be included in reminder emails
+                  {isNaN(discountPercentage) ? 0 : discountPercentage}% discount will be included in reminder emails
                 </span>
               </div>
             </div>
