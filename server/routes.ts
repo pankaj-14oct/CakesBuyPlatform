@@ -1901,8 +1901,12 @@ CakesBuy
       };
       
       // Send welcome email asynchronously (dont wait for it to complete)
-      sendWelcomeEmail(welcomeEmailData).catch(error => {
-        console.error("Failed to send welcome email:", error);
+      import("./email-service").then(({ sendWelcomeEmail }) => {
+        sendWelcomeEmail(welcomeEmailData).catch(error => {
+          console.error("Failed to send welcome email:", error);
+        });
+      }).catch(error => {
+        console.error("Failed to import email service for welcome email:", error);
       });
 
       // Send WhatsApp welcome message asynchronously
@@ -2083,8 +2087,12 @@ CakesBuy
       };
       
       // Send welcome email asynchronously (dont wait for it to complete)
-      sendWelcomeEmail(welcomeEmailData).catch(error => {
-        console.error("Failed to send welcome email:", error);
+      import("./email-service").then(({ sendWelcomeEmail }) => {
+        sendWelcomeEmail(welcomeEmailData).catch(error => {
+          console.error("Failed to send welcome email:", error);
+        });
+      }).catch(error => {
+        console.error("Failed to import email service for welcome email:", error);
       });
       
       // Generate JWT token
