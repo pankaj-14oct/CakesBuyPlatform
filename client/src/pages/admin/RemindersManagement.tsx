@@ -238,8 +238,13 @@ export default function RemindersManagement() {
             <div className="space-y-2">
               <Label htmlFor="couponSelect">Select Existing Coupon</Label>
               <Select 
-                value={discountCode} 
+                value={discountCode || "none"} 
                 onValueChange={(value) => {
+                  if (value === "none") {
+                    setDiscountCode("");
+                    setDiscountPercentage(10);
+                    return;
+                  }
                   const selectedCoupon = coupons.find(c => c.code === value);
                   setDiscountCode(value);
                   if (selectedCoupon) {
@@ -255,7 +260,7 @@ export default function RemindersManagement() {
                   <SelectValue placeholder="Choose from existing coupons" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No coupon</SelectItem>
+                  <SelectItem value="none">No coupon</SelectItem>
                   {coupons.map((coupon) => (
                     <SelectItem key={coupon.code} value={coupon.code}>
                       {coupon.code} - {coupon.description} 
