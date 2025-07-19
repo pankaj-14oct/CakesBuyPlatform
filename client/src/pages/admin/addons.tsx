@@ -33,7 +33,10 @@ const addonFormSchema = z.object({
   description: z.string().optional(),
   category: z.string().min(1, "Category is required"),
   price: z.string().min(1, "Price is required"),
-  image: z.string().optional(),
+  image: z.string().optional().refine(
+    (val) => !val || val === "" || val.startsWith("http") || val.startsWith("/uploads/"),
+    "Please enter a valid URL or select from media library"
+  ),
 });
 
 type AddonForm = z.infer<typeof addonFormSchema>;
@@ -186,6 +189,7 @@ export default function AdminAddons() {
   };
 
   const handleImageSelect = (url: string, isEdit = false) => {
+    // The URL from the media API should already be properly formatted as /uploads/{filename}
     if (isEdit) {
       editForm.setValue('image', url);
       setIsEditMediaDialogOpen(false);
