@@ -14,16 +14,16 @@ import { format, parseISO } from "date-fns";
 
 interface EventReminder {
   id: number;
-  user_id: number;
-  event_type: string;
-  event_date: string;
-  relationship_type?: string;
+  userId: number;
+  eventType: string;
+  eventDate: string;
+  relationshipType?: string;
   title?: string;
-  reminder_date: string;
-  is_processed: boolean;
-  notification_sent: boolean;
-  sent_count: number;
-  created_at: string;
+  reminderDate: string;
+  isProcessed: boolean;
+  notificationSent: boolean;
+  sentCount: number;
+  createdAt: string;
   email: string;
   name?: string;
 }
@@ -179,32 +179,9 @@ export default function RemindersManagement() {
     }
   };
 
-  // Sort reminders by upcoming date (nearest events first)
-  const sortedReminders = [...allReminders].sort((a, b) => {
-    const getDateForSorting = (dateStr: string | null | undefined) => {
-      if (!dateStr) {
-        return new Date(9999, 11, 31); // Far future date for undefined dates to sort them last
-      }
-      
-      // Handle MM-DD format (e.g., "07-30", "08-15")
-      if (dateStr.match(/^\d{2}-\d{2}$/)) {
-        const [month, day] = dateStr.split('-');
-        const currentYear = new Date().getFullYear();
-        const today = new Date();
-        const date = new Date(currentYear, parseInt(month) - 1, parseInt(day));
-        
-        // If the date has passed this year, consider it next year
-        if (date < today) {
-          date.setFullYear(currentYear + 1);
-        }
-        return date;
-      }
-      return new Date(dateStr);
-    };
-    
-    // Sort ascending (nearest dates first)
-    return getDateForSorting(a.event_date).getTime() - getDateForSorting(b.event_date).getTime();
-  });
+  // Backend already filters and sorts by upcoming date (nearest events first)
+  // No need to sort again, but keep the reminders as they are returned
+  const sortedReminders = allReminders;
 
   return (
     <div className="p-6 space-y-6">
@@ -370,9 +347,9 @@ export default function RemindersManagement() {
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                          <Badge className={`${getEventColor(reminder.event_type)} flex items-center space-x-1`}>
-                            {getEventIcon(reminder.event_type)}
-                            <span className="capitalize">{reminder.event_type}</span>
+                          <Badge className={`${getEventColor(reminder.eventType)} flex items-center space-x-1`}>
+                            {getEventIcon(reminder.eventType)}
+                            <span className="capitalize">{reminder.eventType}</span>
                           </Badge>
                           <span className="font-medium text-gray-900">
                             {reminder.email}
@@ -380,10 +357,10 @@ export default function RemindersManagement() {
                           {reminder.name && (
                             <span className="text-gray-600">({reminder.name})</span>
                           )}
-                          {reminder.sent_count > 0 && (
+                          {reminder.sentCount > 0 && (
                             <Badge variant="outline" className="text-xs">
                               <Send className="h-3 w-3 mr-1" />
-                              Sent {reminder.sent_count} time{reminder.sent_count !== 1 ? 's' : ''}
+                              Sent {reminder.sentCount} time{reminder.sentCount !== 1 ? 's' : ''}
                             </Badge>
                           )}
                         </div>
@@ -403,10 +380,10 @@ export default function RemindersManagement() {
                       <div className="mt-2 flex items-center space-x-4 text-sm text-gray-600">
                         <span className="flex items-center space-x-1">
                           <Calendar className="h-4 w-4" />
-                          <span>Event: {formatEventDate(reminder.event_date)}</span>
+                          <span>Event: {formatEventDate(reminder.eventDate)}</span>
                         </span>
-                        {reminder.relationship_type && (
-                          <span>Relationship: {reminder.relationship_type}</span>
+                        {reminder.relationshipType && (
+                          <span>Relationship: {reminder.relationshipType}</span>
                         )}
                         {reminder.title && (
                           <span>Title: {reminder.title}</span>

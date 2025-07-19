@@ -833,16 +833,16 @@ export class DatabaseStorage implements IStorage {
     const remindersWithUsers = await db
       .select({
         id: eventReminders.id,
-        user_id: eventReminders.userId,
-        event_type: eventReminders.eventType,
-        event_date: eventReminders.eventDate,
-        relationship_type: eventReminders.relationshipType,
+        userId: eventReminders.userId,
+        eventType: eventReminders.eventType,
+        eventDate: eventReminders.eventDate,
+        relationshipType: eventReminders.relationshipType,
         title: eventReminders.title,
-        reminder_date: eventReminders.reminderDate,
-        is_processed: eventReminders.isProcessed,
-        notification_sent: eventReminders.notificationSent,
-        sent_count: eventReminders.sentCount,
-        created_at: eventReminders.createdAt,
+        reminderDate: eventReminders.reminderDate,
+        isProcessed: eventReminders.isProcessed,
+        notificationSent: eventReminders.notificationSent,
+        sentCount: eventReminders.sentCount,
+        createdAt: eventReminders.createdAt,
         email: users.email,
         name: users.name,
       })
@@ -850,7 +850,47 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(users, eq(eventReminders.userId, users.id))
       .orderBy(desc(eventReminders.createdAt));
       
-    return remindersWithUsers;
+    // Filter and sort by upcoming events (next 15 days)
+    const today = new Date();
+    const next15Days = new Date(today);
+    next15Days.setDate(today.getDate() + 15);
+    
+    const filteredReminders = remindersWithUsers.filter(reminder => {
+      if (!reminder.eventDate) return false;
+      
+      // Handle MM-DD format
+      if (reminder.eventDate.match(/^\d{2}-\d{2}$/)) {
+        const [month, day] = reminder.eventDate.split('-');
+        const currentYear = new Date().getFullYear();
+        let eventDate = new Date(currentYear, parseInt(month) - 1, parseInt(day));
+        
+        // If the event has passed this year, consider it next year
+        if (eventDate < today) {
+          eventDate.setFullYear(currentYear + 1);
+        }
+        
+        return eventDate >= today && eventDate <= next15Days;
+      }
+      
+      return false;
+    });
+    
+    // Sort by nearest date first
+    return filteredReminders.sort((a, b) => {
+      const getDateForSorting = (dateStr: string) => {
+        const [month, day] = dateStr.split('-');
+        const currentYear = new Date().getFullYear();
+        const date = new Date(currentYear, parseInt(month) - 1, parseInt(day));
+        
+        // If the date has passed this year, consider it next year
+        if (date < today) {
+          date.setFullYear(currentYear + 1);
+        }
+        return date;
+      };
+      
+      return getDateForSorting(a.eventDate).getTime() - getDateForSorting(b.eventDate).getTime();
+    });
   }
 
   async incrementReminderSentCount(id: number): Promise<void> {
