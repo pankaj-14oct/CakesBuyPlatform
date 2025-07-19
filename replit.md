@@ -4,6 +4,9 @@
 A full-stack cake ordering platform built with React frontend and Express backend, featuring customizable cakes, photo cake options, admin dashboard, and delivery management.
 
 ## Recent Changes
+- **2025-01-19**: Implemented Gmail notification for vendor order assignments - vendors automatically receive detailed email notifications when orders are assigned to them
+- **2025-01-19**: Created comprehensive vendor assignment email template with order details, items, delivery information, and call-to-action buttons
+- **2025-01-19**: Added email notification integration to admin vendor assignment route - emails sent automatically upon successful assignment
 - **2025-01-19**: Successfully completed migration from Replit Agent to Replit environment
 - **2025-01-19**: Created PostgreSQL database and pushed schema with all required tables
 - **2025-01-19**: Seeded database with comprehensive dummy data including categories, cakes, addons, users, orders, and navigation items

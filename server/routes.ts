@@ -50,7 +50,7 @@ import {
   type DeliveryBoyAuthRequest,
   type VendorAuthRequest
 } from "./auth";
-import { sendReminderEmail, type ReminderEmailData, sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, type OrderEmailData, sendWelcomeEmail, type WelcomeEmailData } from "./email-service";
+import { sendReminderEmail, type ReminderEmailData, sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, type OrderEmailData, sendWelcomeEmail, type WelcomeEmailData, sendVendorOrderAssignmentEmail, type VendorOrderAssignmentData, testVendorAssignmentEmail, sendEmail } from "./email-service";
 import { whatsAppService, type WhatsAppOrderData } from "./whatsapp-service";
 import { setupWhatsAppAdminRoutes } from "./whatsapp-admin";
 import { sendRatingRequestEmail } from "./rating-service";
@@ -4222,11 +4222,80 @@ CakesBuy
       if (addonPrices && Object.keys(addonPrices).length > 0) {
         await storage.updateOrderAddonPrices(orderId, addonPrices);
       }
+
+      // Get order and vendor details for email notification
+      try {
+        const order = await storage.getOrder(orderId);
+        const vendor = await storage.getVendor(vendorId);
+        
+        if (order && vendor) {
+          const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
+          
+          // Prepare email data
+          const emailData: VendorOrderAssignmentData = {
+            vendorEmail: vendor.email,
+            vendorName: vendor.name,
+            orderNumber: order.orderNumber,
+            customerName: order.customerName,
+            totalAmount: parseFloat(vendorPrice),
+            items: items.map((item: any) => ({
+              name: item.name,
+              quantity: item.quantity,
+              weight: item.weight,
+              flavor: item.flavor,
+              addons: item.addons || []
+            })),
+            deliveryDate: new Date(order.deliveryDate).toLocaleDateString('en-IN'),
+            deliveryAddress: `${order.deliveryAddress.addressLine1}, ${order.deliveryAddress.city}, ${order.deliveryAddress.pincode}`,
+            specialInstructions: order.specialInstructions
+          };
+          
+          // Send vendor assignment email notification
+          await sendVendorOrderAssignmentEmail(emailData);
+          console.log(`Vendor assignment email sent to ${vendor.email} for order ${order.orderNumber}`);
+        }
+      } catch (emailError) {
+        console.error('Failed to send vendor assignment email:', emailError);
+        // Continue with success response even if email fails
+      }
       
       res.json({ message: "Order assigned to vendor successfully" });
     } catch (error) {
       console.error('Error assigning order to vendor:', error);
       res.status(500).json({ message: "Failed to assign order to vendor" });
+    }
+  });
+
+  // Test vendor assignment email endpoint
+  app.post("/api/test-vendor-assignment-email", async (req, res) => {
+    try {
+      const success = await testVendorAssignmentEmail();
+      if (success) {
+        res.json({ 
+          message: "Test vendor assignment email sent successfully",
+          details: "Check your email for the vendor order assignment notification demo"
+        });
+      } else {
+        res.status(500).json({ message: "Failed to send test vendor assignment email" });
+      }
+    } catch (error) {
+      console.error('Test vendor assignment email error:', error);
+      res.status(500).json({ message: "Test vendor assignment email error", error: error.message });
+    }
+  });
+
+  // Test email endpoint
+  app.post("/api/test-email", async (req, res) => {
+    try {
+      const { to, subject, message } = req.body;
+      const success = await sendEmail(to, subject, message);
+      if (success) {
+        res.json({ message: "Test email sent successfully" });
+      } else {
+        res.status(500).json({ message: "Failed to send test email" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Test email error", error: error.message });
     }
   });
 

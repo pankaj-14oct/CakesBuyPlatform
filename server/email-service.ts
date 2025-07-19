@@ -569,3 +569,181 @@ export async function sendOrderStatusUpdateEmail(data: OrderEmailData): Promise<
 
   return await sendEmail(customerEmail, subject, text, html);
 }
+export interface VendorOrderAssignmentData {
+  vendorEmail: string;
+  vendorName: string;
+  orderNumber: string;
+  customerName: string;
+  totalAmount: number;
+  items: Array<{
+    name: string;
+    quantity: number;
+    weight?: string;
+    flavor?: string;
+    addons?: Array<{ name: string; quantity: number }>;
+  }>;
+  deliveryDate: string;
+  deliveryAddress: string;
+  specialInstructions?: string;
+}
+
+export async function sendVendorOrderAssignmentEmail(data: VendorOrderAssignmentData): Promise<boolean> {
+  console.log('Sending vendor order assignment email:', JSON.stringify(data, null, 2));
+  
+  const subject = `🎂 New Order Assignment - ${data.orderNumber}`;
+  
+  const itemsHtml = data.items.map(item => {
+    const addonsText = item.addons && item.addons.length > 0 
+      ? `<br><small style="color: #666;">Addons: ${item.addons.map(addon => `${addon.name} (${addon.quantity})`).join(', ')}</small>`
+      : '';
+    
+    return `
+      <li style="margin-bottom: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 5px;">
+        <strong>${item.name}</strong> - Qty: ${item.quantity}
+        ${item.weight ? `<br><small style="color: #666;">Weight: ${item.weight}</small>` : ''}
+        ${item.flavor ? `<br><small style="color: #666;">Flavor: ${item.flavor}</small>` : ''}
+        ${addonsText}
+      </li>
+    `;
+  }).join('');
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+      <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #8B4513; margin: 0; font-size: 28px;">🎂 CakesBuy</h1>
+          <p style="color: #666; margin: 5px 0 0 0;">Vendor Portal</p>
+        </div>
+        
+        <h2 style="color: #8B4513; text-align: center; margin-bottom: 20px;">
+          📦 New Order Assignment
+        </h2>
+        
+        <p style="font-size: 16px; line-height: 1.6; color: #333;">
+          Dear ${data.vendorName},
+        </p>
+        
+        <p style="font-size: 16px; line-height: 1.6; color: #333;">
+          A new order has been assigned to you. Please review the details below and confirm receipt.
+        </p>
+        
+        <div style="background-color: #f0f8ff; border-left: 4px solid #8B4513; padding: 20px; margin: 20px 0;">
+          <h3 style="color: #8B4513; margin: 0 0 15px 0;">Order Details</h3>
+          <p style="margin: 5px 0;"><strong>Order Number:</strong> ${data.orderNumber}</p>
+          <p style="margin: 5px 0;"><strong>Customer:</strong> ${data.customerName}</p>
+          <p style="margin: 5px 0;"><strong>Total Amount:</strong> ₹${data.totalAmount}</p>
+          <p style="margin: 5px 0;"><strong>Delivery Date:</strong> ${data.deliveryDate}</p>
+        </div>
+        
+        <div style="margin: 20px 0;">
+          <h3 style="color: #8B4513; margin-bottom: 15px;">Items to Prepare:</h3>
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            ${itemsHtml}
+          </ul>
+        </div>
+        
+        <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <h4 style="color: #8B4513; margin: 0 0 10px 0;">📍 Delivery Address:</h4>
+          <p style="margin: 0; color: #333;">${data.deliveryAddress}</p>
+        </div>
+        
+        ${data.specialInstructions ? `
+          <div style="background-color: #e8f5e8; border: 1px solid #c3e6c3; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <h4 style="color: #8B4513; margin: 0 0 10px 0;">📝 Special Instructions:</h4>
+            <p style="margin: 0; color: #333;">${data.specialInstructions}</p>
+          </div>
+        ` : ''}
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${process.env.REPLIT_DEV_DOMAIN || 'https://your-domain.com'}/vendor-login" 
+             style="background-color: #8B4513; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold; display: inline-block; margin-right: 10px;">
+            View Order Details
+          </a>
+          <a href="${process.env.REPLIT_DEV_DOMAIN || 'https://your-domain.com'}/vendor-login" 
+             style="background-color: #28a745; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold; display: inline-block;">
+            Confirm Receipt
+          </a>
+        </div>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #666; font-size: 14px;">
+          <p><strong>Next Steps:</strong></p>
+          <ul style="margin: 10px 0; padding-left: 20px;">
+            <li>Log into your vendor portal to confirm receipt</li>
+            <li>Review all order details and special requirements</li>
+            <li>Update order status as you progress</li>
+            <li>Contact customer if clarification needed</li>
+          </ul>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; color: #888; font-size: 12px;">
+          <p>CakesBuy Vendor Portal</p>
+          <p>For support: vendor-support@cakesbuy.com | +91-XXXXXXXXXX</p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const text = `
+    New Order Assignment - ${data.orderNumber}
+    
+    Dear ${data.vendorName},
+    
+    A new order has been assigned to you:
+    
+    Order Number: ${data.orderNumber}
+    Customer: ${data.customerName}
+    Total Amount: ₹${data.totalAmount}
+    Delivery Date: ${data.deliveryDate}
+    
+    Items to Prepare:
+    ${data.items.map(item => {
+      const addonsText = item.addons && item.addons.length > 0 
+        ? ` (Addons: ${item.addons.map(addon => `${addon.name} (${addon.quantity})`).join(', ')})`
+        : '';
+      return `- ${item.name} - Qty: ${item.quantity}${item.weight ? `, Weight: ${item.weight}` : ''}${item.flavor ? `, Flavor: ${item.flavor}` : ''}${addonsText}`;
+    }).join('\n    ')}
+    
+    Delivery Address: ${data.deliveryAddress}
+    ${data.specialInstructions ? `\nSpecial Instructions: ${data.specialInstructions}` : ''}
+    
+    Please log into your vendor portal to confirm receipt and manage this order.
+    
+    Vendor Portal: ${process.env.REPLIT_DEV_DOMAIN || 'https://your-domain.com'}/vendor-login
+  `;
+
+  return sendEmail(data.vendorEmail, subject, text, html);
+}
+
+// Test function to demonstrate vendor assignment email
+export async function testVendorAssignmentEmail(): Promise<boolean> {
+  const testData: VendorOrderAssignmentData = {
+    vendorEmail: "vendor@example.com",
+    vendorName: "Test Vendor",
+    orderNumber: "ORD-TEST-001",
+    customerName: "John Doe",
+    totalAmount: 1500,
+    items: [
+      {
+        name: "Chocolate Truffle Cake",
+        quantity: 1,
+        weight: "1 Kg",
+        flavor: "Chocolate",
+        addons: [
+          { name: "Extra Chocolate", quantity: 1 },
+          { name: "Candles", quantity: 5 }
+        ]
+      },
+      {
+        name: "Vanilla Sponge Cake",
+        quantity: 1,
+        weight: "500g",
+        flavor: "Vanilla"
+      }
+    ],
+    deliveryDate: new Date().toLocaleDateString('en-IN'),
+    deliveryAddress: "123 Test Street, Test City, 110001",
+    specialInstructions: "Please add 'Happy Birthday' message on the cake"
+  };
+
+  return sendVendorOrderAssignmentEmail(testData);
+}
