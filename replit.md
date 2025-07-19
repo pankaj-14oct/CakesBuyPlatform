@@ -4,6 +4,7 @@
 A full-stack cake ordering platform built with React frontend and Express backend, featuring customizable cakes, photo cake options, admin dashboard, and delivery management.
 
 ## Recent Changes
+- **2025-01-19**: Successfully completed migration from Replit Agent to Replit environment with database schema push and data seeding
 - **2025-01-19**: Added image field to addons table for single primary image support (in addition to existing images array)
 - **2025-01-19**: Enhanced checkout order summary to display detailed addon information including names, quantities, custom inputs, and individual pricing
 - **2025-01-19**: Updated checkout page - removed payment method selection, set PhonePe as default, changed button text to "Make Payment"
