@@ -21,8 +21,7 @@ import {
   loginSchema,
   registerSchema,
   addressSchema,
-  deliveryBoyRegisterSchema,
-  deliveryBoyLoginSchema,
+
   createAddressSchema,
   profileUpdateSchema,
   sendOtpSchema,
@@ -30,8 +29,7 @@ import {
   otpRegisterSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
-  deliveryBoyLoginSchema,
-  deliveryBoyRegisterSchema,
+
   orderRatingSchema,
   vendorRegisterSchema,
   vendorLoginSchema
