@@ -831,11 +831,11 @@ export default function ProfilePage() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel className="flex items-center gap-2">
-                                  <Calendar className="h-4 w-4" />
+                                  <Calendar className="h-4 w-4 text-red-500" />
                                   Birthday (MM-DD)
                                 </FormLabel>
                                 <FormControl>
-                                  <div className="space-y-2">
+                                  <div className="relative">
                                     <Input 
                                       type="date"
                                       onChange={(e) => {
@@ -861,21 +861,16 @@ export default function ProfilePage() {
                                           return '';
                                         })() : ''
                                       }
-                                      className="w-full"
+                                      className="w-full pr-20"
                                     />
-                                    <Input 
-                                      {...field} 
-                                      placeholder="12-25" 
-                                      maxLength={5} 
-                                      className="text-sm text-gray-600"
-                                      readOnly 
-                                    />
+                                    {field.value && (
+                                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-600 font-medium bg-white px-2">
+                                        {field.value}
+                                      </div>
+                                    )}
                                   </div>
                                 </FormControl>
                                 <FormMessage />
-                                <p className="text-xs text-gray-500">
-                                  Birthday must be in MM-DD format
-                                </p>
                                 <p className="text-xs text-gray-500">
                                   We'll send you a cake reminder one week before your birthday!
                                 </p>
@@ -889,11 +884,11 @@ export default function ProfilePage() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel className="flex items-center gap-2">
-                                  <Calendar className="h-4 w-4" />
+                                  <Calendar className="h-4 w-4 text-red-500" />
                                   Anniversary (MM-DD)
                                 </FormLabel>
                                 <FormControl>
-                                  <div className="space-y-2">
+                                  <div className="relative">
                                     <Input 
                                       type="date"
                                       onChange={(e) => {
@@ -919,21 +914,16 @@ export default function ProfilePage() {
                                           return '';
                                         })() : ''
                                       }
-                                      className="w-full"
+                                      className="w-full pr-20"
                                     />
-                                    <Input 
-                                      {...field} 
-                                      placeholder="06-15" 
-                                      maxLength={5} 
-                                      className="text-sm text-gray-600"
-                                      readOnly 
-                                    />
+                                    {field.value && (
+                                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-600 font-medium bg-white px-2">
+                                        {field.value}
+                                      </div>
+                                    )}
                                   </div>
                                 </FormControl>
                                 <FormMessage />
-                                <p className="text-xs text-gray-500">
-                                  Anniversary must be in MM-DD format
-                                </p>
                                 <p className="text-xs text-gray-500">
                                   Get reminded to order a special anniversary cake!
                                 </p>
