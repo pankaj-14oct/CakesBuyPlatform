@@ -73,6 +73,10 @@ async function createEventReminder(userId: number, eventType: 'birthday' | 'anni
     eventDateThisYear.setFullYear(currentYear + 1);
     reminderDate.setFullYear(currentYear + 1);
   }
+
+  // Get user's name for proper display
+  const user = await storage.getUser(userId);
+  const userName = user?.name || user?.phone || 'Your';
   
   await storage.createEventReminder({
     userId,
@@ -80,7 +84,9 @@ async function createEventReminder(userId: number, eventType: 'birthday' | 'anni
     eventDate,
     reminderDate,
     isProcessed: false,
-    notificationSent: false
+    notificationSent: false,
+    title: `${userName}`,
+    relationshipType: eventType === 'birthday' ? 'self' : 'self'
   });
 }
 

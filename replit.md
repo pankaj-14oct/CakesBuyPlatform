@@ -3,7 +3,8 @@
 ## Overview
 A full-stack cake ordering platform built with React frontend and Express backend, featuring customizable cakes, photo cake options, admin dashboard, and delivery management.
 
-## Recent Changes
+## Recent Changes  
+- **2025-01-22**: Fixed reminder display showing "null's birthday" - updated reminder creation to use actual user names instead of null relationshipType, reminders now show proper user names or phone numbers as fallback
 - **2025-01-22**: Added calendar date pickers to birthday and anniversary fields in profile page - users can now select dates using visual calendar interface while maintaining MM-DD format for backend storage, includes both date picker and read-only display field
 - **2025-01-22**: Added Rate Order functionality to user order list - users can now rate delivered orders with a star rating system, orders show rating status or rate button based on delivery status, integrated with existing RateOrder component and updated getUserOrders API to include rating information
 - **2025-01-22**: Successfully completed migration from Replit Agent to standard Replit environment - PostgreSQL database created and configured, schema pushed with all tables, database seeded with comprehensive dummy data, all services operational on localhost:5000, user registration API working correctly with proper validation, email notifications functional
