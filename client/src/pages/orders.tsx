@@ -293,6 +293,7 @@ export default function OrdersPage() {
                         </div>
                         
                         {/* Rate Order Button - Show in header for delivered orders */}
+                        {console.log('Order debug:', { id: order.id, status: order.status, rating: order.rating })}
                         {order.status === 'delivered' && (
                           order.rating ? (
                             <div className="flex items-center space-x-1">
@@ -307,7 +308,7 @@ export default function OrdersPage() {
                             <Link href={`/rate-order/${order.id}`}>
                               <Button variant="outline" size="sm" className="bg-yellow-50 border-yellow-200 text-yellow-800 hover:bg-yellow-100">
                                 <Star className="h-4 w-4 mr-1" />
-                                Rate
+                                Rate Order
                               </Button>
                             </Link>
                           )
