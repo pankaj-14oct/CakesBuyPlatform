@@ -835,9 +835,47 @@ export default function ProfilePage() {
                                   Birthday (MM-DD)
                                 </FormLabel>
                                 <FormControl>
-                                  <Input {...field} placeholder="12-25" maxLength={5} />
+                                  <div className="space-y-2">
+                                    <Input 
+                                      type="date"
+                                      onChange={(e) => {
+                                        if (e.target.value) {
+                                          // Convert YYYY-MM-DD to MM-DD format
+                                          const date = new Date(e.target.value);
+                                          const month = String(date.getMonth() + 1).padStart(2, '0');
+                                          const day = String(date.getDate()).padStart(2, '0');
+                                          field.onChange(`${month}-${day}`);
+                                        } else {
+                                          field.onChange('');
+                                        }
+                                      }}
+                                      value={
+                                        field.value ? 
+                                        (() => {
+                                          // Convert MM-DD to YYYY-MM-DD for date input
+                                          const [month, day] = field.value.split('-');
+                                          if (month && day) {
+                                            const currentYear = new Date().getFullYear();
+                                            return `${currentYear}-${month}-${day}`;
+                                          }
+                                          return '';
+                                        })() : ''
+                                      }
+                                      className="w-full"
+                                    />
+                                    <Input 
+                                      {...field} 
+                                      placeholder="12-25" 
+                                      maxLength={5} 
+                                      className="text-sm text-gray-600"
+                                      readOnly 
+                                    />
+                                  </div>
                                 </FormControl>
                                 <FormMessage />
+                                <p className="text-xs text-gray-500">
+                                  Birthday must be in MM-DD format
+                                </p>
                                 <p className="text-xs text-gray-500">
                                   We'll send you a cake reminder one week before your birthday!
                                 </p>
@@ -855,9 +893,47 @@ export default function ProfilePage() {
                                   Anniversary (MM-DD)
                                 </FormLabel>
                                 <FormControl>
-                                  <Input {...field} placeholder="06-15" maxLength={5} />
+                                  <div className="space-y-2">
+                                    <Input 
+                                      type="date"
+                                      onChange={(e) => {
+                                        if (e.target.value) {
+                                          // Convert YYYY-MM-DD to MM-DD format
+                                          const date = new Date(e.target.value);
+                                          const month = String(date.getMonth() + 1).padStart(2, '0');
+                                          const day = String(date.getDate()).padStart(2, '0');
+                                          field.onChange(`${month}-${day}`);
+                                        } else {
+                                          field.onChange('');
+                                        }
+                                      }}
+                                      value={
+                                        field.value ? 
+                                        (() => {
+                                          // Convert MM-DD to YYYY-MM-DD for date input
+                                          const [month, day] = field.value.split('-');
+                                          if (month && day) {
+                                            const currentYear = new Date().getFullYear();
+                                            return `${currentYear}-${month}-${day}`;
+                                          }
+                                          return '';
+                                        })() : ''
+                                      }
+                                      className="w-full"
+                                    />
+                                    <Input 
+                                      {...field} 
+                                      placeholder="06-15" 
+                                      maxLength={5} 
+                                      className="text-sm text-gray-600"
+                                      readOnly 
+                                    />
+                                  </div>
                                 </FormControl>
                                 <FormMessage />
+                                <p className="text-xs text-gray-500">
+                                  Anniversary must be in MM-DD format
+                                </p>
                                 <p className="text-xs text-gray-500">
                                   Get reminded to order a special anniversary cake!
                                 </p>
