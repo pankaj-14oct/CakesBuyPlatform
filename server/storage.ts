@@ -559,9 +559,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserOrders(userId: number): Promise<Order[]> {
-    return await db.select().from(orders)
+    const ordersWithRatings = await db.select({
+      order: orders,
+      rating: orderRatings
+    }).from(orders)
+      .leftJoin(orderRatings, eq(orders.id, orderRatings.orderId))
       .where(eq(orders.userId, userId))
       .orderBy(desc(orders.createdAt));
+
+    // Transform the result to include rating data in the order object
+    return ordersWithRatings.map(({ order, rating }) => ({
+      ...order,
+      rating: rating ? {
+        id: rating.id,
+        overallRating: rating.overallRating,
+        comment: rating.comment || undefined,
+        createdAt: rating.createdAt?.toISOString() || ''
+      } : undefined
+    }));
   }
 
   async updateOrder(id: number, updates: Partial<Order>): Promise<void> {

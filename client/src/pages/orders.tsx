@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   Package, Calendar, Clock, MapPin, CreditCard, Search,
   Truck, CheckCircle, AlertCircle, Timer, RefreshCw,
-  ShoppingBag, ArrowLeft, Eye
+  ShoppingBag, ArrowLeft, Eye, Star, MessageSquare
 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { formatPrice } from '@/lib/utils';
@@ -56,6 +56,12 @@ interface Order {
   promoCode?: string;
   createdAt: string;
   updatedAt: string;
+  rating?: {
+    id: number;
+    overallRating: number;
+    comment?: string;
+    createdAt: string;
+  };
 }
 
 const statusColors = {
@@ -448,13 +454,40 @@ export default function OrdersPage() {
                           )}
                           
                           {/* Order Actions */}
-                          <div className="flex space-x-3">
+                          <div className="flex flex-wrap gap-3">
+                            {/* Rate Order Button - Show only for delivered orders */}
+                            {order.status === 'delivered' && (
+                              order.rating ? (
+                                <div className="flex items-center space-x-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                  <div className="flex items-center">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                      <Star 
+                                        key={star} 
+                                        className={`h-4 w-4 ${star <= order.rating!.overallRating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`}
+                                      />
+                                    ))}
+                                  </div>
+                                  <span className="text-sm font-medium text-yellow-800">
+                                    Rated {order.rating.overallRating}/5
+                                  </span>
+                                </div>
+                              ) : (
+                                <Link href={`/rate-order/${order.id}`}>
+                                  <Button variant="outline" size="sm" className="bg-yellow-50 border-yellow-200 text-yellow-800 hover:bg-yellow-100">
+                                    <Star className="h-4 w-4 mr-2" />
+                                    Rate Order
+                                  </Button>
+                                </Link>
+                              )
+                            )}
+                            
                             <Link href={`/orders/${order.orderNumber}`}>
                               <Button variant="outline" size="sm">
                                 <Eye className="h-4 w-4 mr-2" />
                                 View Details
                               </Button>
                             </Link>
+                            
                             {order.status === 'delivered' && (
                               <Button variant="outline" size="sm">
                                 Reorder
