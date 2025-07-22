@@ -291,6 +291,28 @@ export default function OrdersPage() {
                             {formatStatus(order.status)}
                           </Badge>
                         </div>
+                        
+                        {/* Rate Order Button - Show in header for delivered orders */}
+                        {order.status === 'delivered' && (
+                          order.rating ? (
+                            <div className="flex items-center space-x-1">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star 
+                                  key={star} 
+                                  className={`h-3 w-3 ${star <= order.rating!.overallRating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`}
+                                />
+                              ))}
+                            </div>
+                          ) : (
+                            <Link href={`/rate-order/${order.id}`}>
+                              <Button variant="outline" size="sm" className="bg-yellow-50 border-yellow-200 text-yellow-800 hover:bg-yellow-100">
+                                <Star className="h-4 w-4 mr-1" />
+                                Rate
+                              </Button>
+                            </Link>
+                          )
+                        )}
+                        
                         <Button variant="ghost" size="sm">
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -317,16 +339,16 @@ export default function OrdersPage() {
                                     {item.customMessage && (
                                       <p>Message: "{item.customMessage}"</p>
                                     )}
-                                    {item.photoCustomization?.compositeImage && (
+                                    {item.customImage && (
                                       <div className="mt-3">
-                                        <p className="font-medium text-pink-600 mb-2">📸 Personalized Photo Cake:</p>
+                                        <p className="font-medium text-pink-600 mb-2">📸 Custom Photo:</p>
                                         <div className="bg-white p-2 rounded border inline-block">
-                                          <iframe
-                                            src={item.photoCustomization.compositeImage}
+                                          <img
+                                            src={item.customImage}
                                             width="200"
                                             height="200"
-                                            className="rounded border-0"
-                                            title="Personalized cake preview"
+                                            className="rounded border-0 object-cover"
+                                            alt="Custom cake design"
                                           />
                                         </div>
                                       </div>
